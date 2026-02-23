@@ -19,7 +19,7 @@ category_watcher:
   drops_only: true # Global default: only watch streams with Drops enabled
   categories:
     - slug: "tom-clancys-rainbow-six-siege"
-      drops_only: true
+      drops_only: false
 
 # Default settings for all streamers
 streamer_defaults:
@@ -89,6 +89,7 @@ notifications:
     token: "" # Set via TELEGRAM_TOKEN_GULIVEER_2 env var
     events:
       - "DROP_CLAIM"
+      - "GIFTED_SUB"
     disable_notification: true
 
 # Discord — disabled (commented out in Python config)
