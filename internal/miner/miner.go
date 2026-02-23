@@ -377,6 +377,7 @@ func (m *Miner) streamerTopics(s *model.Streamer) []*model.PubSubTopic {
 	if s.Settings.CommunityGoalsEnabled {
 		topics = append(topics, model.NewStreamerTopic(model.PubSubTopicCommunityGoals, s))
 	}
+	topics = append(topics, model.NewStreamerTopic(model.PubSubTopicChannelSubscriptions, s))
 
 	return topics
 }

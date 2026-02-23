@@ -23,16 +23,19 @@ const (
 	PubSubTopicCommunityMoments
 	// PubSubTopicCommunityGoals tracks community goal events.
 	PubSubTopicCommunityGoals
+	// PubSubTopicChannelSubscriptions tracks channel subscription events.
+	PubSubTopicChannelSubscriptions
 )
 
 var topicNames = map[PubSubTopicType]string{
-	PubSubTopicVideoPlayback:    "video-playback-by-id",
-	PubSubTopicCommunityPoints:  "community-points-user-v1",
-	PubSubTopicPredictions:      "predictions-channel-v1",
-	PubSubTopicPredictionsUser:  "predictions-user-v1",
-	PubSubTopicRaid:             "raid",
-	PubSubTopicCommunityMoments: "community-moments-channel-v1",
-	PubSubTopicCommunityGoals:   "community-points-channel-v1",
+	PubSubTopicVideoPlayback:        "video-playback-by-id",
+	PubSubTopicCommunityPoints:      "community-points-user-v1",
+	PubSubTopicPredictions:          "predictions-channel-v1",
+	PubSubTopicPredictionsUser:      "predictions-user-v1",
+	PubSubTopicRaid:                 "raid",
+	PubSubTopicCommunityMoments:     "community-moments-channel-v1",
+	PubSubTopicCommunityGoals:       "community-points-channel-v1",
+	PubSubTopicChannelSubscriptions: "channel-subscribe-events-v1",
 }
 
 // String returns the Twitch topic string prefix for this topic type.

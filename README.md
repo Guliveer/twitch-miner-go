@@ -130,6 +130,50 @@ Secrets and auth tokens are injected via environment variables. Per-account vari
 
 For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN_GULIVEER_` and the auth token variable is `TWITCH_AUTH_TOKEN_GULIVEER_`.
 
+### `.env` File Support
+
+The project supports loading environment variables from a `.env` file at startup using [`joho/godotenv`](https://github.com/joho/godotenv). This is **optional** — if no `.env` file is present, the app runs normally using YAML configs and/or standard environment variables.
+
+Environment variables (whether from `.env` or the system) **override** the corresponding values from YAML config files for notification secrets only. This allows you to keep sensitive tokens out of version-controlled YAML files.
+
+**Global variables:**
+
+| Variable    | Description                                        | Default |
+| ----------- | -------------------------------------------------- | ------- |
+| `LOG_LEVEL` | Log level (`DEBUG`, `INFO`, `WARN`, `ERROR`)       | `INFO`  |
+| `PORT`      | HTTP server port for the health/analytics endpoint | `8080`  |
+
+**Per-account notification secret overrides** (pattern: `VARIABLE_<UPPERCASE_USERNAME>`):
+
+| Variable Pattern                 | Description           |
+| -------------------------------- | --------------------- |
+| `TELEGRAM_TOKEN_<USERNAME>`      | Telegram bot token    |
+| `TELEGRAM_CHAT_ID_<USERNAME>`    | Telegram chat ID      |
+| `DISCORD_WEBHOOK_<USERNAME>`     | Discord webhook URL   |
+| `WEBHOOK_URL_<USERNAME>`         | Generic webhook URL   |
+| `MATRIX_HOMESERVER_<USERNAME>`   | Matrix homeserver URL |
+| `MATRIX_ROOM_ID_<USERNAME>`      | Matrix room ID        |
+| `MATRIX_ACCESS_TOKEN_<USERNAME>` | Matrix access token   |
+| `PUSHOVER_TOKEN_<USERNAME>`      | Pushover API token    |
+| `PUSHOVER_USER_KEY_<USERNAME>`   | Pushover user key     |
+| `GOTIFY_URL_<USERNAME>`          | Gotify server URL     |
+| `GOTIFY_TOKEN_<USERNAME>`        | Gotify app token      |
+
+**Example `.env` file:**
+
+```dotenv
+# Global
+LOG_LEVEL=DEBUG
+PORT=9090
+
+# Notification secrets for user "guliveer_"
+TELEGRAM_TOKEN_GULIVEER_=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+TELEGRAM_CHAT_ID_GULIVEER_=987654321
+DISCORD_WEBHOOK_GULIVEER_=https://discord.com/api/webhooks/...
+```
+
+> See [`.env.example`](.env.example) for the starter template.
+
 ## Notifications
 
 The miner supports multiple notification providers. Configure them in your account YAML file under the `notifications` key. Sensitive credentials (tokens, API keys) are injected via environment variables — see [Environment Variables](#environment-variables) above.
@@ -169,26 +213,53 @@ notifications:
 
 ### Event Filtering
 
-The `events` list controls which events trigger a notification. If the list is **empty or omitted**, **all** events will be notified.
+The `events` list controls which events trigger a notification for a given provider. Events are configured per notification provider in the YAML config under `notifications > {provider} > events`.
+
+- If the `events` list is **empty or omitted**, **all** events are sent to that provider.
+- If specific events are listed, **only those events** trigger notifications for that provider.
 
 **Available events:**
 
-| Event              | Description                         |
-| ------------------ | ----------------------------------- |
-| `DROP_CLAIM`       | A drop was claimed                  |
-| `DROP_STATUS`      | Drop progress update                |
-| `STREAMER_ONLINE`  | A streamer went live                |
-| `STREAMER_OFFLINE` | A streamer went offline             |
-| `BONUS_CLAIM`      | Channel points bonus claimed        |
-| `JOIN_RAID`        | Joined a raid                       |
-| `MOMENT_CLAIM`     | Community moment claimed            |
-| `BET_START`        | A prediction started                |
-| `BET_WIN`          | A prediction was won                |
-| `BET_LOSE`         | A prediction was lost               |
-| `BET_REFUND`       | A prediction was refunded           |
-| `BET_FILTERS`      | Prediction skipped due to filters   |
-| `CHAT_MENTION`     | Your username was mentioned in chat |
-| `TEST`             | Test notification (see below)       |
+| Event                   | Emoji | Description                       |
+| ----------------------- | ----- | --------------------------------- |
+| `STREAMER_ONLINE`       | 🟢    | Streamer goes online              |
+| `STREAMER_OFFLINE`      | ⚫    | Streamer goes offline             |
+| `GAIN_FOR_RAID`         | 💵    | Points gained from a raid         |
+| `GAIN_FOR_CLAIM`        | 💵    | Points gained from claiming bonus |
+| `GAIN_FOR_WATCH`        | 💵    | Points gained from watching       |
+| `GAIN_FOR_WATCH_STREAK` | 💵    | Points gained from watch streak   |
+| `BET_WIN`               | 🏆    | Prediction bet won                |
+| `BET_LOSE`              | 💸    | Prediction bet lost               |
+| `BET_REFUND`            | ↩️    | Prediction bet refunded           |
+| `BET_FILTERS`           | 🎰    | Prediction filtered by settings   |
+| `BET_GENERAL`           | 🎰    | General prediction info           |
+| `BET_FAILED`            | 🎰    | Prediction bet failed             |
+| `BET_START`             | 🎰    | Prediction started                |
+| `BONUS_CLAIM`           | 💵    | Bonus claimed                     |
+| `MOMENT_CLAIM`          | 🎉    | Community moment claimed          |
+| `JOIN_RAID`             | ⚔️    | Joined a raid                     |
+| `DROP_CLAIM`            | 📦    | Drop claimed                      |
+| `DROP_STATUS`           | 📦    | Drop progress status              |
+| `CHAT_MENTION`          | 💬    | Mentioned in chat                 |
+| `GIFTED_SUB`            | 🎁    | Received a gifted subscription    |
+| `TEST`                  | —     | Test notification (see below)     |
+
+> **Note:** Emojis are prepended to log messages and notifications automatically. They are defined in [`eventEmoji`](internal/logger/logger.go:19) and sourced from [`internal/model/settings.go`](internal/model/settings.go:7).
+
+**Example — send only specific events to Telegram:**
+
+```yaml
+notifications:
+  telegram:
+    enabled: true
+    token: "..."
+    chat_id: "..."
+    events:
+      - "GIFTED_SUB"
+      - "BET_WIN"
+      - "BET_LOSE"
+      - "DROP_CLAIM"
+```
 
 ### Testing Notifications
 

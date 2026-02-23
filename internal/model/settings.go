@@ -24,6 +24,7 @@ const (
 	EventDropClaim          Event = "DROP_CLAIM"
 	EventDropStatus         Event = "DROP_STATUS"
 	EventChatMention        Event = "CHAT_MENTION"
+	EventGiftedSub          Event = "GIFTED_SUB"
 	EventTest               Event = "TEST"
 )
 
@@ -49,6 +50,7 @@ func AllEvents() []Event {
 		EventDropClaim,
 		EventDropStatus,
 		EventChatMention,
+		EventGiftedSub,
 		EventTest,
 	}
 }

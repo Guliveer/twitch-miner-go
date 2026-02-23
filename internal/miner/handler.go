@@ -33,6 +33,8 @@ func (m *Miner) handleMessage(ctx context.Context, msg *model.Message) {
 		m.handleCommunityMoments(ctx, msg, streamer)
 	case "community-points-channel-v1":
 		m.handleCommunityGoals(ctx, msg, streamer)
+	case "channel-subscribe-events-v1":
+		m.handleGiftedSub(ctx, msg, streamer)
 	default:
 		m.log.Debug("Unhandled PubSub topic", "topic", msg.Topic, "type", string(msg.Type))
 	}
@@ -324,6 +326,34 @@ func (m *Miner) handleCommunityGoals(_ context.Context, msg *model.Message, stre
 			streamer.Mu.Unlock()
 		}
 	}
+}
+
+func (m *Miner) handleGiftedSub(ctx context.Context, msg *model.Message, streamer *model.Streamer) {
+	if streamer == nil {
+		return
+	}
+
+	if msg.Type != model.MsgTypeSubGift && msg.Type != model.MsgTypeAnonSubGift {
+		return
+	}
+
+	streamer.Mu.RLock()
+	username := streamer.Username
+	category := streamer.ResolveCategory()
+	streamer.Mu.RUnlock()
+
+	gifterName := "Anonymous"
+	if msg.Type == model.MsgTypeSubGift {
+		if name, ok := msg.RawMessage["display_name"].(string); ok && name != "" {
+			gifterName = name
+		}
+	}
+
+	m.log.Event(ctx, model.EventGiftedSub,
+		fmt.Sprintf("🎁 Received Gifted Sub [from=%s]", gifterName),
+		"streamer", username,
+		"category", category,
+	)
 }
 
 func (m *Miner) updateChatPresence(streamer *model.Streamer, isOnline bool) {

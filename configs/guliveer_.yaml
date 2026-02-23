@@ -132,6 +132,7 @@ notifications:
     token: "" # Set via TELEGRAM_TOKEN_GULIVEER_ env var
     events:
       - "DROP_CLAIM"
+      - "GIFTED_SUB"
     disable_notification: true
 
 # Discord — disabled (commented out in Python config)

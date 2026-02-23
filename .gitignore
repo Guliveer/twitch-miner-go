@@ -29,4 +29,4 @@ logs/
 # Environment
 .env
 .env.*
-
+!.env.example
