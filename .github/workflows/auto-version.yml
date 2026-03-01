@@ -89,10 +89,10 @@ jobs:
               continue
             fi
 
-            # Non-conventional commit — default to patch as safety net
-            if [ "$BUMP" = "skip" ]; then
-              BUMP="patch"
-            fi
+            # Non-conventional commit — skip (do not bump)
+            # Conventional commits are enforced by git hooks and CI lint,
+            # so non-matching messages (e.g., merge commits) should not trigger a release.
+            continue
           done <<< "$COMMITS"
 
           echo "Determined bump type: $BUMP"
