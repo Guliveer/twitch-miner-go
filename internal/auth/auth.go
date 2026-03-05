@@ -298,6 +298,15 @@ func (a *Authenticator) FetchIntegrityToken(ctx context.Context) (string, error)
 	return a.integrityToken, nil
 }
 
+// RefreshToken attempts to refresh the OAuth access token using the stored
+// refresh token. It is safe for concurrent use and is intended to be called
+// when PubSub receives ERR_BADAUTH, indicating the token has expired.
+func (a *Authenticator) RefreshToken(ctx context.Context) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.refreshAccessToken(ctx)
+}
+
 // generateDeviceID creates a random 32-character alphanumeric device ID,
 func generateDeviceID() string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

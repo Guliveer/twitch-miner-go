@@ -297,8 +297,7 @@ func (c *Connection) handleResponse(ctx context.Context, resp *Response) {
 			)
 
 			if resp.Error == "ERR_BADAUTH" {
-				c.log.Error("Received ERR_BADAUTH — auth token may be expired or invalid",
-					"conn", c.index)
+				c.retryAfterRefresh(ctx, failedTopic)
 			}
 		} else {
 			c.mu.Lock()
@@ -412,4 +411,40 @@ func (c *Connection) removeTopic(topic *model.PubSubTopic) {
 			return
 		}
 	}
+}
+
+// retryAfterRefresh handles ERR_BADAUTH by refreshing the auth token and
+// re-subscribing the failed topic. If another goroutine already refreshed the
+// token, it detects the change and still retries the subscription.
+func (c *Connection) retryAfterRefresh(ctx context.Context, failedTopic string) {
+	oldToken := c.auth.AuthToken()
+	c.log.Warn("Received ERR_BADAUTH — attempting token refresh", "conn", c.index)
+
+	if err := c.auth.RefreshToken(ctx); err != nil {
+		// Another connection may have already refreshed the token.
+		if c.auth.AuthToken() == oldToken {
+			c.log.Error("Token refresh failed — auth token may be expired or invalid",
+				"conn", c.index, "error", err)
+			return
+		}
+		c.log.Info("Token was already refreshed by another connection", "conn", c.index)
+	} else {
+		c.log.Info("Token refreshed successfully", "conn", c.index)
+	}
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	for _, t := range c.topics {
+		if t.String() == failedTopic {
+			c.log.Info("Re-subscribing topic after token refresh",
+				"conn", c.index, "topic", failedTopic)
+			if err := c.sendListen(t); err != nil {
+				c.log.Error("Failed to re-subscribe topic after token refresh",
+					"conn", c.index, "topic", failedTopic, "error", err)
+			}
+			return
+		}
+	}
+	c.log.Warn("Topic not found for re-subscription after token refresh",
+		"conn", c.index, "topic", failedTopic)
 }
