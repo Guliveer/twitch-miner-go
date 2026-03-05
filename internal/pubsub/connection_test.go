@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 
+	authpkg "github.com/Guliveer/twitch-miner-go/internal/auth"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
 	"github.com/Guliveer/twitch-miner-go/internal/model"
 )
@@ -37,14 +38,17 @@ func (m *mockAuthProvider) RefreshToken(_ context.Context) error {
 	return nil
 }
 
-func newTestConnection(auth *mockAuthProvider) *Connection {
+func newTestConnection(authProvider authpkg.Provider) *Connection {
 	log, _ := logger.Setup(logger.Config{Level: 100}) // suppress output
+	if authProvider == nil {
+		authProvider = &mockAuthProvider{}
+	}
 	return &Connection{
 		index:        0,
 		topics:       make([]*model.PubSubTopic, 0),
 		messages:     make(chan *model.Message, 8),
 		writeCh:      make(chan []byte, 64),
-		auth:         auth,
+		auth:         authProvider,
 		log:          log,
 		nonceToTopic: make(map[string]string),
 		isConnected:  true,
@@ -153,12 +157,16 @@ func TestHandleResponse_ERR_BADAUTH_RefreshFailsNoResubscribe(t *testing.T) {
 }
 
 func TestHandleResponse_ERR_BADAUTH_AlreadyRefreshedByAnother(t *testing.T) {
-	mock := &mockAuthProvider{
-		token:      "already-refreshed-token",
-		userID:     "123",
-		refreshErr: context.DeadlineExceeded, // refresh fails
+	// Use a special mock that simulates the token being changed by another
+	// goroutine during the RefreshToken call: RefreshToken returns an error,
+	// but the token has changed, so re-subscribe should still happen.
+	specialMock := &tokenChangingMock{
+		token:      "old-expired",
+		newToken:   "already-refreshed-token",
+		refreshErr: context.DeadlineExceeded,
 	}
-	c := newTestConnection(mock)
+	c := newTestConnection(nil)
+	c.auth = specialMock
 
 	topic := &model.PubSubTopic{
 		TopicType: model.PubSubTopicCommunityPoints,
@@ -169,53 +177,7 @@ func TestHandleResponse_ERR_BADAUTH_AlreadyRefreshedByAnother(t *testing.T) {
 	nonce := "test-nonce-3"
 	c.nonceToTopic[nonce] = topic.String()
 
-	// The connection was created with "already-refreshed-token" but internally
-	// AuthToken() will return the mock's current token. We simulate the case
-	// where the token changed between the initial read and the refresh attempt
-	// by making oldToken differ from the current token.
-	// We do this by overriding AuthToken to return a changing value.
-
-	// Instead, set up the mock so the first AuthToken() call returns one value
-	// and subsequent calls return another.
-	// Simpler approach: just verify that when refresh fails but token changed,
-	// the re-subscribe still happens.
-
-	// Save oldToken as what sendListen used (the "expired" token).
-	// Simulate: retryAfterRefresh is called, oldToken = "old-expired", but
-	// mock now returns "already-refreshed-token" (changed by another goroutine).
-	// refreshErr makes RefreshToken fail, but token differs → re-subscribe.
-
-	// Reset to simulate the scenario properly.
-	mock.mu.Lock()
-	mock.token = "old-expired"
-	mock.mu.Unlock()
-
 	ctx := context.Background()
-
-	// Now simulate another goroutine refreshing the token between
-	// retryAfterRefresh reading oldToken and calling RefreshToken.
-	origRefreshToken := mock.RefreshToken
-	_ = origRefreshToken
-	mock.refreshErr = nil
-	// We override the mock to change the token on refresh even though it "fails"
-	// Actually let me restructure: refresh succeeds but we check re-subscribe.
-	// The "already refreshed by another" case: refresh fails, token changed.
-
-	mock.mu.Lock()
-	mock.token = "old-expired"
-	mock.refreshErr = context.DeadlineExceeded
-	mock.mu.Unlock()
-
-	// We need oldToken to be "old-expired" and then after RefreshToken is called
-	// (which fails), AuthToken() returns something different.
-	// We achieve this by having a custom mock that changes token on RefreshToken call.
-	specialMock := &tokenChangingMock{
-		token:      "old-expired",
-		newToken:   "already-refreshed-token",
-		refreshErr: context.DeadlineExceeded,
-	}
-	c.auth = specialMock
-
 	c.handleResponse(ctx, &Response{
 		Type:  TypeResponse,
 		Nonce: nonce,
