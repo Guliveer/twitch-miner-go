@@ -10,4 +10,5 @@ type Provider interface {
 	UserID() string
 	GetAuthHeaders() map[string]string
 	FetchIntegrityToken(ctx context.Context) (string, error)
+	RefreshToken(ctx context.Context) error
 }
