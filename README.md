@@ -404,10 +404,25 @@ fly secrets set TELEGRAM_TOKEN_YOUR_USERNAME=your_bot_token
 fly secrets set TELEGRAM_CHAT_ID_YOUR_USERNAME=your_chat_id
 ```
 
+### CI/CD Auto-Deploy
+
+Pushes to `main` are automatically deployed via the [CI workflow](.github/workflows/ci.yml) after build and version bump succeed. This requires a `FLY_API_TOKEN` GitHub secret:
+
+```bash
+# 1. Generate a deploy token scoped to your app
+flyctl tokens create deploy -a twitch-miner-go
+
+# 2. Set it as a GitHub repo secret
+gh secret set FLY_API_TOKEN --repo <owner>/<repo>
+# (paste the token when prompted)
+```
+
+> If `FLY_API_TOKEN` is not set, the deploy step is **skipped gracefully** — build and version bump still run normally.
+
 ### Manual Deploy
 
 > **Note:**
-> _[Fly.io](https://fly.io)_ is a personal preference — therefore this project is prepared for it out of the box with a `fly.toml` and volume configuration for cookie persistence.  
+> _[Fly.io](https://fly.io)_ is a personal preference — therefore this project is prepared for it out of the box with a `fly.toml` and volume configuration for cookie persistence.
 > However, the miner is designed to be portable and can run on any platform that supports Go. You are not limited to Fly.io — feel free to deploy on AWS, GCP, Azure, Heroku, DigitalOcean, or any other hosting provider of your choice.
 
 ```bash
