@@ -377,10 +377,6 @@ func (m *Miner) streamerTopics(s *model.Streamer) []*model.PubSubTopic {
 	if s.Settings.CommunityGoalsEnabled {
 		topics = append(topics, model.NewStreamerTopic(model.PubSubTopicCommunityGoals, s))
 	}
-	// NOTE: channel-subscribe-events-v1 requires broadcaster-level access.
-	// A viewer token cannot listen to subscription events on other channels,
-	// so we intentionally skip PubSubTopicChannelSubscriptions here.
-
 	return topics
 }
 

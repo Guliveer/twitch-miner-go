@@ -11,6 +11,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 - **Raids** — automatic raid joining
 - **Community moments** — automatic moment claiming
 - **Community goals** — automatic goal contributions
+- **Gift sub detection** — notifies when your account receives a gifted subscription
 - **Category watcher** — auto-discover streamers by game category
 - **Notifications** — Telegram, Discord, Webhook, Matrix, Pushover, Gotify
 - **Analytics dashboard** — built-in web UI for monitoring
@@ -255,7 +256,7 @@ The `events` list controls which events trigger a notification for a given provi
 | `DROP_CLAIM`            | 📦    | Drop claimed                      |
 | `DROP_STATUS`           | 📦    | Drop progress status              |
 | `CHAT_MENTION`          | 💬    | Mentioned in chat                 |
-| `GIFTED_SUB`            | 🎁    | Received a gifted subscription    |
+| `GIFTED_SUB`            | 🎁    | Received a gifted sub (via IRC)   |
 | `TEST`                  | —     | Test notification (see below)     |
 
 > **Note:** Emojis are prepended to log messages and notifications automatically. The emoji mappings are defined in [`eventEmoji`](internal/logger/logger.go:19). The event type constants themselves are defined in [`internal/model/settings.go`](internal/model/settings.go:7).

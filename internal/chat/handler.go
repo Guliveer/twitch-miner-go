@@ -10,8 +10,8 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/model"
 )
 
-// Handler processes incoming IRC chat messages, detecting @mentions
-// and logging connection events.
+// Handler processes incoming IRC chat messages, detecting @mentions,
+// gifted subscriptions, and logging connection events.
 type Handler struct {
 	username string
 	log *logger.Logger
@@ -62,4 +62,30 @@ func (h *Handler) OnSelfJoinMessage(msg twitch.UserJoinMessage) {
 // OnSelfPartMessage is called when the bot leaves a channel.
 func (h *Handler) OnSelfPartMessage(msg twitch.UserPartMessage) {
 	h.log.Info("💬 Left IRC chat", "channel", msg.Channel)
+}
+
+// OnUserNoticeMessage is called for USERNOTICE IRC messages (subs, gift subs, raids, etc.).
+// It detects gifted subscriptions where the recipient is the configured user.
+func (h *Handler) OnUserNoticeMessage(msg twitch.UserNoticeMessage) {
+	switch msg.MsgID {
+	case "subgift", "anonsubgift":
+		recipient := strings.ToLower(msg.MsgParams["msg-param-recipient-user-name"])
+		if recipient != h.username {
+			return
+		}
+
+		gifterName := "Anonymous"
+		if msg.MsgID == "subgift" && msg.User.DisplayName != "" {
+			gifterName = msg.User.DisplayName
+		}
+
+		h.log.Event(
+			context.Background(),
+			model.EventGiftedSub,
+			"Received gifted sub",
+			"streamer", msg.Channel,
+			"gifter", gifterName,
+			"channel", msg.Channel,
+		)
+	}
 }

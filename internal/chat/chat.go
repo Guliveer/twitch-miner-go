@@ -44,6 +44,7 @@ func NewManager(username, authToken string, log *logger.Logger) *Manager {
 	}
 
 	client.OnPrivateMessage(handler.OnPrivateMessage)
+	client.OnUserNoticeMessage(handler.OnUserNoticeMessage)
 	client.OnConnect(handler.OnConnect)
 	client.OnReconnectMessage(func(msg twitch.ReconnectMessage) {
 		handler.OnReconnect()

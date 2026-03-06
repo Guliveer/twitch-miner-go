@@ -39,10 +39,6 @@ const (
 	// Community goal messages
 	MsgTypeGoalContribution MessageType = "community-goal-contribution"
 	MsgTypeGoalUpdated      MessageType = "community-goal-updated"
-
-	// Subscription messages
-	MsgTypeSubGift     MessageType = "subgift"
-	MsgTypeAnonSubGift MessageType = "anonsubgift"
 )
 
 // Message represents a parsed PubSub message.
