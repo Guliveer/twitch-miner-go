@@ -84,6 +84,12 @@ followers:
 
 # Notifications
 notifications:
+  batch:
+    enabled: true
+    interval: 30m
+    max_entries: 15
+    immediate_events: []
+
   telegram:
     enabled: true
     chat_id: "" # Set via TELEGRAM_CHAT_ID_GULIVEER_2 env var

@@ -283,6 +283,44 @@ notifications:
       - "DROP_CLAIM"
 ```
 
+### Notification Batching
+
+Instead of receiving a separate notification for every single event, you can enable **batching** to group events by streamer or category and deliver them as a single message at a configurable interval.
+
+**Global defaults with per-provider overrides:**
+
+```yaml
+notifications:
+  batch:
+    enabled: true
+    interval: 30m          # flush buffered events every 30 minutes
+    max_entries: 15         # max lines per message; splits into multiple if exceeded
+    immediate_events:       # these bypass batching (empty list = batch everything)
+      - "BET_WIN"
+      - "BET_LOSE"
+      - "DROP_CLAIM"
+
+  discord:
+    enabled: true
+    batch:
+      interval: 15m         # override: Discord flushes every 15 minutes
+  telegram:
+    enabled: true
+    batch:
+      enabled: false         # override: Telegram sends instantly
+```
+
+**How it works:**
+
+- Events are grouped by their notification title (e.g. `oliwer | xQc`, `oliwer | Valorant`).
+- At each interval, all buffered events for a group are joined as newline-separated lines and sent as one message.
+- If a single event arrives in a batch window, it is sent as a regular (unbatched) message.
+- If the buffer exceeds `max_entries`, the message is split into multiple sends.
+- On graceful shutdown, all pending batched events are flushed before the process exits.
+- Events listed in `immediate_events` are always sent instantly, bypassing the buffer.
+- If `immediate_events` is empty or omitted, **all** events are batched.
+- Per-provider `batch` config overrides the global defaults. Omitted fields inherit from global.
+
 ### Testing Notifications
 
 The miner exposes a `POST /api/test-notification` endpoint on the analytics server to verify your notification setup. It sends a test message to **all** enabled notification providers, **bypassing event filters**.

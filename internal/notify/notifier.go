@@ -24,15 +24,23 @@ type Notifier interface {
 	ShouldNotify(event model.Event) bool
 }
 
+// notifierEntry pairs a Notifier with an optional Batcher.
+// When batcher is non-nil, notifications are routed through it.
+type notifierEntry struct {
+	notifier Notifier
+	batcher  *Batcher
+}
+
 // Dispatcher manages multiple notifiers and dispatches notifications to all
 // enabled notifiers that match the event.
 type Dispatcher struct {
-	notifiers []Notifier
-	log       *logger.Logger
+	entries []notifierEntry
+	log     *logger.Logger
 }
 
 // NewDispatcher creates a Dispatcher from the notification configuration.
-// It initialises all configured and enabled notification providers.
+// It initialises all configured and enabled notification providers,
+// optionally wrapping each in a Batcher when batching is enabled.
 func NewDispatcher(cfg config.NotificationsConfig, log *logger.Logger) *Dispatcher {
 	dispatcher := &Dispatcher{log: log}
 
@@ -45,22 +53,34 @@ func NewDispatcher(cfg config.NotificationsConfig, log *logger.Logger) *Dispatch
 		},
 	}
 
+	// addEntry registers a notifier, wrapping it in a Batcher if the
+	// resolved (global+provider) batch config is enabled.
+	addEntry := func(n Notifier, providerBatch *config.BatchConfig) {
+		resolved := config.ResolveBatchConfig(cfg.Batch, providerBatch)
+		entry := notifierEntry{notifier: n}
+		if resolved.IsBatchEnabled() {
+			entry.batcher = NewBatcher(n, resolved, log)
+			entry.batcher.Start()
+		}
+		dispatcher.entries = append(dispatcher.entries, entry)
+	}
+
 	if cfg.Telegram != nil && cfg.Telegram.Enabled {
-		dispatcher.notifiers = append(dispatcher.notifiers, &Telegram{
+		addEntry(&Telegram{
 			baseNotifier:        baseNotifier{name: "Telegram", enabled: true, events: parseEvents(cfg.Telegram.Events)},
 			token:               cfg.Telegram.Token,
 			chatID:              cfg.Telegram.ChatID,
 			disableNotification: cfg.Telegram.DisableNotification,
 			httpClient:          httpClient,
-		})
+		}, cfg.Telegram.Batch)
 	}
 
 	if cfg.Discord != nil && cfg.Discord.Enabled {
-		dispatcher.notifiers = append(dispatcher.notifiers, &Discord{
+		addEntry(&Discord{
 			baseNotifier: baseNotifier{name: "Discord", enabled: true, events: parseEvents(cfg.Discord.Events)},
 			webhookURL:   cfg.Discord.WebhookURL,
 			httpClient:   httpClient,
-		})
+		}, cfg.Discord.Batch)
 	}
 
 	if cfg.Webhook != nil && cfg.Webhook.Enabled {
@@ -68,63 +88,78 @@ func NewDispatcher(cfg config.NotificationsConfig, log *logger.Logger) *Dispatch
 		if method == "" {
 			method = http.MethodPost
 		}
-		dispatcher.notifiers = append(dispatcher.notifiers, &Webhook{
+		addEntry(&Webhook{
 			baseNotifier: baseNotifier{name: "Webhook", enabled: true, events: parseEvents(cfg.Webhook.Events)},
 			url:          cfg.Webhook.Endpoint,
 			method:       method,
 			httpClient:   httpClient,
-		})
+		}, cfg.Webhook.Batch)
 	}
 
 	if cfg.Matrix != nil && cfg.Matrix.Enabled {
-		dispatcher.notifiers = append(dispatcher.notifiers, &Matrix{
+		addEntry(&Matrix{
 			baseNotifier: baseNotifier{name: "Matrix", enabled: true, events: parseEvents(cfg.Matrix.Events)},
 			homeserver:   cfg.Matrix.Homeserver,
 			accessToken:  cfg.Matrix.AccessToken,
 			roomID:       cfg.Matrix.RoomID,
 			httpClient:   httpClient,
-		})
+		}, cfg.Matrix.Batch)
 	}
 
 	if cfg.Pushover != nil && cfg.Pushover.Enabled {
-		dispatcher.notifiers = append(dispatcher.notifiers, &Pushover{
+		addEntry(&Pushover{
 			baseNotifier: baseNotifier{name: "Pushover", enabled: true, events: parseEvents(cfg.Pushover.Events)},
 			token:        cfg.Pushover.APIToken,
 			userKey:      cfg.Pushover.UserKey,
 			httpClient:   httpClient,
-		})
+		}, cfg.Pushover.Batch)
 	}
 
 	if cfg.Gotify != nil && cfg.Gotify.Enabled {
-		dispatcher.notifiers = append(dispatcher.notifiers, &Gotify{
+		addEntry(&Gotify{
 			baseNotifier: baseNotifier{name: "Gotify", enabled: true, events: parseEvents(cfg.Gotify.Events)},
 			url:          cfg.Gotify.URL,
 			token:        cfg.Gotify.Token,
 			httpClient:   httpClient,
-		})
+		}, cfg.Gotify.Batch)
 	}
 
 	return dispatcher
 }
 
 // Dispatch sends a notification to all enabled notifiers that match the event.
-// Sends are non-blocking — each notifier runs in its own goroutine.
+// For notifiers with batching enabled, the event is buffered; otherwise it is
+// sent directly in a goroutine.
 func (d *Dispatcher) Dispatch(ctx context.Context, event model.Event, title, message string) {
-	for _, n := range d.notifiers {
-		if !n.IsEnabled() || !n.ShouldNotify(event) {
+	for _, e := range d.entries {
+		if !e.notifier.IsEnabled() || !e.notifier.ShouldNotify(event) {
 			continue
 		}
-		go func(notifier Notifier) {
-			sendCtx, cancel := context.WithTimeout(ctx, defaultHTTPTimeout)
-			defer cancel()
-			if err := notifier.Send(sendCtx, event, title, message); err != nil {
-				d.log.Warn("notification send failed",
-					"provider", notifier.Name(),
-					"event", string(event),
-					"error", err,
-				)
-			}
-		}(n)
+		if e.batcher != nil {
+			e.batcher.Send(ctx, event, title, message)
+		} else {
+			go func(notifier Notifier) {
+				sendCtx, cancel := context.WithTimeout(ctx, defaultHTTPTimeout)
+				defer cancel()
+				if err := notifier.Send(sendCtx, event, title, message); err != nil {
+					d.log.Warn("notification send failed",
+						"provider", notifier.Name(),
+						"event", string(event),
+						"error", err,
+					)
+				}
+			}(e.notifier)
+		}
+	}
+}
+
+// Stop flushes all active batchers and releases resources.
+// Must be called during graceful shutdown.
+func (d *Dispatcher) Stop(ctx context.Context) {
+	for _, e := range d.entries {
+		if e.batcher != nil {
+			e.batcher.Stop(ctx)
+		}
 	}
 }
 
@@ -154,16 +189,17 @@ func (d *Dispatcher) NotifyFunc(accountName string) logger.NotifyFunc {
 	}
 }
 
-// TestAll sends a test notification to all enabled notifiers, bypassing event filters.
+// TestAll sends a test notification to all enabled notifiers, bypassing event filters
+// and batching.
 func (d *Dispatcher) TestAll(ctx context.Context, title, message string) []error {
 	var errs []error
-	for _, n := range d.notifiers {
-		if !n.IsEnabled() {
+	for _, e := range d.entries {
+		if !e.notifier.IsEnabled() {
 			continue
 		}
 		sendCtx, cancel := context.WithTimeout(ctx, defaultHTTPTimeout)
-		if err := n.Send(sendCtx, model.EventTest, title, message); err != nil {
-			errs = append(errs, fmt.Errorf("%s: %w", n.Name(), err))
+		if err := e.notifier.Send(sendCtx, model.EventTest, title, message); err != nil {
+			errs = append(errs, fmt.Errorf("%s: %w", e.notifier.Name(), err))
 		}
 		cancel()
 	}
@@ -172,7 +208,7 @@ func (d *Dispatcher) TestAll(ctx context.Context, title, message string) []error
 
 // HasNotifiers reports whether any notifiers are configured.
 func (d *Dispatcher) HasNotifiers() bool {
-	return len(d.notifiers) > 0
+	return len(d.entries) > 0
 }
 
 // parseEvents converts a slice of event name strings to model.Event values,

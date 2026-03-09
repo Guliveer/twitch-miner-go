@@ -211,6 +211,11 @@ func (m *Miner) Run(ctx context.Context) error {
 	}
 	m.pendingTimersMu.Unlock()
 
+	// Flush any pending batched notifications before exit.
+	if m.notify != nil {
+		m.notify.Stop(context.Background())
+	}
+
 	return err
 }
 

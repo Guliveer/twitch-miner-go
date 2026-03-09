@@ -75,6 +75,20 @@ followers:
 
 # Notifications
 notifications:
+  # Global batching defaults — groups notifications by streamer/category
+  # and sends them as a single message per interval. Per-provider overrides below.
+  # batch:
+  #   enabled: true
+  #   interval: 15m
+  #   max_entries: 15       # max lines per message (0 = unlimited), splits into multiple if exceeded
+  #   immediate_events:     # these events bypass batching and are sent instantly
+  #     - BET_WIN
+  #     - BET_LOSE
+  #     - DROP_CLAIM
+  #     - STREAMER_ONLINE
+  #     - CHAT_MENTION
+  #     - GIFTED_SUB
+
   telegram:
     enabled: false
     events:
@@ -92,6 +106,10 @@ notifications:
     events:
       - "BET_WIN"
       - "DROP_CLAIM"
+    # Per-provider batch override (uncomment to override global defaults):
+    # batch:
+    #   enabled: true
+    #   interval: 30m
     # webhook_url from env: DISCORD_WEBHOOK_<UPPERCASE_USERNAME>
 
   webhook:

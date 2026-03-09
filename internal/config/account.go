@@ -102,63 +102,124 @@ type FollowersConfig struct {
 	Order string `yaml:"order"`
 }
 
+// BatchConfig holds notification batching settings.
+// When set at the notifications level, it provides global defaults.
+// When set per-provider, it overrides the global defaults.
+type BatchConfig struct {
+	Enabled         *bool         `yaml:"enabled,omitempty"`
+	Interval        time.Duration `yaml:"interval,omitempty"`
+	MaxEntries      int           `yaml:"max_entries,omitempty"`
+	ImmediateEvents []string      `yaml:"immediate_events,omitempty"`
+}
+
 // NotificationsConfig holds all notification provider configurations.
 type NotificationsConfig struct {
+	Batch    *BatchConfig    `yaml:"batch,omitempty"`
 	Telegram *TelegramConfig `yaml:"telegram,omitempty"`
-	Discord *DiscordConfig `yaml:"discord,omitempty"`
-	Webhook *WebhookConfig `yaml:"webhook,omitempty"`
-	Matrix *MatrixConfig `yaml:"matrix,omitempty"`
+	Discord  *DiscordConfig  `yaml:"discord,omitempty"`
+	Webhook  *WebhookConfig  `yaml:"webhook,omitempty"`
+	Matrix   *MatrixConfig   `yaml:"matrix,omitempty"`
 	Pushover *PushoverConfig `yaml:"pushover,omitempty"`
-	Gotify *GotifyConfig `yaml:"gotify,omitempty"`
+	Gotify   *GotifyConfig   `yaml:"gotify,omitempty"`
 }
 
 // TelegramConfig holds Telegram notification settings.
 type TelegramConfig struct {
-	Enabled bool `yaml:"enabled"`
-	Token string `yaml:"token,omitempty"`
-	ChatID string `yaml:"chat_id,omitempty"`
-	Events []string `yaml:"events"`
-	DisableNotification bool `yaml:"disable_notification"`
+	Enabled             bool         `yaml:"enabled"`
+	Token               string       `yaml:"token,omitempty"`
+	ChatID              string       `yaml:"chat_id,omitempty"`
+	Events              []string     `yaml:"events"`
+	DisableNotification bool         `yaml:"disable_notification"`
+	Batch               *BatchConfig `yaml:"batch,omitempty"`
 }
 
 // DiscordConfig holds Discord notification settings.
 type DiscordConfig struct {
-	Enabled bool `yaml:"enabled"`
-	WebhookURL string `yaml:"webhook_url,omitempty"`
-	Events []string `yaml:"events"`
+	Enabled    bool         `yaml:"enabled"`
+	WebhookURL string       `yaml:"webhook_url,omitempty"`
+	Events     []string     `yaml:"events"`
+	Batch      *BatchConfig `yaml:"batch,omitempty"`
 }
 
 // WebhookConfig holds generic webhook notification settings.
 type WebhookConfig struct {
-	Enabled bool `yaml:"enabled"`
-	Endpoint string `yaml:"endpoint,omitempty"`
-	Method string `yaml:"method"`
-	Events []string `yaml:"events"`
+	Enabled  bool         `yaml:"enabled"`
+	Endpoint string       `yaml:"endpoint,omitempty"`
+	Method   string       `yaml:"method"`
+	Events   []string     `yaml:"events"`
+	Batch    *BatchConfig `yaml:"batch,omitempty"`
 }
 
 // MatrixConfig holds Matrix notification settings.
 type MatrixConfig struct {
-	Enabled bool `yaml:"enabled"`
-	Homeserver string `yaml:"homeserver,omitempty"`
-	RoomID string `yaml:"room_id,omitempty"`
-	AccessToken string `yaml:"access_token,omitempty"`
-	Events []string `yaml:"events"`
+	Enabled     bool         `yaml:"enabled"`
+	Homeserver  string       `yaml:"homeserver,omitempty"`
+	RoomID      string       `yaml:"room_id,omitempty"`
+	AccessToken string       `yaml:"access_token,omitempty"`
+	Events      []string     `yaml:"events"`
+	Batch       *BatchConfig `yaml:"batch,omitempty"`
 }
 
 // PushoverConfig holds Pushover notification settings.
 type PushoverConfig struct {
-	Enabled bool `yaml:"enabled"`
-	UserKey string `yaml:"user_key,omitempty"`
-	APIToken string `yaml:"api_token,omitempty"`
-	Events []string `yaml:"events"`
+	Enabled  bool         `yaml:"enabled"`
+	UserKey  string       `yaml:"user_key,omitempty"`
+	APIToken string       `yaml:"api_token,omitempty"`
+	Events   []string     `yaml:"events"`
+	Batch    *BatchConfig `yaml:"batch,omitempty"`
 }
 
 // GotifyConfig holds Gotify notification settings.
 type GotifyConfig struct {
-	Enabled bool `yaml:"enabled"`
-	URL string `yaml:"url,omitempty"`
-	Token string `yaml:"token,omitempty"`
-	Events []string `yaml:"events"`
+	Enabled bool         `yaml:"enabled"`
+	URL     string       `yaml:"url,omitempty"`
+	Token   string       `yaml:"token,omitempty"`
+	Events  []string     `yaml:"events"`
+	Batch   *BatchConfig `yaml:"batch,omitempty"`
+}
+
+// ResolveBatchConfig merges a provider-level BatchConfig with the global defaults.
+// Provider fields take precedence; nil/zero fields fall back to global.
+func ResolveBatchConfig(global, provider *BatchConfig) *BatchConfig {
+	if global == nil && provider == nil {
+		return nil
+	}
+
+	resolved := &BatchConfig{}
+
+	// Start from global
+	if global != nil {
+		resolved.Enabled = global.Enabled
+		resolved.Interval = global.Interval
+		resolved.MaxEntries = global.MaxEntries
+		resolved.ImmediateEvents = global.ImmediateEvents
+	}
+
+	// Override with provider-specific values
+	if provider != nil {
+		if provider.Enabled != nil {
+			resolved.Enabled = provider.Enabled
+		}
+		if provider.Interval != 0 {
+			resolved.Interval = provider.Interval
+		}
+		if provider.MaxEntries != 0 {
+			resolved.MaxEntries = provider.MaxEntries
+		}
+		if len(provider.ImmediateEvents) > 0 {
+			resolved.ImmediateEvents = provider.ImmediateEvents
+		}
+	}
+
+	return resolved
+}
+
+// IsBatchEnabled returns whether batching is enabled in this config.
+func (bc *BatchConfig) IsBatchEnabled() bool {
+	if bc == nil || bc.Enabled == nil {
+		return false
+	}
+	return *bc.Enabled
 }
 
 // ToStreamerSettings converts a StreamerSettingsConfig to a model.StreamerSettings,
