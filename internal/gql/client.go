@@ -12,6 +12,7 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -86,11 +87,16 @@ type Client struct {
 
 // NewClient creates a new GQL Client with a shared HTTP client configured
 // for connection pooling and the given authenticator.
-func NewClient(authenticator auth.Provider, log *logger.Logger) *Client {
+// An optional proxyURL routes all requests through the specified proxy.
+func NewClient(authenticator auth.Provider, log *logger.Logger, proxyURL *url.URL) *Client {
 	transport := &http.Transport{
 		MaxIdleConns:        20,
 		MaxIdleConnsPerHost: 5,
 		IdleConnTimeout:     90 * time.Second,
+	}
+	if proxyURL != nil {
+		transport.Proxy = http.ProxyURL(proxyURL)
+		log.Info("GQL client using proxy", "proxy", proxyURL.Host)
 	}
 
 	httpClient := &http.Client{

@@ -4,16 +4,21 @@ package server
 
 import (
 	"context"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
 	"fmt"
 	"net"
 	"net/http"
 	"net/http/pprof"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/Guliveer/twitch-miner-go/internal/constants"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
 	"github.com/Guliveer/twitch-miner-go/internal/model"
+	"github.com/Guliveer/twitch-miner-go/internal/utils"
 )
 
 // StreamerFunc is a function that returns the current list of streamers
@@ -24,11 +29,19 @@ type StreamerFunc func() []*model.Streamer
 // notifiers across all miners. Returns any errors encountered.
 type NotifyTestFunc func(ctx context.Context) []error
 
+// DashboardAuth holds credentials for HTTP Basic Auth on the dashboard.
+// The password is stored as a SHA-256 hex digest for constant-time comparison.
+type DashboardAuth struct {
+	Username     string
+	PasswordHash string // hex-encoded SHA-256
+}
+
 // AnalyticsServer serves the analytics dashboard and JSON API endpoints.
 type AnalyticsServer struct {
 	addr string
 	log  *logger.Logger
 	srv  *http.Server
+	auth *DashboardAuth
 
 	mu             sync.RWMutex
 	streamers      []*model.Streamer
@@ -37,10 +50,13 @@ type AnalyticsServer struct {
 }
 
 // NewAnalyticsServer creates a new AnalyticsServer bound to the given address.
-func NewAnalyticsServer(addr string, log *logger.Logger) *AnalyticsServer {
+// If auth is non-nil, all endpoints (except /health and /static) require
+// HTTP Basic Auth with the configured username and SHA-256 hashed password.
+func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth) *AnalyticsServer {
 	s := &AnalyticsServer{
 		addr: addr,
 		log:  log,
+		auth: auth,
 	}
 
 	mux := http.NewServeMux()
@@ -67,9 +83,14 @@ func NewAnalyticsServer(addr string, log *logger.Logger) *AnalyticsServer {
 	mux.Handle("GET /debug/pprof/goroutine", pprof.Handler("goroutine"))
 	mux.Handle("GET /debug/pprof/allocs", pprof.Handler("allocs"))
 
+	var handler http.Handler = mux
+	if auth != nil {
+		handler = withBasicAuth(auth, mux)
+	}
+
 	s.srv = &http.Server{
 		Addr:              addr,
-		Handler:           withLogging(log, mux),
+		Handler:           withLogging(log, handler),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
@@ -127,12 +148,12 @@ func (s *AnalyticsServer) Run(ctx context.Context) error {
 	s.log.Info("Analytics server started", "address", "http://"+s.addr)
 
 	errCh := make(chan error, 1)
-	go func() {
+	utils.SafeGo(func() {
 		if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errCh <- fmt.Errorf("analytics server: %w", err)
 		}
 		close(errCh)
-	}()
+	})
 
 	select {
 	case <-ctx.Done():
@@ -146,6 +167,39 @@ func (s *AnalyticsServer) Run(ctx context.Context) error {
 	case err := <-errCh:
 		return err
 	}
+}
+
+// withBasicAuth enforces HTTP Basic Auth with SHA-256 password comparison.
+// Health endpoint and static assets are excluded.
+func withBasicAuth(creds *DashboardAuth, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Always allow health checks and static assets without auth.
+		if r.URL.Path == "/health" || strings.HasPrefix(r.URL.Path, "/static/") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		user, pass, ok := r.BasicAuth()
+		if !ok || !checkCredentials(user, pass, creds) {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Twitch Miner Dashboard"`)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// checkCredentials verifies username and password against stored credentials.
+// The password is hashed with SHA-256 and compared in constant time.
+func checkCredentials(user, pass string, creds *DashboardAuth) bool {
+	userMatch := subtle.ConstantTimeCompare([]byte(user), []byte(creds.Username)) == 1
+
+	hash := sha256.Sum256([]byte(pass))
+	passHash := hex.EncodeToString(hash[:])
+	passMatch := subtle.ConstantTimeCompare([]byte(passHash), []byte(creds.PasswordHash)) == 1
+
+	return userMatch && passMatch
 }
 
 func withLogging(log *logger.Logger, next http.Handler) http.Handler {

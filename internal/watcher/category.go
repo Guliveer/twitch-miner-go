@@ -26,13 +26,14 @@ type categoryEntry struct {
 type CategoryWatcher struct {
 	mu sync.Mutex
 
-	gqlClient        *gql.Client
-	log              *logger.Logger
-	categories       []categoryEntry
-	globalDropsOnly  bool
-	pollInterval     time.Duration
-	blacklist        map[string]bool
-	streamerDefaults *model.StreamerSettings
+	gqlClient         *gql.Client
+	log               *logger.Logger
+	categories        []categoryEntry
+	globalDropsOnly   bool
+	pollInterval      time.Duration
+	blacklist         map[string]bool
+	categoryBlacklist map[string]bool
+	streamerDefaults  *model.StreamerSettings
 
 	categoryStreamers map[string]string
 }
@@ -43,6 +44,7 @@ func NewCategoryWatcher(
 	gqlClient *gql.Client,
 	log *logger.Logger,
 	blacklist []string,
+	categoryBlacklist []string,
 	streamerDefaults *model.StreamerSettings,
 ) *CategoryWatcher {
 	categories := make([]categoryEntry, 0, len(cfg.Categories))
@@ -56,6 +58,11 @@ func NewCategoryWatcher(
 	blacklistMap := make(map[string]bool, len(blacklist))
 	for _, blacklistedName := range blacklist {
 		blacklistMap[strings.ToLower(blacklistedName)] = true
+	}
+
+	catBlacklistMap := make(map[string]bool, len(categoryBlacklist))
+	for _, cat := range categoryBlacklist {
+		catBlacklistMap[strings.ToLower(cat)] = true
 	}
 
 	interval := cfg.PollInterval
@@ -75,6 +82,7 @@ func NewCategoryWatcher(
 		globalDropsOnly:   cfg.DropsOnly,
 		pollInterval:      interval,
 		blacklist:         blacklistMap,
+		categoryBlacklist: catBlacklistMap,
 		streamerDefaults:  streamerDefaults,
 		categoryStreamers: catStreamers,
 	}
@@ -132,6 +140,10 @@ func (cw *CategoryWatcher) evaluate(
 
 		if ctx.Err() != nil {
 			return
+		}
+
+		if cw.categoryBlacklist[strings.ToLower(cat.Slug)] {
+			continue
 		}
 
 		dropsOnly := cw.globalDropsOnly

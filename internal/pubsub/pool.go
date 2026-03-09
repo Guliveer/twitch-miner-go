@@ -13,6 +13,7 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/constants"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
 	"github.com/Guliveer/twitch-miner-go/internal/model"
+	"github.com/Guliveer/twitch-miner-go/internal/utils"
 )
 
 // MessageHandler processes decoded PubSub messages routed from the pool.
@@ -282,7 +283,7 @@ func (p *Pool) reconnect(ctx context.Context, oldConn *Connection) (*Connection,
 // channel and forwards them to the pool's merged fan-in channel.
 // The goroutine exits when the connection's messages channel is closed or the
 func (p *Pool) startForwarder(ctx context.Context, conn *Connection) {
-	go func() {
+	utils.SafeGo(func() {
 		for {
 			select {
 			case msg, ok := <-conn.Messages():
@@ -298,7 +299,7 @@ func (p *Pool) startForwarder(ctx context.Context, conn *Connection) {
 				return
 			}
 		}
-	}()
+	})
 }
 
 func (p *Pool) routeMessages(ctx context.Context) error {

@@ -5,9 +5,25 @@ package utils
 import (
 	"fmt"
 	"math"
+	"os"
 	"regexp"
+	"runtime/debug"
 	"strings"
 )
+
+// SafeGo launches a goroutine with panic recovery. If the goroutine panics,
+// the panic is caught, a stack trace is printed to stderr, and execution
+// continues without crashing the process.
+func SafeGo(fn func()) {
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Fprintf(os.Stderr, "panic recovered in goroutine: %v\n%s\n", r, debug.Stack())
+			}
+		}()
+		fn()
+	}()
+}
 
 var slugifyNonAlnum = regexp.MustCompile(`[^a-z0-9-]+`)
 

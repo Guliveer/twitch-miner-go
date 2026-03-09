@@ -4,11 +4,65 @@ import (
 	"encoding/json"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Guliveer/twitch-miner-go/internal/model"
 )
+
+// paginationParams holds parsed offset/limit query parameters.
+type paginationParams struct {
+	Offset int
+	Limit  int
+}
+
+// parsePagination extracts offset and limit from query parameters.
+// Returns defaults of offset=0, limit=0 (meaning no pagination).
+func parsePagination(r *http.Request) paginationParams {
+	p := paginationParams{}
+	if v := r.URL.Query().Get("offset"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			p.Offset = n
+		}
+	}
+	if v := r.URL.Query().Get("limit"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			p.Limit = n
+		}
+	}
+	return p
+}
+
+// paginatedResponse wraps a paginated API response with metadata.
+type paginatedResponse struct {
+	Total  int `json:"total"`
+	Offset int `json:"offset"`
+	Limit  int `json:"limit"`
+	Data   any `json:"data"`
+}
+
+// applyPagination slices a list and returns a paginatedResponse.
+// If limit is 0, all items are returned (no pagination).
+func applyPagination[T any](items []T, p paginationParams) paginatedResponse {
+	total := len(items)
+
+	if p.Offset > total {
+		p.Offset = total
+	}
+	items = items[p.Offset:]
+
+	if p.Limit > 0 && p.Limit < len(items) {
+		items = items[:p.Limit]
+	}
+
+	return paginatedResponse{
+		Total:  total,
+		Offset: p.Offset,
+		Limit:  p.Limit,
+		Data:   items,
+	}
+}
 
 func (s *AnalyticsServer) handleDashboard(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
@@ -112,7 +166,41 @@ func (s *AnalyticsServer) handleStreamers(w http.ResponseWriter, r *http.Request
 		result = append(result, summary)
 	}
 
-	writeJSON(w, http.StatusOK, result)
+	// Sort: ?sort=points|viewers|name (default: name), ?order=asc|desc (default: asc)
+	sortBy := r.URL.Query().Get("sort")
+	order := strings.ToLower(r.URL.Query().Get("order"))
+	desc := order == "desc"
+
+	switch sortBy {
+	case "points":
+		sort.Slice(result, func(i, j int) bool {
+			if desc {
+				return result[i].ChannelPoints > result[j].ChannelPoints
+			}
+			return result[i].ChannelPoints < result[j].ChannelPoints
+		})
+	case "viewers":
+		sort.Slice(result, func(i, j int) bool {
+			if desc {
+				return result[i].ViewersCount > result[j].ViewersCount
+			}
+			return result[i].ViewersCount < result[j].ViewersCount
+		})
+	default:
+		sort.Slice(result, func(i, j int) bool {
+			if desc {
+				return strings.ToLower(result[i].Username) > strings.ToLower(result[j].Username)
+			}
+			return strings.ToLower(result[i].Username) < strings.ToLower(result[j].Username)
+		})
+	}
+
+	p := parsePagination(r)
+	if p.Limit > 0 || p.Offset > 0 {
+		writeJSON(w, http.StatusOK, applyPagination(result, p))
+	} else {
+		writeJSON(w, http.StatusOK, result)
+	}
 }
 
 func (s *AnalyticsServer) handleStreamer(w http.ResponseWriter, r *http.Request) {
@@ -305,7 +393,12 @@ func (s *AnalyticsServer) handleEventLogs(w http.ResponseWriter, r *http.Request
 		entries = []eventLogEntry{}
 	}
 
-	writeJSON(w, http.StatusOK, entries)
+	p := parsePagination(r)
+	if p.Limit > 0 || p.Offset > 0 {
+		writeJSON(w, http.StatusOK, applyPagination(entries, p))
+	} else {
+		writeJSON(w, http.StatusOK, entries)
+	}
 }
 
 func (s *AnalyticsServer) handleEventFilters(w http.ResponseWriter, _ *http.Request) {

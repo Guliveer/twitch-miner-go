@@ -20,6 +20,7 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/model"
 	"github.com/Guliveer/twitch-miner-go/internal/server"
 	"github.com/Guliveer/twitch-miner-go/internal/updater"
+	"github.com/Guliveer/twitch-miner-go/internal/utils"
 	"github.com/Guliveer/twitch-miner-go/internal/version"
 	"github.com/joho/godotenv"
 )
@@ -75,7 +76,7 @@ func main() {
 	rootLog.Info("🚀 Starting Twitch Channel Points Miner (Go)", "version", version.String())
 
 	// Check for updates in the background.
-	go func() {
+	utils.SafeGo(func() {
 		info, err := updater.CheckForUpdate(context.Background(), version.Number)
 		if err != nil {
 			rootLog.Debug("Update check failed", "error", err)
@@ -84,7 +85,7 @@ func main() {
 		if msg := updater.FormatNotification(info, version.Number); msg != "" {
 			fmt.Print(msg)
 		}
-	}()
+	})
 
 	configs, err := config.LoadAllAccountConfigs(*configDir)
 	if err != nil {
@@ -110,7 +111,7 @@ func main() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 
-	go func() {
+	utils.SafeGo(func() {
 		sig := <-sigCh
 		rootLog.Info("Received shutdown signal", "signal", sig.String())
 		cancel()
@@ -119,7 +120,7 @@ func main() {
 			rootLog.Error("Graceful shutdown timed out, forcing exit")
 			os.Exit(1)
 		})
-	}()
+	})
 
 	miners := make([]*miner.Miner, 0, len(configs))
 	for _, cfg := range configs {
@@ -133,7 +134,14 @@ func main() {
 	}
 
 	addr := ":" + httpPort
-	analyticsServer := server.NewAnalyticsServer(addr, rootLog)
+	var dashboardAuth *server.DashboardAuth
+	if user := os.Getenv("DASHBOARD_USER"); user != "" {
+		dashboardAuth = &server.DashboardAuth{
+			Username:     user,
+			PasswordHash: os.Getenv("DASHBOARD_PASSWORD_SHA256"),
+		}
+	}
+	analyticsServer := server.NewAnalyticsServer(addr, rootLog, dashboardAuth)
 
 	analyticsServer.SetStreamerFunc(func() []*model.Streamer {
 		var all []*model.Streamer
@@ -170,11 +178,11 @@ func main() {
 		return allErrs
 	})
 
-	go func() {
+	utils.SafeGo(func() {
 		if err := analyticsServer.Run(ctx); err != nil && ctx.Err() == nil {
 			rootLog.Error("Analytics server failed", "error", err)
 		}
-	}()
+	})
 
 	rootLog.Info("🌐 Health/analytics server started", "addr", addr)
 

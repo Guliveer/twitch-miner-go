@@ -5,6 +5,7 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,6 +13,30 @@ import (
 
 	"gopkg.in/yaml.v3"
 )
+
+// parseProxyURL validates and parses a proxy URL string.
+func parseProxyURL(raw string) (*url.URL, error) {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return nil, err
+	}
+	if u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "socks5" {
+		return nil, fmt.Errorf("unsupported proxy scheme %q (use http, https, or socks5)", u.Scheme)
+	}
+	if u.Host == "" {
+		return nil, fmt.Errorf("proxy URL missing host")
+	}
+	return u, nil
+}
+
+// ProxyURL returns the parsed proxy URL, or nil if no proxy is configured.
+func (ac *AccountConfig) ProxyURL() *url.URL {
+	if ac.Proxy == "" {
+		return nil
+	}
+	u, _ := parseProxyURL(ac.Proxy)
+	return u
+}
 
 // DefaultConfigDir is the default directory for account configuration files.
 const DefaultConfigDir = "configs"
@@ -152,7 +177,7 @@ func applyEnvOverrides(cfg *AccountConfig) {
 	}
 }
 
-// Validate checks the configuration for common errors.
+// Validate checks the configuration for common errors and contradictory settings.
 func Validate(cfg *AccountConfig) error {
 	if cfg.Username == "" {
 		return fmt.Errorf("username is required")
@@ -178,6 +203,30 @@ func Validate(cfg *AccountConfig) error {
 	if cfg.Notifications.Discord != nil && cfg.Notifications.Discord.Enabled {
 		if cfg.Notifications.Discord.WebhookURL == "" {
 			return fmt.Errorf("account %s: discord enabled but webhook_url not set (use env var DISCORD_WEBHOOK_%s)", cfg.Username, strings.ToUpper(cfg.Username))
+		}
+	}
+
+	// Detect contradictory settings: predictions enabled but no bet config.
+	if cfg.StreamerDefaults.MakePredictions != nil && *cfg.StreamerDefaults.MakePredictions && cfg.StreamerDefaults.Bet == nil {
+		return fmt.Errorf("account %s: make_predictions is enabled in streamer_defaults but no bet config is set", cfg.Username)
+	}
+
+	// Category watcher enabled but no categories configured.
+	if cfg.CategoryWatcher.Enabled && len(cfg.CategoryWatcher.Categories) == 0 {
+		return fmt.Errorf("account %s: category_watcher is enabled but no categories are configured", cfg.Username)
+	}
+
+	// Batch interval must be positive when enabled.
+	if cfg.Notifications.Batch != nil && cfg.Notifications.Batch.IsBatchEnabled() {
+		if cfg.Notifications.Batch.Interval < 0 {
+			return fmt.Errorf("account %s: batch interval must be positive", cfg.Username)
+		}
+	}
+
+	// Proxy URL must be well-formed if set.
+	if cfg.Proxy != "" {
+		if _, err := parseProxyURL(cfg.Proxy); err != nil {
+			return fmt.Errorf("account %s: invalid proxy URL %q: %w", cfg.Username, cfg.Proxy, err)
 		}
 	}
 

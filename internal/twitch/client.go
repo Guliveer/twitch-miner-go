@@ -87,7 +87,7 @@ type Client struct {
 // NewClient creates a new high-level Twitch Client from account configuration.
 func NewClient(cfg *config.AccountConfig, log *logger.Logger) (*Client, error) {
 	authenticator := auth.NewAuthenticator(cfg, log)
-	gqlClient := gql.NewClient(authenticator, log)
+	gqlClient := gql.NewClient(authenticator, log, cfg.ProxyURL())
 
 	return &Client{
 		Auth:      authenticator,

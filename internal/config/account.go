@@ -19,6 +19,8 @@ type AccountConfig struct {
 
 	Priority []string `yaml:"priority"`
 
+	Proxy string `yaml:"proxy,omitempty"`
+
 	CategoryWatcher CategoryWatcherConfig `yaml:"category_watcher"`
 
 	StreamerDefaults StreamerSettingsConfig `yaml:"streamer_defaults"`
@@ -26,6 +28,8 @@ type AccountConfig struct {
 	Streamers []StreamerConfig `yaml:"streamers"`
 
 	Blacklist []string `yaml:"blacklist"`
+
+	CategoryBlacklist []string `yaml:"category_blacklist"`
 
 	Followers FollowersConfig `yaml:"followers"`
 

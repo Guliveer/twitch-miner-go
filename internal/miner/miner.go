@@ -182,6 +182,7 @@ func (m *Miner) Run(ctx context.Context) error {
 			m.twitch.GQLClient(),
 			m.log,
 			m.cfg.Blacklist,
+			m.cfg.CategoryBlacklist,
 			defaults,
 		)
 		g.Go(func() error {

@@ -8,6 +8,7 @@ import (
 	"github.com/gempir/go-twitch-irc/v4"
 
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
+	"github.com/Guliveer/twitch-miner-go/internal/utils"
 )
 
 // Manager manages IRC chat connections for multiple streamers.
@@ -103,13 +104,13 @@ func (m *Manager) Run(ctx context.Context) error {
 	m.mu.Unlock()
 
 	errCh := make(chan error, 1)
-	go func() {
+	utils.SafeGo(func() {
 		err := m.client.Connect()
 		if err != nil {
 			errCh <- err
 		}
 		close(errCh)
-	}()
+	})
 
 	select {
 	case <-ctx.Done():

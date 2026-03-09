@@ -68,6 +68,14 @@ streamers:
 blacklist:
   - "unwanted_streamer"
 
+# Blacklisted game categories — excluded from category_watcher discovery
+# category_blacklist:
+#   - "just-chatting"
+#   - "pools-hot-tubs-and-beaches"
+
+# HTTP proxy for all Twitch API requests (supports http, https, socks5)
+# proxy: "socks5://127.0.0.1:1080"
+
 # Follow mode - also watch all followed channels
 followers:
   enabled: false
