@@ -35,6 +35,13 @@ var integrityFailureOps = map[string]bool{
 	"ViewerDropsDashboard": true,
 }
 
+// skipIntegrityOps lists GQL operations that are more reliable without the
+// Client-Integrity header. Some browser-oriented queries are rejected with a
+// failed integrity check even when standard browser headers are present.
+var skipIntegrityOps = map[string]bool{
+	"ChannelFollows": true,
+}
+
 // circuitBreaker tracks consecutive failures and backs off when the API
 type circuitBreaker struct {
 	mu               sync.Mutex
@@ -252,7 +259,7 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 	// Raw queries (non-persisted) should not send the integrity token —
 	// Twitch's integrity system is designed for persisted queries and
 	// sending it with raw queries causes "service error" for some categories.
-	skipIntegrity := reqBody.Query != ""
+	skipIntegrity := reqBody.Query != "" || skipIntegrityOps[opName]
 
 	respBody, err := c.doHTTPRequest(ctx, jsonBody, opName, skipIntegrity)
 	if err != nil {
