@@ -12,7 +12,6 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/model"
 )
 
-
 func (m *Miner) handlePredictionsChannel(ctx context.Context, msg *model.Message, streamer *model.Streamer) {
 	if streamer == nil || msg.Data == nil {
 		return
@@ -183,7 +182,6 @@ func (m *Miner) handlePredictionLocked(eventID, eventStatus string) {
 
 	m.log.Debug("Prediction locked", "event_id", eventID)
 }
-
 
 func (m *Miner) handlePredictionsUser(ctx context.Context, msg *model.Message, streamer *model.Streamer) {
 	if msg.Data == nil {

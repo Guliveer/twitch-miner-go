@@ -118,8 +118,8 @@ const (
 // GQLOperation represents a persisted GQL query with its operation name and SHA256 hash.
 type GQLOperation struct {
 	OperationName string
-	SHA256Hash string
-	Query string
+	SHA256Hash    string
+	Query         string
 }
 
 // Persisted GQL operations migrated from Python constants.py.

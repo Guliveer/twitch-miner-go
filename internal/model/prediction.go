@@ -199,9 +199,9 @@ func ParseDelayMode(s string) DelayMode {
 
 // FilterCondition defines a condition for filtering predictions before betting.
 type FilterCondition struct {
-	By OutcomeKey `json:"by" yaml:"by"`
-	Where Condition `json:"where" yaml:"where"`
-	Value float64 `json:"value" yaml:"value"`
+	By    OutcomeKey `json:"by" yaml:"by"`
+	Where Condition  `json:"where" yaml:"where"`
+	Value float64    `json:"value" yaml:"value"`
 }
 
 // String returns a human-readable representation of the filter condition.
@@ -211,15 +211,15 @@ func (fc *FilterCondition) String() string {
 
 // BetSettings holds configuration for automatic prediction betting.
 type BetSettings struct {
-	Strategy Strategy `json:"strategy" yaml:"strategy"`
-	Percentage int `json:"percentage" yaml:"percentage"`
-	PercentageGap int `json:"percentage_gap" yaml:"percentage_gap"`
-	MaxPoints int `json:"max_points" yaml:"max_points"`
-	MinimumPoints int `json:"minimum_points" yaml:"minimum_points"`
-	StealthMode bool `json:"stealth_mode" yaml:"stealth_mode"`
+	Strategy        Strategy         `json:"strategy" yaml:"strategy"`
+	Percentage      int              `json:"percentage" yaml:"percentage"`
+	PercentageGap   int              `json:"percentage_gap" yaml:"percentage_gap"`
+	MaxPoints       int              `json:"max_points" yaml:"max_points"`
+	MinimumPoints   int              `json:"minimum_points" yaml:"minimum_points"`
+	StealthMode     bool             `json:"stealth_mode" yaml:"stealth_mode"`
 	FilterCondition *FilterCondition `json:"filter_condition,omitempty" yaml:"filter_condition"`
-	Delay float64 `json:"delay" yaml:"delay"`
-	DelayMode DelayMode `json:"delay_mode" yaml:"delay_mode"`
+	Delay           float64          `json:"delay" yaml:"delay"`
+	DelayMode       DelayMode        `json:"delay_mode" yaml:"delay_mode"`
 }
 
 // DefaultBetSettings returns BetSettings with default values.
@@ -244,31 +244,31 @@ func (bs *BetSettings) String() string {
 
 // Outcome represents a single prediction outcome with computed statistics.
 type Outcome struct {
-	ID string `json:"id"`
-	Title string `json:"title"`
-	Color string `json:"color"`
-	TotalUsers int `json:"total_users"`
-	TotalPoints int `json:"total_points"`
-	TopPoints int `json:"top_points"`
+	ID              string  `json:"id"`
+	Title           string  `json:"title"`
+	Color           string  `json:"color"`
+	TotalUsers      int     `json:"total_users"`
+	TotalPoints     int     `json:"total_points"`
+	TopPoints       int     `json:"top_points"`
 	PercentageUsers float64 `json:"percentage_users"`
-	Odds float64 `json:"odds"`
-	OddsPercentage float64 `json:"odds_percentage"`
+	Odds            float64 `json:"odds"`
+	OddsPercentage  float64 `json:"odds_percentage"`
 }
 
 // BetDecision holds the result of a bet calculation.
 type BetDecision struct {
-	Choice int `json:"choice"`
-	Amount int `json:"amount"`
+	Choice    int    `json:"choice"`
+	Amount    int    `json:"amount"`
 	OutcomeID string `json:"id"`
 }
 
 // Bet holds the state of a prediction bet calculation.
 type Bet struct {
-	Outcomes []Outcome `json:"outcomes"`
-	Decision BetDecision `json:"decision"`
-	TotalUsers int `json:"total_users"`
-	TotalPoints int `json:"total_points"`
-	Settings *BetSettings `json:"-"`
+	Outcomes    []Outcome    `json:"outcomes"`
+	Decision    BetDecision  `json:"decision"`
+	TotalUsers  int          `json:"total_users"`
+	TotalPoints int          `json:"total_points"`
+	Settings    *BetSettings `json:"-"`
 }
 
 // NewBet creates a new Bet from a list of outcomes and settings.
@@ -483,30 +483,30 @@ func (b *Bet) String() string {
 // PredictionResult holds the result of a resolved prediction.
 type PredictionResult struct {
 	ResultString string `json:"string"`
-	Type string `json:"type"`
-	Gained int `json:"gained"`
+	Type         string `json:"type"`
+	Gained       int    `json:"gained"`
 }
 
 // EventPrediction represents an active prediction event on a channel.
 type EventPrediction struct {
 	Mu sync.Mutex `json:"-"`
 
-	Streamer *Streamer `json:"-"`
-	EventID string `json:"event_id"`
-	Title string `json:"title"`
-	CreatedAt time.Time `json:"created_at"`
-	PredictionWindowSeconds float64 `json:"prediction_window_seconds"`
-	Status string `json:"status"`
-	Result PredictionResult `json:"result"`
-	BoxFillable bool `json:"box_fillable"`
-	ScheduledFor time.Time `json:"scheduled_for"`
-	BetConfirmed bool `json:"bet_confirmed"`
-	BetPlaced bool `json:"bet_placed"`
-	PlacementInFlight bool `json:"placement_in_flight"`
-	PlacementAttempts int `json:"placement_attempts"`
-	LastAttemptAt time.Time `json:"last_attempt_at"`
-	LastFailedReason string `json:"last_failed_reason"`
-	Bet *Bet `json:"bet"`
+	Streamer                *Streamer        `json:"-"`
+	EventID                 string           `json:"event_id"`
+	Title                   string           `json:"title"`
+	CreatedAt               time.Time        `json:"created_at"`
+	PredictionWindowSeconds float64          `json:"prediction_window_seconds"`
+	Status                  string           `json:"status"`
+	Result                  PredictionResult `json:"result"`
+	BoxFillable             bool             `json:"box_fillable"`
+	ScheduledFor            time.Time        `json:"scheduled_for"`
+	BetConfirmed            bool             `json:"bet_confirmed"`
+	BetPlaced               bool             `json:"bet_placed"`
+	PlacementInFlight       bool             `json:"placement_in_flight"`
+	PlacementAttempts       int              `json:"placement_attempts"`
+	LastAttemptAt           time.Time        `json:"last_attempt_at"`
+	LastFailedReason        string           `json:"last_failed_reason"`
+	Bet                     *Bet             `json:"bet"`
 }
 
 // NewEventPrediction creates a new EventPrediction.

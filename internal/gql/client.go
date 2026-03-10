@@ -30,9 +30,9 @@ var ErrCircuitOpen = errors.New("circuit breaker open: API requests temporarily 
 // expected and should be logged at DEBUG instead of WARN. These operations
 // sometimes fail with "failed integrity check" but may still succeed on retry
 var integrityFailureOps = map[string]bool{
-	"JoinRaid":              true,
-	"ClaimCommunityPoints":  true,
-	"ViewerDropsDashboard":  true,
+	"JoinRaid":             true,
+	"ClaimCommunityPoints": true,
+	"ViewerDropsDashboard": true,
 }
 
 // circuitBreaker tracks consecutive failures and backs off when the API
@@ -74,11 +74,11 @@ func (cb *circuitBreaker) shouldSkip() bool {
 // Client is the Twitch GQL HTTP client with connection pooling, a circuit
 // breaker, and retry logic.
 type Client struct {
-	httpClient   *http.Client
-	transport    *http.Transport
-	auth         auth.Provider
-	log          *logger.Logger
-	breaker      *circuitBreaker
+	httpClient *http.Client
+	transport  *http.Transport
+	auth       auth.Provider
+	log        *logger.Logger
+	breaker    *circuitBreaker
 
 	maxRetries int
 	mu         sync.RWMutex

@@ -171,7 +171,6 @@ func (a *Authenticator) saveCookies() {
 	}
 }
 
-
 func promptLine(prompt string) (string, error) {
 	fmt.Print(prompt)
 	reader := bufio.NewReader(os.Stdin)

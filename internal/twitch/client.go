@@ -78,10 +78,10 @@ func (sc *spadeCache) prune() {
 // Client is the high-level Twitch API facade combining auth and GQL client.
 // It provides business-logic methods for the miner.
 type Client struct {
-	Auth *auth.Authenticator
-	GQL *gql.Client
-	Log *logger.Logger
-	cfg *config.AccountConfig
+	Auth      *auth.Authenticator
+	GQL       *gql.Client
+	Log       *logger.Logger
+	cfg       *config.AccountConfig
 	spadeURLs *spadeCache
 }
 

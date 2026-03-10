@@ -307,27 +307,27 @@ func (m *Miner) checkAllStreamersOnline(ctx context.Context) {
 				return
 			}
 
-				streamer.Mu.RLock()
-				isOnline := streamer.IsOnline
-				category := streamer.ResolveCategory()
-				viewers := 0
-				if streamer.Stream != nil {
-					viewers = streamer.Stream.ViewersCount
-				}
-				streamer.Mu.RUnlock()
-	
-				mu.Lock()
-				if isOnline {
-					onlineCount++
-					mu.Unlock()
-					m.log.Info("🟢 Online",
-						"streamer", streamer.Username,
-						"category", category,
-						"viewers", viewers)
-				} else {
-					offlineCount++
-					mu.Unlock()
-				}
+			streamer.Mu.RLock()
+			isOnline := streamer.IsOnline
+			category := streamer.ResolveCategory()
+			viewers := 0
+			if streamer.Stream != nil {
+				viewers = streamer.Stream.ViewersCount
+			}
+			streamer.Mu.RUnlock()
+
+			mu.Lock()
+			if isOnline {
+				onlineCount++
+				mu.Unlock()
+				m.log.Info("🟢 Online",
+					"streamer", streamer.Username,
+					"category", category,
+					"viewers", viewers)
+			} else {
+				offlineCount++
+				mu.Unlock()
+			}
 		}(s)
 	}
 
