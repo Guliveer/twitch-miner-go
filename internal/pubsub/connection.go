@@ -19,25 +19,26 @@ import (
 // Connection represents a single WebSocket connection to the Twitch PubSub server.
 // Each connection can subscribe to up to MaxTopicsPerConn (50) topics.
 type Connection struct {
-	mu sync.Mutex
+	mu        sync.Mutex
+	closeOnce sync.Once
 
-	index int
-	conn *websocket.Conn
-	topics []*model.PubSubTopic
+	index         int
+	conn          *websocket.Conn
+	topics        []*model.PubSubTopic
 	pendingTopics []*model.PubSubTopic
 
-	lastPong time.Time
+	lastPong    time.Time
 	isConnected bool
 
 	messages chan *model.Message
-	writeCh chan []byte
+	writeCh  chan []byte
 
 	auth auth.Provider
-	log *logger.Logger
+	log  *logger.Logger
 
 	nonceToTopic map[string]string
 
-	lastMsgTimestamp time.Time
+	lastMsgTimestamp  time.Time
 	lastMsgIdentifier string
 }
 
@@ -150,17 +151,19 @@ func (c *Connection) Run(ctx context.Context) error {
 
 // Close gracefully closes the WebSocket connection.
 func (c *Connection) Close() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.closeOnce.Do(func() {
+		c.mu.Lock()
+		defer c.mu.Unlock()
 
-	c.isConnected = false
-	// Clear stale nonce→topic mappings; any pending LISTEN responses will
-	// never arrive after disconnect, so these entries would leak otherwise.
-	clear(c.nonceToTopic)
-	if c.conn != nil {
-		c.conn.Close(websocket.StatusNormalClosure, "closing")
-	}
-	close(c.messages)
+		c.isConnected = false
+		// Clear stale nonce→topic mappings; any pending LISTEN responses will
+		// never arrive after disconnect, so these entries would leak otherwise.
+		clear(c.nonceToTopic)
+		if c.conn != nil {
+			c.conn.Close(websocket.StatusNormalClosure, "closing")
+		}
+		close(c.messages)
+	})
 }
 
 // Messages returns the channel on which parsed PubSub messages are delivered.
@@ -208,9 +211,9 @@ func (c *Connection) readLoop(ctx context.Context) error {
 		err := wsjson.Read(ctx, c.conn, &resp)
 		if err != nil {
 			c.mu.Lock()
-				c.isConnected = false
-				clear(c.nonceToTopic)
-				c.mu.Unlock()
+			c.isConnected = false
+			clear(c.nonceToTopic)
+			c.mu.Unlock()
 
 			if ctx.Err() != nil {
 				return ctx.Err()
@@ -278,9 +281,7 @@ func (c *Connection) handleResponse(ctx context.Context, resp *Response) {
 
 	case TypeReconnect:
 		c.log.Info("Reconnection requested by server", "conn", c.index)
-		c.mu.Lock()
-		c.isConnected = false
-		c.mu.Unlock()
+		c.Close()
 
 	case TypeResponse:
 		if resp.Error != "" {

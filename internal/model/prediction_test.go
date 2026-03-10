@@ -232,6 +232,28 @@ func TestCalculate_StealthModeNoEffectWhenTopPointsZero(t *testing.T) {
 	}
 }
 
+func TestParseResultUsesClampedDecisionAmount(t *testing.T) {
+	s := DefaultBetSettings()
+	s.Strategy = StrategyNumber1
+	s.Percentage = 50
+	s.MaxPoints = 50000
+
+	b := makeBet(twoOutcomes(), s)
+	decision := b.Calculate(1000)
+	decision.Amount = 400
+	b.Decision = decision
+
+	ep := &EventPrediction{Bet: b}
+	points := ep.ParseResult("LOSE", 0)
+
+	if points["placed"] != 400 {
+		t.Fatalf("expected placed amount 400, got %d", points["placed"])
+	}
+	if points["gained"] != -400 {
+		t.Fatalf("expected gained amount -400, got %d", points["gained"])
+	}
+}
+
 // --- Edge cases ---
 
 func TestCalculate_AllOutcomesZeroUsers(t *testing.T) {
@@ -546,8 +568,8 @@ func TestParseStrategy(t *testing.T) {
 		{"SMART", StrategySmart},
 		{"NUMBER_1", StrategyNumber1},
 		{"NUMBER_8", StrategyNumber8},
-		{"UNKNOWN", StrategySmart},  // default
-		{"", StrategySmart},          // default
+		{"UNKNOWN", StrategySmart}, // default
+		{"", StrategySmart},        // default
 	}
 	for _, tc := range tests {
 		got := ParseStrategy(tc.input)

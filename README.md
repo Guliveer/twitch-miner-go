@@ -33,10 +33,9 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
    8. [1.8. Authentication](#18-authentication)
       1. [1.8.1. When to use the env vars](#181-when-to-use-the-env-vars)
    9. [1.9. Docker](#19-docker)
-   10. [1.10. Deploy to Fly.io](#110-deploy-to-flyio)
-       1. [1.10.1. Setup](#1101-setup)
-       2. [1.10.2. CI/CD Auto-Deploy](#1102-cicd-auto-deploy)
-       3. [1.10.3. Manual Deploy](#1103-manual-deploy)
+   10. [1.10. Deployment](#110-deployment)
+       1. [1.10.1. Compose Setup](#1101-compose-setup)
+       2. [1.10.2. Compose Notes](#1102-compose-notes)
    11. [1.11. Development](#111-development)
    12. [1.12. Auto-Update Checker](#112-auto-update-checker)
    13. [1.13. License](#113-license)
@@ -54,7 +53,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 - **Category watcher** — auto-discover streamers by game category
 - **Notifications** — Telegram, Discord, Webhook, Matrix, Pushover, Gotify
 - **Analytics dashboard** — built-in web UI for monitoring
-- **Fly.io ready** — deploy with a single command
+- **Container-first deployment** — built for GHCR images and Docker Compose
 
 ## 1.3. Resource Comparison
 
@@ -124,6 +123,8 @@ features:
   claim_drops_startup: false
   enable_analytics: true
 
+max_watch_streams: 2
+
 priority:
   - STREAK
   - DROPS
@@ -164,6 +165,8 @@ followers:
 
 Secrets and auth tokens are injected via environment variables. Per-account variables **require** a `_<USERNAME>` suffix (uppercase) to scope them to the correct account.
 
+Use the `configs/` directory for per-account behavior such as watched streamers, betting strategy, and feature toggles. Use environment variables or `.env` for secrets and global runtime values that should not be duplicated per account.
+
 For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN_GULIVEER_` and the auth token variable is `TWITCH_AUTH_TOKEN_GULIVEER_`.
 
 ### 1.6.1. Global
@@ -173,6 +176,12 @@ For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN
 | `LOG_LEVEL` | Log level (`DEBUG`, `INFO`, `WARN`, `ERROR`) | `INFO`  |
 | `PORT`      | HTTP server port for health/analytics        | `8080`  |
 | `DATA_DIR`  | Persistent data directory (cookies, state)   | `.`     |
+| `TWITCH_CLIENT_ID_TV` | Required Twitch TV client ID         | —       |
+| `TWITCH_CLIENT_ID_BROWSER` | Required Twitch browser client ID | —       |
+| `TWITCH_CLIENT_VERSION` | Required Twitch browser client version | —    |
+| `TWITCH_CLIENT_ID_MOBILE` | Optional Twitch mobile web client ID | —     |
+| `TWITCH_CLIENT_ID_ANDROID` | Optional Twitch Android client ID | —     |
+| `TWITCH_CLIENT_ID_IOS` | Optional Twitch iOS client ID         | —       |
 
 ### 1.6.2. Per-Account Authentication
 
@@ -210,6 +219,16 @@ Environment variables (whether from `.env` or the system) **override** the corre
 LOG_LEVEL=DEBUG
 PORT=9090
 
+# Required Twitch runtime identifiers
+TWITCH_CLIENT_ID_TV=your_tv_client_id
+TWITCH_CLIENT_ID_BROWSER=your_browser_client_id
+TWITCH_CLIENT_VERSION=your_client_version
+
+# Optional Twitch client identifiers for future compatibility
+TWITCH_CLIENT_ID_MOBILE=your_mobile_client_id
+TWITCH_CLIENT_ID_ANDROID=your_android_client_id
+TWITCH_CLIENT_ID_IOS=your_ios_client_id
+
 # Notification secrets for user "guliveer_"
 TELEGRAM_TOKEN_GULIVEER_=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
 TELEGRAM_CHAT_ID_GULIVEER_=987654321
@@ -217,6 +236,36 @@ DISCORD_WEBHOOK_GULIVEER_=https://discord.com/api/webhooks/...
 ```
 
 > See [`.env.example`](.env.example) for the starter template.
+
+#### How To Obtain Twitch Runtime Identifiers
+
+The safest way to obtain these values is from real Twitch client requests that you control. Do not assume older values stay valid forever.
+
+**Browser values**
+
+1. Open `https://www.twitch.tv` in your browser.
+2. Open DevTools and go to the `Network` tab.
+3. Filter for `gql`.
+4. Open a request to `https://gql.twitch.tv/gql`.
+5. Copy these request headers:
+   - `Client-Id` -> `TWITCH_CLIENT_ID_BROWSER`
+   - `Client-Version` -> `TWITCH_CLIENT_VERSION`
+
+**TV client ID without owning a TV**
+
+You do not need a physical television. Practical options:
+
+1. Use an Android TV emulator and inspect Twitch app traffic with a local proxy.
+2. Use an Android phone emulator and the Twitch TV/device-login flow if you already proxy mobile traffic.
+3. Reuse the TV client ID from a previously working setup and only replace it when Twitch invalidates it.
+
+For this project today, the most important runtime values are:
+
+- `TWITCH_CLIENT_ID_TV`
+- `TWITCH_CLIENT_ID_BROWSER`
+- `TWITCH_CLIENT_VERSION`
+
+The mobile and platform-specific IDs are kept for future compatibility, but the current runtime path depends primarily on the TV and browser values.
 
 ## 1.7. Notifications
 
@@ -397,7 +446,7 @@ The validated token is then saved to a cookie file and reused on subsequent star
 
 The `TWITCH_AUTH_TOKEN_<USERNAME>` env var is the **recommended** fallback when the interactive device code flow is impractical:
 
-- **Headless deployments** — servers or containers without interactive terminal access (e.g., Fly.io, cloud VMs)
+- **Headless deployments** — servers or containers without interactive terminal access (e.g., Docker hosts, cloud VMs)
 - **Multi-account setups** — pre-seed tokens for several accounts without running the device flow for each
 - **CI/CD environments** — automated pipelines where no human is present to complete the device flow
 
@@ -420,14 +469,18 @@ docker build -t twitch-miner-go .
 docker run -d \
   -p 8080:8080 \
   -v miner_data:/data \
+  -v $(pwd)/configs:/configs:ro \
   -e DATA_DIR=/data \
+  --env-file .env \
   twitch-miner-go
 
 # Run with auth token (recommended — for headless environments)
 docker run -d \
   -p 8080:8080 \
   -v miner_data:/data \
+  -v $(pwd)/configs:/configs:ro \
   -e DATA_DIR=/data \
+  --env-file .env \
   -e TWITCH_AUTH_TOKEN_YOUR_USERNAME=your_oauth_token \
   twitch-miner-go
 
@@ -435,70 +488,82 @@ docker run -d \
 docker run -d \
   -p 8080:8080 \
   -v miner_data:/data \
+  -v $(pwd)/configs:/configs:ro \
   -e DATA_DIR=/data \
+  --env-file .env \
   -e TWITCH_PASSWORD_YOUR_USERNAME=your_twitch_password \
   twitch-miner-go
 ```
 
-## 1.10. Deploy to Fly.io
+### Docker Compose
 
-The repo includes [`fly.toml`](fly.toml) — the Fly.io deployment config. Fly.io is a personal preference and comes pre-configured, but the miner is portable and runs on any platform that supports Go (AWS, GCP, Azure, DigitalOcean, etc.).
+```bash
+docker compose up -d
+```
 
-### 1.10.1. Setup
+The included [`docker-compose.yml`](docker-compose.yml) uses the published GHCR image by default:
+
+```text
+ghcr.io/drjakeberg/twitch-miner-go:latest
+```
+
+Set `TWITCH_MINER_IMAGE` in `.env` if you want to pin a version or use a different registry/tag.
+
+The compose setup mounts:
+
+- `./configs` to `/configs` as read-only account configuration
+- a named volume to `/data` for cookies and persisted session state
+- `.env` for required Twitch client identifiers, dashboard auth, and account secrets
+
+### GitHub Container Registry
+
+This repository publishes Docker images to GHCR with GitHub Actions.
+
+- `main` pushes publish `latest` and a short SHA tag
+- version tags such as `v1.2.3` publish `1.2.3` and `1.2`
+
+Example image references:
+
+- `ghcr.io/drjakeberg/twitch-miner-go:latest`
+- `ghcr.io/drjakeberg/twitch-miner-go:1.2.3`
+- `ghcr.io/drjakeberg/twitch-miner-go:sha-abcdef1`
+
+## 1.10. Deployment
+
+The intended deployment path for this fork is:
+
+- GHCR for published images
+- Docker Compose for runtime orchestration
+- mounted `configs/` and `/data` volumes for persistence
 
 ```bash
 # 1. Copy the example account config and customize (filename = your Twitch username)
 cp configs/example.yaml.example configs/your_twitch_username.yaml
 
-# 2. Install flyctl
-curl -L https://fly.io/install.sh | sh
+# 2. Create your runtime env file
+cp .env.example .env
 
-# 3. Login
-fly auth login
-
-# 4. Create the app (first time only)
-fly launch --no-deploy
-
-# 5. Create a volume for persistent data
-fly volumes create miner_data --region fra --size 1
-
-# 6. (Optional) Set auth token for headless login — skips the interactive device code flow (recommended)
-fly secrets set TWITCH_AUTH_TOKEN_YOUR_USERNAME=your_oauth_token
-
-# 7. (Optional) Set password for last-resort login — less reliable than auth token, may require 2FA
-fly secrets set TWITCH_PASSWORD_YOUR_USERNAME=your_twitch_password
-
-# 8. Set notification secrets (replace YOUR_USERNAME with your Twitch username in uppercase)
-fly secrets set TELEGRAM_TOKEN_YOUR_USERNAME=your_bot_token
-fly secrets set TELEGRAM_CHAT_ID_YOUR_USERNAME=your_chat_id
+# 3. Start the miner
+docker compose up -d
 ```
 
-### 1.10.2. CI/CD Auto-Deploy
+### 1.10.1. Compose Setup
 
-Pushes to `main` are automatically deployed via the [CI workflow](.github/workflows/ci.yml) after build and version bump succeed. This requires a `FLY_API_TOKEN` GitHub secret:
+The included [`docker-compose.yml`](docker-compose.yml) uses the published GHCR image by default:
 
-```bash
-# 1. Generate a deploy token scoped to your app
-flyctl tokens create deploy -a twitch-miner-go
-
-# 2. Set it as a GitHub repo secret
-gh secret set FLY_API_TOKEN --repo <owner>/<repo>
-# (paste the token when prompted)
+```text
+ghcr.io/drjakeberg/twitch-miner-go:latest
 ```
 
-> If `FLY_API_TOKEN` is not set, the deploy step is **skipped gracefully** — build and version bump still run normally.
+Set `TWITCH_MINER_IMAGE` in `.env` if you want to pin a version or use a different registry/tag.
 
-### 1.10.3. Manual Deploy
+### 1.10.2. Compose Notes
 
-```bash
-fly deploy
-
-# View logs
-fly logs
-
-# Check health
-curl https://your-app-name.fly.dev/health
-```
+- `configs/` holds per-account YAML files.
+- `/data` persists cookies and session state.
+- `./configs` is mounted read-only to `/configs` for per-account YAML configuration.
+- GHCR packages are published automatically by [`.github/workflows/docker-publish.yml`](.github/workflows/docker-publish.yml).
+- CI validates builds, tests, linting, and release tagging. It does not auto-deploy to a hosting provider.
 
 ## 1.11. Development
 

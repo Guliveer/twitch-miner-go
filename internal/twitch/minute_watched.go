@@ -284,6 +284,19 @@ func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Prio
 	}
 
 	watching := make(map[int]struct{})
+	selectedIndices := make([]int, 0, maxWatch)
+
+	addWatching := func(idx int) bool {
+		if len(selectedIndices) >= maxWatch {
+			return false
+		}
+		if _, ok := watching[idx]; ok {
+			return false
+		}
+		watching[idx] = struct{}{}
+		selectedIndices = append(selectedIndices, idx)
+		return true
+	}
 
 	for _, priority := range priorities {
 		if len(watching) >= maxWatch {
@@ -295,8 +308,7 @@ func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Prio
 		switch priority {
 		case model.PriorityOrder:
 			for _, idx := range onlineIndices {
-				if _, ok := watching[idx]; !ok {
-					watching[idx] = struct{}{}
+				if addWatching(idx) {
 					remaining--
 					if remaining <= 0 {
 						break
@@ -319,8 +331,7 @@ func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Prio
 
 				if watchStreak && missing &&
 					(offlineAt.IsZero() || now.Sub(offlineAt).Minutes() > 30) &&
-					minuteWatched < 7 {
-					watching[idx] = struct{}{}
+					minuteWatched < 7 && addWatching(idx) {
 					remaining--
 					if remaining <= 0 {
 						break
@@ -338,8 +349,7 @@ func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Prio
 				dropsCondition := s.DropsCondition()
 				s.Mu.RUnlock()
 
-				if dropsCondition {
-					watching[idx] = struct{}{}
+				if dropsCondition && addWatching(idx) {
 					remaining--
 					if remaining <= 0 {
 						break
@@ -371,8 +381,9 @@ func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Prio
 				return withMultiplier[i].multiplier > withMultiplier[j].multiplier
 			})
 			for _, im := range withMultiplier {
-				watching[im.index] = struct{}{}
-				remaining--
+				if addWatching(im.index) {
+					remaining--
+				}
 				if remaining <= 0 {
 					break
 				}
@@ -401,8 +412,7 @@ func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Prio
 				})
 			}
 			for _, item := range items {
-				if _, ok := watching[item.index]; !ok {
-					watching[item.index] = struct{}{}
+				if addWatching(item.index) {
 					remaining--
 					if remaining <= 0 {
 						break
@@ -412,13 +422,9 @@ func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Prio
 		}
 	}
 
-	result := make([]*model.Streamer, 0, len(watching))
-	for idx := range watching {
+	result := make([]*model.Streamer, 0, len(selectedIndices))
+	for _, idx := range selectedIndices {
 		result = append(result, streamers[idx])
-	}
-
-	if len(result) > maxWatch {
-		result = result[:maxWatch]
 	}
 
 	return result

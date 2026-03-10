@@ -85,10 +85,11 @@ jobs:
       - name: Vet
         run: go vet ./...
 
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
+
       - name: Lint
-        uses: golangci/golangci-lint-action@v7
-        with:
-          version: latest
+        run: golangci-lint run
 
   version:
     needs: [build]
@@ -181,7 +182,7 @@ jobs:
           echo "Determined bump type: $BUMP"
           echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
 
-      - name: Bump version
+      - name: Determine next version
         if: steps.bump.outputs.bump != 'skip'
         id: version
         run: |
@@ -210,19 +211,19 @@ jobs:
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
           echo "New version: $NEW_VERSION"
 
-          printf "%s" "$NEW_VERSION" > VERSION
-
           echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Commit and tag
+      - name: Create and push tag
         if: steps.bump.outputs.bump != 'skip'
         env:
           NEW_VERSION: ${{ steps.version.outputs.new_version }}
         run: |
-          git add VERSION
-          git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
+          if git rev-parse "v${NEW_VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${NEW_VERSION} already exists locally"
+            exit 0
+          fi
           git tag -a "v${NEW_VERSION}" -m "v${NEW_VERSION}"
-          git push origin main --follow-tags
+          git push origin "refs/tags/v${NEW_VERSION}"
 
       - name: Create GitHub Release
         if: steps.bump.outputs.bump != 'skip'
@@ -230,30 +231,3 @@ jobs:
         with:
           tag_name: "v${{ steps.version.outputs.new_version }}"
           generate_release_notes: true
-
-  deploy:
-    needs: [build, version]
-    runs-on: ubuntu-latest
-    environment:
-      name: fly.io [prod]
-      url: https://twitch-miner-go.fly.dev
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup flyctl
-        uses: superfly/flyctl-actions/setup-flyctl@master
-
-      - name: Deploy to Fly.io
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          VERSION: ${{ needs.version.outputs.new_version }}
-        run: |
-          if [ -z "$FLY_API_TOKEN" ]; then
-            echo "⚠️ FLY_API_TOKEN not set — skipping deploy"
-            exit 0
-          fi
-          GIT_COMMIT=$(git rev-parse --short HEAD)
-          flyctl deploy --remote-only \
-            --build-arg "VERSION=${VERSION}" \
-            --build-arg "GIT_COMMIT=${GIT_COMMIT}"

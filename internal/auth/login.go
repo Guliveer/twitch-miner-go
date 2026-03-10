@@ -40,7 +40,7 @@ func (a *Authenticator) loginWithPassword(ctx context.Context, password string) 
 	payload := map[string]any{
 		"username":      a.username,
 		"password":      password,
-		"client_id":     constants.ClientIDBrowser,
+		"client_id":     a.runtime.ClientIDBrowser,
 		"undelete_user": false,
 		"remember_me":   true,
 	}
@@ -85,7 +85,7 @@ func (a *Authenticator) handle2FA(ctx context.Context, password string, basePayl
 	payload := map[string]any{
 		"username":      a.username,
 		"password":      password,
-		"client_id":     constants.ClientIDBrowser,
+		"client_id":     a.runtime.ClientIDBrowser,
 		"undelete_user": false,
 		"remember_me":   true,
 		tokenKey:        code,
@@ -122,7 +122,7 @@ func (a *Authenticator) sendLoginRequest(ctx context.Context, payload map[string
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Client-Id", constants.ClientIDBrowser)
+	req.Header.Set("Client-Id", a.runtime.ClientIDBrowser)
 	req.Header.Set("X-Device-Id", a.deviceID)
 	req.Header.Set("User-Agent", constants.DefaultUserAgent)
 
@@ -170,7 +170,6 @@ func (a *Authenticator) saveCookies() {
 		a.log.Info("Cookies saved", "file", a.cookieFile)
 	}
 }
-
 
 func promptLine(prompt string) (string, error) {
 	fmt.Print(prompt)

@@ -59,9 +59,8 @@ Releases are fully automated through the [CI workflow](.github/workflows/ci.yml)
 1. Developers write commits using the Conventional Commits format described above.
 2. Git hooks enforce the format locally (see [Setting Up Git Hooks](#setting-up-git-hooks)).
 3. CI validates the commit format on pull requests.
-4. On merge to `main`, the CI pipeline runs in order: **build** → **version** → **deploy**:
-   - **build** — compiles, runs tests and vet
-   - **version** — analyzes commit messages, bumps [`VERSION`](VERSION), creates a git tag and GitHub Release
-   - **deploy** — deploys to Fly.io with the new version (only after build and version succeed)
+4. On merge to `main`, the CI pipeline runs in order: **build** → **version**:
+   - **build** — compiles, runs tests, vet, and lint
+   - **version** — analyzes commit messages and creates a git tag and GitHub Release
 
-No manual version bumps, tags, or deploys are needed — just write well-formatted commits and the pipeline handles the rest.
+Docker images are published separately via the Docker workflow. No manual tags are needed — just write well-formatted commits and the pipeline handles the rest.

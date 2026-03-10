@@ -21,7 +21,7 @@ func (m *Miner) runMinuteWatcher(ctx context.Context) error {
 			return ctx.Err()
 		case <-ticker.C:
 			streamers := m.getStreamers()
-			toWatch := twitch.SelectStreamersToWatch(streamers, m.priorities, constants.MaxWatchStreams)
+			toWatch := twitch.SelectStreamersToWatch(streamers, m.priorities, m.cfg.MaxWatchStreams)
 
 			m.logWatchingChanges(toWatch)
 

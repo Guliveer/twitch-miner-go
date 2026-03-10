@@ -1,6 +1,6 @@
-// Package constants defines all Twitch API endpoints, client identifiers,
-// GQL operation hashes, user-agent strings, PubSub topic formats, and
-// default timeout/interval values used throughout the miner.
+// Package constants defines Twitch API endpoints, GQL operation hashes,
+// user-agent strings, PubSub topic formats, and default timeout/interval
+// values used throughout the miner.
 package constants
 
 import "time"
@@ -32,20 +32,6 @@ const (
 const DeviceCodeScopes = "channel_read chat:read chat:edit user_read user:read:email"
 
 const (
-	// ClientID is the Twitch client ID (TV client).
-	ClientID = "ue6666qo983tsx6so1t0vnawi233wa"
-	// ClientIDBrowser is the Twitch client ID for browser clients.
-	ClientIDBrowser = "kimne78kx3ncx6brgo4mv6wki5h1ko"
-	// ClientIDMobile is the Twitch client ID for mobile browser clients.
-	ClientIDMobile = "r8s4dac0uhzifbpu9sjdiwzctle17ff"
-	// ClientIDAndroid is the Twitch client ID for the Android app.
-	ClientIDAndroid = "kd1unb4b3q4t58fwlpcbzcbnm76a8fp"
-	// ClientIDiOS is the Twitch client ID for the iOS app.
-	ClientIDiOS = "851cqzxpb9bqu9z6galo155du"
-
-	// ClientVersion is the Twitch client version string (browser).
-	ClientVersion = "ef928475-9403-42f2-8a34-55784bd08e16"
-
 	// DropID is the tag ID used to identify streams with Drops enabled.
 	DropID = "c2542d6d-cd10-4532-919b-3d19f30a768b"
 )
@@ -132,8 +118,8 @@ const (
 // GQLOperation represents a persisted GQL query with its operation name and SHA256 hash.
 type GQLOperation struct {
 	OperationName string
-	SHA256Hash string
-	Query string
+	SHA256Hash    string
+	Query         string
 }
 
 // Persisted GQL operations migrated from Python constants.py.
