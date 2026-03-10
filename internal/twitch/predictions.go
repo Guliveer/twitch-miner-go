@@ -95,6 +95,7 @@ func (c *Client) MakePrediction(ctx context.Context, streamer *model.Streamer, e
 		event.Mu.Unlock()
 		return fmt.Errorf("prediction amount %d fell below minimum after balance guard", decision.Amount)
 	}
+	event.Bet.Decision = decision
 
 	event.Mu.Unlock()
 

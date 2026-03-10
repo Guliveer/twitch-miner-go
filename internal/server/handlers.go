@@ -109,9 +109,13 @@ func filterStreamers(streamers []*model.Streamer, r *http.Request) []*model.Stre
 			continue
 		}
 		// Channel filter (substring, case-insensitive)
-		if channelFilter != "" && !strings.Contains(strings.ToLower(st.Username), channelFilter) {
-			st.Mu.RUnlock()
-			continue
+		if channelFilter != "" {
+			usernameMatch := strings.Contains(strings.ToLower(st.Username), channelFilter)
+			displayNameMatch := strings.Contains(strings.ToLower(st.DisplayName), channelFilter)
+			if !usernameMatch && !displayNameMatch {
+				st.Mu.RUnlock()
+				continue
+			}
 		}
 		// Category filter (substring match on game name)
 		if categoryFilter != "" {
@@ -364,14 +368,19 @@ func (s *AnalyticsServer) handleEventLogs(w http.ResponseWriter, r *http.Request
 		if accountFilter != "" && strings.ToLower(st.AccountUsername) != accountFilter {
 			continue
 		}
-		if channelFilter != "" && !strings.Contains(strings.ToLower(st.Username), channelFilter) {
-			continue
-		}
 
 		st.Mu.RLock()
 		streamerName := st.DisplayName
 		if streamerName == "" {
 			streamerName = st.Username
+		}
+		if channelFilter != "" {
+			usernameMatch := strings.Contains(strings.ToLower(st.Username), channelFilter)
+			displayNameMatch := strings.Contains(strings.ToLower(streamerName), channelFilter)
+			if !usernameMatch && !displayNameMatch {
+				st.Mu.RUnlock()
+				continue
+			}
 		}
 		for event, hist := range st.History {
 			// Apply event filter.
