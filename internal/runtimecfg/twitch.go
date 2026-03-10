@@ -54,9 +54,6 @@ func (c *Twitch) Validate() error {
 	required := map[string]string{
 		envTwitchClientIDTV:      c.ClientIDTV,
 		envTwitchClientIDBrowser: c.ClientIDBrowser,
-		envTwitchClientIDMobile:  c.ClientIDMobile,
-		envTwitchClientIDAndroid: c.ClientIDAndroid,
-		envTwitchClientIDIOS:     c.ClientIDIOS,
 		envTwitchClientVersion:   c.ClientVersion,
 	}
 

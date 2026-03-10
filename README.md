@@ -138,9 +138,9 @@ Use the `configs/` directory for per-account behavior such as watched streamers,
 | -------------------------------- | --------------------------------------------------- |
 | `TWITCH_CLIENT_ID_TV`            | Required Twitch TV client ID                        |
 | `TWITCH_CLIENT_ID_BROWSER`       | Required Twitch browser client ID                   |
-| `TWITCH_CLIENT_ID_MOBILE`        | Required Twitch mobile web client ID                |
-| `TWITCH_CLIENT_ID_ANDROID`       | Required Twitch Android client ID                   |
-| `TWITCH_CLIENT_ID_IOS`           | Required Twitch iOS client ID                       |
+| `TWITCH_CLIENT_ID_MOBILE`        | Optional Twitch mobile web client ID                |
+| `TWITCH_CLIENT_ID_ANDROID`       | Optional Twitch Android client ID                   |
+| `TWITCH_CLIENT_ID_IOS`           | Optional Twitch iOS client ID                       |
 | `TWITCH_CLIENT_VERSION`          | Required Twitch browser client version              |
 | `TWITCH_AUTH_TOKEN_<USERNAME>`   | OAuth token (fallback for headless auth)            |
 | `TWITCH_PASSWORD_<USERNAME>`     | Twitch password (last-resort auth, may require 2FA) |
@@ -159,6 +159,36 @@ Use the `configs/` directory for per-account behavior such as watched streamers,
 | `LOG_LEVEL`                      | Log level override                                  |
 
 For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN_GULIVEER_` and the auth token variable is `TWITCH_AUTH_TOKEN_GULIVEER_`.
+
+#### How To Obtain Twitch Runtime Identifiers
+
+The safest way to obtain these values is from real Twitch client requests that you control. Do not assume older values stay valid forever.
+
+**Browser values**
+
+1. Open `https://www.twitch.tv` in your browser.
+2. Open DevTools and go to the `Network` tab.
+3. Filter for `gql`.
+4. Open a request to `https://gql.twitch.tv/gql`.
+5. Copy these request headers:
+   - `Client-Id` -> `TWITCH_CLIENT_ID_BROWSER`
+   - `Client-Version` -> `TWITCH_CLIENT_VERSION`
+
+**TV client ID without owning a TV**
+
+You do not need a physical television. Practical options:
+
+1. Use an Android TV emulator and inspect Twitch app traffic with a local proxy.
+2. Use an Android phone emulator and the Twitch TV/device-login flow if you already proxy mobile traffic.
+3. Reuse the TV client ID from a previously working setup and only replace it when Twitch invalidates it.
+
+For this project today, the most important runtime values are:
+
+- `TWITCH_CLIENT_ID_TV`
+- `TWITCH_CLIENT_ID_BROWSER`
+- `TWITCH_CLIENT_VERSION`
+
+The mobile and platform-specific IDs are kept for future compatibility, but the current runtime path depends primarily on the TV and browser values.
 
 ### `.env` File Support
 
@@ -199,10 +229,12 @@ PORT=9090
 # Required Twitch runtime identifiers
 TWITCH_CLIENT_ID_TV=your_tv_client_id
 TWITCH_CLIENT_ID_BROWSER=your_browser_client_id
+TWITCH_CLIENT_VERSION=your_client_version
+
+# Optional Twitch client identifiers for future compatibility
 TWITCH_CLIENT_ID_MOBILE=your_mobile_client_id
 TWITCH_CLIENT_ID_ANDROID=your_android_client_id
 TWITCH_CLIENT_ID_IOS=your_ios_client_id
-TWITCH_CLIENT_VERSION=your_client_version
 
 # Notification secrets for user "guliveer_"
 TELEGRAM_TOKEN_GULIVEER_=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11

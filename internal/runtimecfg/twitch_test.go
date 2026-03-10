@@ -24,7 +24,6 @@ func TestTwitchValidateMissingValues(t *testing.T) {
 
 	for _, key := range []string{
 		"TWITCH_CLIENT_ID_BROWSER",
-		"TWITCH_CLIENT_ID_ANDROID",
 		"TWITCH_CLIENT_VERSION",
 	} {
 		if !strings.Contains(err.Error(), key) {
