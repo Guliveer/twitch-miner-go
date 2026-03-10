@@ -49,7 +49,7 @@ type DebugPredictionEntry struct {
 // DebugSnapshot returns a read-only runtime view of the miner internals.
 func (m *Miner) DebugSnapshot() DebugSnapshot {
 	streamers := m.getStreamers()
-	watching := twitch.SelectStreamersToWatch(streamers, m.priorities, 0)
+	watching := twitch.SelectStreamersToWatch(streamers, m.priorities, m.cfg.MaxWatchStreams)
 
 	watchingEntries := make([]DebugWatchingEntry, 0, len(watching))
 	for _, streamer := range watching {

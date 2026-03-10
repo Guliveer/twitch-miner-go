@@ -92,6 +92,8 @@ features:
   claim_drops_startup: false
   enable_analytics: true
 
+max_watch_streams: 2
+
 priority:
   - STREAK
   - DROPS
@@ -127,6 +129,8 @@ followers:
   enabled: false
   order: "ASC"
 ```
+
+`max_watch_streams` controls how many live channels the miner will simulate as watched at the same time. The default is `2`.
 
 ### Environment Variables
 

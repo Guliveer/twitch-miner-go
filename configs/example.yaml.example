@@ -11,6 +11,10 @@ features:
   claim_drops_startup: false
   enable_analytics: true
 
+# Maximum number of live streams to simulate as watched at the same time.
+# Default: 2
+max_watch_streams: 2
+
 # Watch priority evaluated in order, first match wins
 priority:
   - STREAK
