@@ -27,8 +27,9 @@ import (
 var ErrCircuitOpen = errors.New("circuit breaker open: API requests temporarily suspended")
 
 type operationBehavior struct {
-	skipIntegrity bool
-	failOnErrors  bool
+	skipIntegrity   bool
+	failOnErrors    bool
+	tryAltClientIDs bool
 }
 
 // integrityFailureOps lists GQL operations where integrity check failures are
@@ -47,8 +48,9 @@ var operationBehaviors = map[string]operationBehavior{
 	// headers or with stale persisted-query behavior. Treating errors as fatal
 	// prevents silent "0 followers" fallbacks.
 	"ChannelFollows": {
-		skipIntegrity: true,
-		failOnErrors:  true,
+		skipIntegrity:   true,
+		failOnErrors:    true,
+		tryAltClientIDs: true,
 	},
 }
 
@@ -217,7 +219,7 @@ func (c *Client) PostGQLBatch(ctx context.Context, ops []constants.GQLOperation,
 		return nil, fmt.Errorf("marshaling batch GQL request: %w", err)
 	}
 
-	respBody, err := c.doHTTPRequest(ctx, jsonBody, "batch", false)
+	respBody, err := c.doHTTPRequest(ctx, jsonBody, "batch", false, "")
 	if err != nil {
 		return nil, err
 	}
@@ -272,35 +274,62 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 	// Twitch's integrity system is designed for persisted queries and
 	// sending it with raw queries causes "service error" for some categories.
 	skipIntegrity := reqBody.Query != "" || behavior.skipIntegrity
-
-	respBody, err := c.doHTTPRequest(ctx, jsonBody, opName, skipIntegrity)
-	if err != nil {
-		return nil, err
-	}
-
-	var response gqlResponse
-	if err := json.Unmarshal(respBody, &response); err != nil {
-		return nil, fmt.Errorf("parsing GQL response for %s: %w", opName, err)
-	}
-
-	if len(response.Errors) > 0 {
-		errMsg := response.Errors[0].Message
-		if strings.Contains(errMsg, "integrity check") && integrityFailureOps[opName] {
-			c.log.Debug("GQL integrity check failure (expected)",
-				"operation", opName,
-				"error", errMsg)
-		} else {
-			c.log.Warn("GQL operation returned errors",
-				"operation", opName,
-				"error", errMsg)
-		}
-
-		if behavior.failOnErrors {
-			return nil, fmt.Errorf("GQL operation %s returned error: %s", opName, errMsg)
+	clientIDs := []string{""}
+	if behavior.tryAltClientIDs {
+		ids := c.auth.ClientIDsForGQL()
+		if len(ids) > 0 {
+			clientIDs = ids
 		}
 	}
 
-	return response.Data, nil
+	var lastErr error
+	for idx, clientID := range clientIDs {
+		respBody, err := c.doHTTPRequest(ctx, jsonBody, opName, skipIntegrity, clientID)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		var response gqlResponse
+		if err := json.Unmarshal(respBody, &response); err != nil {
+			return nil, fmt.Errorf("parsing GQL response for %s: %w", opName, err)
+		}
+
+		if len(response.Errors) > 0 {
+			errMsg := response.Errors[0].Message
+			if strings.Contains(errMsg, "integrity check") && integrityFailureOps[opName] {
+				c.log.Debug("GQL integrity check failure (expected)",
+					"operation", opName,
+					"error", errMsg)
+			} else {
+				c.log.Warn("GQL operation returned errors",
+					"operation", opName,
+					"error", errMsg,
+					"client_id_attempt", idx+1)
+			}
+
+			if behavior.tryAltClientIDs && idx < len(clientIDs)-1 {
+				c.log.Info("Retrying GQL operation with alternate client ID",
+					"operation", opName,
+					"attempt", idx+2,
+					"total_attempts", len(clientIDs))
+				lastErr = fmt.Errorf("GQL operation %s returned error: %s", opName, errMsg)
+				continue
+			}
+
+			if behavior.failOnErrors {
+				return nil, fmt.Errorf("GQL operation %s returned error: %s", opName, errMsg)
+			}
+		}
+
+		return response.Data, nil
+	}
+
+	if lastErr != nil {
+		return nil, lastErr
+	}
+
+	return nil, fmt.Errorf("GQL operation %s failed without a response", opName)
 }
 
 // doHTTPRequest performs the actual HTTP POST with auth headers, client version,
@@ -311,7 +340,7 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 // Retry logging strategy: individual retries are logged at DEBUG level to
 // reduce noise. Only the final failure (after all retries exhausted) is
 // logged at WARN level. Known-flaky operations (e.g., VideoPlayerStreamInfoOverlayChannel)
-func (c *Client) doHTTPRequest(ctx context.Context, jsonBody []byte, opName string, skipIntegrity bool) ([]byte, error) {
+func (c *Client) doHTTPRequest(ctx context.Context, jsonBody []byte, opName string, skipIntegrity bool, clientIDOverride string) ([]byte, error) {
 	if c.breaker.shouldSkip() {
 		c.log.Debug("Circuit breaker open, skipping request", "operation", opName)
 		return nil, ErrCircuitOpen
@@ -343,6 +372,9 @@ func (c *Client) doHTTPRequest(ctx context.Context, jsonBody []byte, opName stri
 		req.Header.Set("Content-Type", "application/json")
 		for k, v := range c.auth.GetAuthHeaders() {
 			req.Header.Set(k, v)
+		}
+		if clientIDOverride != "" {
+			req.Header.Set("Client-Id", clientIDOverride)
 		}
 		req.Header.Set("Client-Version", c.auth.ClientVersion())
 

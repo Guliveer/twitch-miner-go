@@ -26,6 +26,39 @@ type Twitch struct {
 	ClientVersion   string
 }
 
+// ClientIDsForGQL returns a de-duplicated list of client IDs ordered from the
+// most browser-like context to the most device-like context. This is useful for
+// trying alternative Twitch client contexts when an internal operation becomes
+// client-sensitive.
+func (c *Twitch) ClientIDsForGQL() []string {
+	if c == nil {
+		return nil
+	}
+
+	candidates := []string{
+		c.ClientIDBrowser,
+		c.ClientIDMobile,
+		c.ClientIDAndroid,
+		c.ClientIDIOS,
+		c.ClientIDTV,
+	}
+
+	seen := make(map[string]struct{}, len(candidates))
+	ids := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		if candidate == "" {
+			continue
+		}
+		if _, ok := seen[candidate]; ok {
+			continue
+		}
+		seen[candidate] = struct{}{}
+		ids = append(ids, candidate)
+	}
+
+	return ids
+}
+
 // LoadTwitchFromEnv loads all required Twitch identifiers from environment
 // variables and returns a validation error when any value is missing.
 func LoadTwitchFromEnv() (*Twitch, error) {

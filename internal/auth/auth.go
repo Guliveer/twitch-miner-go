@@ -256,6 +256,11 @@ func (a *Authenticator) ClientVersion() string {
 	return a.runtime.ClientVersion
 }
 
+// ClientIDsForGQL returns the configured Twitch client IDs ordered for GQL fallback attempts.
+func (a *Authenticator) ClientIDsForGQL() []string {
+	return a.runtime.ClientIDsForGQL()
+}
+
 // FetchIntegrityToken fetches or returns a cached integrity token from
 // https://gql.twitch.tv/integrity. The token is refreshed 5 minutes before expiry.
 func (a *Authenticator) FetchIntegrityToken(ctx context.Context) (string, error) {
