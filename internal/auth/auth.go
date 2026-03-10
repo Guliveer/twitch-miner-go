@@ -238,13 +238,13 @@ func (a *Authenticator) Username() string {
 	return a.username
 }
 
-// GetAuthHeaders returns the headers needed for all Twitch API requests.
+// GetAuthHeaders returns the headers needed for Twitch GQL requests.
 func (a *Authenticator) GetAuthHeaders() map[string]string {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	return map[string]string{
 		"Authorization":     "OAuth " + a.authToken,
-		"Client-Id":         a.runtime.ClientIDTV,
+		"Client-Id":         a.runtime.ClientIDBrowser,
 		"Client-Session-Id": a.clientSession,
 		"X-Device-Id":       a.deviceID,
 		"User-Agent":        constants.DefaultUserAgent,
@@ -275,7 +275,7 @@ func (a *Authenticator) FetchIntegrityToken(ctx context.Context) (string, error)
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "OAuth "+a.authToken)
-	req.Header.Set("Client-Id", a.runtime.ClientIDTV)
+	req.Header.Set("Client-Id", a.runtime.ClientIDBrowser)
 	req.Header.Set("Client-Session-Id", a.clientSession)
 	req.Header.Set("X-Device-Id", a.deviceID)
 	req.Header.Set("User-Agent", constants.DefaultUserAgent)
