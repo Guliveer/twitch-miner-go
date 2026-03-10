@@ -26,10 +26,16 @@ import (
 // are being skipped to avoid hammering a failing API.
 var ErrCircuitOpen = errors.New("circuit breaker open: API requests temporarily suspended")
 
+// ErrTransientGQLError marks GQL responses that failed due to a temporary
+// Twitch-side condition and should not be treated like a durable application
+// error.
+var ErrTransientGQLError = errors.New("transient GQL error")
+
 type operationBehavior struct {
 	skipIntegrity   bool
 	failOnErrors    bool
 	tryAltClientIDs bool
+	retryGQLErrors  bool
 }
 
 // integrityFailureOps lists GQL operations where integrity check failures are
@@ -51,6 +57,10 @@ var operationBehaviors = map[string]operationBehavior{
 		skipIntegrity:   true,
 		failOnErrors:    true,
 		tryAltClientIDs: true,
+	},
+	"VideoPlayerStreamInfoOverlayChannel": {
+		tryAltClientIDs: true,
+		retryGQLErrors:  true,
 	},
 }
 
@@ -284,45 +294,64 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 
 	var lastErr error
 	for idx, clientID := range clientIDs {
-		respBody, err := c.doHTTPRequest(ctx, jsonBody, opName, skipIntegrity, clientID)
-		if err != nil {
-			lastErr = err
-			continue
-		}
-
-		var response gqlResponse
-		if err := json.Unmarshal(respBody, &response); err != nil {
-			return nil, fmt.Errorf("parsing GQL response for %s: %w", opName, err)
-		}
-
-		if len(response.Errors) > 0 {
-			errMsg := response.Errors[0].Message
-			if strings.Contains(errMsg, "integrity check") && integrityFailureOps[opName] {
-				c.log.Debug("GQL integrity check failure (expected)",
-					"operation", opName,
-					"error", errMsg)
-			} else {
-				c.log.Warn("GQL operation returned errors",
-					"operation", opName,
-					"error", errMsg,
-					"client_id_attempt", idx+1)
+		semanticRetries := 0
+		for {
+			respBody, err := c.doHTTPRequest(ctx, jsonBody, opName, skipIntegrity, clientID)
+			if err != nil {
+				lastErr = err
+				break
 			}
 
-			if behavior.tryAltClientIDs && idx < len(clientIDs)-1 {
-				c.log.Info("Retrying GQL operation with alternate client ID",
-					"operation", opName,
-					"attempt", idx+2,
-					"total_attempts", len(clientIDs))
-				lastErr = fmt.Errorf("GQL operation %s returned error: %s", opName, errMsg)
-				continue
+			var response gqlResponse
+			if err := json.Unmarshal(respBody, &response); err != nil {
+				return nil, fmt.Errorf("parsing GQL response for %s: %w", opName, err)
 			}
 
-			if behavior.failOnErrors {
-				return nil, fmt.Errorf("GQL operation %s returned error: %s", opName, errMsg)
+			if len(response.Errors) > 0 {
+				errMsg := response.Errors[0].Message
+				if strings.Contains(errMsg, "integrity check") && integrityFailureOps[opName] {
+					c.log.Debug("GQL integrity check failure (expected)",
+						"operation", opName,
+						"error", errMsg)
+				} else {
+					c.log.Warn("GQL operation returned errors",
+						"operation", opName,
+						"error", errMsg,
+						"client_id_attempt", idx+1)
+				}
+
+				if behavior.retryGQLErrors && isRetryableGQLError(errMsg) && semanticRetries < 2 {
+					semanticRetries++
+					backoff := time.Duration(semanticRetries) * time.Second
+					c.log.Info("Retrying GQL operation after transient response error",
+						"operation", opName,
+						"retry", semanticRetries,
+						"backoff", backoff)
+					select {
+					case <-ctx.Done():
+						return nil, ctx.Err()
+					case <-time.After(backoff):
+					}
+					lastErr = fmt.Errorf("%w: GQL operation %s returned error: %s", ErrTransientGQLError, opName, errMsg)
+					continue
+				}
+
+				if behavior.tryAltClientIDs && idx < len(clientIDs)-1 {
+					c.log.Info("Retrying GQL operation with alternate client ID",
+						"operation", opName,
+						"attempt", idx+2,
+						"total_attempts", len(clientIDs))
+					lastErr = wrapTransientGQLError(opName, errMsg)
+					break
+				}
+
+				if behavior.failOnErrors {
+					return nil, wrapTransientGQLError(opName, errMsg)
+				}
 			}
+
+			return response.Data, nil
 		}
-
-		return response.Data, nil
 	}
 
 	if lastErr != nil {
@@ -330,6 +359,29 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 	}
 
 	return nil, fmt.Errorf("GQL operation %s failed without a response", opName)
+}
+
+func wrapTransientGQLError(opName, errMsg string) error {
+	if isRetryableGQLError(errMsg) {
+		return fmt.Errorf("%w: GQL operation %s returned error: %s", ErrTransientGQLError, opName, errMsg)
+	}
+	return fmt.Errorf("GQL operation %s returned error: %s", opName, errMsg)
+}
+
+func isRetryableGQLError(errMsg string) bool {
+	errMsg = strings.ToLower(errMsg)
+	return strings.Contains(errMsg, "service timeout") ||
+		strings.Contains(errMsg, "service unavailable") ||
+		strings.Contains(errMsg, "temporarily unavailable") ||
+		strings.Contains(errMsg, "timed out")
+}
+
+// IsTransientError reports whether the error indicates a temporary Twitch-side
+// failure where callers should preserve current state and try again later.
+func IsTransientError(err error) bool {
+	return errors.Is(err, ErrTransientGQLError) ||
+		errors.Is(err, context.DeadlineExceeded) ||
+		errors.Is(err, context.Canceled)
 }
 
 // doHTTPRequest performs the actual HTTP POST with auth headers, client version,

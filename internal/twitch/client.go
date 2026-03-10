@@ -154,6 +154,12 @@ func (c *Client) CheckStreamerOnline(ctx context.Context, streamer *model.Stream
 		}
 
 		if err := c.updateStream(ctx, streamer); err != nil {
+			if gql.IsTransientError(err) {
+				c.Log.Warn("Keeping streamer online after transient stream update failure",
+					"streamer", streamer.Username,
+					"error", err)
+				return nil
+			}
 			streamer.Mu.Lock()
 			streamer.SetOffline()
 			streamer.Mu.Unlock()
