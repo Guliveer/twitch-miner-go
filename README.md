@@ -22,7 +22,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 - **Category watcher** — auto-discover streamers by game category
 - **Notifications** — Telegram, Discord, Webhook, Matrix, Pushover, Gotify
 - **Analytics dashboard** — built-in web UI for monitoring
-- **Fly.io ready** — deploy with a single command
+- **Container-first deployment** — built for GHCR images and Docker Compose
 
 ## Resource Comparison
 
@@ -425,7 +425,7 @@ The validated token is then saved to a cookie file and reused on subsequent star
 
 The `TWITCH_AUTH_TOKEN_<USERNAME>` env var is the **recommended** fallback when the interactive device code flow is impractical:
 
-- **Headless deployments** — servers or containers without interactive terminal access (e.g., Fly.io, cloud VMs)
+- **Headless deployments** — servers or containers without interactive terminal access (e.g., Docker hosts, cloud VMs)
 - **Multi-account setups** — pre-seed tokens for several accounts without running the device flow for each
 - **CI/CD environments** — automated pipelines where no human is present to complete the device flow
 
@@ -507,69 +507,31 @@ Example image references:
 - `ghcr.io/drjakeberg/twitch-miner-go:1.2.3`
 - `ghcr.io/drjakeberg/twitch-miner-go:sha-abcdef1`
 
-## Deploy to Fly.io
+## Deployment
 
-The repo includes [`fly.toml`](fly.toml) — the Fly.io deployment config. You can customize the app name, region, and VM settings directly in this file.
+The intended deployment path for this fork is:
 
-### Setup
+- GHCR for published images
+- Docker Compose for runtime orchestration
+- mounted `configs/` and `/data` volumes for persistence
 
 ```bash
 # 1. Copy the example account config and customize (filename = your Twitch username)
 cp configs/example.yaml.example configs/your_twitch_username.yaml
 
-# 2. Install flyctl
-curl -L https://fly.io/install.sh | sh
+# 2. Create your runtime env file
+cp .env.example .env
 
-# 3. Login
-fly auth login
-
-# 4. Create the app (first time only)
-fly launch --no-deploy
-
-# 5. Create a volume for persistent data
-fly volumes create miner_data --region fra --size 1
-
-# 6. (Optional) Set auth token for headless login — skips the interactive device code flow (recommended)
-fly secrets set TWITCH_AUTH_TOKEN_YOUR_USERNAME=your_oauth_token
-
-# 7. (Optional) Set password for last-resort login — less reliable than auth token, may require 2FA
-fly secrets set TWITCH_PASSWORD_YOUR_USERNAME=your_twitch_password
-
-# 8. Set notification secrets (replace YOUR_USERNAME with your Twitch username in uppercase)
-fly secrets set TELEGRAM_TOKEN_YOUR_USERNAME=your_bot_token
-fly secrets set TELEGRAM_CHAT_ID_YOUR_USERNAME=your_chat_id
+# 3. Start the miner
+docker compose up -d
 ```
 
-### CI/CD Auto-Deploy
+### Compose Notes
 
-Pushes to `main` are automatically deployed via the [CI workflow](.github/workflows/ci.yml) after build and version bump succeed. This requires a `FLY_API_TOKEN` GitHub secret:
-
-```bash
-# 1. Generate a deploy token scoped to your app
-flyctl tokens create deploy -a twitch-miner-go
-
-# 2. Set it as a GitHub repo secret
-gh secret set FLY_API_TOKEN --repo <owner>/<repo>
-# (paste the token when prompted)
-```
-
-> If `FLY_API_TOKEN` is not set, the deploy step is **skipped gracefully** — build and version bump still run normally.
-
-### Manual Deploy
-
-> **Note:**
-> _[Fly.io](https://fly.io)_ is a personal preference — therefore this project is prepared for it out of the box with a `fly.toml` and volume configuration for cookie persistence.
-> However, the miner is designed to be portable and can run on any platform that supports Go. You are not limited to Fly.io — feel free to deploy on AWS, GCP, Azure, Heroku, DigitalOcean, or any other hosting provider of your choice.
-
-```bash
-fly deploy
-
-# View logs
-fly logs
-
-# Check health
-curl https://your-app-name.fly.dev/health
-```
+- `configs/` holds per-account YAML files.
+- `/data` persists cookies and session state.
+- GHCR packages are published automatically by [`.github/workflows/docker-publish.yml`](.github/workflows/docker-publish.yml).
+- CI validates builds, tests, linting, and release tagging. It does not auto-deploy to a hosting provider.
 
 ## Development
 
