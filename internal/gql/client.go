@@ -26,20 +26,30 @@ import (
 // are being skipped to avoid hammering a failing API.
 var ErrCircuitOpen = errors.New("circuit breaker open: API requests temporarily suspended")
 
+type operationBehavior struct {
+	skipIntegrity bool
+	failOnErrors  bool
+}
+
 // integrityFailureOps lists GQL operations where integrity check failures are
 // expected and should be logged at DEBUG instead of WARN. These operations
-// sometimes fail with "failed integrity check" but may still succeed on retry
+// sometimes fail with "failed integrity check" but may still succeed on retry.
 var integrityFailureOps = map[string]bool{
 	"JoinRaid":             true,
 	"ClaimCommunityPoints": true,
 	"ViewerDropsDashboard": true,
 }
 
-// skipIntegrityOps lists GQL operations that are more reliable without the
-// Client-Integrity header. Some browser-oriented queries are rejected with a
-// failed integrity check even when standard browser headers are present.
-var skipIntegrityOps = map[string]bool{
-	"ChannelFollows": true,
+// operationBehaviors centralizes per-operation compatibility workarounds for
+// Twitch's unstable internal GQL APIs.
+var operationBehaviors = map[string]operationBehavior{
+	// This browser-oriented query frequently fails when sent with integrity
+	// headers or with stale persisted-query behavior. Treating errors as fatal
+	// prevents silent "0 followers" fallbacks.
+	"ChannelFollows": {
+		skipIntegrity: true,
+		failOnErrors:  true,
+	},
 }
 
 // circuitBreaker tracks consecutive failures and backs off when the API
@@ -256,10 +266,12 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 		return nil, fmt.Errorf("marshaling GQL request: %w", err)
 	}
 
+	behavior := operationBehaviors[opName]
+
 	// Raw queries (non-persisted) should not send the integrity token —
 	// Twitch's integrity system is designed for persisted queries and
 	// sending it with raw queries causes "service error" for some categories.
-	skipIntegrity := reqBody.Query != "" || skipIntegrityOps[opName]
+	skipIntegrity := reqBody.Query != "" || behavior.skipIntegrity
 
 	respBody, err := c.doHTTPRequest(ctx, jsonBody, opName, skipIntegrity)
 	if err != nil {
@@ -281,6 +293,10 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 			c.log.Warn("GQL operation returned errors",
 				"operation", opName,
 				"error", errMsg)
+		}
+
+		if behavior.failOnErrors {
+			return nil, fmt.Errorf("GQL operation %s returned error: %s", opName, errMsg)
 		}
 	}
 

@@ -181,7 +181,7 @@ jobs:
           echo "Determined bump type: $BUMP"
           echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
 
-      - name: Bump version
+      - name: Determine next version
         if: steps.bump.outputs.bump != 'skip'
         id: version
         run: |
@@ -210,19 +210,19 @@ jobs:
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
           echo "New version: $NEW_VERSION"
 
-          printf "%s" "$NEW_VERSION" > VERSION
-
           echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Commit and tag
+      - name: Create and push tag
         if: steps.bump.outputs.bump != 'skip'
         env:
           NEW_VERSION: ${{ steps.version.outputs.new_version }}
         run: |
-          git add VERSION
-          git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
+          if git rev-parse "v${NEW_VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${NEW_VERSION} already exists locally"
+            exit 0
+          fi
           git tag -a "v${NEW_VERSION}" -m "v${NEW_VERSION}"
-          git push origin main --follow-tags
+          git push origin "refs/tags/v${NEW_VERSION}"
 
       - name: Create GitHub Release
         if: steps.bump.outputs.bump != 'skip'
@@ -252,6 +252,9 @@ jobs:
           if [ -z "$FLY_API_TOKEN" ]; then
             echo "⚠️ FLY_API_TOKEN not set — skipping deploy"
             exit 0
+          fi
+          if [ -z "$VERSION" ]; then
+            VERSION=$(cat VERSION)
           fi
           GIT_COMMIT=$(git rev-parse --short HEAD)
           flyctl deploy --remote-only \
