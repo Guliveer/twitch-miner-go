@@ -332,7 +332,6 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 						return nil, ctx.Err()
 					case <-time.After(backoff):
 					}
-					lastErr = fmt.Errorf("%w: GQL operation %s returned error: %s", ErrTransientGQLError, opName, errMsg)
 					continue
 				}
 
