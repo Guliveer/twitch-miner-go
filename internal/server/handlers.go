@@ -85,6 +85,19 @@ func (s *AnalyticsServer) handleHealth(w http.ResponseWriter, _ *http.Request) {
 	})
 }
 
+func (s *AnalyticsServer) handleDebug(w http.ResponseWriter, _ *http.Request) {
+	s.mu.RLock()
+	fn := s.debugFunc
+	s.mu.RUnlock()
+
+	if fn == nil {
+		writeJSON(w, http.StatusServiceUnavailable, errorResponse{Error: "debug snapshot is not configured"})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, fn())
+}
+
 // filterStreamers applies query-parameter filters to a streamer list.
 // When a filter parameter is empty the corresponding check is skipped,
 // so callers with no filters get the full list back unchanged.
@@ -109,9 +122,13 @@ func filterStreamers(streamers []*model.Streamer, r *http.Request) []*model.Stre
 			continue
 		}
 		// Channel filter (substring, case-insensitive)
-		if channelFilter != "" && !strings.Contains(strings.ToLower(st.Username), channelFilter) {
-			st.Mu.RUnlock()
-			continue
+		if channelFilter != "" {
+			usernameMatch := strings.Contains(strings.ToLower(st.Username), channelFilter)
+			displayNameMatch := strings.Contains(strings.ToLower(st.DisplayName), channelFilter)
+			if !usernameMatch && !displayNameMatch {
+				st.Mu.RUnlock()
+				continue
+			}
 		}
 		// Category filter (substring match on game name)
 		if categoryFilter != "" {
@@ -364,11 +381,20 @@ func (s *AnalyticsServer) handleEventLogs(w http.ResponseWriter, r *http.Request
 		if accountFilter != "" && strings.ToLower(st.AccountUsername) != accountFilter {
 			continue
 		}
-		if channelFilter != "" && !strings.Contains(strings.ToLower(st.Username), channelFilter) {
-			continue
-		}
 
 		st.Mu.RLock()
+		streamerName := st.DisplayName
+		if streamerName == "" {
+			streamerName = st.Username
+		}
+		if channelFilter != "" {
+			usernameMatch := strings.Contains(strings.ToLower(st.Username), channelFilter)
+			displayNameMatch := strings.Contains(strings.ToLower(streamerName), channelFilter)
+			if !usernameMatch && !displayNameMatch {
+				st.Mu.RUnlock()
+				continue
+			}
+		}
 		for event, hist := range st.History {
 			// Apply event filter.
 			if eventFilter != "" && event != eventFilter {
@@ -380,7 +406,7 @@ func (s *AnalyticsServer) handleEventLogs(w http.ResponseWriter, r *http.Request
 			}
 			entries = append(entries, eventLogEntry{
 				Account:  st.AccountUsername,
-				Streamer: st.DisplayName,
+				Streamer: streamerName,
 				Event:    event,
 				Count:    hist.Counter,
 				Amount:   hist.Amount,
@@ -410,8 +436,12 @@ func (s *AnalyticsServer) handleEventFilters(w http.ResponseWriter, _ *http.Requ
 		if st.AccountUsername != "" {
 			accountSet[st.AccountUsername] = true
 		}
-		channelSet[st.DisplayName] = true
 		st.Mu.RLock()
+		streamerName := st.DisplayName
+		if streamerName == "" {
+			streamerName = st.Username
+		}
+		channelSet[streamerName] = true
 		for event := range st.History {
 			eventSet[event] = true
 		}

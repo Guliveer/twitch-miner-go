@@ -87,7 +87,7 @@ func (a *Authenticator) loginWithDeviceCode(ctx context.Context) error {
 // requestDeviceCode sends a POST to the Twitch device code endpoint and
 func (a *Authenticator) requestDeviceCode(ctx context.Context) (*DeviceCodeResponse, error) {
 	form := url.Values{
-		"client_id": {constants.ClientID},
+		"client_id": {a.runtime.ClientIDTV},
 		"scopes":    {constants.DeviceCodeScopes},
 	}
 
@@ -165,7 +165,7 @@ func (a *Authenticator) pollForToken(ctx context.Context, deviceCode string, int
 // Returns (*TokenResponse, nil) on success, (nil, nil) if authorization is
 func (a *Authenticator) requestToken(ctx context.Context, deviceCode string) (*TokenResponse, error) {
 	form := url.Values{
-		"client_id":   {constants.ClientID},
+		"client_id":   {a.runtime.ClientIDTV},
 		"device_code": {deviceCode},
 		"grant_type":  {"urn:ietf:params:oauth:grant-type:device_code"},
 	}
@@ -234,7 +234,7 @@ func (a *Authenticator) refreshAccessToken(ctx context.Context) error {
 	a.log.Info("Attempting token refresh")
 
 	form := url.Values{
-		"client_id":     {constants.ClientID},
+		"client_id":     {a.runtime.ClientIDTV},
 		"client_secret": {""},
 		"grant_type":    {"refresh_token"},
 		"refresh_token": {refreshToken},

@@ -17,6 +17,8 @@ type AccountConfig struct {
 
 	Features FeaturesConfig `yaml:"features"`
 
+	MaxWatchStreams int `yaml:"max_watch_streams,omitempty"`
+
 	Priority []string `yaml:"priority"`
 
 	Proxy string `yaml:"proxy,omitempty"`
@@ -39,71 +41,71 @@ type AccountConfig struct {
 // AuthConfig holds authentication-related settings.
 type AuthConfig struct {
 	AuthToken string `yaml:"auth_token"`
-	Password string `yaml:"password"`
+	Password  string `yaml:"password"`
 }
 
 // FeaturesConfig holds global feature toggles for an account.
 type FeaturesConfig struct {
 	ClaimDropsStartup bool `yaml:"claim_drops_startup"`
-	EnableAnalytics bool `yaml:"enable_analytics"`
+	EnableAnalytics   bool `yaml:"enable_analytics"`
 }
 
 // CategoryWatcherConfig holds settings for the category watcher.
 type CategoryWatcherConfig struct {
-	Enabled bool `yaml:"enabled"`
-	PollInterval time.Duration `yaml:"poll_interval"`
-	DropsOnly bool `yaml:"drops_only"`
-	Categories []CategoryConfig `yaml:"categories"`
+	Enabled      bool             `yaml:"enabled"`
+	PollInterval time.Duration    `yaml:"poll_interval"`
+	DropsOnly    bool             `yaml:"drops_only"`
+	Categories   []CategoryConfig `yaml:"categories"`
 }
 
 // CategoryConfig holds settings for a single game category.
 type CategoryConfig struct {
-	Slug string `yaml:"slug"`
-	DropsOnly *bool `yaml:"drops_only,omitempty"`
+	Slug      string `yaml:"slug"`
+	DropsOnly *bool  `yaml:"drops_only,omitempty"`
 }
 
 // StreamerSettingsConfig is the YAML representation of per-streamer settings.
 type StreamerSettingsConfig struct {
-	MakePredictions *bool `yaml:"make_predictions,omitempty"`
-	FollowRaid *bool `yaml:"follow_raid,omitempty"`
-	ClaimDrops *bool `yaml:"claim_drops,omitempty"`
-	ClaimMoments *bool `yaml:"claim_moments,omitempty"`
-	WatchStreak *bool `yaml:"watch_streak,omitempty"`
-	CommunityGoals *bool `yaml:"community_goals,omitempty"`
-	Chat string `yaml:"chat,omitempty"`
-	Bet *BetSettingsConfig `yaml:"bet,omitempty"`
+	MakePredictions *bool              `yaml:"make_predictions,omitempty"`
+	FollowRaid      *bool              `yaml:"follow_raid,omitempty"`
+	ClaimDrops      *bool              `yaml:"claim_drops,omitempty"`
+	ClaimMoments    *bool              `yaml:"claim_moments,omitempty"`
+	WatchStreak     *bool              `yaml:"watch_streak,omitempty"`
+	CommunityGoals  *bool              `yaml:"community_goals,omitempty"`
+	Chat            string             `yaml:"chat,omitempty"`
+	Bet             *BetSettingsConfig `yaml:"bet,omitempty"`
 }
 
 // BetSettingsConfig is the YAML representation of bet settings.
 type BetSettingsConfig struct {
-	Strategy string `yaml:"strategy,omitempty"`
-	Percentage *int `yaml:"percentage,omitempty"`
-	PercentageGap *int `yaml:"percentage_gap,omitempty"`
-	MaxPoints *int `yaml:"max_points,omitempty"`
-	MinimumPoints *int `yaml:"minimum_points,omitempty"`
-	StealthMode *bool `yaml:"stealth_mode,omitempty"`
-	Delay *float64 `yaml:"delay,omitempty"`
-	DelayMode string `yaml:"delay_mode,omitempty"`
+	Strategy        string                 `yaml:"strategy,omitempty"`
+	Percentage      *int                   `yaml:"percentage,omitempty"`
+	PercentageGap   *int                   `yaml:"percentage_gap,omitempty"`
+	MaxPoints       *int                   `yaml:"max_points,omitempty"`
+	MinimumPoints   *int                   `yaml:"minimum_points,omitempty"`
+	StealthMode     *bool                  `yaml:"stealth_mode,omitempty"`
+	Delay           *float64               `yaml:"delay,omitempty"`
+	DelayMode       string                 `yaml:"delay_mode,omitempty"`
 	FilterCondition *FilterConditionConfig `yaml:"filter_condition,omitempty"`
 }
 
 // FilterConditionConfig is the YAML representation of a filter condition.
 type FilterConditionConfig struct {
-	By string `yaml:"by"`
-	Where string `yaml:"where"`
+	By    string  `yaml:"by"`
+	Where string  `yaml:"where"`
 	Value float64 `yaml:"value"`
 }
 
 // StreamerConfig holds per-streamer configuration from YAML.
 type StreamerConfig struct {
-	Username string `yaml:"username"`
+	Username string                  `yaml:"username"`
 	Settings *StreamerSettingsConfig `yaml:"settings,omitempty"`
 }
 
 // FollowersConfig holds settings for watching followed channels.
 type FollowersConfig struct {
-	Enabled bool `yaml:"enabled"`
-	Order string `yaml:"order"`
+	Enabled bool   `yaml:"enabled"`
+	Order   string `yaml:"order"`
 }
 
 // BatchConfig holds notification batching settings.

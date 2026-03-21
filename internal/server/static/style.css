@@ -50,6 +50,30 @@ header h1 {
   border-bottom: 1px solid #26262c;
 }
 
+.status-banner {
+  margin: 1rem auto 0;
+  max-width: 1200px;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.status-banner.hidden {
+  display: none;
+}
+
+.status-banner.info {
+  background: #1f2937;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+}
+
+.status-banner.error {
+  background: #3b1118;
+  color: #fecaca;
+  border: 1px solid #7f1d1d;
+}
+
 .filter-group {
   display: flex;
   flex-direction: column;

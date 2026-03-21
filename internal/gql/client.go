@@ -1,6 +1,6 @@
 // Package gql provides a typed GraphQL client for the Twitch GQL API.
-// It handles connection pooling, request building, client version caching,
-// rate limiting awareness, and error handling with retries.
+// It handles connection pooling, request building, runtime-configured client
+// version headers, rate limiting awareness, and error handling with retries.
 package gql
 
 import (
@@ -26,13 +26,42 @@ import (
 // are being skipped to avoid hammering a failing API.
 var ErrCircuitOpen = errors.New("circuit breaker open: API requests temporarily suspended")
 
+// ErrTransientGQLError marks GQL responses that failed due to a temporary
+// Twitch-side condition and should not be treated like a durable application
+// error.
+var ErrTransientGQLError = errors.New("transient GQL error")
+
+type operationBehavior struct {
+	skipIntegrity   bool
+	failOnErrors    bool
+	tryAltClientIDs bool
+	retryGQLErrors  bool
+}
+
 // integrityFailureOps lists GQL operations where integrity check failures are
 // expected and should be logged at DEBUG instead of WARN. These operations
-// sometimes fail with "failed integrity check" but may still succeed on retry
+// sometimes fail with "failed integrity check" but may still succeed on retry.
 var integrityFailureOps = map[string]bool{
-	"JoinRaid":              true,
-	"ClaimCommunityPoints":  true,
-	"ViewerDropsDashboard":  true,
+	"JoinRaid":             true,
+	"ClaimCommunityPoints": true,
+	"ViewerDropsDashboard": true,
+}
+
+// operationBehaviors centralizes per-operation compatibility workarounds for
+// Twitch's unstable internal GQL APIs.
+var operationBehaviors = map[string]operationBehavior{
+	// This browser-oriented query frequently fails when sent with integrity
+	// headers or with stale persisted-query behavior. Treating errors as fatal
+	// prevents silent "0 followers" fallbacks.
+	"ChannelFollows": {
+		skipIntegrity:   true,
+		failOnErrors:    true,
+		tryAltClientIDs: true,
+	},
+	"VideoPlayerStreamInfoOverlayChannel": {
+		tryAltClientIDs: true,
+		retryGQLErrors:  true,
+	},
 }
 
 // circuitBreaker tracks consecutive failures and backs off when the API
@@ -55,7 +84,11 @@ func (cb *circuitBreaker) recordFailure() {
 	cb.consecutiveFails++
 	cb.lastFailure = time.Now()
 	if cb.consecutiveFails >= 10 {
-		backoff := time.Duration(cb.consecutiveFails-9) * 30 * time.Second
+		multiplier := cb.consecutiveFails - 9
+		if multiplier > 10 {
+			multiplier = 10
+		}
+		backoff := time.Duration(multiplier) * 30 * time.Second
 		if backoff > 5*time.Minute {
 			backoff = 5 * time.Minute
 		}
@@ -71,15 +104,14 @@ func (cb *circuitBreaker) shouldSkip() bool {
 	return time.Now().Before(cb.cooldownUntil)
 }
 
-// Client is the Twitch GQL HTTP client with connection pooling,
-// client version caching, circuit breaker, and retry logic.
+// Client is the Twitch GQL HTTP client with connection pooling, a circuit
+// breaker, and retry logic.
 type Client struct {
-	httpClient   *http.Client
-	transport    *http.Transport
-	auth         auth.Provider
-	log          *logger.Logger
-	versionCache *versionCache
-	breaker      *circuitBreaker
+	httpClient *http.Client
+	transport  *http.Transport
+	auth       auth.Provider
+	log        *logger.Logger
+	breaker    *circuitBreaker
 
 	maxRetries int
 	mu         sync.RWMutex
@@ -105,13 +137,12 @@ func NewClient(authenticator auth.Provider, log *logger.Logger, proxyURL *url.UR
 	}
 
 	return &Client{
-		httpClient:   httpClient,
-		transport:    transport,
-		auth:         authenticator,
-		log:          log,
-		versionCache: newVersionCache(),
-		breaker:      &circuitBreaker{},
-		maxRetries:   constants.DefaultMaxRetries,
+		httpClient: httpClient,
+		transport:  transport,
+		auth:       authenticator,
+		log:        log,
+		breaker:    &circuitBreaker{},
+		maxRetries: constants.DefaultMaxRetries,
 	}
 }
 
@@ -202,7 +233,7 @@ func (c *Client) PostGQLBatch(ctx context.Context, ops []constants.GQLOperation,
 		return nil, fmt.Errorf("marshaling batch GQL request: %w", err)
 	}
 
-	respBody, err := c.doHTTPRequest(ctx, jsonBody, "batch", false)
+	respBody, err := c.doHTTPRequest(ctx, jsonBody, "batch", false, "")
 	if err != nil {
 		return nil, err
 	}
@@ -251,35 +282,109 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 		return nil, fmt.Errorf("marshaling GQL request: %w", err)
 	}
 
+	behavior := operationBehaviors[opName]
+
 	// Raw queries (non-persisted) should not send the integrity token —
 	// Twitch's integrity system is designed for persisted queries and
 	// sending it with raw queries causes "service error" for some categories.
-	skipIntegrity := reqBody.Query != ""
-
-	respBody, err := c.doHTTPRequest(ctx, jsonBody, opName, skipIntegrity)
-	if err != nil {
-		return nil, err
-	}
-
-	var response gqlResponse
-	if err := json.Unmarshal(respBody, &response); err != nil {
-		return nil, fmt.Errorf("parsing GQL response for %s: %w", opName, err)
-	}
-
-	if len(response.Errors) > 0 {
-		errMsg := response.Errors[0].Message
-		if strings.Contains(errMsg, "integrity check") && integrityFailureOps[opName] {
-			c.log.Debug("GQL integrity check failure (expected)",
-				"operation", opName,
-				"error", errMsg)
-		} else {
-			c.log.Warn("GQL operation returned errors",
-				"operation", opName,
-				"error", errMsg)
+	skipIntegrity := reqBody.Query != "" || behavior.skipIntegrity
+	clientIDs := []string{""}
+	if behavior.tryAltClientIDs {
+		ids := c.auth.ClientIDsForGQL()
+		if len(ids) > 0 {
+			clientIDs = ids
 		}
 	}
 
-	return response.Data, nil
+	var lastErr error
+	for idx, clientID := range clientIDs {
+		semanticRetries := 0
+		for {
+			respBody, err := c.doHTTPRequest(ctx, jsonBody, opName, skipIntegrity, clientID)
+			if err != nil {
+				lastErr = err
+				break
+			}
+
+			var response gqlResponse
+			if err := json.Unmarshal(respBody, &response); err != nil {
+				return nil, fmt.Errorf("parsing GQL response for %s: %w", opName, err)
+			}
+
+			if len(response.Errors) > 0 {
+				errMsg := response.Errors[0].Message
+				if strings.Contains(errMsg, "integrity check") && integrityFailureOps[opName] {
+					c.log.Debug("GQL integrity check failure (expected)",
+						"operation", opName,
+						"error", errMsg)
+				} else {
+					c.log.Warn("GQL operation returned errors",
+						"operation", opName,
+						"error", errMsg,
+						"client_id_attempt", idx+1)
+				}
+
+				if behavior.retryGQLErrors && isRetryableGQLError(errMsg) && semanticRetries < 2 {
+					semanticRetries++
+					backoff := time.Duration(semanticRetries) * time.Second
+					c.log.Info("Retrying GQL operation after transient response error",
+						"operation", opName,
+						"retry", semanticRetries,
+						"backoff", backoff)
+					select {
+					case <-ctx.Done():
+						return nil, ctx.Err()
+					case <-time.After(backoff):
+					}
+					continue
+				}
+
+				if behavior.tryAltClientIDs && idx < len(clientIDs)-1 {
+					c.log.Info("Retrying GQL operation with alternate client ID",
+						"operation", opName,
+						"attempt", idx+2,
+						"total_attempts", len(clientIDs))
+					lastErr = wrapTransientGQLError(opName, errMsg)
+					break
+				}
+
+				if behavior.failOnErrors {
+					return nil, wrapTransientGQLError(opName, errMsg)
+				}
+			}
+
+			return response.Data, nil
+		}
+	}
+
+	if lastErr != nil {
+		return nil, lastErr
+	}
+
+	return nil, fmt.Errorf("GQL operation %s failed without a response", opName)
+}
+
+func wrapTransientGQLError(opName, errMsg string) error {
+	if isRetryableGQLError(errMsg) {
+		return fmt.Errorf("%w: GQL operation %s returned error: %s", ErrTransientGQLError, opName, errMsg)
+	}
+	return fmt.Errorf("GQL operation %s returned error: %s", opName, errMsg)
+}
+
+func isRetryableGQLError(errMsg string) bool {
+	errMsg = strings.ToLower(errMsg)
+	return strings.Contains(errMsg, "service timeout") ||
+		strings.Contains(errMsg, "service unavailable") ||
+		strings.Contains(errMsg, "temporarily unavailable") ||
+		strings.Contains(errMsg, "timed out")
+}
+
+// IsTransientError reports whether the error indicates a temporary Twitch-side
+// failure where callers should preserve current state and try again later.
+func IsTransientError(err error) bool {
+	return errors.Is(err, ErrTransientGQLError) ||
+		errors.Is(err, context.DeadlineExceeded) ||
+		errors.Is(err, context.Canceled)
 }
 
 // doHTTPRequest performs the actual HTTP POST with auth headers, client version,
@@ -290,7 +395,7 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 // Retry logging strategy: individual retries are logged at DEBUG level to
 // reduce noise. Only the final failure (after all retries exhausted) is
 // logged at WARN level. Known-flaky operations (e.g., VideoPlayerStreamInfoOverlayChannel)
-func (c *Client) doHTTPRequest(ctx context.Context, jsonBody []byte, opName string, skipIntegrity bool) ([]byte, error) {
+func (c *Client) doHTTPRequest(ctx context.Context, jsonBody []byte, opName string, skipIntegrity bool, clientIDOverride string) ([]byte, error) {
 	if c.breaker.shouldSkip() {
 		c.log.Debug("Circuit breaker open, skipping request", "operation", opName)
 		return nil, ErrCircuitOpen
@@ -323,7 +428,10 @@ func (c *Client) doHTTPRequest(ctx context.Context, jsonBody []byte, opName stri
 		for k, v := range c.auth.GetAuthHeaders() {
 			req.Header.Set(k, v)
 		}
-		req.Header.Set("Client-Version", c.updateClientVersion(ctx))
+		if clientIDOverride != "" {
+			req.Header.Set("Client-Id", clientIDOverride)
+		}
+		req.Header.Set("Client-Version", c.auth.ClientVersion())
 
 		if !skipIntegrity {
 			if integrityToken, err := c.auth.FetchIntegrityToken(ctx); err != nil {

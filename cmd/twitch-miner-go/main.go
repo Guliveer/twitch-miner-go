@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"sync"
@@ -18,6 +19,7 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
 	"github.com/Guliveer/twitch-miner-go/internal/miner"
 	"github.com/Guliveer/twitch-miner-go/internal/model"
+	"github.com/Guliveer/twitch-miner-go/internal/runtimecfg"
 	"github.com/Guliveer/twitch-miner-go/internal/server"
 	"github.com/Guliveer/twitch-miner-go/internal/updater"
 	"github.com/Guliveer/twitch-miner-go/internal/utils"
@@ -35,11 +37,20 @@ func main() {
 	configDir := flag.String("config", "configs", "Path to the configuration directory")
 	port := flag.String("port", "8080", "Port for the health/analytics HTTP server")
 	logLevel := flag.String("log-level", "", "Log level: DEBUG, INFO, WARN, ERROR (overrides LOG_LEVEL env)")
+	healthcheckURL := flag.String("healthcheck-url", "", "Probe the given HTTP URL and exit with status 0 only on HTTP 200")
 	showVersion := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
 
 	if *showVersion {
 		fmt.Println(version.String())
+		os.Exit(0)
+	}
+
+	if *healthcheckURL != "" {
+		if err := runHealthcheck(*healthcheckURL); err != nil {
+			fmt.Fprintf(os.Stderr, "Healthcheck failed: %v\n", err)
+			os.Exit(1)
+		}
 		os.Exit(0)
 	}
 
@@ -74,6 +85,8 @@ func main() {
 
 	fmt.Print(banner)
 	rootLog.Info("🚀 Starting Twitch Channel Points Miner (Go)", "version", version.String())
+
+	twitchRuntime := runtimecfg.LoadTwitchFromEnv(rootLog.Logger)
 
 	// Check for updates in the background.
 	utils.SafeGo(func() {
@@ -122,15 +135,20 @@ func main() {
 		})
 	})
 
-	miners := make([]*miner.Miner, 0, len(configs))
+	type minerEntry struct {
+		cfg   *config.AccountConfig
+		miner *miner.Miner
+	}
+
+	miners := make([]minerEntry, 0, len(configs))
 	for _, cfg := range configs {
 		if !cfg.IsEnabled() {
 			rootLog.Info("Account is disabled, skipping", "account", cfg.Username)
 			continue
 		}
 		accountLog := rootLog.WithAccount(cfg.Username)
-		minerInstance := miner.NewMiner(cfg, accountLog)
-		miners = append(miners, minerInstance)
+		minerInstance := miner.NewMiner(cfg, accountLog, twitchRuntime)
+		miners = append(miners, minerEntry{cfg: cfg, miner: minerInstance})
 	}
 
 	addr := ":" + httpPort
@@ -145,16 +163,16 @@ func main() {
 
 	analyticsServer.SetStreamerFunc(func() []*model.Streamer {
 		var all []*model.Streamer
-		for _, minerInstance := range miners {
-			all = append(all, minerInstance.Streamers()...)
+		for _, entry := range miners {
+			all = append(all, entry.miner.Streamers()...)
 		}
 		return all
 	})
 
 	analyticsServer.SetNotifyTestFunc(func(ctx context.Context) []error {
 		var allErrs []error
-		for _, minerInstance := range miners {
-			d := minerInstance.NotifyDispatcher()
+		for _, entry := range miners {
+			d := entry.miner.NotifyDispatcher()
 			if d == nil || !d.HasNotifiers() {
 				continue
 			}
@@ -164,8 +182,8 @@ func main() {
 		if len(miners) > 0 && allErrs == nil {
 			// Check if any miner had notifiers at all.
 			hasAny := false
-			for _, minerInstance := range miners {
-				d := minerInstance.NotifyDispatcher()
+			for _, entry := range miners {
+				d := entry.miner.NotifyDispatcher()
 				if d != nil && d.HasNotifiers() {
 					hasAny = true
 					break
@@ -178,6 +196,17 @@ func main() {
 		return allErrs
 	})
 
+	analyticsServer.SetDebugFunc(func() any {
+		snapshots := make([]miner.DebugSnapshot, 0, len(miners))
+		for _, entry := range miners {
+			snapshots = append(snapshots, entry.miner.DebugSnapshot())
+		}
+		return map[string]any{
+			"timestamp": time.Now().UTC().Format(time.RFC3339),
+			"miners":    snapshots,
+		}
+	})
+
 	utils.SafeGo(func() {
 		if err := analyticsServer.Run(ctx); err != nil && ctx.Err() == nil {
 			rootLog.Error("Analytics server failed", "error", err)
@@ -187,8 +216,9 @@ func main() {
 	rootLog.Info("🌐 Health/analytics server started", "addr", addr)
 
 	var wg sync.WaitGroup
-	for i, minerInstance := range miners {
-		cfg := configs[i]
+	for _, entry := range miners {
+		cfg := entry.cfg
+		minerInstance := entry.miner
 		accountLog := rootLog.WithAccount(cfg.Username)
 
 		wg.Add(1)
@@ -211,4 +241,25 @@ func main() {
 	}
 
 	rootLog.Info("👋 All miners stopped. Goodbye!")
+}
+
+func runHealthcheck(target string) error {
+	client := &http.Client{Timeout: 5 * time.Second}
+
+	req, err := http.NewRequest(http.MethodGet, target, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status %d", resp.StatusCode)
+	}
+
+	return nil
 }

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Guliveer/twitch-miner-go/internal/constants"
 	"gopkg.in/yaml.v3"
 )
 
@@ -102,6 +103,10 @@ func LoadAllAccountConfigs(dir string) ([]*AccountConfig, error) {
 }
 
 func applyDefaults(cfg *AccountConfig) {
+	if cfg.MaxWatchStreams <= 0 {
+		cfg.MaxWatchStreams = constants.MaxWatchStreams
+	}
+
 	if len(cfg.Priority) == 0 {
 		cfg.Priority = []string{"STREAK", "DROPS", "ORDER"}
 	}
@@ -181,6 +186,10 @@ func applyEnvOverrides(cfg *AccountConfig) {
 func Validate(cfg *AccountConfig) error {
 	if cfg.Username == "" {
 		return fmt.Errorf("username is required")
+	}
+
+	if cfg.MaxWatchStreams < 1 {
+		return fmt.Errorf("account %s: max_watch_streams must be at least 1", cfg.Username)
 	}
 
 	if len(cfg.Streamers) == 0 && !cfg.Followers.Enabled && !cfg.CategoryWatcher.Enabled {

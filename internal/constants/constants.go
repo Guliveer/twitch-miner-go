@@ -32,18 +32,24 @@ const (
 const DeviceCodeScopes = "channel_read chat:read chat:edit user_read user:read:email"
 
 const (
-	// ClientID is the Twitch client ID (TV client).
+	// ClientID is the default Twitch client ID (TV client).
+	// Can be overridden via TWITCH_CLIENT_ID_TV env var.
 	ClientID = "ue6666qo983tsx6so1t0vnawi233wa"
-	// ClientIDBrowser is the Twitch client ID for browser clients.
+	// ClientIDBrowser is the default Twitch client ID for browser clients.
+	// Can be overridden via TWITCH_CLIENT_ID_BROWSER env var.
 	ClientIDBrowser = "kimne78kx3ncx6brgo4mv6wki5h1ko"
-	// ClientIDMobile is the Twitch client ID for mobile browser clients.
+	// ClientIDMobile is the default Twitch client ID for mobile browser clients.
+	// Can be overridden via TWITCH_CLIENT_ID_MOBILE env var.
 	ClientIDMobile = "r8s4dac0uhzifbpu9sjdiwzctle17ff"
-	// ClientIDAndroid is the Twitch client ID for the Android app.
+	// ClientIDAndroid is the default Twitch client ID for the Android app.
+	// Can be overridden via TWITCH_CLIENT_ID_ANDROID env var.
 	ClientIDAndroid = "kd1unb4b3q4t58fwlpcbzcbnm76a8fp"
-	// ClientIDiOS is the Twitch client ID for the iOS app.
+	// ClientIDiOS is the default Twitch client ID for the iOS app.
+	// Can be overridden via TWITCH_CLIENT_ID_IOS env var.
 	ClientIDiOS = "851cqzxpb9bqu9z6galo155du"
 
-	// ClientVersion is the Twitch client version string (browser).
+	// ClientVersion is the default Twitch client version string (browser).
+	// Can be overridden via TWITCH_CLIENT_VERSION env var.
 	ClientVersion = "ef928475-9403-42f2-8a34-55784bd08e16"
 
 	// DropID is the tag ID used to identify streams with Drops enabled.
@@ -132,8 +138,8 @@ const (
 // GQLOperation represents a persisted GQL query with its operation name and SHA256 hash.
 type GQLOperation struct {
 	OperationName string
-	SHA256Hash string
-	Query string
+	SHA256Hash    string
+	Query         string
 }
 
 // Persisted GQL operations migrated from Python constants.py.

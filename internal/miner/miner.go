@@ -19,6 +19,7 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/model"
 	"github.com/Guliveer/twitch-miner-go/internal/notify"
 	"github.com/Guliveer/twitch-miner-go/internal/pubsub"
+	"github.com/Guliveer/twitch-miner-go/internal/runtimecfg"
 	"github.com/Guliveer/twitch-miner-go/internal/twitch"
 	"github.com/Guliveer/twitch-miner-go/internal/watcher"
 )
@@ -51,10 +52,12 @@ type Miner struct {
 
 	lastWatching   map[string]bool
 	lastWatchingMu sync.Mutex
+
+	runtime *runtimecfg.Twitch
 }
 
 // NewMiner creates a new Miner from account configuration.
-func NewMiner(cfg *config.AccountConfig, log *logger.Logger) *Miner {
+func NewMiner(cfg *config.AccountConfig, log *logger.Logger, runtime *runtimecfg.Twitch) *Miner {
 	return &Miner{
 		cfg:               cfg,
 		log:               log,
@@ -62,6 +65,7 @@ func NewMiner(cfg *config.AccountConfig, log *logger.Logger) *Miner {
 		pendingTimers:     make(map[string]*time.Timer),
 		priorities:        cfg.ParsedPriorities(),
 		lastWatching:      make(map[string]bool),
+		runtime:           runtime,
 	}
 }
 
@@ -105,7 +109,7 @@ func (m *Miner) Run(ctx context.Context) error {
 	startTime := time.Now()
 	m.log.Info("🚀 Starting miner", "account", m.cfg.Username)
 
-	tc, err := twitch.NewClient(m.cfg, m.log)
+	tc, err := twitch.NewClient(m.cfg, m.log, m.runtime)
 	if err != nil {
 		return fmt.Errorf("creating twitch client: %w", err)
 	}
@@ -303,27 +307,27 @@ func (m *Miner) checkAllStreamersOnline(ctx context.Context) {
 				return
 			}
 
-				streamer.Mu.RLock()
-				isOnline := streamer.IsOnline
-				category := streamer.ResolveCategory()
-				viewers := 0
-				if streamer.Stream != nil {
-					viewers = streamer.Stream.ViewersCount
-				}
-				streamer.Mu.RUnlock()
-	
-				mu.Lock()
-				if isOnline {
-					onlineCount++
-					mu.Unlock()
-					m.log.Info("🟢 Online",
-						"streamer", streamer.Username,
-						"category", category,
-						"viewers", viewers)
-				} else {
-					offlineCount++
-					mu.Unlock()
-				}
+			streamer.Mu.RLock()
+			isOnline := streamer.IsOnline
+			category := streamer.ResolveCategory()
+			viewers := 0
+			if streamer.Stream != nil {
+				viewers = streamer.Stream.ViewersCount
+			}
+			streamer.Mu.RUnlock()
+
+			mu.Lock()
+			if isOnline {
+				onlineCount++
+				mu.Unlock()
+				m.log.Info("🟢 Online",
+					"streamer", streamer.Username,
+					"category", category,
+					"viewers", viewers)
+			} else {
+				offlineCount++
+				mu.Unlock()
+			}
 		}(s)
 	}
 
