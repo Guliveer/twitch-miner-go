@@ -94,7 +94,7 @@ func LoadTwitchFromEnv(log *slog.Logger) *Twitch {
 		ClientVersion:   load(envTwitchClientVersion, constants.ClientVersion),
 	}
 
-	if len(usedDefaults) > 0 {
+	if len(usedDefaults) > 0 && log != nil {
 		log.Warn("Using built-in default Twitch client identifiers (may be outdated). "+
 			"Set environment variables for fresh values.",
 			"defaults_used", strings.Join(usedDefaults, ", "))

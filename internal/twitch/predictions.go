@@ -93,7 +93,11 @@ func (c *Client) MakePrediction(ctx context.Context, streamer *model.Streamer, e
 	}
 	if decision.Amount < 10 {
 		event.Mu.Unlock()
-		return fmt.Errorf("prediction amount %d fell below minimum after balance guard", decision.Amount)
+		c.Log.Info("Skipping prediction — amount fell below minimum after balance clamp",
+			"streamer", username,
+			"amount", decision.Amount,
+			"balance", balance)
+		return nil
 	}
 	event.Bet.Decision = decision
 

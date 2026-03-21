@@ -37,7 +37,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
        1. [1.10.1. Setup](#1101-setup)
        2. [1.10.2. CI/CD Auto-Deploy](#1102-cicd-auto-deploy)
        3. [1.10.3. Manual Deploy](#1103-manual-deploy)
-       4. [1.10.4. Docker Compose (Alternative)](#1104-docker-compose-alternative)
+       4. [1.10.4. Alternative Deployment](#1104-alternative-deployment)
    11. [1.11. Development](#111-development)
    12. [1.12. Auto-Update Checker](#112-auto-update-checker)
    13. [1.13. License](#113-license)
@@ -178,12 +178,14 @@ For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN
 | `LOG_LEVEL` | Log level (`DEBUG`, `INFO`, `WARN`, `ERROR`) | `INFO`  |
 | `PORT`      | HTTP server port for health/analytics        | `8080`  |
 | `DATA_DIR`  | Persistent data directory (cookies, state)   | `.`     |
-| `TWITCH_CLIENT_ID_TV` | Required Twitch TV client ID         | —       |
-| `TWITCH_CLIENT_ID_BROWSER` | Required Twitch browser client ID | —       |
-| `TWITCH_CLIENT_VERSION` | Required Twitch browser client version | —    |
-| `TWITCH_CLIENT_ID_MOBILE` | Optional Twitch mobile web client ID | —     |
-| `TWITCH_CLIENT_ID_ANDROID` | Optional Twitch Android client ID | —     |
-| `TWITCH_CLIENT_ID_IOS` | Optional Twitch iOS client ID         | —       |
+| `TWITCH_CLIENT_ID_TV` | Twitch TV client ID (falls back to built-in default if unset; override recommended) | built-in default |
+| `TWITCH_CLIENT_ID_BROWSER` | Twitch browser client ID (falls back to built-in default if unset; override recommended) | built-in default |
+| `TWITCH_CLIENT_VERSION` | Twitch browser client version (falls back to built-in default if unset; override recommended) | built-in default |
+| `TWITCH_CLIENT_ID_MOBILE` | Twitch mobile web client ID (falls back to built-in default if unset) | built-in default |
+| `TWITCH_CLIENT_ID_ANDROID` | Twitch Android client ID (falls back to built-in default if unset) | built-in default |
+| `TWITCH_CLIENT_ID_IOS` | Twitch iOS client ID (falls back to built-in default if unset) | built-in default |
+
+> **Note:** Twitch client IDs and versions have compiled-in defaults (from `internal/constants`) that are used when the corresponding environment variables are unset. These defaults may become stale as Twitch updates their clients, so it is recommended to set these environment variables explicitly.
 
 ### 1.6.2. Per-Account Authentication
 

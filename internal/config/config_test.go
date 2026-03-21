@@ -1,14 +1,18 @@
 package config
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/Guliveer/twitch-miner-go/internal/constants"
+)
 
 func TestApplyDefaultsSetsMaxWatchStreams(t *testing.T) {
 	cfg := &AccountConfig{}
 
 	applyDefaults(cfg)
 
-	if cfg.MaxWatchStreams != 2 {
-		t.Fatalf("expected default max_watch_streams to be 2, got %d", cfg.MaxWatchStreams)
+	if cfg.MaxWatchStreams != constants.MaxWatchStreams {
+		t.Fatalf("expected default max_watch_streams to be %d, got %d", constants.MaxWatchStreams, cfg.MaxWatchStreams)
 	}
 }
 
