@@ -4,6 +4,18 @@
   const REFRESH_INTERVAL = 30000; // 30 seconds
   const FILTER_REFRESH_INTERVAL = 60000; // 60 seconds
 
+  function setStatus(message, kind) {
+    var banner = document.getElementById("dashboard-status");
+    if (!banner) return;
+    if (!message) {
+      banner.textContent = "";
+      banner.className = "status-banner hidden";
+      return;
+    }
+    banner.textContent = message;
+    banner.className = "status-banner " + (kind || "info");
+  }
+
   // ── Debounce utility ──────────────────────────────────────────────────
   function debounce(fn, delay) {
     var timer;
@@ -16,7 +28,7 @@
   // ── Fetch helper ──────────────────────────────────────────────────────
   async function fetchJSON(url) {
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    if (!resp.ok) throw new Error("HTTP " + resp.status + " for " + url);
     return resp.json();
   }
 
@@ -73,6 +85,7 @@
       populateSelect("filter-category", data.categories || [], "All Categories");
     } catch (err) {
       console.error("Failed to load filters:", err);
+      setStatus("Failed to load dashboard filters. Check API access or server logs.", "error");
     }
   }
 
@@ -104,11 +117,11 @@
         var statusText = s.is_online ? "Online" : "Offline";
         var categoryBadge = s.is_category_watched ? '<span class="badge category">CAT</span>' : "";
         var accountBadge = s.account ? '<span class="badge account">' + escapeHTML(s.account) + "</span>" : "";
-        var gameText = s.game ? s.game : "";
+        var gameText = s.game ? escapeHTML(s.game) : "";
         var viewersText = s.is_online ? s.viewers_count + " viewers" : "";
         var details = [gameText, viewersText].filter(Boolean).join(" · ");
 
-        return '<div class="streamer-card ' + statusClass + '">' + '  <div class="name"><a href="' + s.streamer_url + '" target="_blank">' + (s.display_name || s.username) + "</a>" + accountBadge + "</div>" + '  <div class="status">' + '    <span class="badge ' + statusClass + '">' + statusText + "</span>" + categoryBadge + "  </div>" + '  <div class="details">' + '    <span class="points">' + formatPoints(s.channel_points) + " pts</span>" + (details ? " · " + details : "") + (s.title ? "<br><em>" + escapeHTML(s.title) + "</em>" : "") + "  </div>" + "</div>";
+        return '<div class="streamer-card ' + statusClass + '">' + '  <div class="name"><a href="' + escapeHTML(s.streamer_url) + '" target="_blank">' + escapeHTML(s.display_name || s.username) + "</a>" + accountBadge + "</div>" + '  <div class="status">' + '    <span class="badge ' + statusClass + '">' + statusText + "</span>" + categoryBadge + "  </div>" + '  <div class="details">' + '    <span class="points">' + formatPoints(s.channel_points) + " pts</span>" + (details ? " · " + details : "") + (s.title ? "<br><em>" + escapeHTML(s.title) + "</em>" : "") + "  </div>" + "</div>";
       })
       .join("");
   }
@@ -143,14 +156,20 @@
 
   // ── Data refresh ──────────────────────────────────────────────────────
   async function refresh() {
+    setStatus("Refreshing dashboard data...", "info");
     try {
       var filterQuery = buildFilterParams();
       var separator = filterQuery ? "?" + filterQuery : "";
       var results = await Promise.all([fetchJSON("/api/streamers" + separator), fetchJSON("/api/stats" + separator)]);
       renderStreamers(results[0]);
       renderStats(results[1]);
+      setStatus("", "");
     } catch (err) {
       console.error("Dashboard refresh error:", err);
+      document.getElementById("streamers-grid").innerHTML = '<div class="loading">Dashboard data could not be loaded.</div>';
+      document.getElementById("history-body").innerHTML =
+        '<tr><td colspan="3" style="text-align:center;color:#ff7777">Dashboard data could not be loaded.</td></tr>';
+      setStatus("Failed to refresh dashboard data. Verify authentication and backend connectivity.", "error");
     }
   }
 

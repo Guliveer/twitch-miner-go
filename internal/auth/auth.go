@@ -16,6 +16,7 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/config"
 	"github.com/Guliveer/twitch-miner-go/internal/constants"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
+	"github.com/Guliveer/twitch-miner-go/internal/runtimecfg"
 )
 
 // Authenticator handles Twitch login, token management, and cookie persistence.
@@ -35,6 +36,7 @@ type Authenticator struct {
 	cfg        config.AuthConfig
 	log        *logger.Logger
 	httpClient *http.Client
+	runtime    *runtimecfg.Twitch
 
 	integrityToken  string
 	integrityExpire int64
@@ -44,7 +46,7 @@ type Authenticator struct {
 // The cookie file path is automatically derived as cookies/{username}.json.
 // On Fly.io / Docker, DATA_DIR points to the persistent volume (e.g. /data),
 // so cookies are stored under {DATA_DIR}/cookies/{username}.json instead.
-func NewAuthenticator(cfg *config.AccountConfig, log *logger.Logger) *Authenticator {
+func NewAuthenticator(cfg *config.AccountConfig, log *logger.Logger, runtime *runtimecfg.Twitch) *Authenticator {
 	username := strings.ToLower(cfg.Username)
 	cookiesDir := "cookies"
 	if dataDir := os.Getenv("DATA_DIR"); dataDir != "" {
@@ -64,6 +66,7 @@ func NewAuthenticator(cfg *config.AccountConfig, log *logger.Logger) *Authentica
 		deviceID:      generateDeviceID(),
 		clientSession: GenerateHex(16),
 		log:           log,
+		runtime:       runtime,
 		httpClient: &http.Client{
 			Timeout: constants.DefaultHTTPTimeout,
 		},
@@ -235,17 +238,27 @@ func (a *Authenticator) Username() string {
 	return a.username
 }
 
-// GetAuthHeaders returns the headers needed for all Twitch API requests.
+// GetAuthHeaders returns the headers needed for Twitch GQL requests.
 func (a *Authenticator) GetAuthHeaders() map[string]string {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	return map[string]string{
 		"Authorization":     "OAuth " + a.authToken,
-		"Client-Id":         constants.ClientID,
+		"Client-Id":         a.runtime.ClientIDBrowser,
 		"Client-Session-Id": a.clientSession,
 		"X-Device-Id":       a.deviceID,
 		"User-Agent":        constants.DefaultUserAgent,
 	}
+}
+
+// ClientVersion returns the configured Twitch client version used for GQL requests.
+func (a *Authenticator) ClientVersion() string {
+	return a.runtime.ClientVersion
+}
+
+// ClientIDsForGQL returns the configured Twitch client IDs ordered for GQL fallback attempts.
+func (a *Authenticator) ClientIDsForGQL() []string {
+	return a.runtime.ClientIDsForGQL()
 }
 
 // FetchIntegrityToken fetches or returns a cached integrity token from
@@ -267,7 +280,7 @@ func (a *Authenticator) FetchIntegrityToken(ctx context.Context) (string, error)
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "OAuth "+a.authToken)
-	req.Header.Set("Client-Id", constants.ClientID)
+	req.Header.Set("Client-Id", a.runtime.ClientIDBrowser)
 	req.Header.Set("Client-Session-Id", a.clientSession)
 	req.Header.Set("X-Device-Id", a.deviceID)
 	req.Header.Set("User-Agent", constants.DefaultUserAgent)

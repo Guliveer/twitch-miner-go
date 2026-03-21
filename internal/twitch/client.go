@@ -17,6 +17,7 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/gql"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
 	"github.com/Guliveer/twitch-miner-go/internal/model"
+	"github.com/Guliveer/twitch-miner-go/internal/runtimecfg"
 )
 
 // Pre-compiled regexes for updateSpadeURL (Fix #4: avoid compiling per-call).
@@ -77,16 +78,16 @@ func (sc *spadeCache) prune() {
 // Client is the high-level Twitch API facade combining auth and GQL client.
 // It provides business-logic methods for the miner.
 type Client struct {
-	Auth *auth.Authenticator
-	GQL *gql.Client
-	Log *logger.Logger
-	cfg *config.AccountConfig
+	Auth      *auth.Authenticator
+	GQL       *gql.Client
+	Log       *logger.Logger
+	cfg       *config.AccountConfig
 	spadeURLs *spadeCache
 }
 
 // NewClient creates a new high-level Twitch Client from account configuration.
-func NewClient(cfg *config.AccountConfig, log *logger.Logger) (*Client, error) {
-	authenticator := auth.NewAuthenticator(cfg, log)
+func NewClient(cfg *config.AccountConfig, log *logger.Logger, runtime *runtimecfg.Twitch) (*Client, error) {
+	authenticator := auth.NewAuthenticator(cfg, log, runtime)
 	gqlClient := gql.NewClient(authenticator, log, cfg.ProxyURL())
 
 	return &Client{
@@ -153,6 +154,12 @@ func (c *Client) CheckStreamerOnline(ctx context.Context, streamer *model.Stream
 		}
 
 		if err := c.updateStream(ctx, streamer); err != nil {
+			if gql.IsTransientError(err) {
+				c.Log.Warn("Keeping streamer online after transient stream update failure",
+					"streamer", streamer.Username,
+					"error", err)
+				return nil
+			}
 			streamer.Mu.Lock()
 			streamer.SetOffline()
 			streamer.Mu.Unlock()
@@ -509,4 +516,3 @@ func (c *Client) GQLClient() *gql.Client {
 func (c *Client) AuthProvider() auth.Provider {
 	return c.Auth
 }
-

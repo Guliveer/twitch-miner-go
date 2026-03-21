@@ -29,6 +29,9 @@ type StreamerFunc func() []*model.Streamer
 // notifiers across all miners. Returns any errors encountered.
 type NotifyTestFunc func(ctx context.Context) []error
 
+// DebugSnapshotFunc returns a debug snapshot that can be serialized as JSON.
+type DebugSnapshotFunc func() any
+
 // DashboardAuth holds credentials for HTTP Basic Auth on the dashboard.
 // The password is stored as a SHA-256 hex digest for constant-time comparison.
 type DashboardAuth struct {
@@ -47,6 +50,7 @@ type AnalyticsServer struct {
 	streamers      []*model.Streamer
 	streamerFunc   StreamerFunc
 	notifyTestFunc NotifyTestFunc
+	debugFunc      DebugSnapshotFunc
 }
 
 // NewAnalyticsServer creates a new AnalyticsServer bound to the given address.
@@ -69,6 +73,7 @@ func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth) *A
 	mux.HandleFunc("GET /api/filters", s.handleFilters)
 	mux.HandleFunc("GET /api/events", s.handleEventLogs)
 	mux.HandleFunc("GET /api/event-filters", s.handleEventFilters)
+	mux.HandleFunc("GET /api/debug", s.handleDebug)
 
 	mux.HandleFunc("POST /api/test-notification", s.handleTestNotification)
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(staticFS)))
@@ -115,6 +120,13 @@ func (s *AnalyticsServer) SetStreamers(streamers []*model.Streamer) {
 func (s *AnalyticsServer) SetNotifyTestFunc(fn NotifyTestFunc) {
 	s.mu.Lock()
 	s.notifyTestFunc = fn
+	s.mu.Unlock()
+}
+
+// SetDebugFunc sets a function that returns a debug snapshot across all miners.
+func (s *AnalyticsServer) SetDebugFunc(fn DebugSnapshotFunc) {
+	s.mu.Lock()
+	s.debugFunc = fn
 	s.mu.Unlock()
 }
 

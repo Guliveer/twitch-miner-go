@@ -22,6 +22,29 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Validate PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          PATTERN='^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\([a-zA-Z0-9_-]+\))?(!)?: .+'
+
+          echo "PR title: $PR_TITLE"
+          if ! echo "$PR_TITLE" | grep -qE "$PATTERN"; then
+            echo ""
+            echo "🚫 PR title does not follow Conventional Commits format."
+            echo "This matters because squash-merge uses the PR title as the commit message."
+            echo ""
+            echo "Format: <type>[optional scope][!]: <description>"
+            echo "Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build"
+            echo "Examples:"
+            echo "  feat: add Docker Compose support"
+            echo "  fix(gql): retry on transient failures"
+            echo "  feat!: require Twitch runtime identifiers"
+            exit 1
+          fi
+
+          echo "✅ PR title follows Conventional Commits format."
+
       - name: Validate Conventional Commits
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -121,11 +144,14 @@ jobs:
           if [ -z "$LAST_TAG" ]; then
             echo "No previous version tag found. Using first commit as base."
             RANGE="HEAD"
-            COMMITS=$(git log --format="%s" "$RANGE")
+            COMMITS=$(git log --first-parent --format="%s" "$RANGE")
           else
             echo "Last tag: $LAST_TAG"
             RANGE="${LAST_TAG}..HEAD"
-            COMMITS=$(git log --format="%s" "$RANGE")
+            # --first-parent: only analyze commits directly on main,
+            # not internal commits from merged branches/forks.
+            # This prevents external PR commit history from influencing version bumps.
+            COMMITS=$(git log --first-parent --format="%s" "$RANGE")
           fi
 
           if [ -z "$COMMITS" ]; then
@@ -185,8 +211,15 @@ jobs:
         if: steps.bump.outputs.bump != 'skip'
         id: version
         run: |
-          CURRENT=$(cat VERSION)
-          echo "Current version: $CURRENT"
+          # Derive current version from the latest git tag (immutable, fork-safe).
+          # Falls back to VERSION file only if no tags exist yet.
+          LAST_TAG=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1)
+          if [ -n "$LAST_TAG" ]; then
+            CURRENT="${LAST_TAG#v}"
+          else
+            CURRENT=$(cat VERSION)
+          fi
+          echo "Current version: $CURRENT (source: ${LAST_TAG:-VERSION file})"
 
           BUMP="${{ steps.bump.outputs.bump }}"
 

@@ -52,16 +52,24 @@ This configures two git hooks:
 
 > **Tip:** The hooks are stored in [`scripts/githooks/`](scripts/githooks/) and the installer ([`scripts/install-hooks.sh`](scripts/install-hooks.sh)) simply points `core.hooksPath` at that directory — no files are copied into `.git/`.
 
+## Pull Requests
+
+- **PR titles must follow Conventional Commits format** — CI validates this automatically.
+- **Use squash-merge** when merging PRs. This ensures the PR title (which CI validates) becomes the single commit on `main`, keeping history clean and version bumps predictable.
+- The version pipeline only analyzes first-parent commits on `main`, so internal branch history from forks does not influence version bumps.
+
+> **Repo setting:** Enable "Allow squash merging" and set default to "Default to pull request title" in repository Settings → General → Pull Requests.
+
 ## Automated Versioning
 
 Releases are fully automated through the [CI workflow](.github/workflows/ci.yml):
 
 1. Developers write commits using the Conventional Commits format described above.
 2. Git hooks enforce the format locally (see [Setting Up Git Hooks](#setting-up-git-hooks)).
-3. CI validates the commit format on pull requests.
+3. CI validates both the **PR title** and individual **commit messages** on pull requests.
 4. On merge to `main`, the CI pipeline runs in order: **build** → **version** → **deploy**:
-   - **build** — compiles, runs tests and vet
-   - **version** — analyzes commit messages, bumps [`VERSION`](VERSION), creates a git tag and GitHub Release
-   - **deploy** — deploys to Fly.io with the new version (only after build and version succeed)
+   - **build** — compiles, runs tests, vet, and lint
+   - **version** — analyzes first-parent commit messages since the last tag, bumps `VERSION`, creates a git tag and GitHub Release
+   - **deploy** — deploys to Fly.io (when `FLY_API_TOKEN` is configured)
 
-No manual version bumps, tags, or deploys are needed — just write well-formatted commits and the pipeline handles the rest.
+Docker images are published separately via the [Docker workflow](.github/workflows/docker-publish.yml). No manual tags are needed — just write well-formatted commits and the pipeline handles the rest.

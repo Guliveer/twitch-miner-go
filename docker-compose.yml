@@ -1,0 +1,25 @@
+services:
+  twitch-miner-go:
+    # Override image in .env with TWITCH_MINER_IMAGE variable
+    image: ${TWITCH_MINER_IMAGE:-ghcr.io/guliveer/twitch-miner-go:latest}
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      DATA_DIR: /data
+      PORT: 8080
+      # Required: Set TWITCH_CLIENT_ID_TV, TWITCH_CLIENT_ID_BROWSER, TWITCH_CLIENT_VERSION in .env
+    volumes:
+      - ./configs:/configs:ro
+      - twitch-miner-data:/data
+    healthcheck:
+      test: ["CMD", "/twitch-miner-go", "-healthcheck-url", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  twitch-miner-data:

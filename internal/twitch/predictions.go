@@ -19,6 +19,14 @@ func (c *Client) MakePrediction(ctx context.Context, streamer *model.Streamer, e
 	streamer.Mu.RUnlock()
 
 	event.Mu.Lock()
+	if event.BetConfirmed {
+		event.Mu.Unlock()
+		c.Log.Info("Prediction already confirmed",
+			"streamer", username,
+			"event_id", event.EventID,
+			"event", string(model.EventBetGeneral))
+		return nil
+	}
 
 	decision := event.Bet.Calculate(balance)
 
@@ -76,6 +84,18 @@ func (c *Client) MakePrediction(ctx context.Context, streamer *model.Streamer, e
 	if decision.Choice >= 0 && decision.Choice < len(event.Bet.Outcomes) {
 		chosenOutcome = event.Bet.Outcomes[decision.Choice].Title
 	}
+	if decision.Choice < 0 || decision.Choice >= len(event.Bet.Outcomes) || decision.OutcomeID == "" {
+		event.Mu.Unlock()
+		return fmt.Errorf("no valid prediction outcome available")
+	}
+	if decision.Amount > balance {
+		decision.Amount = balance
+	}
+	if decision.Amount < 10 {
+		event.Mu.Unlock()
+		return fmt.Errorf("prediction amount %d fell below minimum after balance guard", decision.Amount)
+	}
+	event.Bet.Decision = decision
 
 	event.Mu.Unlock()
 
@@ -98,6 +118,7 @@ func (c *Client) MakePrediction(ctx context.Context, streamer *model.Streamer, e
 
 	event.Mu.Lock()
 	event.BetPlaced = true
+	event.LastFailedReason = ""
 	event.Mu.Unlock()
 
 	c.Log.Info("Prediction placed successfully",

@@ -9,6 +9,8 @@ type Provider interface {
 	AuthToken() string
 	UserID() string
 	GetAuthHeaders() map[string]string
+	ClientVersion() string
+	ClientIDsForGQL() []string
 	FetchIntegrityToken(ctx context.Context) (string, error)
 	RefreshToken(ctx context.Context) error
 }

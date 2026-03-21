@@ -25,6 +25,8 @@ func (m *mockAuthProvider) Login(_ context.Context) error                       
 func (m *mockAuthProvider) AuthToken() string                                     { m.mu.Lock(); defer m.mu.Unlock(); return m.token }
 func (m *mockAuthProvider) UserID() string                                        { return m.userID }
 func (m *mockAuthProvider) GetAuthHeaders() map[string]string                     { return nil }
+func (m *mockAuthProvider) ClientVersion() string                                 { return "test-version" }
+func (m *mockAuthProvider) ClientIDsForGQL() []string                             { return []string{"browser"} }
 func (m *mockAuthProvider) FetchIntegrityToken(_ context.Context) (string, error) { return "", nil }
 
 func (m *mockAuthProvider) RefreshToken(_ context.Context) error {
@@ -215,6 +217,8 @@ func (m *tokenChangingMock) Login(_ context.Context) error                      
 func (m *tokenChangingMock) AuthToken() string                                     { m.mu.Lock(); defer m.mu.Unlock(); return m.token }
 func (m *tokenChangingMock) UserID() string                                        { return "123" }
 func (m *tokenChangingMock) GetAuthHeaders() map[string]string                     { return nil }
+func (m *tokenChangingMock) ClientVersion() string                                 { return "test-version" }
+func (m *tokenChangingMock) ClientIDsForGQL() []string                             { return []string{"browser"} }
 func (m *tokenChangingMock) FetchIntegrityToken(_ context.Context) (string, error) { return "", nil }
 
 func (m *tokenChangingMock) RefreshToken(_ context.Context) error {
@@ -246,4 +250,25 @@ func TestHandleResponse_OtherErrors_NoRefresh(t *testing.T) {
 		t.Errorf("RefreshToken should not be called for non-BADAUTH errors, got %d calls", mock.refreshCount)
 	}
 	mock.mu.Unlock()
+}
+
+func TestHandleResponse_ReconnectClosesConnection(t *testing.T) {
+	mock := &mockAuthProvider{token: "valid-token", userID: "123"}
+	c := newTestConnection(mock)
+
+	ctx := context.Background()
+	c.handleResponse(ctx, &Response{Type: TypeReconnect})
+
+	if c.IsConnected() {
+		t.Fatal("expected connection to be marked disconnected after reconnect request")
+	}
+
+	select {
+	case _, ok := <-c.Messages():
+		if ok {
+			t.Fatal("expected messages channel to be closed after reconnect request")
+		}
+	default:
+		t.Fatal("expected messages channel to close after reconnect request")
+	}
 }
