@@ -22,6 +22,8 @@ type Streamer struct {
 	IsOnline bool `json:"is_online"`
 	IsCategoryWatched bool `json:"is_category_watched"`
 	CategorySlug string `json:"category_slug,omitempty"`
+	IsTeamWatched bool `json:"is_team_watched"`
+	TeamName string `json:"team_name,omitempty"`
 
 	StreamUpAt time.Time `json:"stream_up_at"`
 	OnlineAt time.Time `json:"online_at"`

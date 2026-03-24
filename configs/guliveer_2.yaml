@@ -21,6 +21,13 @@ category_watcher:
     - slug: "tom-clancys-rainbow-six-siege"
       drops_only: false
 
+# Team watcher - auto-discover streams by team membership
+team_watcher:
+  enabled: true
+  poll_interval: 180s
+  teams:
+    - name: "rainbow6"
+
 # Default settings for all streamers
 streamer_defaults:
   make_predictions: true
@@ -86,7 +93,7 @@ followers:
 notifications:
   batch:
     enabled: true
-    interval: 30m
+    interval: 3h
     max_entries: 15
     immediate_events: []
 

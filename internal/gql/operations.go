@@ -787,6 +787,83 @@ func (c *Client) GetDropCampaignDetailsBatch(ctx context.Context, campaignIDs []
 	return results, nil
 }
 
+// TeamMember holds information about a team member returned by the TeamPage query.
+type TeamMember struct {
+	UserID      string
+	Login       string
+	DisplayName string
+	IsLive      bool
+	ViewersCount int
+	GameID      string
+	GameName    string
+	GameSlug    string
+}
+
+// GetTeamMembers fetches all members of a Twitch team.
+func (c *Client) GetTeamMembers(ctx context.Context, teamName string) ([]TeamMember, error) {
+	vars := map[string]any{"name": teamName}
+	data, err := c.PostGQL(ctx, constants.GQLTeamPage, vars)
+	if err != nil {
+		return nil, fmt.Errorf("GetTeamMembers for %s: %w", teamName, err)
+	}
+
+	var resp struct {
+		Team *struct {
+			Members struct {
+				Nodes []struct {
+					User *struct {
+						ID          string `json:"id"`
+						Login       string `json:"login"`
+						DisplayName string `json:"displayName"`
+						Stream      *struct {
+							ID           string `json:"id"`
+							ViewersCount int    `json:"viewersCount"`
+							Game         *struct {
+								ID          string `json:"id"`
+								Name        string `json:"name"`
+								DisplayName string `json:"displayName"`
+								Slug        string `json:"slug"`
+							} `json:"game"`
+						} `json:"stream"`
+					} `json:"user"`
+				} `json:"nodes"`
+			} `json:"members"`
+		} `json:"team"`
+	}
+
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, fmt.Errorf("parsing GetTeamMembers response: %w", err)
+	}
+
+	if resp.Team == nil {
+		return nil, fmt.Errorf("team %s not found", teamName)
+	}
+
+	var members []TeamMember
+	for _, node := range resp.Team.Members.Nodes {
+		if node.User == nil {
+			continue
+		}
+		member := TeamMember{
+			UserID:      node.User.ID,
+			Login:       node.User.Login,
+			DisplayName: node.User.DisplayName,
+		}
+		if node.User.Stream != nil {
+			member.IsLive = true
+			member.ViewersCount = node.User.Stream.ViewersCount
+			if node.User.Stream.Game != nil {
+				member.GameID = node.User.Stream.Game.ID
+				member.GameName = node.User.Stream.Game.DisplayName
+				member.GameSlug = node.User.Stream.Game.Slug
+			}
+		}
+		members = append(members, member)
+	}
+
+	return members, nil
+}
+
 // GetGameSlug fetches the slug for a game by its ID using a raw GQL query.
 // Returns empty string if the game is not found.
 func (c *Client) GetGameSlug(ctx context.Context, gameID string) (string, error) {

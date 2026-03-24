@@ -25,6 +25,8 @@ type AccountConfig struct {
 
 	CategoryWatcher CategoryWatcherConfig `yaml:"category_watcher"`
 
+	TeamWatcher TeamWatcherConfig `yaml:"team_watcher"`
+
 	StreamerDefaults StreamerSettingsConfig `yaml:"streamer_defaults"`
 
 	Streamers []StreamerConfig `yaml:"streamers"`
@@ -62,6 +64,18 @@ type CategoryWatcherConfig struct {
 type CategoryConfig struct {
 	Slug      string `yaml:"slug"`
 	DropsOnly *bool  `yaml:"drops_only,omitempty"`
+}
+
+// TeamWatcherConfig holds settings for the team watcher.
+type TeamWatcherConfig struct {
+	Enabled      bool          `yaml:"enabled"`
+	PollInterval time.Duration `yaml:"poll_interval"`
+	Teams        []TeamConfig  `yaml:"teams"`
+}
+
+// TeamConfig holds settings for a single Twitch team.
+type TeamConfig struct {
+	Name string `yaml:"name"`
 }
 
 // StreamerSettingsConfig is the YAML representation of per-streamer settings.

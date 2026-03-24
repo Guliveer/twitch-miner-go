@@ -31,6 +31,16 @@ category_watcher:
     - slug: "league-of-legends"
       drops_only: true
 
+# Team watcher - auto-discover streams by team membership
+# Picks one live streamer per team (highest viewers), similar to category_watcher.
+# URL format: https://www.twitch.tv/team/{name}
+# team_watcher:
+#   enabled: true
+#   poll_interval: 180s
+#   teams:
+#     - name: "rainbow6"
+#     - name: "og"
+
 # Default settings for all streamers, can be overridden per-streamer
 streamer_defaults:
   make_predictions: true

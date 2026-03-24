@@ -104,6 +104,13 @@ func (m *Miner) handlePredictionCreated(
 		return
 	}
 
+	// Store event before balance check so dedup works even when bet is rejected.
+	// Without this, repeated prediction updates re-trigger handlePredictionCreated
+	// and spam "Insufficient points" every second.
+	m.eventsPredictionsMu.Lock()
+	m.eventsPredictions[eventID] = event
+	m.eventsPredictionsMu.Unlock()
+
 	if betSettings.MinimumPoints > 0 && balance < betSettings.MinimumPoints {
 		m.log.Event(ctx, model.EventBetFilters,
 			"Insufficient points for bet",
@@ -113,10 +120,6 @@ func (m *Miner) handlePredictionCreated(
 			"minimum", betSettings.MinimumPoints)
 		return
 	}
-
-	m.eventsPredictionsMu.Lock()
-	m.eventsPredictions[eventID] = event
-	m.eventsPredictionsMu.Unlock()
 
 	m.log.Event(ctx, model.EventBetStart,
 		fmt.Sprintf("Placing bet in %.0fs", secondsUntilClose),

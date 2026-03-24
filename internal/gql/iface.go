@@ -38,4 +38,5 @@ type Operations interface {
 	GetBroadcastID(ctx context.Context, channelID string) (string, error)
 	CheckViewerIsMod(ctx context.Context, channelLogin string) (bool, error)
 	GetGameSlug(ctx context.Context, gameID string) (string, error)
+	GetTeamMembers(ctx context.Context, teamName string) ([]TeamMember, error)
 }

@@ -228,6 +228,10 @@ var (
 		OperationName: "GameByID",
 		Query:         `query GameByID($id: ID!) { game(id: $id) { slug } }`,
 	}
+	GQLTeamPage = GQLOperation{
+		OperationName: "TeamPage",
+		Query:         `query TeamPage($name: String!) { team(name: $name) { id name displayName members { nodes { user { id login displayName stream { id viewersCount game { id name displayName slug } } } } } } }`,
+	}
 )
 
 // AllGQLOperations returns a slice of all defined GQL operations for iteration.
@@ -254,5 +258,6 @@ func AllGQLOperations() []GQLOperation {
 		GQLContributeCommunityPointsCommunityGoal,
 		GQLDirectoryPageGame,
 		GQLGameByID,
+		GQLTeamPage,
 	}
 }

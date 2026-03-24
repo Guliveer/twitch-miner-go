@@ -48,7 +48,7 @@ func (m *Miner) addStreamer(ctx context.Context, s *model.Streamer) {
 			"streamer", s.Username, "error", err)
 	}
 
-	if !s.IsCategoryWatched {
+	if !s.IsCategoryWatched && !s.IsTeamWatched {
 		m.log.Info("➕ Added",
 			"streamer", s.Username,
 			"channel_id", s.ChannelID,
@@ -211,7 +211,7 @@ func (m *Miner) resolveStreamers(ctx context.Context) error {
 		}
 	}
 
-	if len(resolved) == 0 && !m.cfg.CategoryWatcher.Enabled {
+	if len(resolved) == 0 && !m.cfg.CategoryWatcher.Enabled && !m.cfg.TeamWatcher.Enabled {
 		return fmt.Errorf("no streamers could be resolved for account %s", m.cfg.Username)
 	}
 

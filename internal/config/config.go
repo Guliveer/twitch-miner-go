@@ -115,6 +115,10 @@ func applyDefaults(cfg *AccountConfig) {
 		cfg.CategoryWatcher.PollInterval = 120 * time.Second
 	}
 
+	if cfg.TeamWatcher.PollInterval == 0 {
+		cfg.TeamWatcher.PollInterval = 120 * time.Second
+	}
+
 	if cfg.Followers.Order == "" {
 		cfg.Followers.Order = "ASC"
 	}
@@ -192,8 +196,8 @@ func Validate(cfg *AccountConfig) error {
 		return fmt.Errorf("account %s: max_watch_streams must be at least 1", cfg.Username)
 	}
 
-	if len(cfg.Streamers) == 0 && !cfg.Followers.Enabled && !cfg.CategoryWatcher.Enabled {
-		return fmt.Errorf("account %s: at least one of streamers, followers, or category_watcher must be configured", cfg.Username)
+	if len(cfg.Streamers) == 0 && !cfg.Followers.Enabled && !cfg.CategoryWatcher.Enabled && !cfg.TeamWatcher.Enabled {
+		return fmt.Errorf("account %s: at least one of streamers, followers, category_watcher, or team_watcher must be configured", cfg.Username)
 	}
 
 	for i, streamerCfg := range cfg.Streamers {
@@ -223,6 +227,11 @@ func Validate(cfg *AccountConfig) error {
 	// Category watcher enabled but no categories configured.
 	if cfg.CategoryWatcher.Enabled && len(cfg.CategoryWatcher.Categories) == 0 {
 		return fmt.Errorf("account %s: category_watcher is enabled but no categories are configured", cfg.Username)
+	}
+
+	// Team watcher enabled but no teams configured.
+	if cfg.TeamWatcher.Enabled && len(cfg.TeamWatcher.Teams) == 0 {
+		return fmt.Errorf("account %s: team_watcher is enabled but no teams are configured", cfg.Username)
 	}
 
 	// Batch interval must be positive when enabled.
