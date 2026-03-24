@@ -112,6 +112,9 @@ func (m *Miner) handlePredictionCreated(
 	m.eventsPredictionsMu.Unlock()
 
 	if betSettings.MinimumPoints > 0 && balance < betSettings.MinimumPoints {
+		event.Mu.Lock()
+		event.BetSkipped = true
+		event.Mu.Unlock()
 		m.log.Event(ctx, model.EventBetFilters,
 			"Insufficient points for bet",
 			"streamer", username,
@@ -162,7 +165,7 @@ func (m *Miner) handlePredictionUpdated(
 	m.pendingTimersMu.Lock()
 	_, hasTimer := m.pendingTimers[eventID]
 	m.pendingTimersMu.Unlock()
-	if !hasTimer && eventStatus == "ACTIVE" && !event.BetPlaced && !event.BetConfirmed {
+	if !hasTimer && eventStatus == "ACTIVE" && !event.BetPlaced && !event.BetConfirmed && !event.BetSkipped {
 		delay := event.ClosingBetAfter(time.Now())
 		if delay < 0 {
 			delay = 0

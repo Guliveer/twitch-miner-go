@@ -505,6 +505,7 @@ type EventPrediction struct {
 	ScheduledFor            time.Time        `json:"scheduled_for"`
 	BetConfirmed            bool             `json:"bet_confirmed"`
 	BetPlaced               bool             `json:"bet_placed"`
+	BetSkipped              bool             `json:"bet_skipped"`
 	PlacementInFlight       bool             `json:"placement_in_flight"`
 	PlacementAttempts       int              `json:"placement_attempts"`
 	LastAttemptAt           time.Time        `json:"last_attempt_at"`

@@ -62,6 +62,9 @@ var operationBehaviors = map[string]operationBehavior{
 		tryAltClientIDs: true,
 		retryGQLErrors:  true,
 	},
+	"TeamPage": {
+		failOnErrors: true,
+	},
 }
 
 // circuitBreaker tracks consecutive failures and backs off when the API

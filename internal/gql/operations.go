@@ -807,6 +807,10 @@ func (c *Client) GetTeamMembers(ctx context.Context, teamName string) ([]TeamMem
 		return nil, fmt.Errorf("GetTeamMembers for %s: %w", teamName, err)
 	}
 
+	if len(data) == 0 {
+		return nil, fmt.Errorf("GetTeamMembers for %s: empty response from API", teamName)
+	}
+
 	var resp struct {
 		Team *struct {
 			Members struct {
