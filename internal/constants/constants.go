@@ -230,7 +230,7 @@ var (
 	}
 	GQLTeamPage = GQLOperation{
 		OperationName: "TeamPage",
-		Query:         `query TeamPage($name: String!) { team(name: $name) { id name displayName members { nodes { user { id login displayName stream { id viewersCount game { id name displayName slug } } } } } } }`,
+		Query:         `query TeamPage($name: String!) { team(name: $name) { id name displayName members(first: 100) { edges { node { id login displayName stream { id viewersCount game { id name displayName slug } } } } } } }`,
 	}
 )
 

@@ -818,8 +818,8 @@ func (c *Client) GetTeamMembers(ctx context.Context, teamName string) ([]TeamMem
 	var resp struct {
 		Team *struct {
 			Members struct {
-				Nodes []struct {
-					User *struct {
+				Edges []struct {
+					Node *struct {
 						ID          string `json:"id"`
 						Login       string `json:"login"`
 						DisplayName string `json:"displayName"`
@@ -833,8 +833,8 @@ func (c *Client) GetTeamMembers(ctx context.Context, teamName string) ([]TeamMem
 								Slug        string `json:"slug"`
 							} `json:"game"`
 						} `json:"stream"`
-					} `json:"user"`
-				} `json:"nodes"`
+					} `json:"node"`
+				} `json:"edges"`
 			} `json:"members"`
 		} `json:"team"`
 	}
@@ -848,22 +848,22 @@ func (c *Client) GetTeamMembers(ctx context.Context, teamName string) ([]TeamMem
 	}
 
 	var members []TeamMember
-	for _, node := range resp.Team.Members.Nodes {
-		if node.User == nil {
+	for _, edge := range resp.Team.Members.Edges {
+		if edge.Node == nil {
 			continue
 		}
 		member := TeamMember{
-			UserID:      node.User.ID,
-			Login:       node.User.Login,
-			DisplayName: node.User.DisplayName,
+			UserID:      edge.Node.ID,
+			Login:       edge.Node.Login,
+			DisplayName: edge.Node.DisplayName,
 		}
-		if node.User.Stream != nil {
+		if edge.Node.Stream != nil {
 			member.IsLive = true
-			member.ViewersCount = node.User.Stream.ViewersCount
-			if node.User.Stream.Game != nil {
-				member.GameID = node.User.Stream.Game.ID
-				member.GameName = node.User.Stream.Game.DisplayName
-				member.GameSlug = node.User.Stream.Game.Slug
+			member.ViewersCount = edge.Node.Stream.ViewersCount
+			if edge.Node.Stream.Game != nil {
+				member.GameID = edge.Node.Stream.Game.ID
+				member.GameName = edge.Node.Stream.Game.DisplayName
+				member.GameSlug = edge.Node.Stream.Game.Slug
 			}
 		}
 		members = append(members, member)
