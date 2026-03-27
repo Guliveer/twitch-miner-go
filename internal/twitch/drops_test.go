@@ -135,11 +135,18 @@ func inventoryJSON(drops []inventoryDrop) string {
 		})
 	}
 
+	// Put each drop in its own campaign to simulate the real inventory
+	// where the same drop can appear across multiple campaigns.
+	var campaigns []campaign
+	for _, entry := range entries {
+		campaigns = append(campaigns, campaign{
+			Game:           &game{Name: "The Finals", Slug: "the-finals"},
+			TimeBasedDrops: []dropEntry{entry},
+		})
+	}
+
 	inv := inventory{
-		DropCampaignsInProgress: []campaign{{
-			Game:           &game{Name: "Rainbow Six Siege", Slug: "tom-clancys-rainbow-six-siege"},
-			TimeBasedDrops: entries,
-		}},
+		DropCampaignsInProgress: campaigns,
 	}
 
 	// Match the real GQL response shape that GetDropsInventory parses.
@@ -277,6 +284,32 @@ func TestClaimAllDrops_HandlesUnexpectedStatus(t *testing.T) {
 	}
 	if got := transport.callCount("DropsPage_ClaimDropRewards"); got != 1 {
 		t.Fatalf("expected still 1 claim call after second run, got %d", got)
+	}
+}
+
+func TestClaimAllDrops_DedupesSameDropAcrossCampaigns(t *testing.T) {
+	t.Parallel()
+
+	// Same drop ID ("drop1") appears 4 times with different instance IDs,
+	// simulating the same drop available from 4 different campaigns.
+	transport := newMockTransport()
+	transport.responses["Inventory"] = inventoryJSON([]inventoryDrop{
+		{id: "drop1", timeName: "2 Hours", benefitName: "Accounting Services", instanceID: "inst-1"},
+		{id: "drop1", timeName: "2 Hours", benefitName: "Accounting Services", instanceID: "inst-2"},
+		{id: "drop1", timeName: "2 Hours", benefitName: "Accounting Services", instanceID: "inst-3"},
+		{id: "drop1", timeName: "2 Hours", benefitName: "Accounting Services", instanceID: "inst-4"},
+	})
+	transport.responses["DropsPage_ClaimDropRewards"] = claimSuccessResponse()
+
+	client := newTestClient(t, transport)
+
+	if err := client.ClaimAllDropsFromInventory(context.Background()); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Only 1 claim call despite 4 instances — dedup by drop definition ID.
+	if got := transport.callCount("DropsPage_ClaimDropRewards"); got != 1 {
+		t.Fatalf("expected 1 claim call (dedup across campaigns), got %d", got)
 	}
 }
 

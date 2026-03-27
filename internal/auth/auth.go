@@ -261,6 +261,16 @@ func (a *Authenticator) ClientIDsForGQL() []string {
 	return a.runtime.ClientIDsForGQL()
 }
 
+// ClearIntegrityToken invalidates the cached integrity token so the next
+// FetchIntegrityToken call fetches a fresh one. Called by the GQL client
+// when Twitch rejects the current token with "failed integrity check".
+func (a *Authenticator) ClearIntegrityToken() {
+	a.mu.Lock()
+	a.integrityToken = ""
+	a.integrityExpire = 0
+	a.mu.Unlock()
+}
+
 // FetchIntegrityToken fetches or returns a cached integrity token from
 // https://gql.twitch.tv/integrity. The token is refreshed 5 minutes before expiry.
 func (a *Authenticator) FetchIntegrityToken(ctx context.Context) (string, error) {

@@ -451,8 +451,12 @@ func (c *Client) ClaimDropRewards(ctx context.Context, dropInstanceID string) (b
 		return false, fmt.Errorf("parsing ClaimDropRewards response: %w", err)
 	}
 
+	if len(resp.Errors) > 0 {
+		return false, fmt.Errorf("ClaimDropRewards GQL error: %s (dropInstanceID=%s)", resp.Errors[0].Message, dropInstanceID)
+	}
+
 	if resp.ClaimDropRewards == nil {
-		return false, fmt.Errorf("ClaimDropRewards returned nil response")
+		return false, fmt.Errorf("ClaimDropRewards returned nil (dropInstanceID=%s, raw=%s)", dropInstanceID, string(data))
 	}
 
 	switch resp.ClaimDropRewards.Status {

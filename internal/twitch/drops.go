@@ -205,8 +205,10 @@ func (c *Client) ClaimAllDropsFromInventory(ctx context.Context) error {
 				continue
 			}
 
-			// Skip drops we've already attempted to claim to avoid notification spam.
-			if _, alreadyAttempted := c.claimedDrops.Load(drop.Self.DropInstanceID); alreadyAttempted {
+			// Dedup by drop definition ID — the same drop can appear across
+			// multiple campaigns with different instance IDs. Claiming one
+			// instance is enough; Twitch marks the rest as claimed server-side.
+			if _, alreadyAttempted := c.claimedDrops.Load(drop.ID); alreadyAttempted {
 				continue
 			}
 
@@ -229,7 +231,7 @@ func (c *Client) ClaimAllDropsFromInventory(ctx context.Context) error {
 				"category", categoryName)
 
 			// Mark as attempted before calling the API to prevent duplicates.
-			c.claimedDrops.Store(drop.Self.DropInstanceID, true)
+			c.claimedDrops.Store(drop.ID, true)
 
 			claimed, err := c.GQL.ClaimDropRewards(ctx, drop.Self.DropInstanceID)
 			if err != nil {

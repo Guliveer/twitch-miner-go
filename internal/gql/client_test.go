@@ -15,7 +15,7 @@ func TestIsRetryableGQLError(t *testing.T) {
 		{name: "service timeout", msg: "service timeout", want: true},
 		{name: "temporarily unavailable", msg: "Temporarily unavailable", want: true},
 		{name: "timed out", msg: "upstream timed out", want: true},
-		{name: "integrity failure", msg: "failed integrity check", want: false},
+		{name: "integrity failure", msg: "failed integrity check", want: true},
 		{name: "validation error", msg: "field does not exist", want: false},
 	}
 

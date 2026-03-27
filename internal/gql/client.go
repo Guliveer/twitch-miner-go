@@ -42,9 +42,10 @@ type operationBehavior struct {
 // expected and should be logged at DEBUG instead of WARN. These operations
 // sometimes fail with "failed integrity check" but may still succeed on retry.
 var integrityFailureOps = map[string]bool{
-	"JoinRaid":             true,
-	"ClaimCommunityPoints": true,
-	"ViewerDropsDashboard": true,
+	"JoinRaid":                  true,
+	"ClaimCommunityPoints":      true,
+	"ViewerDropsDashboard":      true,
+	"DropsPage_ClaimDropRewards": true,
 }
 
 // operationBehaviors centralizes per-operation compatibility workarounds for
@@ -64,6 +65,11 @@ var operationBehaviors = map[string]operationBehavior{
 	},
 	"TeamPage": {
 		failOnErrors: true,
+	},
+	// Drop claims fail with "failed integrity check" when the integrity
+	// token is stale. Retrying with a fresh token typically succeeds.
+	"DropsPage_ClaimDropRewards": {
+		retryGQLErrors: true,
 	},
 }
 
@@ -340,6 +346,13 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 				}
 
 				if behavior.retryGQLErrors && isRetryableGQLError(errMsg) && semanticRetries < 2 {
+					// If the error was an integrity check failure, invalidate
+					// the cached token so the retry fetches a fresh one.
+					if strings.Contains(errMsg, "integrity check") {
+						if clearer, ok := c.auth.(interface{ ClearIntegrityToken() }); ok {
+							clearer.ClearIntegrityToken()
+						}
+					}
 					semanticRetries++
 					backoff := time.Duration(semanticRetries) * time.Second
 					c.log.Info("Retrying GQL operation after transient response error",
@@ -391,7 +404,8 @@ func isRetryableGQLError(errMsg string) bool {
 	return strings.Contains(errMsg, "service timeout") ||
 		strings.Contains(errMsg, "service unavailable") ||
 		strings.Contains(errMsg, "temporarily unavailable") ||
-		strings.Contains(errMsg, "timed out")
+		strings.Contains(errMsg, "timed out") ||
+		strings.Contains(errMsg, "integrity check")
 }
 
 // IsTransientError reports whether the error indicates a temporary Twitch-side
