@@ -83,6 +83,10 @@ type Client struct {
 	Log       *logger.Logger
 	cfg       *config.AccountConfig
 	spadeURLs *spadeCache
+
+	// claimedDrops tracks drop instance IDs that have already been attempted
+	// to prevent notification spam across sync cycles.
+	claimedDrops sync.Map
 }
 
 // NewClient creates a new high-level Twitch Client from account configuration.

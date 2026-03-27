@@ -452,14 +452,14 @@ func (c *Client) ClaimDropRewards(ctx context.Context, dropInstanceID string) (b
 	}
 
 	if resp.ClaimDropRewards == nil {
-		return false, nil
+		return false, fmt.Errorf("ClaimDropRewards returned nil response")
 	}
 
 	switch resp.ClaimDropRewards.Status {
 	case "ELIGIBLE_FOR_ALL", "DROP_INSTANCE_ALREADY_CLAIMED":
 		return true, nil
 	default:
-		return false, nil
+		return false, fmt.Errorf("ClaimDropRewards unexpected status: %s", resp.ClaimDropRewards.Status)
 	}
 }
 

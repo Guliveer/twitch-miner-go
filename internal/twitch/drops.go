@@ -130,25 +130,6 @@ func (c *Client) syncCampaignsWithInventory(ctx context.Context, campaigns []*mo
 								timeDrop.Self.DropInstanceID,
 								timeDrop.Self.IsClaimed,
 							)
-							if drop.IsClaimable {
-									categoryName := ""
-									if campaigns[i].Game != nil {
-										categoryName = campaigns[i].Game.Slug
-										if categoryName == "" {
-											categoryName = campaigns[i].Game.Name
-										}
-									}
-									c.Log.Event(ctx, model.EventDropClaim, "Claiming drop",
-										"drop", drop.String(),
-										"category", categoryName)
-								claimed, err := c.GQL.ClaimDropRewards(ctx, drop.DropInstanceID)
-								if err != nil {
-									c.Log.Warn("Failed to claim drop",
-										"drop", drop.Name, "error", err)
-								} else {
-									drop.IsClaimed = claimed
-								}
-							}
 						}
 					}
 				}
@@ -192,8 +173,13 @@ func (c *Client) ClaimAllDropsFromInventory(ctx context.Context) error {
 				Slug string `json:"slug"`
 			} `json:"game"`
 			TimeBasedDrops []struct {
-				ID   string `json:"id"`
-				Name string `json:"name"`
+				ID           string `json:"id"`
+				Name         string `json:"name"`
+				BenefitEdges []struct {
+					Benefit struct {
+						Name string `json:"name"`
+					} `json:"benefit"`
+				} `json:"benefitEdges"`
 				Self *struct {
 					DropInstanceID string `json:"dropInstanceID"`
 					IsClaimed      bool   `json:"isClaimed"`
@@ -215,28 +201,50 @@ func (c *Client) ClaimAllDropsFromInventory(ctx context.Context) error {
 			if drop.Self == nil {
 				continue
 			}
-			if !drop.Self.IsClaimed && drop.Self.DropInstanceID != "" {
-					categoryName := ""
-					if campaign.Game != nil {
-						categoryName = campaign.Game.Slug
-						if categoryName == "" {
-							categoryName = campaign.Game.Name
-						}
-					}
-					c.Log.Event(ctx, model.EventDropClaim, "Claiming drop from inventory",
-						"drop", drop.Name,
-						"category", categoryName)
-				_, err := c.GQL.ClaimDropRewards(ctx, drop.Self.DropInstanceID)
-				if err != nil {
-					c.Log.Warn("Failed to claim drop from inventory",
-						"drop", drop.Name, "error", err)
+			if drop.Self.IsClaimed || drop.Self.DropInstanceID == "" {
+				continue
+			}
+
+			// Skip drops we've already attempted to claim to avoid notification spam.
+			if _, alreadyAttempted := c.claimedDrops.Load(drop.Self.DropInstanceID); alreadyAttempted {
+				continue
+			}
+
+			categoryName := ""
+			if campaign.Game != nil {
+				categoryName = campaign.Game.Slug
+				if categoryName == "" {
+					categoryName = campaign.Game.Name
 				}
-				sleepDuration := time.Duration(5+rand.IntN(5)) * time.Second
-				select {
-				case <-ctx.Done():
-					return ctx.Err()
-				case <-time.After(sleepDuration):
-				}
+			}
+
+			// Use the benefit/reward name if available, fall back to the time-based drop name.
+			dropName := drop.Name
+			if len(drop.BenefitEdges) > 0 && drop.BenefitEdges[0].Benefit.Name != "" {
+				dropName = drop.BenefitEdges[0].Benefit.Name
+			}
+
+			c.Log.Event(ctx, model.EventDropClaim, "Claiming drop from inventory",
+				"drop", dropName,
+				"category", categoryName)
+
+			// Mark as attempted before calling the API to prevent duplicates.
+			c.claimedDrops.Store(drop.Self.DropInstanceID, true)
+
+			claimed, err := c.GQL.ClaimDropRewards(ctx, drop.Self.DropInstanceID)
+			if err != nil {
+				c.Log.Warn("Failed to claim drop from inventory",
+					"drop", dropName, "error", err)
+			} else if !claimed {
+				c.Log.Warn("Drop claim was not accepted",
+					"drop", dropName)
+			}
+
+			sleepDuration := time.Duration(5+rand.IntN(5)) * time.Second
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(sleepDuration):
 			}
 		}
 	}

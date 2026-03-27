@@ -120,6 +120,18 @@ type Client struct {
 	mu         sync.RWMutex
 }
 
+// NewClientForTest creates a GQL Client with a caller-supplied *http.Client,
+// allowing tests to inject a custom transport (e.g. mock round-tripper).
+func NewClientForTest(authenticator auth.Provider, log *logger.Logger, httpClient *http.Client) *Client {
+	return &Client{
+		httpClient: httpClient,
+		auth:       authenticator,
+		log:        log,
+		breaker:    &circuitBreaker{},
+		maxRetries: 0, // no retries in tests
+	}
+}
+
 // NewClient creates a new GQL Client with a shared HTTP client configured
 // for connection pooling and the given authenticator.
 // An optional proxyURL routes all requests through the specified proxy.
