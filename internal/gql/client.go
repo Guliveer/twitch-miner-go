@@ -36,6 +36,7 @@ type operationBehavior struct {
 	failOnErrors    bool
 	tryAltClientIDs bool
 	retryGQLErrors  bool
+	clientID        string // if set, override Client-Id header for this operation
 }
 
 // integrityFailureOps lists GQL operations where integrity check failures are
@@ -66,10 +67,18 @@ var operationBehaviors = map[string]operationBehavior{
 	"TeamPage": {
 		failOnErrors: true,
 	},
-	// Drop claims fail with "failed integrity check" when the integrity
-	// token is stale. Retrying with a fresh token typically succeeds.
+	// Community points claims also fail with integrity checks from browser
+	// client IDs. Using Android client ID matches the drop claim approach.
+	"ClaimCommunityPoints": {
+		skipIntegrity: true,
+		clientID:      constants.ClientIDAndroid,
+	},
+	// Twitch enforces integrity checks only for browser client IDs.
+	// Using the Android client ID without integrity matches the approach
+	// of all major working Twitch miners (DevilXD, rdavydov).
 	"DropsPage_ClaimDropRewards": {
-		retryGQLErrors: true,
+		skipIntegrity: true,
+		clientID:      constants.ClientIDAndroid,
 	},
 }
 
@@ -310,7 +319,9 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 	// sending it with raw queries causes "service error" for some categories.
 	skipIntegrity := reqBody.Query != "" || behavior.skipIntegrity
 	clientIDs := []string{""}
-	if behavior.tryAltClientIDs {
+	if behavior.clientID != "" {
+		clientIDs = []string{behavior.clientID}
+	} else if behavior.tryAltClientIDs {
 		ids := c.auth.ClientIDsForGQL()
 		if len(ids) > 0 {
 			clientIDs = ids
