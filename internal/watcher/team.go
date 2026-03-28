@@ -212,7 +212,7 @@ func (tw *TeamWatcher) evaluate(
 					"live_members", liveCount,
 				)
 			} else {
-				tw.log.Info("No live members in team", "team", teamName)
+				tw.log.Debug("No live members in team", "team", teamName)
 			}
 			continue
 		}
