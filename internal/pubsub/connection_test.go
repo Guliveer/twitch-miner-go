@@ -27,6 +27,7 @@ func (m *mockAuthProvider) UserID() string                                      
 func (m *mockAuthProvider) GetAuthHeaders() map[string]string                     { return nil }
 func (m *mockAuthProvider) ClientVersion() string                                 { return "test-version" }
 func (m *mockAuthProvider) ClientIDsForGQL() []string                             { return []string{"browser"} }
+func (m *mockAuthProvider) AndroidClientID() string                               { return "android-test" }
 func (m *mockAuthProvider) FetchIntegrityToken(_ context.Context) (string, error) { return "", nil }
 
 func (m *mockAuthProvider) RefreshToken(_ context.Context) error {
@@ -219,6 +220,7 @@ func (m *tokenChangingMock) UserID() string                                     
 func (m *tokenChangingMock) GetAuthHeaders() map[string]string                     { return nil }
 func (m *tokenChangingMock) ClientVersion() string                                 { return "test-version" }
 func (m *tokenChangingMock) ClientIDsForGQL() []string                             { return []string{"browser"} }
+func (m *tokenChangingMock) AndroidClientID() string                               { return "android-test" }
 func (m *tokenChangingMock) FetchIntegrityToken(_ context.Context) (string, error) { return "", nil }
 
 func (m *tokenChangingMock) RefreshToken(_ context.Context) error {

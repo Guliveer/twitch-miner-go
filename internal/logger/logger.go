@@ -172,7 +172,7 @@ func (l *Logger) Event(ctx context.Context, event model.Event, msg string, args 
 			if key == "streamer" || key == "category" {
 				continue // skip, already in title
 			}
-			parts = append(parts, fmt.Sprintf("%s=%v", key, args[i+1]))
+			parts = append(parts, fmt.Sprintf("%s={%v}", key, args[i+1]))
 		}
 
 		formattedMsg := msg
@@ -262,21 +262,21 @@ func (h *colorHandler) Handle(_ context.Context, record slog.Record) error {
 	for _, a := range h.attrs {
 		if h.colored {
 			if color, ok := coloredAttrKeys[a.Key]; ok {
-				fmt.Fprintf(h.writer, " %s=%s%v%s", a.Key, color, a.Value, colorReset)
+				fmt.Fprintf(h.writer, " %s=%s{%v}%s", a.Key, color, a.Value, colorReset)
 				continue
 			}
 		}
-		fmt.Fprintf(h.writer, " %s=%v", a.Key, a.Value)
+		fmt.Fprintf(h.writer, " %s={%v}", a.Key, a.Value)
 	}
 
 	record.Attrs(func(a slog.Attr) bool {
 		if h.colored {
 			if color, ok := coloredAttrKeys[a.Key]; ok {
-				fmt.Fprintf(h.writer, " %s=%s%v%s", a.Key, color, a.Value, colorReset)
+				fmt.Fprintf(h.writer, " %s=%s{%v}%s", a.Key, color, a.Value, colorReset)
 				return true
 			}
 		}
-		fmt.Fprintf(h.writer, " %s=%v", a.Key, a.Value)
+		fmt.Fprintf(h.writer, " %s={%v}", a.Key, a.Value)
 		return true
 	})
 

@@ -431,18 +431,18 @@ func (c *Client) retryWithAndroidClientID(ctx context.Context, jsonBody []byte, 
 	c.log.Info("Integrity check failed, retrying with Android client ID",
 		"operation", opName)
 
-	respBody, err := c.doHTTPRequest(ctx, jsonBody, opName, true, constants.ClientIDAndroid)
+	respBody, err := c.doHTTPRequest(ctx, jsonBody, opName, true, c.auth.AndroidClientID())
 	if err != nil {
-		return nil, fmt.Errorf("Android client ID fallback for %s: %w", opName, err)
+		return nil, fmt.Errorf("android client ID fallback for %s: %w", opName, err)
 	}
 
 	var response gqlResponse
 	if err := json.Unmarshal(respBody, &response); err != nil {
-		return nil, fmt.Errorf("parsing Android fallback response for %s: %w", opName, err)
+		return nil, fmt.Errorf("parsing android fallback response for %s: %w", opName, err)
 	}
 
 	if len(response.Errors) > 0 {
-		return nil, fmt.Errorf("Android client ID fallback for %s returned error: %s",
+		return nil, fmt.Errorf("android client ID fallback for %s returned error: %s",
 			opName, response.Errors[0].Message)
 	}
 

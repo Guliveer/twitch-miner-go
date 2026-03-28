@@ -70,6 +70,7 @@ func (m *mockAuthProvider) FetchIntegrityToken(_ context.Context) (string, error
 func (m *mockAuthProvider) RefreshToken(_ context.Context) error                  { return nil }
 func (m *mockAuthProvider) ClientVersion() string                                 { return "test" }
 func (m *mockAuthProvider) ClientIDsForGQL() []string                             { return nil }
+func (m *mockAuthProvider) AndroidClientID() string                               { return "android-test" }
 
 func newTestClient(t *testing.T, transport *mockTransport) *Client {
 	t.Helper()

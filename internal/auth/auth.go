@@ -261,6 +261,11 @@ func (a *Authenticator) ClientIDsForGQL() []string {
 	return a.runtime.ClientIDsForGQL()
 }
 
+// AndroidClientID returns the runtime-configured Android client ID.
+func (a *Authenticator) AndroidClientID() string {
+	return a.runtime.ClientIDAndroid
+}
+
 // ClearIntegrityToken invalidates the cached integrity token so the next
 // FetchIntegrityToken call fetches a fresh one. Called by the GQL client
 // when Twitch rejects the current token with "failed integrity check".
