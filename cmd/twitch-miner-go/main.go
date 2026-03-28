@@ -28,9 +28,11 @@ import (
 )
 
 const banner = `
-╔══════════════════════════════════════════════════╗
-║     Twitch Channel Points Miner — Go Edition     ║
-╚══════════════════════════════════════════════════╝
+╔═══════════════════════════════════════╗
+║       Twitch Miner — Go Edition       ║
+║                                       ║
+║  github.com/Guliveer/twitch-miner-go  ║
+╚═══════════════════════════════════════╝
 `
 
 func main() {

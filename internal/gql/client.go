@@ -328,6 +328,11 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 		}
 	}
 
+	// androidFallbackEligible is true when the operation is not already
+	// configured to use the Android client ID, so we can attempt it as a
+	// fallback if an integrity check fails.
+	androidFallbackEligible := behavior.clientID != constants.ClientIDAndroid
+
 	var lastErr error
 	for idx, clientID := range clientIDs {
 		semanticRetries := 0
@@ -343,53 +348,64 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 				return nil, fmt.Errorf("parsing GQL response for %s: %w", opName, err)
 			}
 
-			if len(response.Errors) > 0 {
-				errMsg := response.Errors[0].Message
-				if strings.Contains(errMsg, "integrity check") && integrityFailureOps[opName] {
-					c.log.Debug("GQL integrity check failure (expected)",
-						"operation", opName,
-						"error", errMsg)
-				} else {
-					c.log.Warn("GQL operation returned errors",
-						"operation", opName,
-						"error", errMsg,
-						"client_id_attempt", idx+1)
-				}
+			if len(response.Errors) == 0 {
+				return response.Data, nil
+			}
 
-				if behavior.retryGQLErrors && isRetryableGQLError(errMsg) && semanticRetries < 2 {
-					// If the error was an integrity check failure, invalidate
-					// the cached token so the retry fetches a fresh one.
-					if strings.Contains(errMsg, "integrity check") {
-						if clearer, ok := c.auth.(interface{ ClearIntegrityToken() }); ok {
-							clearer.ClearIntegrityToken()
-						}
+			errMsg := response.Errors[0].Message
+			if strings.Contains(errMsg, "integrity check") && integrityFailureOps[opName] {
+				c.log.Debug("GQL integrity check failure (expected)",
+					"operation", opName,
+					"error", errMsg)
+			} else {
+				c.log.Warn("GQL operation returned errors",
+					"operation", opName,
+					"error", errMsg,
+					"client_id_attempt", idx+1)
+			}
+
+			// Priority 1: integrity failure → try Android client ID (no integrity).
+			if strings.Contains(errMsg, "integrity check") && androidFallbackEligible {
+				androidFallbackEligible = false // one attempt only
+				if data, fbErr := c.retryWithAndroidClientID(ctx, jsonBody, opName); fbErr == nil {
+					return data, nil
+				}
+				// Fallback failed — continue with the remaining strategies.
+			}
+
+			// Priority 2: retryable GQL error → semantic retry with backoff.
+			if behavior.retryGQLErrors && isRetryableGQLError(errMsg) && semanticRetries < 2 {
+				if strings.Contains(errMsg, "integrity check") {
+					if clearer, ok := c.auth.(interface{ ClearIntegrityToken() }); ok {
+						clearer.ClearIntegrityToken()
 					}
-					semanticRetries++
-					backoff := time.Duration(semanticRetries) * time.Second
-					c.log.Info("Retrying GQL operation after transient response error",
-						"operation", opName,
-						"retry", semanticRetries,
-						"backoff", backoff)
-					select {
-					case <-ctx.Done():
-						return nil, ctx.Err()
-					case <-time.After(backoff):
-					}
-					continue
 				}
+				semanticRetries++
+				backoff := time.Duration(semanticRetries) * time.Second
+				c.log.Info("Retrying GQL operation after transient response error",
+					"operation", opName,
+					"retry", semanticRetries,
+					"backoff", backoff)
+				select {
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				case <-time.After(backoff):
+				}
+				continue
+			}
 
-				if behavior.tryAltClientIDs && idx < len(clientIDs)-1 {
-					c.log.Info("Retrying GQL operation with alternate client ID",
-						"operation", opName,
-						"attempt", idx+2,
-						"total_attempts", len(clientIDs))
-					lastErr = wrapTransientGQLError(opName, errMsg)
-					break
-				}
+			// Priority 3: alternate client IDs.
+			if behavior.tryAltClientIDs && idx < len(clientIDs)-1 {
+				c.log.Info("Retrying GQL operation with alternate client ID",
+					"operation", opName,
+					"attempt", idx+2,
+					"total_attempts", len(clientIDs))
+				lastErr = wrapTransientGQLError(opName, errMsg)
+				break
+			}
 
-				if behavior.failOnErrors {
-					return nil, wrapTransientGQLError(opName, errMsg)
-				}
+			if behavior.failOnErrors {
+				return nil, wrapTransientGQLError(opName, errMsg)
 			}
 
 			return response.Data, nil
@@ -401,6 +417,37 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 	}
 
 	return nil, fmt.Errorf("GQL operation %s failed without a response", opName)
+}
+
+// retryWithAndroidClientID performs a single GQL request using the Android
+// client ID without an integrity token. Twitch enforces integrity checks only
+// for browser client IDs, so the Android ID sidesteps the check entirely.
+// Returns (data, nil) on success or (nil, err) if the fallback also failed.
+func (c *Client) retryWithAndroidClientID(ctx context.Context, jsonBody []byte, opName string) (json.RawMessage, error) {
+	if clearer, ok := c.auth.(interface{ ClearIntegrityToken() }); ok {
+		clearer.ClearIntegrityToken()
+	}
+
+	c.log.Info("Integrity check failed, retrying with Android client ID",
+		"operation", opName)
+
+	respBody, err := c.doHTTPRequest(ctx, jsonBody, opName, true, constants.ClientIDAndroid)
+	if err != nil {
+		return nil, fmt.Errorf("Android client ID fallback for %s: %w", opName, err)
+	}
+
+	var response gqlResponse
+	if err := json.Unmarshal(respBody, &response); err != nil {
+		return nil, fmt.Errorf("parsing Android fallback response for %s: %w", opName, err)
+	}
+
+	if len(response.Errors) > 0 {
+		return nil, fmt.Errorf("Android client ID fallback for %s returned error: %s",
+			opName, response.Errors[0].Message)
+	}
+
+	c.log.Info("Android client ID fallback succeeded", "operation", opName)
+	return response.Data, nil
 }
 
 func wrapTransientGQLError(opName, errMsg string) error {
