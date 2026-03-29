@@ -23,11 +23,11 @@ category_watcher:
     - slug: "battlefield-6"
       drops_only: false
     - slug: "valorant"
-      drops_only: false
     - slug: "star-citizen"
     - slug: "the-finals"
     - slug: "arc-raiders"
     - slug: "destiny-2"
+    - slug: "call-of-duty-warzone"
     - slug: "trove"
     - slug: "delta-force-hawk-ops"
     - slug: "pubg-battlegrounds"
