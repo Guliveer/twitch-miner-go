@@ -16,10 +16,59 @@ This project supports multiple deployment strategies with modular CI/CD pipeline
 
 | Method | Best For | Pros | Cons |
 |--------|----------|------|------|
+| **systemd Service** | Bare-metal Linux, VPS | Native, zero overhead, auto-restart | Linux only, manual updates |
 | **Docker Compose** | Self-hosted, VPS | Full control, customizable | Requires infrastructure management |
 | **Fly.io** | Quick cloud deploy | Managed platform, auto-scaling | Costs for high usage |
 
-Both methods work with the same codebase and configuration files. Choose based on your infrastructure preferences.
+All methods work with the same codebase and configuration files. Choose based on your infrastructure preferences.
+
+---
+
+## systemd Service (Linux)
+
+### Quick Start
+
+```bash
+# 1. Clone and build
+git clone https://github.com/Guliveer/twitch-miner-go.git
+cd twitch-miner-go
+./run.sh  # builds the binary (Ctrl+C to stop after build)
+
+# 2. Run the interactive installer
+sudo ./install-service.sh install
+```
+
+The wizard will ask for service name, paths, port, user, and optionally enable + start the service.
+
+### Managing the Service
+
+```bash
+# Check status and recent logs
+sudo ./install-service.sh status
+
+# Or use systemctl directly
+systemctl status twitch-miner-go
+systemctl restart twitch-miner-go
+journalctl -u twitch-miner-go -f
+```
+
+### Uninstalling
+
+```bash
+sudo ./install-service.sh uninstall
+```
+
+This stops and removes the systemd unit file. Binary, configs, and data are preserved — remove them manually if needed.
+
+### File Locations (defaults)
+
+| Item | Path |
+|------|------|
+| Binary | `/usr/local/bin/twitch-miner-go` |
+| Configs | `/etc/twitch-miner-go/configs/` |
+| Environment | `/etc/twitch-miner-go/.env` |
+| Data (cookies) | `/var/lib/twitch-miner-go/` |
+| Service unit | `/etc/systemd/system/twitch-miner-go.service` |
 
 ---
 

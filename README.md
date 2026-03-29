@@ -11,36 +11,43 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 
 ## 1.1. Table of Contents
 
-1. [1. Twitch Channel Points Miner — Go Edition](#1-twitch-channel-points-miner--go-edition)
-   1. [1.1. Table of Contents](#11-table-of-contents)
-   2. [1.2. Features](#12-features)
-   3. [1.3. Resource Comparison](#13-resource-comparison)
-   4. [1.4. Running Locally](#14-running-locally)
-      1. [1.4.1. Flags](#141-flags)
-   5. [1.5. Configuration](#15-configuration)
-      1. [1.5.1. Quick Start](#151-quick-start)
-   6. [1.6. Environment Variables](#16-environment-variables)
-      1. [1.6.1. Global](#161-global)
-      2. [1.6.2. Per-Account Authentication](#162-per-account-authentication)
-      3. [1.6.3. Per-Account Notifications](#163-per-account-notifications)
-      4. [1.6.4. `.env` File Support](#164-env-file-support)
-   7. [1.7. Notifications](#17-notifications)
-      1. [1.7.1. Supported Providers](#171-supported-providers)
-      2. [1.7.2. Example: Telegram](#172-example-telegram)
-      3. [1.7.3. Event Filtering](#173-event-filtering)
-      4. [1.7.4. Notification Batching](#174-notification-batching)
-      5. [1.7.5. Testing Notifications](#175-testing-notifications)
-   8. [1.8. Authentication](#18-authentication)
-      1. [1.8.1. When to use the env vars](#181-when-to-use-the-env-vars)
-   9. [1.9. Docker](#19-docker)
-   10. [1.10. Deploy to Fly.io](#110-deploy-to-flyio)
-       1. [1.10.1. Setup](#1101-setup)
-       2. [1.10.2. CI/CD Auto-Deploy](#1102-cicd-auto-deploy)
-       3. [1.10.3. Manual Deploy](#1103-manual-deploy)
-       4. [1.10.4. Alternative Deployment](#1104-alternative-deployment)
-   11. [1.11. Development](#111-development)
-   12. [1.12. Auto-Update Checker](#112-auto-update-checker)
-   13. [1.13. License](#113-license)
+- [1. Twitch Channel Points Miner — Go Edition](#1-twitch-channel-points-miner--go-edition)
+  - [1.1. Table of Contents](#11-table-of-contents)
+  - [1.2. Features](#12-features)
+  - [1.3. Resource Comparison](#13-resource-comparison)
+  - [1.4. Running Locally](#14-running-locally)
+    - [1.4.1. Flags](#141-flags)
+  - [1.5. Configuration](#15-configuration)
+    - [1.5.1. Quick Start](#151-quick-start)
+  - [1.6. Environment Variables](#16-environment-variables)
+    - [1.6.1. Global](#161-global)
+    - [1.6.2. Per-Account Authentication](#162-per-account-authentication)
+    - [1.6.3. Per-Account Notifications](#163-per-account-notifications)
+    - [1.6.4. `.env` File Support](#164-env-file-support)
+      - [How To Obtain Twitch Runtime Identifiers](#how-to-obtain-twitch-runtime-identifiers)
+  - [1.7. Notifications](#17-notifications)
+    - [1.7.1. Supported Providers](#171-supported-providers)
+    - [1.7.2. Example: Telegram](#172-example-telegram)
+    - [1.7.3. Event Filtering](#173-event-filtering)
+    - [1.7.4. Notification Batching](#174-notification-batching)
+    - [1.7.5. Testing Notifications](#175-testing-notifications)
+  - [1.8. Authentication](#18-authentication)
+    - [1.8.1. When to use the env vars](#181-when-to-use-the-env-vars)
+  - [1.9. Docker](#19-docker)
+    - [Docker Compose](#docker-compose)
+    - [GitHub Container Registry](#github-container-registry)
+  - [1.10. systemd Service (Linux)](#110-systemd-service-linux)
+    - [Managing the Service](#managing-the-service)
+    - [Uninstalling](#uninstalling)
+    - [Default File Locations](#default-file-locations)
+  - [1.11. Deploy to Fly.io](#111-deploy-to-flyio)
+    - [1.11.1. Setup](#1111-setup)
+    - [1.11.2. CI/CD Auto-Deploy](#1112-cicd-auto-deploy)
+    - [1.11.3. Manual Deploy](#1113-manual-deploy)
+    - [1.11.4. Alternative Deployment](#1114-alternative-deployment)
+  - [1.12. Development](#112-development)
+  - [1.13. Auto-Update Checker](#113-auto-update-checker)
+  - [1.14. License](#114-license)
 
 ## 1.2. Features
 
@@ -55,7 +62,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 - **Category watcher** — auto-discover streamers by game category
 - **Notifications** — Telegram, Discord, Webhook, Matrix, Pushover, Gotify
 - **Analytics dashboard** — built-in web UI for monitoring
-- **Fly.io ready** — deploy with a single command; Docker Compose also supported
+- **Fly.io ready** — deploy with a single command; Docker Compose and systemd service also supported
 
 ## 1.3. Resource Comparison
 
@@ -532,11 +539,50 @@ Example image references:
 - `ghcr.io/guliveer/twitch-miner-go:1.2.3`
 - `ghcr.io/guliveer/twitch-miner-go:sha-abcdef1`
 
-## 1.10. Deploy to Fly.io
+## 1.10. systemd Service (Linux)
+
+Run twitch-miner-go as a native Linux service with automatic restarts and boot startup. An interactive installer script is included.
+
+```bash
+# Build the binary first
+./run.sh   # Ctrl+C after build completes
+
+# Run the installer wizard
+sudo ./install-service.sh install
+```
+
+The wizard will prompt for service name, paths, port, user, and optionally enable + start the service.
+
+### Managing the Service
+
+```bash
+systemctl status twitch-miner-go
+systemctl restart twitch-miner-go
+journalctl -u twitch-miner-go -f     # follow logs
+```
+
+### Uninstalling
+
+```bash
+sudo ./install-service.sh uninstall
+```
+
+### Default File Locations
+
+| Item | Path |
+|------|------|
+| Binary | `/usr/local/bin/twitch-miner-go` |
+| Configs | `/etc/twitch-miner-go/configs/` |
+| Environment | `/etc/twitch-miner-go/.env` |
+| Data (cookies) | `/var/lib/twitch-miner-go/` |
+
+> See [DEPLOYMENT.md](DEPLOYMENT.md) for the full systemd deployment guide.
+
+## 1.11. Deploy to Fly.io
 
 The repo includes [`fly.toml`](fly.toml) — the Fly.io deployment config. Fly.io is a personal preference and comes pre-configured, but the miner is portable and runs on any platform that supports Go (AWS, GCP, Azure, DigitalOcean, etc.).
 
-### 1.10.1. Setup
+### 1.11.1. Setup
 
 ```bash
 # 1. Copy the example account config and customize (filename = your Twitch username)
@@ -570,7 +616,7 @@ fly secrets set TELEGRAM_TOKEN_YOUR_USERNAME=your_bot_token
 fly secrets set TELEGRAM_CHAT_ID_YOUR_USERNAME=your_chat_id
 ```
 
-### 1.10.2. CI/CD Auto-Deploy
+### 1.11.2. CI/CD Auto-Deploy
 
 Pushes to `main` are automatically deployed via the [CI workflow](.github/workflows/ci.yml) after build and version bump succeed. This requires a `FLY_API_TOKEN` GitHub secret:
 
@@ -585,7 +631,7 @@ gh secret set FLY_API_TOKEN --repo <owner>/<repo>
 
 > If `FLY_API_TOKEN` is not set, the deploy step is **skipped gracefully** — build and version bump still run normally.
 
-### 1.10.3. Manual Deploy
+### 1.11.3. Manual Deploy
 
 ```bash
 fly deploy
@@ -597,18 +643,18 @@ fly logs
 curl https://your-app-name.fly.dev/health
 ```
 
-### 1.10.4. Alternative Deployment
+### 1.11.4. Alternative Deployment
 
 For self-hosted deployments, Docker Compose is also supported — see the [Docker Compose](#docker-compose) section above and [DEPLOYMENT.md](DEPLOYMENT.md) for a comprehensive guide covering both Fly.io and Docker workflows.
 
-## 1.11. Development
+## 1.12. Development
 
 This project uses [Conventional Commits](https://www.conventionalcommits.org/) and automated versioning. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full commit convention, git hooks setup, and versioning workflow.
 
-## 1.12. Auto-Update Checker
+## 1.13. Auto-Update Checker
 
 On startup, the miner automatically checks for new releases in the background via [`updater.CheckForUpdate()`](internal/updater/updater.go). If a newer version is available, a notification is printed to the terminal. This check is non-blocking and does not affect startup time.
 
-## 1.13. License
+## 1.14. License
 
 This project is licensed under the GNU GPL v3.0 License. See the [LICENSE](LICENSE.txt) file for details.
