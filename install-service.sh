@@ -17,6 +17,8 @@ readonly DEFAULT_OPENRC_LOG_DIR="/var/log"
 
 # Detected init system: "systemd" or "openrc" (set by detect_init_system)
 INIT_SYSTEM=""
+# Config mode: "copy" or "symlink" (set by wizard)
+CONFIG_MODE="copy"
 
 # Colors
 RED='\033[0;31m'
@@ -147,6 +149,41 @@ wizard() {
     local default_user="${SUDO_USER:-$(whoami)}"
     prompt RUN_USER "Run as user" "$default_user"
 
+    # Config deployment mode
+    if [[ -d "${SCRIPT_DIR}/configs" ]]; then
+        echo ""
+        info "How should config files be deployed to ${CONFIG_DIR}?"
+        echo "  copy    — copy files (edit in ${CONFIG_DIR}, use '$0 sync' to re-copy from source)"
+        echo "  symlink — symlink to source directory (edits in either location take effect)"
+        prompt CONFIG_MODE "Config mode (copy/symlink)" "copy"
+        if [[ "$CONFIG_MODE" != "copy" && "$CONFIG_MODE" != "symlink" ]]; then
+            warn "Invalid config mode '${CONFIG_MODE}', defaulting to 'copy'."
+            CONFIG_MODE="copy"
+        fi
+    fi
+
+    # Warn about home directory paths (systemd ProtectHome=true blocks /home access)
+    if [[ "$INIT_SYSTEM" == "systemd" ]]; then
+        local home_paths=()
+        for p in "$CONFIG_DIR" "$DATA_DIR" "$ENV_FILE"; do
+            [[ "$p" == /home/* ]] && home_paths+=("$p")
+        done
+        if [[ ${#home_paths[@]} -gt 0 ]]; then
+            echo ""
+            warn "The following paths are under /home/:"
+            for p in "${home_paths[@]}"; do
+                echo "    ${p}"
+            done
+            warn "systemd's ProtectHome=true will block access to these paths."
+            warn "Move them outside /home/ or the service will fail to read them."
+            echo ""
+            if ! confirm "Continue anyway?"; then
+                warn "Aborted. Re-run the wizard with paths outside /home/."
+                exit 0
+            fi
+        fi
+    fi
+
     echo ""
     info "Summary:"
     echo "  Service:    ${SERVICE_NAME}"
@@ -157,6 +194,7 @@ wizard() {
     echo "  Port:       ${PORT}"
     echo "  Log level:  ${LOG_LEVEL}"
     echo "  User:       ${RUN_USER}"
+    echo "  Config mode: ${CONFIG_MODE}"
     echo ""
 
     if ! confirm "Proceed with installation?"; then
@@ -179,10 +217,26 @@ do_install() {
     cp -f "$BINARY_SOURCE" "$bin_dest"
     chmod 755 "$bin_dest"
 
-    # Copy configs if source dir exists and target is empty
-    if [[ -d "${SCRIPT_DIR}/configs" ]] && [[ ! "$(ls -A "$CONFIG_DIR" 2>/dev/null)" ]]; then
-        info "Copying config files to ${CONFIG_DIR}..."
-        cp -r "${SCRIPT_DIR}/configs/"* "$CONFIG_DIR/" 2>/dev/null || true
+    # Deploy config files
+    if [[ -d "${SCRIPT_DIR}/configs" ]]; then
+        if [[ "$CONFIG_MODE" == "symlink" ]]; then
+            # Remove target dir if empty and create symlink to source
+            if [[ -d "$CONFIG_DIR" ]] && [[ ! "$(ls -A "$CONFIG_DIR" 2>/dev/null)" ]]; then
+                rmdir "$CONFIG_DIR"
+            fi
+            if [[ ! -e "$CONFIG_DIR" ]]; then
+                info "Symlinking ${CONFIG_DIR} -> ${SCRIPT_DIR}/configs..."
+                ln -sfn "${SCRIPT_DIR}/configs" "$CONFIG_DIR"
+            else
+                warn "Config directory already exists and is not empty, skipping symlink."
+            fi
+        else
+            # Copy mode
+            if [[ ! "$(ls -A "$CONFIG_DIR" 2>/dev/null)" ]]; then
+                info "Copying config files to ${CONFIG_DIR}..."
+                cp -r "${SCRIPT_DIR}/configs/"* "$CONFIG_DIR/" 2>/dev/null || true
+            fi
+        fi
     fi
 
     # Create .env if it doesn't exist
@@ -451,15 +505,54 @@ do_status() {
     fi
 }
 
+# ── Sync configs ────────────────────────────────
+
+do_sync() {
+    local name="${1:-$DEFAULT_SERVICE_NAME}"
+    local target_dir="$DEFAULT_CONFIG_DIR"
+    local source_dir="${SCRIPT_DIR}/configs"
+
+    if [[ ! -d "$source_dir" ]]; then
+        error "Source config directory not found: ${source_dir}"
+        exit 1
+    fi
+
+    if [[ -L "$target_dir" ]]; then
+        warn "Config directory is a symlink (${target_dir} -> $(readlink -f "$target_dir"))."
+        warn "Sync is not needed — changes are shared automatically."
+        exit 0
+    fi
+
+    if [[ ! -d "$target_dir" ]]; then
+        error "Target config directory not found: ${target_dir}"
+        error "Is the service installed?"
+        exit 1
+    fi
+
+    info "Syncing configs from ${source_dir} to ${target_dir}..."
+    cp -r "${source_dir}/"* "$target_dir/"
+    info "Config files updated."
+
+    if confirm "Restart the service to apply changes?"; then
+        if [[ "$INIT_SYSTEM" == "systemd" ]]; then
+            systemctl restart "$name"
+        else
+            rc-service "$name" restart
+        fi
+        info "Service restarted."
+    fi
+}
+
 # ── Main ─────────────────────────────────────────
 
 usage() {
-    echo "Usage: sudo $0 [install|uninstall|status]"
+    echo "Usage: sudo $0 [install|uninstall|status|sync]"
     echo ""
     echo "Commands:"
     echo "  install     Interactive wizard to create a service (default)"
     echo "  uninstall   Stop and remove the service"
     echo "  status      Show service status and recent logs"
+    echo "  sync        Re-copy config files from source and optionally restart"
     echo ""
     echo "Supported init systems: systemd, OpenRC (Alpine)"
 }
@@ -481,6 +574,10 @@ main() {
         status)
             preflight
             do_status "${2:-}"
+            ;;
+        sync)
+            preflight
+            do_sync "${2:-}"
             ;;
         -h|--help|help)
             usage
