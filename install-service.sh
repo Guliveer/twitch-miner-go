@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ─────────────────────────────────────────────────
-# Twitch Miner Go — systemd service installer
+# Twitch Miner Go — service installer (systemd / OpenRC)
 # Usage: sudo ./install-service.sh
 # ─────────────────────────────────────────────────
 
@@ -13,6 +13,10 @@ readonly DEFAULT_DATA_DIR="/var/lib/twitch-miner-go"
 readonly DEFAULT_ENV_FILE="/etc/twitch-miner-go/.env"
 readonly DEFAULT_PORT="8080"
 readonly DEFAULT_LOG_LEVEL="INFO"
+readonly DEFAULT_OPENRC_LOG_DIR="/var/log"
+
+# Detected init system: "systemd" or "openrc" (set by detect_init_system)
+INIT_SYSTEM=""
 
 # Colors
 RED='\033[0;31m'
@@ -51,17 +55,35 @@ confirm() {
 
 banner() {
     echo -e "${BOLD}"
-    echo "╔═══════════════════════════════════════════╗"
-    echo "║  Twitch Miner Go — Service Installer      ║"
-    echo "╚═══════════════════════════════════════════╝"
+    echo "╔═══════════════════════════════════════════════╗"
+    echo "║  Twitch Miner Go — Service Installer          ║"
+    echo "║  (systemd / OpenRC)                           ║"
+    echo "╚═══════════════════════════════════════════════╝"
     echo -e "${NC}"
 }
 
 # ── Preflight checks ────────────────────────────
 
+detect_init_system() {
+    if command -v systemctl &>/dev/null && systemctl --version &>/dev/null; then
+        INIT_SYSTEM="systemd"
+    elif command -v rc-service &>/dev/null; then
+        INIT_SYSTEM="openrc"
+        # Require supervise-daemon for process supervision (OpenRC >= 0.21)
+        if ! command -v supervise-daemon &>/dev/null; then
+            error "OpenRC detected but 'supervise-daemon' is missing (requires OpenRC >= 0.21)."
+            error "Please upgrade OpenRC: apk upgrade openrc"
+            exit 1
+        fi
+    else
+        error "No supported init system found (systemd or OpenRC)."
+        exit 1
+    fi
+}
+
 preflight() {
     if [[ "$(uname -s)" != "Linux" ]]; then
-        error "This script only works on Linux (systemd)."
+        error "This script only works on Linux."
         exit 1
     fi
 
@@ -70,10 +92,8 @@ preflight() {
         exit 1
     fi
 
-    if ! command -v systemctl &>/dev/null; then
-        error "systemd is not available on this system."
-        exit 1
-    fi
+    detect_init_system
+    info "Detected init system: ${BOLD}${INIT_SYSTEM}${NC}"
 }
 
 # ── Find or build the binary ────────────────────
@@ -113,7 +133,7 @@ resolve_binary() {
 
 wizard() {
     banner
-    info "This wizard will set up twitch-miner-go as a systemd service.\n"
+    info "This wizard will set up twitch-miner-go as a service (${INIT_SYSTEM}).\n"
 
     prompt SERVICE_NAME  "Service name"                "$DEFAULT_SERVICE_NAME"
     prompt INSTALL_DIR   "Binary install directory"    "$DEFAULT_INSTALL_DIR"
@@ -148,7 +168,6 @@ wizard() {
 # ── Install ──────────────────────────────────────
 
 do_install() {
-    local service_file="/etc/systemd/system/${SERVICE_NAME}.service"
     local bin_dest="${INSTALL_DIR}/twitch-miner-go"
 
     # Create directories
@@ -184,6 +203,17 @@ ENVEOF
     info "Setting permissions for user '${RUN_USER}'..."
     chown -R "${RUN_USER}:" "$CONFIG_DIR" "$DATA_DIR" "$(dirname "$ENV_FILE")"
     chmod 600 "$ENV_FILE"
+
+    if [[ "$INIT_SYSTEM" == "systemd" ]]; then
+        install_systemd "$bin_dest"
+    else
+        install_openrc "$bin_dest"
+    fi
+}
+
+install_systemd() {
+    local bin_dest="$1"
+    local service_file="/etc/systemd/system/${SERVICE_NAME}.service"
 
     # Generate systemd unit
     info "Writing systemd unit to ${service_file}..."
@@ -248,20 +278,103 @@ EOF
     echo ""
 }
 
+install_openrc() {
+    local bin_dest="$1"
+    local init_script="/etc/init.d/${SERVICE_NAME}"
+    local log_file="${DEFAULT_OPENRC_LOG_DIR}/${SERVICE_NAME}.log"
+
+    # Create log file with correct ownership
+    info "Creating log file at ${log_file}..."
+    touch "$log_file"
+    chown "${RUN_USER}:" "$log_file"
+
+    # Generate OpenRC init script
+    info "Writing OpenRC init script to ${init_script}..."
+    cat > "$init_script" <<EOF
+#!/sbin/openrc-run
+# Twitch Channel Points Miner (Go) — OpenRC service
+
+name="Twitch Channel Points Miner (Go)"
+description="Twitch Channel Points Miner (Go)"
+
+supervisor=supervise-daemon
+command="${bin_dest}"
+command_args="-config ${CONFIG_DIR} -port ${PORT} -log-level ${LOG_LEVEL}"
+command_user="${RUN_USER}"
+
+directory="${DATA_DIR}"
+pidfile="/run/\${RC_SVCNAME}.pid"
+output_log="${log_file}"
+error_log="${log_file}"
+respawn_delay=10
+
+# Load environment variables
+start_pre() {
+    if [ -f "${ENV_FILE}" ]; then
+        set -a
+        # shellcheck disable=SC1091
+        . "${ENV_FILE}"
+        set +a
+    fi
+}
+
+depend() {
+    need net
+    after firewall
+}
+EOF
+    chmod 755 "$init_script"
+
+    # Enable & start
+    if confirm "Enable service to start on boot?"; then
+        rc-update add "$SERVICE_NAME" default
+        info "Service added to default runlevel."
+    fi
+
+    if confirm "Start the service now?"; then
+        rc-service "$SERVICE_NAME" start
+        info "Service started."
+        echo ""
+        rc-service "$SERVICE_NAME" status || true
+    fi
+
+    echo ""
+    info "Installation complete!"
+    echo ""
+    echo "  Useful commands:"
+    echo "    rc-service ${SERVICE_NAME} status"
+    echo "    rc-service ${SERVICE_NAME} stop"
+    echo "    rc-service ${SERVICE_NAME} restart"
+    echo "    tail -f ${log_file}"
+    echo ""
+    echo "  Config:  ${CONFIG_DIR}"
+    echo "  Env:     ${ENV_FILE}"
+    echo "  Logs:    ${log_file}"
+    echo ""
+}
+
 # ── Uninstall ────────────────────────────────────
 
 do_uninstall() {
     banner
     prompt SERVICE_NAME "Service name to remove" "$DEFAULT_SERVICE_NAME"
-    local service_file="/etc/systemd/system/${SERVICE_NAME}.service"
 
-    if [[ ! -f "$service_file" ]]; then
-        error "Service file not found: ${service_file}"
-        exit 1
+    if [[ "$INIT_SYSTEM" == "systemd" ]]; then
+        local service_file="/etc/systemd/system/${SERVICE_NAME}.service"
+        if [[ ! -f "$service_file" ]]; then
+            error "Service file not found: ${service_file}"
+            exit 1
+        fi
+    else
+        local service_file="/etc/init.d/${SERVICE_NAME}"
+        if [[ ! -f "$service_file" ]]; then
+            error "Init script not found: ${service_file}"
+            exit 1
+        fi
     fi
 
     echo ""
-    warn "This will stop and remove the systemd service."
+    warn "This will stop and remove the ${INIT_SYSTEM} service."
     warn "Binary, configs, and data will NOT be deleted."
     echo ""
 
@@ -270,17 +383,28 @@ do_uninstall() {
         exit 0
     fi
 
-    info "Stopping service..."
-    systemctl stop "$SERVICE_NAME" 2>/dev/null || true
+    if [[ "$INIT_SYSTEM" == "systemd" ]]; then
+        info "Stopping service..."
+        systemctl stop "$SERVICE_NAME" 2>/dev/null || true
 
-    info "Disabling service..."
-    systemctl disable "$SERVICE_NAME" 2>/dev/null || true
+        info "Disabling service..."
+        systemctl disable "$SERVICE_NAME" 2>/dev/null || true
 
-    info "Removing service file..."
-    rm -f "$service_file"
+        info "Removing service file..."
+        rm -f "$service_file"
 
-    info "Reloading systemd daemon..."
-    systemctl daemon-reload
+        info "Reloading systemd daemon..."
+        systemctl daemon-reload
+    else
+        info "Stopping service..."
+        rc-service "$SERVICE_NAME" stop 2>/dev/null || true
+
+        info "Removing from default runlevel..."
+        rc-update del "$SERVICE_NAME" default 2>/dev/null || true
+
+        info "Removing init script..."
+        rm -f "$service_file"
+    fi
 
     info "Service '${SERVICE_NAME}' removed."
     echo ""
@@ -289,6 +413,9 @@ do_uninstall() {
     echo "    Config:  ${DEFAULT_CONFIG_DIR}"
     echo "    Data:    ${DEFAULT_DATA_DIR}"
     echo "    Env:     ${DEFAULT_ENV_FILE}"
+    if [[ "$INIT_SYSTEM" == "openrc" ]]; then
+        echo "    Logs:    ${DEFAULT_OPENRC_LOG_DIR}/${SERVICE_NAME}.log"
+    fi
     echo ""
 }
 
@@ -296,14 +423,31 @@ do_uninstall() {
 
 do_status() {
     local name="${1:-$DEFAULT_SERVICE_NAME}"
-    if systemctl list-unit-files "${name}.service" &>/dev/null; then
-        systemctl --no-pager status "$name" || true
-        echo ""
-        echo "Recent logs:"
-        journalctl -u "$name" -n 20 --no-pager 2>/dev/null || true
+
+    if [[ "$INIT_SYSTEM" == "systemd" ]]; then
+        if systemctl list-unit-files "${name}.service" &>/dev/null; then
+            systemctl --no-pager status "$name" || true
+            echo ""
+            echo "Recent logs:"
+            journalctl -u "$name" -n 20 --no-pager 2>/dev/null || true
+        else
+            error "Service '${name}' not found."
+            exit 1
+        fi
     else
-        error "Service '${name}' not found."
-        exit 1
+        if [[ ! -f "/etc/init.d/${name}" ]]; then
+            error "Service '${name}' not found (/etc/init.d/${name})."
+            exit 1
+        fi
+        rc-service "$name" status || true
+        echo ""
+        local log_file="${DEFAULT_OPENRC_LOG_DIR}/${name}.log"
+        if [[ -f "$log_file" ]]; then
+            echo "Recent logs (${log_file}):"
+            tail -n 20 "$log_file" 2>/dev/null || true
+        else
+            warn "Log file not found: ${log_file}"
+        fi
     fi
 }
 
@@ -313,9 +457,11 @@ usage() {
     echo "Usage: sudo $0 [install|uninstall|status]"
     echo ""
     echo "Commands:"
-    echo "  install     Interactive wizard to create the systemd service (default)"
-    echo "  uninstall   Stop and remove the systemd service"
+    echo "  install     Interactive wizard to create a service (default)"
+    echo "  uninstall   Stop and remove the service"
     echo "  status      Show service status and recent logs"
+    echo ""
+    echo "Supported init systems: systemd, OpenRC (Alpine)"
 }
 
 main() {
