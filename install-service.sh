@@ -8,9 +8,9 @@ set -euo pipefail
 
 readonly DEFAULT_SERVICE_NAME="twitch-miner-go"
 readonly DEFAULT_INSTALL_DIR="/usr/local/bin"
-readonly DEFAULT_CONFIG_DIR="/etc/twitch-miner-go/configs"
-readonly DEFAULT_DATA_DIR="/var/lib/twitch-miner-go"
-readonly DEFAULT_ENV_FILE="/etc/twitch-miner-go/.env"
+readonly DEFAULT_CONFIG_DIR="/etc/${DEFAULT_SERVICE_NAME}/configs"
+readonly DEFAULT_DATA_DIR="/var/lib/${DEFAULT_SERVICE_NAME}"
+readonly DEFAULT_ENV_FILE="/etc/${DEFAULT_SERVICE_NAME}/.env"
 readonly DEFAULT_PORT="8080"
 readonly DEFAULT_LOG_LEVEL="INFO"
 readonly DEFAULT_OPENRC_LOG_DIR="/var/log"
@@ -138,10 +138,16 @@ wizard() {
     info "This wizard will set up twitch-miner-go as a service (${INIT_SYSTEM}).\n"
 
     prompt SERVICE_NAME  "Service name"                "$DEFAULT_SERVICE_NAME"
+
+    # Compute defaults based on chosen service name
+    local def_config_dir="/etc/${SERVICE_NAME}/configs"
+    local def_data_dir="/var/lib/${SERVICE_NAME}"
+    local def_env_file="/etc/${SERVICE_NAME}/.env"
+
     prompt INSTALL_DIR   "Binary install directory"    "$DEFAULT_INSTALL_DIR"
-    prompt CONFIG_DIR    "Config directory"            "$DEFAULT_CONFIG_DIR"
-    prompt DATA_DIR      "Data directory (cookies)"    "$DEFAULT_DATA_DIR"
-    prompt ENV_FILE      "Environment file (.env)"     "$DEFAULT_ENV_FILE"
+    prompt CONFIG_DIR    "Config directory"            "$def_config_dir"
+    prompt DATA_DIR      "Data directory (cookies)"    "$def_data_dir"
+    prompt ENV_FILE      "Environment file (.env)"     "$def_env_file"
     prompt PORT          "HTTP port"                   "$DEFAULT_PORT"
     prompt LOG_LEVEL     "Log level (DEBUG/INFO/WARN/ERROR)" "$DEFAULT_LOG_LEVEL"
 
@@ -187,7 +193,7 @@ wizard() {
     echo ""
     info "Summary:"
     echo "  Service:    ${SERVICE_NAME}"
-    echo "  Binary:     ${INSTALL_DIR}/twitch-miner-go"
+    echo "  Binary:     ${INSTALL_DIR}/${SERVICE_NAME}"
     echo "  Config:     ${CONFIG_DIR}"
     echo "  Data:       ${DATA_DIR}"
     echo "  Env file:   ${ENV_FILE}"
@@ -206,7 +212,7 @@ wizard() {
 # ── Install ──────────────────────────────────────
 
 do_install() {
-    local bin_dest="${INSTALL_DIR}/twitch-miner-go"
+    local bin_dest="${INSTALL_DIR}/${SERVICE_NAME}"
 
     # Create directories
     info "Creating directories..."
@@ -463,10 +469,10 @@ do_uninstall() {
     info "Service '${SERVICE_NAME}' removed."
     echo ""
     echo "  Remaining files (remove manually if needed):"
-    echo "    Binary:  ${DEFAULT_INSTALL_DIR}/twitch-miner-go"
-    echo "    Config:  ${DEFAULT_CONFIG_DIR}"
-    echo "    Data:    ${DEFAULT_DATA_DIR}"
-    echo "    Env:     ${DEFAULT_ENV_FILE}"
+    echo "    Binary:  ${DEFAULT_INSTALL_DIR}/${SERVICE_NAME}"
+    echo "    Config:  /etc/${SERVICE_NAME}/configs"
+    echo "    Data:    /var/lib/${SERVICE_NAME}"
+    echo "    Env:     /etc/${SERVICE_NAME}/.env"
     if [[ "$INIT_SYSTEM" == "openrc" ]]; then
         echo "    Logs:    ${DEFAULT_OPENRC_LOG_DIR}/${SERVICE_NAME}.log"
     fi
