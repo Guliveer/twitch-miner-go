@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Pre-commit hook: blocks commits when the local branch is behind
+# its remote tracking branch. Prevents committing before pulling
+# CI-created version bumps.
+
+# Only check when on a branch (not detached HEAD)
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
+if [ -z "$BRANCH" ]; then
+  exit 0
+fi
+
+# Get the remote tracking branch
+UPSTREAM=$(git rev-parse --abbrev-ref "${BRANCH}@{upstream}" 2>/dev/null)
+if [ -z "$UPSTREAM" ]; then
+  exit 0 # No upstream configured
+fi
+
+# Fetch the remote (silently; if network is down, skip the check)
+REMOTE=$(echo "$UPSTREAM" | cut -d'/' -f1)
+if ! git fetch "$REMOTE" --quiet 2>/dev/null; then
+  exit 0
+fi
+
+# Check how many commits we're behind
+BEHIND=$(git rev-list --count HEAD.."$UPSTREAM" 2>/dev/null)
+
+if [ "$BEHIND" -gt 0 ]; then
+  echo ""
+  echo "⚠️  Local branch '$BRANCH' is $BEHIND commit(s) behind '$UPSTREAM':"
+  echo ""
+  git log --oneline HEAD.."$UPSTREAM"
+  echo ""
+  echo "Pull first:  git pull --rebase"
+  echo "Or bypass:   git commit --no-verify"
+  echo ""
+  exit 1
+fi
+
+exit 0

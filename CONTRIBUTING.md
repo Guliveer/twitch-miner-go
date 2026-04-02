@@ -45,8 +45,9 @@ Run the hook installer to enable local commit validation:
 ./scripts/install-hooks.sh
 ```
 
-This configures two git hooks:
+This configures three git hooks:
 
+- **`pre-commit`** — blocks commits if the local branch is behind its remote tracking branch (e.g. after a CI version bump). Pull first with `git pull --rebase`, or bypass with `git commit --no-verify`.
 - **`commit-msg`** — validates that every commit message follows the Conventional Commits format before it is recorded.
 - **`pre-push`** — re-validates all outgoing commits before they are pushed to the remote.
 
