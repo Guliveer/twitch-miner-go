@@ -20,7 +20,7 @@ type Version struct {
 // String returns a human-readable version string.
 // Returns "dev" if no version was injected at build time.
 func String() string {
-	if Number == "dev" {
+	if Number == "" || Number == "dev" {
 		return "dev"
 	}
 	return fmt.Sprintf("%s (%s)", Number, GitCommit)

@@ -286,6 +286,9 @@ jobs:
             echo "⚠️ FLY_API_TOKEN not set — skipping deploy"
             exit 0
           fi
+          if [ -z "$VERSION" ]; then
+            VERSION=$(cat VERSION)
+          fi
           GIT_COMMIT=$(git rev-parse --short HEAD)
           flyctl deploy --remote-only \
             --build-arg "VERSION=${VERSION}" \
