@@ -118,10 +118,13 @@ notifications:
       - "BET_LOSE"
       - "DROP_CLAIM"
       - "GIFTED_SUB"
+      - "MINER_STARTED"
+      - "MINER_STOPPED"
+      - "MINER_CRASHED"
     disable_notification: false
-    # chat_id and token come from environment variables:
-    #   TELEGRAM_CHAT_ID_<UPPERCASE_USERNAME>
-    #   TELEGRAM_TOKEN_<UPPERCASE_USERNAME>
+    # chat_id and token from env vars (per-account takes precedence over global):
+    #   TELEGRAM_CHAT_ID / TELEGRAM_CHAT_ID_<UPPERCASE_USERNAME>
+    #   TELEGRAM_TOKEN   / TELEGRAM_TOKEN_<UPPERCASE_USERNAME>
 
   discord:
     enabled: false
@@ -132,29 +135,33 @@ notifications:
     # batch:
     #   enabled: true
     #   interval: 30m
-    # webhook_url from env: DISCORD_WEBHOOK_<UPPERCASE_USERNAME>
+    # webhook_url from env: DISCORD_WEBHOOK / DISCORD_WEBHOOK_<UPPERCASE_USERNAME>
 
   webhook:
     enabled: false
     method: "POST" # GET | POST
     events:
       - "BET_WIN"
-    # endpoint from env: WEBHOOK_URL_<UPPERCASE_USERNAME>
+    # endpoint from env: WEBHOOK_URL / WEBHOOK_URL_<UPPERCASE_USERNAME>
 
   matrix:
     enabled: false
     events:
       - "BET_WIN"
-    # Env vars: MATRIX_HOMESERVER_<UPPERCASE_USERNAME>, MATRIX_ROOM_ID_<UPPERCASE_USERNAME>, MATRIX_ACCESS_TOKEN_<UPPERCASE_USERNAME>
+    # Env vars: MATRIX_HOMESERVER / MATRIX_HOMESERVER_<UPPERCASE_USERNAME>,
+    #           MATRIX_ROOM_ID / MATRIX_ROOM_ID_<UPPERCASE_USERNAME>,
+    #           MATRIX_ACCESS_TOKEN / MATRIX_ACCESS_TOKEN_<UPPERCASE_USERNAME>
 
   pushover:
     enabled: false
     events:
       - "BET_WIN"
-    # Env vars: PUSHOVER_USER_KEY_<UPPERCASE_USERNAME>, PUSHOVER_TOKEN_<UPPERCASE_USERNAME>
+    # Env vars: PUSHOVER_TOKEN / PUSHOVER_TOKEN_<UPPERCASE_USERNAME>,
+    #           PUSHOVER_USER_KEY / PUSHOVER_USER_KEY_<UPPERCASE_USERNAME>
 
   gotify:
     enabled: false
     events:
       - "DROP_CLAIM"
-    # Env vars: GOTIFY_URL_<UPPERCASE_USERNAME>, GOTIFY_TOKEN_<UPPERCASE_USERNAME>
+    # Env vars: GOTIFY_URL / GOTIFY_URL_<UPPERCASE_USERNAME>,
+    #           GOTIFY_TOKEN / GOTIFY_TOKEN_<UPPERCASE_USERNAME>

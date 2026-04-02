@@ -25,6 +25,9 @@ const (
 	EventDropStatus         Event = "DROP_STATUS"
 	EventChatMention        Event = "CHAT_MENTION"
 	EventGiftedSub          Event = "GIFTED_SUB"
+	EventMinerStarted       Event = "MINER_STARTED"
+	EventMinerStopped       Event = "MINER_STOPPED"
+	EventMinerCrashed       Event = "MINER_CRASHED"
 	EventTest               Event = "TEST"
 )
 
@@ -51,6 +54,9 @@ func AllEvents() []Event {
 		EventDropStatus,
 		EventChatMention,
 		EventGiftedSub,
+		EventMinerStarted,
+		EventMinerStopped,
+		EventMinerCrashed,
 		EventTest,
 	}
 }

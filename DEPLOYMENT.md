@@ -354,27 +354,27 @@ on:
 
 ### Account Configuration
 
-Create one YAML file per account in `configs/`:
+Create one YAML file per account in `configs/`. The filename (without extension) becomes the username — no `username` field in the YAML:
 
 ```yaml
-username: your_twitch_username
+# configs/your_twitch_username.yaml
 enabled: true
 
-max_watch_streams: 2  # Concurrent streams
+features:
+  claim_drops_startup: false
+  enable_analytics: true
 
-streamers:
-  - username: streamer_name
-    settings:
-      predictions: true
-      watch: true
+max_watch_streams: 2
 
 priority:
   - STREAK
   - DROPS
   - ORDER
 
-analytics:
-  enable_analytics: true
+streamers:
+  - username: "streamer_name"
+    settings:
+      make_predictions: true
 ```
 
 ### Authentication

@@ -141,6 +141,9 @@ notifications:
     events:
       - "DROP_CLAIM"
       - "GIFTED_SUB"
+      - "MINER_STARTED"
+      - "MINER_STOPPED"
+      - "MINER_CRASHED"
     disable_notification: true
 
 # Discord — disabled (commented out in Python config)

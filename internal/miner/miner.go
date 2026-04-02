@@ -21,6 +21,7 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/pubsub"
 	"github.com/Guliveer/twitch-miner-go/internal/runtimecfg"
 	"github.com/Guliveer/twitch-miner-go/internal/twitch"
+	"github.com/Guliveer/twitch-miner-go/internal/version"
 	"github.com/Guliveer/twitch-miner-go/internal/watcher"
 )
 
@@ -147,6 +148,7 @@ func (m *Miner) Run(ctx context.Context) error {
 	m.chat = chat.NewManager(m.cfg.Username, m.twitch.AuthProvider().AuthToken(), m.log)
 	m.joinInitialChats()
 
+	parentCtx := ctx
 	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
@@ -222,6 +224,9 @@ func (m *Miner) Run(ctx context.Context) error {
 		"startup_duration", time.Since(startTime).Round(time.Millisecond),
 	)
 
+	m.notify.DispatchSync(ctx, model.EventMinerStarted, m.cfg.Username,
+		fmt.Sprintf("🚀 Miner started — %s", version.String()))
+
 	err = g.Wait()
 
 	m.pendingTimersMu.Lock()
@@ -231,9 +236,17 @@ func (m *Miner) Run(ctx context.Context) error {
 	}
 	m.pendingTimersMu.Unlock()
 
-	// Flush any pending batched notifications before exit.
+	// Send lifecycle notification and flush pending batched notifications.
 	if m.notify != nil {
-		m.notify.Stop(context.Background())
+		bgCtx := context.Background()
+		if err != nil && parentCtx.Err() == nil {
+			m.notify.DispatchSync(bgCtx, model.EventMinerCrashed, m.cfg.Username,
+				fmt.Sprintf("💥 Miner crashed — %s\nError: %v", version.String(), err))
+		} else {
+			m.notify.DispatchSync(bgCtx, model.EventMinerStopped, m.cfg.Username,
+				fmt.Sprintf("🛑 Miner stopped — %s", version.String()))
+		}
+		m.notify.Stop(bgCtx)
 	}
 
 	return err

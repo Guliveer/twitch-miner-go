@@ -24,7 +24,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
   - [1.6. Environment Variables](#16-environment-variables)
     - [1.6.1. Global](#161-global)
     - [1.6.2. Per-Account Authentication](#162-per-account-authentication)
-    - [1.6.3. Per-Account Notifications](#163-per-account-notifications)
+    - [1.6.3. Notification Secrets](#163-notification-secrets)
     - [1.6.4. `.env` File Support](#164-env-file-support)
       - [How To Obtain Twitch Runtime Identifiers](#how-to-obtain-twitch-runtime-identifiers)
   - [1.7. Notifications](#17-notifications)
@@ -62,7 +62,10 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 - **Community goals** — automatic goal contributions
 - **Gift sub detection** — notifies when your account receives a gifted subscription
 - **Category watcher** — auto-discover streamers by game category
+- **Team watcher** — auto-discover streamers by Twitch team membership
+- **Followers mode** — automatically watch all followed channels
 - **Notifications** — Telegram, Discord, Webhook, Matrix, Pushover, Gotify
+- **Lifecycle alerts** — start, stop, and crash notifications with version info
 - **Analytics dashboard** — built-in web UI for monitoring
 - **Fly.io ready** — deploy with a single command; Docker Compose and systemd service also supported
 
@@ -106,6 +109,7 @@ run.bat
 | `-config`    | `configs` | Path to the configuration directory                             |
 | `-port`      | `8080`    | Port for the health/analytics server                            |
 | `-log-level` | `INFO`    | Log level: DEBUG, INFO, WARN, ERROR (effective default: `INFO`) |
+| `-healthcheck-url` | _(none)_ | Probe the given HTTP URL and exit 0 on HTTP 200 |
 | `-version`   | `false`   | Print version and exit                                          |
 
 ## 1.5. Configuration
@@ -174,7 +178,7 @@ followers:
 
 ## 1.6. Environment Variables
 
-Secrets and auth tokens are injected via environment variables. Per-account variables **require** a `_<USERNAME>` suffix (uppercase) to scope them to the correct account.
+Secrets and auth tokens are injected via environment variables. Per-account variables use a `_<USERNAME>` suffix (uppercase) to scope them to the correct account. Notification secrets also support a **global fallback** — if the per-account variable is not set, the miner checks for the key without the suffix (e.g. `TELEGRAM_TOKEN`), allowing all accounts to share one notification channel.
 
 Use the `configs/` directory for per-account behavior such as watched streamers, betting strategy, and feature toggles. Use environment variables or `.env` for secrets and global runtime values that should not be duplicated per account.
 
@@ -193,6 +197,8 @@ For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN
 | `TWITCH_CLIENT_ID_MOBILE` | Twitch mobile web client ID (falls back to built-in default if unset) | built-in default |
 | `TWITCH_CLIENT_ID_ANDROID` | Twitch Android client ID (falls back to built-in default if unset) | built-in default |
 | `TWITCH_CLIENT_ID_IOS` | Twitch iOS client ID (falls back to built-in default if unset) | built-in default |
+| `DASHBOARD_USER` | Username for analytics dashboard HTTP basic auth | _(disabled)_ |
+| `DASHBOARD_PASSWORD_SHA256` | SHA-256 hash of the dashboard password | _(none)_ |
 
 > **Note:** Twitch client IDs and versions have compiled-in defaults (from `internal/constants`) that are used when the corresponding environment variables are unset. These defaults may become stale as Twitch updates their clients, so it is recommended to set these environment variables explicitly.
 
@@ -203,21 +209,23 @@ For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN
 | `TWITCH_AUTH_TOKEN_<USERNAME>` | OAuth token (fallback for headless auth)            |
 | `TWITCH_PASSWORD_<USERNAME>`   | Twitch password (last-resort auth, may require 2FA) |
 
-### 1.6.3. Per-Account Notifications
+### 1.6.3. Notification Secrets
 
-| Variable                         | Description           |
-| -------------------------------- | --------------------- |
-| `TELEGRAM_TOKEN_<USERNAME>`      | Telegram bot token    |
-| `TELEGRAM_CHAT_ID_<USERNAME>`    | Telegram chat ID      |
-| `DISCORD_WEBHOOK_<USERNAME>`     | Discord webhook URL   |
-| `WEBHOOK_URL_<USERNAME>`         | Generic webhook URL   |
-| `MATRIX_HOMESERVER_<USERNAME>`   | Matrix homeserver URL |
-| `MATRIX_ROOM_ID_<USERNAME>`      | Matrix room ID        |
-| `MATRIX_ACCESS_TOKEN_<USERNAME>` | Matrix access token   |
-| `PUSHOVER_TOKEN_<USERNAME>`      | Pushover API token    |
-| `PUSHOVER_USER_KEY_<USERNAME>`   | Pushover user key     |
-| `GOTIFY_URL_<USERNAME>`          | Gotify server URL     |
-| `GOTIFY_TOKEN_<USERNAME>`        | Gotify app token      |
+Notification credentials support two levels: **global** (`KEY`) and **per-account** (`KEY_<USERNAME>`). Per-account takes precedence — if set, the global value is ignored for that account. Use global variables to send all accounts' notifications to a single channel.
+
+| Global variable        | Per-account override             | Description           |
+| ---------------------- | -------------------------------- | --------------------- |
+| `TELEGRAM_TOKEN`       | `TELEGRAM_TOKEN_<USERNAME>`      | Telegram bot token    |
+| `TELEGRAM_CHAT_ID`     | `TELEGRAM_CHAT_ID_<USERNAME>`    | Telegram chat ID      |
+| `DISCORD_WEBHOOK`      | `DISCORD_WEBHOOK_<USERNAME>`     | Discord webhook URL   |
+| `WEBHOOK_URL`          | `WEBHOOK_URL_<USERNAME>`         | Generic webhook URL   |
+| `MATRIX_HOMESERVER`    | `MATRIX_HOMESERVER_<USERNAME>`   | Matrix homeserver URL |
+| `MATRIX_ROOM_ID`       | `MATRIX_ROOM_ID_<USERNAME>`      | Matrix room ID        |
+| `MATRIX_ACCESS_TOKEN`  | `MATRIX_ACCESS_TOKEN_<USERNAME>` | Matrix access token   |
+| `PUSHOVER_TOKEN`       | `PUSHOVER_TOKEN_<USERNAME>`      | Pushover API token    |
+| `PUSHOVER_USER_KEY`    | `PUSHOVER_USER_KEY_<USERNAME>`   | Pushover user key     |
+| `GOTIFY_URL`           | `GOTIFY_URL_<USERNAME>`          | Gotify server URL     |
+| `GOTIFY_TOKEN`         | `GOTIFY_TOKEN_<USERNAME>`        | Gotify app token      |
 
 ### 1.6.4. `.env` File Support
 
@@ -242,10 +250,13 @@ TWITCH_CLIENT_ID_MOBILE=your_mobile_client_id
 TWITCH_CLIENT_ID_ANDROID=your_android_client_id
 TWITCH_CLIENT_ID_IOS=your_ios_client_id
 
-# Notification secrets for user "guliveer_"
-TELEGRAM_TOKEN_GULIVEER_=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
-TELEGRAM_CHAT_ID_GULIVEER_=987654321
-DISCORD_WEBHOOK_GULIVEER_=https://discord.com/api/webhooks/...
+# Global notification secrets (shared by all accounts)
+TELEGRAM_TOKEN=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+TELEGRAM_CHAT_ID=987654321
+
+# Per-account override (this account uses a different chat)
+# TELEGRAM_CHAT_ID_GULIVEER_=111222333
+# DISCORD_WEBHOOK_GULIVEER_=https://discord.com/api/webhooks/...
 ```
 
 > See [`.env.example`](.env.example) for the starter template.
@@ -282,7 +293,7 @@ The mobile and platform-specific IDs are kept for future compatibility, but the 
 
 ## 1.7. Notifications
 
-The miner supports multiple notification providers. Configure them in your account YAML file under the `notifications` key. Sensitive credentials (tokens, API keys) are injected via environment variables — see [Environment Variables](#per-account-notifications) above.
+The miner supports multiple notification providers. Configure them in your account YAML file under the `notifications` key. Sensitive credentials (tokens, API keys) are injected via environment variables — see [Notification Secrets](#163-notification-secrets) above.
 
 ### 1.7.1. Supported Providers
 
@@ -295,7 +306,7 @@ The miner supports multiple notification providers. Configure them in your accou
 | Matrix   | `matrix`   | `MATRIX_HOMESERVER_*`, `MATRIX_ROOM_ID_*`, `MATRIX_ACCESS_TOKEN_*` |
 | Webhook  | `webhook`  | `WEBHOOK_URL_*`                                                    |
 
-> `*` = `_<USERNAME>` suffix (uppercase). For example, user `guliveer_` → `TELEGRAM_TOKEN_GULIVEER_`. See the full variable list in [Environment Variables](#per-account-notifications).
+> `*` = `_<USERNAME>` suffix (uppercase) or global (without suffix). Per-account takes precedence. For example, `TELEGRAM_TOKEN_GULIVEER_` overrides `TELEGRAM_TOKEN`. See the full variable list in [Notification Secrets](#163-notification-secrets).
 
 ### 1.7.2. Example: Telegram
 
@@ -348,9 +359,14 @@ The `events` list controls which events trigger a notification for a given provi
 | `DROP_STATUS`           | 📦    | Drop progress status              |
 | `CHAT_MENTION`          | 💬    | Mentioned in chat                 |
 | `GIFTED_SUB`            | 🎁    | Received a gifted sub (via IRC)   |
+| `MINER_STARTED`         | 🚀    | Miner started (with version info) |
+| `MINER_STOPPED`         | 🛑    | Miner stopped gracefully          |
+| `MINER_CRASHED`         | 💥    | Miner crashed (with error details)|
 | `TEST`                  | —     | Test notification (see below)     |
 
 > **Note:** Emojis are prepended to log messages and notifications automatically. The emoji mappings are defined in [`eventEmoji`](internal/logger/logger.go:19). The event type constants are defined in [`internal/model/settings.go`](internal/model/settings.go:7).
+>
+> **Note:** Lifecycle events (`MINER_STARTED`, `MINER_STOPPED`, `MINER_CRASHED`) are always sent immediately — they bypass notification batching entirely.
 
 **Example — send only specific events to Telegram:**
 
