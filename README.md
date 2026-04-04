@@ -11,6 +11,8 @@
 
 A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2). Mines channel points, claims bonuses, places predictions, joins raids, claims drops, and more — all with a fraction of the resource usage.
 
+> ⭐ **[Star this repo](https://github.com/Guliveer/twitch-miner-go/stargazers)** to bookmark it and get notified about new releases — the project is young, actively developed, and the best time to jump in is now.
+
 ## 1.1. Table of Contents
 
 - [1. Twitch Channel Points Miner — Go Edition](#1-twitch-channel-points-miner--go-edition)
@@ -77,6 +79,8 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 | Docker image | ~800 MB              | ~10–15 MB         |
 | Startup time | ~5–10 s              | < 100 ms          |
 | Threads      | 60+                  | ~10–20 goroutines |
+
+> Impressed by the difference? A [⭐ star](https://github.com/Guliveer/twitch-miner-go/stargazers) helps the next person find this instead of running the 800 MB Python image. Already using the miner? That one click keeps you in the loop for what ships next.
 
 ## 1.4. Running Locally
 

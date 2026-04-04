@@ -59,8 +59,6 @@ This configures three git hooks:
 - **Use squash-merge** when merging PRs. This ensures the PR title (which CI validates) becomes the single commit on `main`, keeping history clean and version bumps predictable.
 - The version pipeline only analyzes first-parent commits on `main`, so internal branch history from forks does not influence version bumps.
 
-> **Repo setting:** Enable "Allow squash merging" and set default to "Default to pull request title" in repository Settings → General → Pull Requests.
-
 ## Automated Versioning
 
 Releases are fully automated through the [CI workflow](.github/workflows/ci.yml):

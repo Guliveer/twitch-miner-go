@@ -31,6 +31,10 @@ logs/
 .env.*
 !.env.example
 
+# Local files
+**.local
+**.local.*
+
 # Other
 .claude/
 .remember/

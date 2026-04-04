@@ -74,7 +74,7 @@ This stops and removes the systemd unit file. Binary, configs, and data are pres
 
 ## Docker Compose (GHCR)
 
-### Quick Start
+### Quick Start (Docker)
 
 ```bash
 # 1. Clone and configure
@@ -96,7 +96,7 @@ docker compose up -d
 docker compose logs -f
 ```
 
-### Configuration
+### Configuration (Docker)
 
 The `docker-compose.yml` uses the published GHCR image by default:
 
@@ -156,7 +156,7 @@ docker image prune -f
 
 ## Fly.io
 
-### Quick Start
+### Quick Start (Fly.io)
 
 ```bash
 # 1. Install flyctl
@@ -191,7 +191,7 @@ fly secrets set TWITCH_AUTH_TOKEN_YOUR_USERNAME=your_oauth_token
 fly deploy
 ```
 
-### Configuration
+### Configuration (Fly.io)
 
 The `fly.toml` includes optimized settings for the miner:
 
@@ -284,6 +284,7 @@ No additional configuration needed!
 **Enabled when `FLY_API_TOKEN` secret is configured:**
 
 1. Get your Fly.io API token:
+
    ```bash
    fly auth token
    ```
@@ -338,7 +339,7 @@ on:
 
 #### Getting Browser Values
 
-1. Open https://www.twitch.tv in your browser
+1. Open <https://www.twitch.tv> in your browser
 2. Open DevTools (F12) → Network tab
 3. Filter for `gql`
 4. Click any request to `https://gql.twitch.tv/gql`
@@ -416,30 +417,34 @@ TWITCH_PASSWORD_YOUR_USERNAME=your_password
 
 ## Troubleshooting
 
-### Docker Compose
+### Troubleshooting: Docker Compose
 
 **Container won't start:**
+
 ```bash
 docker compose logs
 # Check for missing Twitch identifiers
 ```
 
 **Config changes not applied:**
+
 ```bash
 docker compose down
 docker compose up -d
 ```
 
 **Old cookies causing issues:**
+
 ```bash
 docker compose down
 docker volume rm twitch-miner-go_twitch-miner-data
 docker compose up -d
 ```
 
-### Fly.io
+### Troubleshooting: Fly.io
 
 **Deployment fails:**
+
 ```bash
 fly logs
 # Check for missing secrets
@@ -447,12 +452,14 @@ fly secrets list
 ```
 
 **Out of memory:**
+
 ```bash
 # Increase memory
 fly scale vm shared-cpu-1x --memory 512
 ```
 
 **Volume issues:**
+
 ```bash
 fly volumes list
 fly volumes destroy <volume_id>
