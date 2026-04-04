@@ -6,6 +6,16 @@ on:
       - main
     tags:
       - "v*.*.*"
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE.txt'
+      - 'docs/**'
+      - '.env.example'
+      - 'configs/example.yaml.example'
+      - 'install-service.sh'
+      - 'run.bat'
+      - 'run.sh'
+      - 'scripts/**'
   workflow_dispatch:
 
 permissions:

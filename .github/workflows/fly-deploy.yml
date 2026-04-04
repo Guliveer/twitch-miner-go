@@ -1,6 +1,12 @@
-name: "Fly.io Deploy (Manual)"
+name: "Fly.io Deploy"
 
 on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Version to deploy (leave empty to use VERSION file)"
+        required: false
+        type: string
   workflow_dispatch:
     inputs:
       version:
@@ -43,6 +49,10 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
+          if [ -z "$FLY_API_TOKEN" ]; then
+            echo "⚠️ FLY_API_TOKEN not set — skipping deploy"
+            exit 0
+          fi
           GIT_COMMIT=$(git rev-parse --short HEAD)
           flyctl deploy --remote-only \
             --build-arg "VERSION=${VERSION}" \

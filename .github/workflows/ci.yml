@@ -3,6 +3,16 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE.txt'
+      - 'docs/**'
+      - '.env.example'
+      - 'configs/example.yaml.example'
+      - 'install-service.sh'
+      - 'run.bat'
+      - 'run.sh'
+      - 'scripts/**'
   pull_request:
     branches: [main]
 
@@ -266,30 +276,7 @@ jobs:
 
   deploy:
     needs: [build, version]
-    runs-on: ubuntu-latest
-    environment:
-      name: fly.io [prod]
-      url: https://twitch-miner-go.fly.dev
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup flyctl
-        uses: superfly/flyctl-actions/setup-flyctl@master
-
-      - name: Deploy to Fly.io
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          VERSION: ${{ needs.version.outputs.new_version }}
-        run: |
-          if [ -z "$FLY_API_TOKEN" ]; then
-            echo "⚠️ FLY_API_TOKEN not set — skipping deploy"
-            exit 0
-          fi
-          if [ -z "$VERSION" ]; then
-            VERSION=$(cat VERSION)
-          fi
-          GIT_COMMIT=$(git rev-parse --short HEAD)
-          flyctl deploy --remote-only \
-            --build-arg "VERSION=${VERSION}" \
-            --build-arg "GIT_COMMIT=${GIT_COMMIT}"
+    uses: ./.github/workflows/fly-deploy.yml
+    with:
+      version: ${{ needs.version.outputs.new_version }}
+    secrets: inherit
