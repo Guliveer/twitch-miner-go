@@ -129,6 +129,8 @@ cp configs/example.yaml.example configs/your_twitch_username.yaml
 
 See [`configs/example.yaml.example`](configs/example.yaml.example) for the full schema. Files with a `.yaml.example` extension are not loaded as configs — only `.yaml` and `.yml` files are loaded.
 
+> **After cloning:** The repository may contain personal account configs (e.g. `guliveer_.yaml`). Delete them and create your own from the example template — these configs are specific to the maintainer's accounts and will not work for you.
+
 ### 1.5.1. Quick Start
 
 ```yaml

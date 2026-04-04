@@ -25,6 +25,8 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/) t
 | `ci`       | CI/CD changes           | None          |
 | `chore`    | Maintenance tasks       | None          |
 
+> **Choosing the right type:** Use version-bumping types (`feat`, `fix`, `perf`, `refactor`, `build`) only for changes that affect the built binary or Docker image. For everything else: `build` for deployment infra (`fly.toml`, `docker-compose.yml`), `chore` for account configs (`configs/*.yaml` — triggers deploy without a version bump), and `docs`/`chore`/`ci` for scripts, templates, and CI workflows (pipeline is skipped entirely for these).
+
 **Breaking changes** — adding `!` after the type (e.g., `feat!:`) or including `BREAKING CHANGE:` in the commit body triggers a **major** version bump (x.0.0).
 
 **Examples:**
