@@ -16,6 +16,7 @@ on:
       - 'run.bat'
       - 'run.sh'
       - 'scripts/**'
+      - '.github/**'
   workflow_dispatch:
 
 env:
