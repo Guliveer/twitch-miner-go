@@ -5,10 +5,12 @@ This project supports multiple deployment strategies with modular CI/CD pipeline
 ## Table of Contents
 
 1. [Deployment Options](#deployment-options)
-2. [Docker Compose (GHCR)](#docker-compose-ghcr)
-3. [Fly.io](#flyio)
-4. [CI/CD Pipelines](#cicd-pipelines)
-5. [Required Configuration](#required-configuration)
+2. [Linux Service (systemd / OpenRC)](#linux-service-systemd--openrc)
+3. [Windows Service](#windows-service)
+4. [Docker Compose (GHCR)](#docker-compose-ghcr)
+5. [Fly.io](#flyio)
+6. [CI/CD Pipelines](#cicd-pipelines)
+7. [Required Configuration](#required-configuration)
 
 ---
 
@@ -16,7 +18,8 @@ This project supports multiple deployment strategies with modular CI/CD pipeline
 
 | Method | Best For | Pros | Cons |
 |--------|----------|------|------|
-| **systemd Service** | Bare-metal Linux, VPS | Native, zero overhead, auto-restart | Linux only, manual updates |
+| **Linux Service** | Bare-metal Linux, VPS, Alpine | Native, zero overhead, auto-restart, systemd + OpenRC | Linux only, manual updates |
+| **Windows Service** | Windows desktop/server | Native, auto-rebuild on start, no visible window | Windows only, requires Go toolchain |
 | **Docker Compose** | Self-hosted, VPS | Full control, customizable | Requires infrastructure management |
 | **Fly.io** | Quick cloud deploy | Managed platform, auto-scaling | Costs for high usage |
 
@@ -24,7 +27,9 @@ All methods work with the same codebase and configuration files. Choose based on
 
 ---
 
-## systemd Service (Linux)
+## Linux Service (systemd / OpenRC)
+
+The installer auto-detects the init system — systemd (most distros) or OpenRC (Alpine Linux). OpenRC support requires `supervise-daemon` (OpenRC >= 0.21).
 
 ### Quick Start
 
@@ -43,13 +48,18 @@ The wizard will ask for service name, paths, port, user, and optionally enable +
 ### Managing the Service
 
 ```bash
-# Check status and recent logs
+# Check status and recent logs (works with both init systems)
 sudo ./install-service.sh status
 
-# Or use systemctl directly
+# systemd
 systemctl status twitch-miner-go
 systemctl restart twitch-miner-go
 journalctl -u twitch-miner-go -f
+
+# OpenRC (Alpine)
+rc-service twitch-miner-go status
+rc-service twitch-miner-go restart
+tail -f /var/log/twitch-miner-go.log
 ```
 
 ### Uninstalling
@@ -58,7 +68,7 @@ journalctl -u twitch-miner-go -f
 sudo ./install-service.sh uninstall
 ```
 
-This stops and removes the systemd unit file. Binary, configs, and data are preserved — remove them manually if needed.
+This stops and removes the service unit/init script. Binary, configs, and data are preserved — remove them manually if needed.
 
 ### File Locations (defaults)
 
@@ -68,7 +78,64 @@ This stops and removes the systemd unit file. Binary, configs, and data are pres
 | Configs | `/etc/twitch-miner-go/configs/` |
 | Environment | `/etc/twitch-miner-go/.env` |
 | Data (cookies) | `/var/lib/twitch-miner-go/` |
-| Service unit | `/etc/systemd/system/twitch-miner-go.service` |
+| Service (systemd) | `/etc/systemd/system/twitch-miner-go.service` |
+| Service (OpenRC) | `/etc/init.d/twitch-miner-go` |
+| Logs (OpenRC) | `/var/log/twitch-miner-go.log` |
+
+---
+
+## Windows Service
+
+### Quick Start
+
+```bat
+REM Right-click install-service.bat and select "Run as administrator"
+install-service.bat install
+```
+
+The wizard will ask for config directory, port, and log level. [NSSM](https://nssm.cc/) (Non-Sucking Service Manager) is auto-downloaded if not already installed.
+
+### How It Works
+
+The installer uses NSSM to wrap the application as a native Windows service. On every start (including automatic restarts after a crash), the service:
+
+1. Rebuilds the binary from source (`go build`)
+2. Launches the freshly built binary
+
+This ensures config changes and code updates are always picked up without manual rebuilds.
+
+### Managing the Service
+
+```bat
+install-service.bat start       REM starts (triggers a rebuild first)
+install-service.bat stop
+install-service.bat restart     REM restart with a fresh rebuild
+install-service.bat status
+```
+
+### Uninstalling
+
+```bat
+install-service.bat uninstall
+```
+
+This stops and removes the Windows service. The binary, configs, and logs are preserved — remove them manually if needed.
+
+### File Locations (defaults)
+
+| Item | Path |
+|------|------|
+| Binary | `<project-dir>\twitch-miner-go.exe` |
+| Configs | `<project-dir>\configs\` |
+| Service wrapper | `<project-dir>\_service-start.bat` |
+| Logs | `<project-dir>\logs\service.log` |
+| NSSM | `<project-dir>\tools\nssm\nssm.exe` |
+
+### Prerequisites
+
+- **Go toolchain** in the system PATH (not just user PATH — the service runs under the SYSTEM account)
+- **Git** in the system PATH (for version embedding during builds)
+- **Administrator privileges** to install/manage Windows services
 
 ---
 

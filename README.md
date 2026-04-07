@@ -40,18 +40,21 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
     - [1.9. Docker](#19-docker)
         - [Docker Compose](#docker-compose)
         - [GitHub Container Registry](#github-container-registry)
-    - [1.10. systemd Service (Linux)](#110-systemd-service-linux)
+    - [1.10. Linux Service (systemd / OpenRC)](#110-linux-service-systemd--openrc)
         - [Managing the Service](#managing-the-service)
         - [Uninstalling](#uninstalling)
         - [Default File Locations](#default-file-locations)
-    - [1.11. Deploy to Fly.io](#111-deploy-to-flyio)
-        - [1.11.1. Setup](#1111-setup)
-        - [1.11.2. CI/CD Auto-Deploy](#1112-cicd-auto-deploy)
-        - [1.11.3. Manual Deploy](#1113-manual-deploy)
-        - [1.11.4. Alternative Deployment](#1114-alternative-deployment)
-    - [1.12. Development](#112-development)
-    - [1.13. Auto-Update Checker](#113-auto-update-checker)
-    - [1.14. License](#114-license)
+    - [1.11. Windows Service](#111-windows-service)
+        - [Managing the Service](#managing-the-service-1)
+        - [Uninstalling](#uninstalling-1)
+    - [1.12. Deploy to Fly.io](#112-deploy-to-flyio)
+        - [1.12.1. Setup](#1121-setup)
+        - [1.12.2. CI/CD Auto-Deploy](#1122-cicd-auto-deploy)
+        - [1.12.3. Manual Deploy](#1123-manual-deploy)
+        - [1.12.4. Alternative Deployment](#1124-alternative-deployment)
+    - [1.13. Development](#113-development)
+    - [1.14. Auto-Update Checker](#114-auto-update-checker)
+    - [1.15. License](#115-license)
 
 ## 1.2. Features
 
@@ -564,9 +567,9 @@ Example image references:
 - `ghcr.io/guliveer/twitch-miner-go:1.2.3`
 - `ghcr.io/guliveer/twitch-miner-go:sha-abcdef1`
 
-## 1.10. systemd Service (Linux)
+## 1.10. Linux Service (systemd / OpenRC)
 
-Run twitch-miner-go as a native Linux service with automatic restarts and boot startup. An interactive installer script is included.
+Run twitch-miner-go as a native Linux service with automatic restarts and boot startup. The interactive installer auto-detects the init system (systemd or OpenRC/Alpine).
 
 ```bash
 # Build the binary first
@@ -581,9 +584,15 @@ The wizard will prompt for service name, paths, port, user, and optionally enabl
 ### Managing the Service
 
 ```bash
+# systemd
 systemctl status twitch-miner-go
 systemctl restart twitch-miner-go
 journalctl -u twitch-miner-go -f     # follow logs
+
+# OpenRC (Alpine)
+rc-service twitch-miner-go status
+rc-service twitch-miner-go restart
+tail -f /var/log/twitch-miner-go.log  # follow logs
 ```
 
 ### Uninstalling
@@ -601,13 +610,41 @@ sudo ./install-service.sh uninstall
 | Environment    | `/etc/twitch-miner-go/.env`      |
 | Data (cookies) | `/var/lib/twitch-miner-go/`      |
 
-> See [DEPLOYMENT.md](DEPLOYMENT.md) for the full systemd deployment guide.
+> See [DEPLOYMENT.md](DEPLOYMENT.md) for the full Linux service deployment guide.
 
-## 1.11. Deploy to Fly.io
+## 1.11. Windows Service
+
+Run twitch-miner-go as a Windows service with automatic restarts. The binary is rebuilt from source on every start, so config and code changes are always picked up. Uses [NSSM](https://nssm.cc/) (auto-downloaded if not installed).
+
+```bat
+REM Right-click and select "Run as administrator"
+install-service.bat install
+```
+
+The wizard will prompt for config directory, port, and log level.
+
+### Managing the Service
+
+```bat
+install-service.bat start       REM starts (rebuilds the binary first)
+install-service.bat stop
+install-service.bat restart     REM restart with a fresh rebuild
+install-service.bat status
+```
+
+### Uninstalling
+
+```bat
+install-service.bat uninstall
+```
+
+> See [DEPLOYMENT.md](DEPLOYMENT.md) for the full Windows service deployment guide.
+
+## 1.12. Deploy to Fly.io
 
 The repo includes [`fly.toml`](fly.toml) — the Fly.io deployment config. Fly.io is a personal preference and comes pre-configured, but the miner is portable and runs on any platform that supports Go (AWS, GCP, Azure, DigitalOcean, etc.).
 
-### 1.11.1. Setup
+### 1.12.1. Setup
 
 ```bash
 # 1. Copy the example account config and customize (filename = your Twitch username)
@@ -641,7 +678,7 @@ fly secrets set TELEGRAM_TOKEN_YOUR_USERNAME=your_bot_token
 fly secrets set TELEGRAM_CHAT_ID_YOUR_USERNAME=your_chat_id
 ```
 
-### 1.11.2. CI/CD Auto-Deploy
+### 1.12.2. CI/CD Auto-Deploy
 
 Pushes to `main` are automatically deployed via the [CI workflow](.github/workflows/ci.yml) after build and version bump succeed. This requires a `FLY_API_TOKEN` GitHub secret:
 
@@ -656,7 +693,7 @@ gh secret set FLY_API_TOKEN --repo <owner>/<repo>
 
 > If `FLY_API_TOKEN` is not set, the deployment step is **skipped gracefully** — build and version bump still run normally.
 
-### 1.11.3. Manual Deploy
+### 1.12.3. Manual Deploy
 
 ```bash
 fly deploy
@@ -668,18 +705,18 @@ fly logs
 curl https://your-app-name.fly.dev/health
 ```
 
-### 1.11.4. Alternative Deployment
+### 1.12.4. Alternative Deployment
 
 For self-hosted deployments, Docker Compose is also supported — see the [Docker Compose](#docker-compose) section above and [DEPLOYMENT.md](DEPLOYMENT.md) for a comprehensive guide covering both Fly.io and Docker workflows.
 
-## 1.12. Development
+## 1.13. Development
 
 This project uses [Conventional Commits](https://www.conventionalcommits.org/) and automated versioning. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full commit convention, git hooks setup, and versioning workflow.
 
-## 1.13. Auto-Update Checker
+## 1.14. Auto-Update Checker
 
 On startup, the miner automatically checks for new releases in the background via [`updater.CheckForUpdate()`](internal/updater/updater.go). If a newer version is available, a notification is printed to the terminal. This check is non-blocking and does not affect startup time.
 
-## 1.14. License
+## 1.15. License
 
 This project is licensed under the GNU GPL v3.0 License. See the [LICENSE](LICENSE.txt) file for details.
