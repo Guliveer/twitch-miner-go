@@ -64,6 +64,35 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		c.Log.Warn("Failed to sync campaigns with inventory", "error", err)
 	}
 
+	// Detect new campaigns and fire NEW_CAMPAIGN notifications.
+	// On the first call, seed knownCampaigns without notifications.
+	if c.campaignsInitialized.Load() {
+		for _, campaign := range campaigns {
+			if _, seen := c.knownCampaigns.LoadOrStore(campaign.ID, true); !seen {
+				for _, streamer := range streamers {
+					if campaignMatchesStreamer(campaign, streamer) {
+						gameName := ""
+						if campaign.Game != nil {
+							gameName = campaign.Game.Slug
+							if gameName == "" {
+								gameName = campaign.Game.Name
+							}
+						}
+						c.Log.Event(ctx, model.EventNewCampaign, "New drop campaign available",
+							"campaign", campaign.Name,
+							"category", gameName)
+						break
+					}
+				}
+			}
+		}
+	} else {
+		for _, campaign := range campaigns {
+			c.knownCampaigns.Store(campaign.ID, true)
+		}
+		c.campaignsInitialized.Store(true)
+	}
+
 	for _, streamer := range streamers {
 		streamer.Mu.Lock()
 		if streamer.DropsCondition() {

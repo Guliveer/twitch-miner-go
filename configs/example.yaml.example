@@ -107,6 +107,7 @@ notifications:
   #     - BET_WIN
   #     - BET_LOSE
   #     - DROP_CLAIM
+  #     - NEW_CAMPAIGN
   #     - STREAMER_ONLINE
   #     - CHAT_MENTION
   #     - GIFTED_SUB
@@ -117,6 +118,7 @@ notifications:
       - "BET_WIN"
       - "BET_LOSE"
       - "DROP_CLAIM"
+      - "NEW_CAMPAIGN"
       - "GIFTED_SUB"
       - "MINER_STARTED"
       - "MINER_STOPPED"

@@ -73,6 +73,13 @@ func NewAuthenticator(cfg *config.AccountConfig, log *logger.Logger, runtime *ru
 	}
 }
 
+// NewForTest creates a minimal Authenticator for unit tests with a preset userID.
+func NewForTest(userID string) *Authenticator {
+	return &Authenticator{
+		userID: userID,
+	}
+}
+
 // Login performs the authentication flow with the following priority:
 //  1. Load cookies from file → validate token → success
 //     1b. If token expired, try refresh token → validate → save → success

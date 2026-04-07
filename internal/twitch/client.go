@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/Guliveer/twitch-miner-go/internal/auth"
@@ -87,6 +88,13 @@ type Client struct {
 	// claimedDrops tracks drop instance IDs that have already been attempted
 	// to prevent notification spam across sync cycles.
 	claimedDrops sync.Map
+
+	// knownCampaigns tracks campaign IDs seen during previous SyncCampaigns
+	// calls so that NEW_CAMPAIGN notifications only fire for genuinely new ones.
+	knownCampaigns sync.Map
+	// campaignsInitialized is set after the first SyncCampaigns call.
+	// The first call seeds knownCampaigns without firing notifications.
+	campaignsInitialized atomic.Bool
 }
 
 // NewClient creates a new high-level Twitch Client from account configuration.

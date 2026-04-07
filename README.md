@@ -363,6 +363,7 @@ The `events` list controls which events trigger a notification for a given provi
 | `JOIN_RAID`             | ⚔️    | Joined a raid                     |
 | `DROP_CLAIM`            | 📦    | Drop claimed                      |
 | `DROP_STATUS`           | 📦    | Drop progress status              |
+| `NEW_CAMPAIGN`          | 🆕    | New drop campaign detected        |
 | `CHAT_MENTION`          | 💬    | Mentioned in chat                 |
 | `GIFTED_SUB`            | 🎁    | Received a gifted sub (via IRC)   |
 | `MINER_STARTED`         | 🚀    | Miner started (with version info) |

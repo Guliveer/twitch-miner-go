@@ -3,14 +3,18 @@ package twitch
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
+	"github.com/Guliveer/twitch-miner-go/internal/auth"
 	"github.com/Guliveer/twitch-miner-go/internal/gql"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
+	"github.com/Guliveer/twitch-miner-go/internal/model"
 )
 
 // mockTransport intercepts HTTP requests and returns canned GQL responses
@@ -32,6 +36,36 @@ func (m *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	body, _ := io.ReadAll(req.Body)
 	req.Body.Close()
 
+	bodyStr := strings.TrimSpace(string(body))
+
+	// Handle batch requests (JSON array) used by PostGQLBatch.
+	if strings.HasPrefix(bodyStr, "[") {
+		var batch []struct {
+			OperationName string `json:"operationName"`
+		}
+		json.Unmarshal(body, &batch)
+
+		var items []string
+		m.mu.Lock()
+		for _, op := range batch {
+			m.calls[op.OperationName]++
+			if resp, ok := m.responses[op.OperationName]; ok {
+				items = append(items, resp)
+			} else {
+				items = append(items, `{"data": null}`)
+			}
+		}
+		m.mu.Unlock()
+
+		batchResp := "[" + strings.Join(items, ",") + "]"
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(strings.NewReader(batchResp)),
+			Header:     make(http.Header),
+		}, nil
+	}
+
+	// Single operation.
 	var payload struct {
 		OperationName string `json:"operationName"`
 	}
@@ -82,6 +116,7 @@ func newTestClient(t *testing.T, transport *mockTransport) *Client {
 	gqlClient := gql.NewClientForTest(&mockAuthProvider{}, log, &http.Client{Transport: transport})
 
 	return &Client{
+		Auth:      auth.NewForTest("12345"),
 		Log:       log,
 		GQL:       gqlClient,
 		spadeURLs: &spadeCache{entries: make(map[string]spadeCacheEntry)},
@@ -328,5 +363,173 @@ func TestClaimAllDrops_EmptyInventory(t *testing.T) {
 
 	if got := transport.callCount("DropsPage_ClaimDropRewards"); got != 0 {
 		t.Fatalf("expected 0 claim calls for empty inventory, got %d", got)
+	}
+}
+
+// --- SyncCampaigns / NEW_CAMPAIGN notification tests ---
+
+// eventCapture collects notification events fired via Logger.Event.
+type eventCapture struct {
+	mu     sync.Mutex
+	events []capturedEvent
+}
+
+type capturedEvent struct {
+	event model.Event
+	meta  map[string]string
+}
+
+func newEventCapture(log *logger.Logger) *eventCapture {
+	ec := &eventCapture{}
+	log.SetNotifyFunc(func(_ context.Context, _ string, event model.Event, meta map[string]string) {
+		ec.mu.Lock()
+		ec.events = append(ec.events, capturedEvent{event: event, meta: meta})
+		ec.mu.Unlock()
+	})
+	return ec
+}
+
+func (ec *eventCapture) countEvent(event model.Event) int {
+	ec.mu.Lock()
+	defer ec.mu.Unlock()
+	count := 0
+	for _, e := range ec.events {
+		if e.event == event {
+			count++
+		}
+	}
+	return count
+}
+
+func (ec *eventCapture) reset() {
+	ec.mu.Lock()
+	ec.events = nil
+	ec.mu.Unlock()
+}
+
+// dashboardJSON builds a ViewerDropsDashboard GQL response with the given campaign IDs.
+func dashboardJSON(ids ...string) string {
+	var items []string
+	for _, id := range ids {
+		items = append(items, fmt.Sprintf(`{"id":%q,"status":"ACTIVE"}`, id))
+	}
+	return fmt.Sprintf(`{"data":{"currentUser":{"dropCampaigns":[%s]}}}`, strings.Join(items, ","))
+}
+
+// campaignDetailJSON builds a DropCampaignDetails batch-element response for a single campaign.
+func campaignDetailJSON(id, name, gameName, gameSlug string) string {
+	now := time.Now()
+	start := now.Add(-24 * time.Hour).Format(time.RFC3339)
+	end := now.Add(24 * time.Hour).Format(time.RFC3339)
+	return fmt.Sprintf(`{"data":{"user":{"dropCampaign":{`+
+		`"id":%q,"name":%q,"status":"ACTIVE","startAt":%q,"endAt":%q,`+
+		`"game":{"id":"game1","name":%q,"displayName":%q,"slug":%q},`+
+		`"allow":{"channels":[{"id":"chan1"}]},`+
+		`"timeBasedDrops":[{"id":"drop-%s","name":"Drop","requiredMinutesWatched":60,`+
+		`"startAt":%q,"endAt":%q,"benefitEdges":[{"benefit":{"name":"Reward"}}]}]`+
+		`}}}}`, id, name, start, end, gameName, gameName, gameSlug, id, start, end)
+}
+
+// testStreamer creates a minimal streamer that satisfies DropsCondition and matches the given campaign.
+func testStreamer(gameName string, campaignIDs ...string) *model.Streamer {
+	s := model.NewStreamer("teststreamer")
+	s.IsOnline = true
+	s.Stream.Game = &model.GameInfo{Name: gameName}
+	s.Stream.CampaignIDs = campaignIDs
+	s.Settings = &model.StreamerSettings{ClaimDrops: true}
+	return s
+}
+
+func TestSyncCampaigns_SeedsOnFirstRun(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp1")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp1", "Season 5 Drops", "The Finals", "the-finals")
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	streamers := []*model.Streamer{testStreamer("The Finals", "camp1")}
+
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// First call seeds knownCampaigns — no NEW_CAMPAIGN notification should fire.
+	if got := capture.countEvent(model.EventNewCampaign); got != 0 {
+		t.Fatalf("expected 0 NEW_CAMPAIGN events on first sync (seeding), got %d", got)
+	}
+
+	// Verify the campaign was stored in knownCampaigns.
+	if _, ok := client.knownCampaigns.Load("camp1"); !ok {
+		t.Fatal("expected camp1 to be stored in knownCampaigns after first sync")
+	}
+}
+
+func TestSyncCampaigns_SkipsKnownCampaign(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp1")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp1", "Season 5 Drops", "The Finals", "the-finals")
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	streamers := []*model.Streamer{testStreamer("The Finals", "camp1")}
+
+	// First sync — seeds.
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("first sync: %v", err)
+	}
+
+	capture.reset()
+
+	// Second sync — same campaign, should NOT fire.
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("second sync: %v", err)
+	}
+
+	if got := capture.countEvent(model.EventNewCampaign); got != 0 {
+		t.Fatalf("expected 0 NEW_CAMPAIGN events for known campaign, got %d", got)
+	}
+}
+
+func TestSyncCampaigns_NotifiesNewCampaign(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp1")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp1", "Season 5 Drops", "The Finals", "the-finals")
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	streamers := []*model.Streamer{testStreamer("The Finals", "camp1", "camp2")}
+
+	// First sync — seeds camp1.
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("first sync: %v", err)
+	}
+
+	capture.reset()
+
+	// Update mock: dashboard now returns camp2, details return camp2 data.
+	transport.mu.Lock()
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp2")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp2", "New Event Drops", "The Finals", "the-finals")
+	transport.mu.Unlock()
+
+	// Second sync — should detect camp2 as new.
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("second sync: %v", err)
+	}
+
+	if got := capture.countEvent(model.EventNewCampaign); got != 1 {
+		t.Fatalf("expected 1 NEW_CAMPAIGN event for new campaign, got %d", got)
 	}
 }
