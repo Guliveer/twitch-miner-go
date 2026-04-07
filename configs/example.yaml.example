@@ -26,10 +26,12 @@ category_watcher:
   enabled: false
   poll_interval: 120s
   drops_only: false
+  notify_new_campaigns: false # Send NEW_CAMPAIGN notification when a new drop campaign appears
   categories:
     - slug: "just-chatting"
     - slug: "league-of-legends"
       drops_only: true
+      notify_new_campaigns: true # Per-category override
 
 # Team watcher - auto-discover streams by team membership
 # Picks one live streamer per team (highest viewers), similar to category_watcher.

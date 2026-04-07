@@ -17,6 +17,7 @@ category_watcher:
   enabled: true
   poll_interval: 120s
   drops_only: true # Global default: only watch streams with Drops enabled
+  notify_new_campaigns: true # Notify when new drop campaigns appear
   categories:
     - slug: "tom-clancys-rainbow-six-siege"
       drops_only: false

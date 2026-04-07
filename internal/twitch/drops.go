@@ -66,10 +66,15 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 
 	// Detect new campaigns and fire NEW_CAMPAIGN notifications.
 	// On the first call, seed knownCampaigns without notifications.
+	// Only fires for campaigns matching a streamer with NotifyNewCampaigns enabled
+	// (set via category_watcher.notify_new_campaigns config).
 	if c.campaignsInitialized.Load() {
 		for _, campaign := range campaigns {
 			if _, seen := c.knownCampaigns.LoadOrStore(campaign.ID, true); !seen {
 				for _, streamer := range streamers {
+					if !streamer.NotifyNewCampaigns {
+						continue
+					}
 					if campaignMatchesStreamer(campaign, streamer) {
 						gameName := ""
 						if campaign.Game != nil {

@@ -16,42 +16,42 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 ## 1.1. Table of Contents
 
 - [1. Twitch Channel Points Miner — Go Edition](#1-twitch-channel-points-miner--go-edition)
-  - [1.1. Table of Contents](#11-table-of-contents)
-  - [1.2. Features](#12-features)
-  - [1.3. Resource Comparison](#13-resource-comparison)
-  - [1.4. Running Locally](#14-running-locally)
-    - [1.4.1. Flags](#141-flags)
-  - [1.5. Configuration](#15-configuration)
-    - [1.5.1. Quick Start](#151-quick-start)
-  - [1.6. Environment Variables](#16-environment-variables)
-    - [1.6.1. Global](#161-global)
-    - [1.6.2. Per-Account Authentication](#162-per-account-authentication)
-    - [1.6.3. Notification Secrets](#163-notification-secrets)
-    - [1.6.4. `.env` File Support](#164-env-file-support)
-      - [How To Obtain Twitch Runtime Identifiers](#how-to-obtain-twitch-runtime-identifiers)
-  - [1.7. Notifications](#17-notifications)
-    - [1.7.1. Supported Providers](#171-supported-providers)
-    - [1.7.2. Example: Telegram](#172-example-telegram)
-    - [1.7.3. Event Filtering](#173-event-filtering)
-    - [1.7.4. Notification Batching](#174-notification-batching)
-    - [1.7.5. Testing Notifications](#175-testing-notifications)
-  - [1.8. Authentication](#18-authentication)
-    - [1.8.1. When to use the env vars](#181-when-to-use-the-env-vars)
-  - [1.9. Docker](#19-docker)
-    - [Docker Compose](#docker-compose)
-    - [GitHub Container Registry](#github-container-registry)
-  - [1.10. systemd Service (Linux)](#110-systemd-service-linux)
-    - [Managing the Service](#managing-the-service)
-    - [Uninstalling](#uninstalling)
-    - [Default File Locations](#default-file-locations)
-  - [1.11. Deploy to Fly.io](#111-deploy-to-flyio)
-    - [1.11.1. Setup](#1111-setup)
-    - [1.11.2. CI/CD Auto-Deploy](#1112-cicd-auto-deploy)
-    - [1.11.3. Manual Deploy](#1113-manual-deploy)
-    - [1.11.4. Alternative Deployment](#1114-alternative-deployment)
-  - [1.12. Development](#112-development)
-  - [1.13. Auto-Update Checker](#113-auto-update-checker)
-  - [1.14. License](#114-license)
+    - [1.1. Table of Contents](#11-table-of-contents)
+    - [1.2. Features](#12-features)
+    - [1.3. Resource Comparison](#13-resource-comparison)
+    - [1.4. Running Locally](#14-running-locally)
+        - [1.4.1. Flags](#141-flags)
+    - [1.5. Configuration](#15-configuration)
+        - [1.5.1. Quick Start](#151-quick-start)
+    - [1.6. Environment Variables](#16-environment-variables)
+        - [1.6.1. Global](#161-global)
+        - [1.6.2. Per-Account Authentication](#162-per-account-authentication)
+        - [1.6.3. Notification Secrets](#163-notification-secrets)
+        - [1.6.4. `.env` File Support](#164-env-file-support)
+            - [How To Obtain Twitch Runtime Identifiers](#how-to-obtain-twitch-runtime-identifiers)
+    - [1.7. Notifications](#17-notifications)
+        - [1.7.1. Supported Providers](#171-supported-providers)
+        - [1.7.2. Example: Telegram](#172-example-telegram)
+        - [1.7.3. Event Filtering](#173-event-filtering)
+        - [1.7.4. Notification Batching](#174-notification-batching)
+        - [1.7.5. Testing Notifications](#175-testing-notifications)
+    - [1.8. Authentication](#18-authentication)
+        - [1.8.1. When to use the env vars](#181-when-to-use-the-env-vars)
+    - [1.9. Docker](#19-docker)
+        - [Docker Compose](#docker-compose)
+        - [GitHub Container Registry](#github-container-registry)
+    - [1.10. systemd Service (Linux)](#110-systemd-service-linux)
+        - [Managing the Service](#managing-the-service)
+        - [Uninstalling](#uninstalling)
+        - [Default File Locations](#default-file-locations)
+    - [1.11. Deploy to Fly.io](#111-deploy-to-flyio)
+        - [1.11.1. Setup](#1111-setup)
+        - [1.11.2. CI/CD Auto-Deploy](#1112-cicd-auto-deploy)
+        - [1.11.3. Manual Deploy](#1113-manual-deploy)
+        - [1.11.4. Alternative Deployment](#1114-alternative-deployment)
+    - [1.12. Development](#112-development)
+    - [1.13. Auto-Update Checker](#113-auto-update-checker)
+    - [1.14. License](#114-license)
 
 ## 1.2. Features
 
@@ -74,7 +74,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 ## 1.3. Resource Comparison
 
 | Resource     | Python (per account) | Go (per account)  |
-| ------------ | -------------------- | ----------------- |
+|--------------|----------------------|-------------------|
 | Memory       | ~80–120 MB           | ~5–15 MB          |
 | Docker image | ~800 MB              | ~10–15 MB         |
 | Startup time | ~5–10 s              | < 100 ms          |
@@ -108,13 +108,13 @@ run.bat
 
 ### 1.4.1. Flags
 
-| Flag         | Default   | Description                                                     |
-| ------------ | --------- | --------------------------------------------------------------- |
-| `-config`    | `configs` | Path to the configuration directory                             |
-| `-port`      | `8080`    | Port for the health/analytics server                            |
-| `-log-level` | `INFO`    | Log level: DEBUG, INFO, WARN, ERROR (effective default: `INFO`) |
-| `-healthcheck-url` | _(none)_ | Probe the given HTTP URL and exit 0 on HTTP 200 |
-| `-version`   | `false`   | Print version and exit                                          |
+| Flag               | Default   | Description                                                     |
+|--------------------|-----------|-----------------------------------------------------------------|
+| `-config`          | `configs` | Path to the configuration directory                             |
+| `-port`            | `8080`    | Port for the health/analytics server                            |
+| `-log-level`       | `INFO`    | Log level: DEBUG, INFO, WARN, ERROR (effective default: `INFO`) |
+| `-healthcheck-url` | _(none)_  | Probe the given HTTP URL and exit 0 on HTTP 200                 |
+| `-version`         | `false`   | Print version and exit                                          |
 
 ## 1.5. Configuration
 
@@ -137,7 +137,7 @@ See [`configs/example.yaml.example`](configs/example.yaml.example) for the full 
 # configs/your_twitch_username.yaml
 # The filename IS the username — no username field needed.
 
-# Set to false to disable this account without deleting the config (default: true)
+# Set 'false' to disable this account without deleting the config (default: true)
 enabled: true
 
 features:
@@ -192,26 +192,26 @@ For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN
 
 ### 1.6.1. Global
 
-| Variable    | Description                                  | Default |
-| ----------- | -------------------------------------------- | ------- |
-| `LOG_LEVEL` | Log level (`DEBUG`, `INFO`, `WARN`, `ERROR`) | `INFO`  |
-| `PORT`      | HTTP server port for health/analytics        | `8080`  |
-| `DATA_DIR`  | Persistent data directory (cookies, state)   | `.`     |
-| `TWITCH_CLIENT_ID_TV` | Twitch TV client ID (falls back to built-in default if unset; override recommended) | built-in default |
-| `TWITCH_CLIENT_ID_BROWSER` | Twitch browser client ID (falls back to built-in default if unset; override recommended) | built-in default |
-| `TWITCH_CLIENT_VERSION` | Twitch browser client version (falls back to built-in default if unset; override recommended) | built-in default |
-| `TWITCH_CLIENT_ID_MOBILE` | Twitch mobile web client ID (falls back to built-in default if unset) | built-in default |
-| `TWITCH_CLIENT_ID_ANDROID` | Twitch Android client ID (falls back to built-in default if unset) | built-in default |
-| `TWITCH_CLIENT_ID_IOS` | Twitch iOS client ID (falls back to built-in default if unset) | built-in default |
-| `DASHBOARD_USER` | Username for analytics dashboard HTTP basic auth | _(disabled)_ |
-| `DASHBOARD_PASSWORD_SHA256` | SHA-256 hash of the dashboard password | _(none)_ |
+| Variable                    | Description                                                                                   | Default          |
+|-----------------------------|-----------------------------------------------------------------------------------------------|------------------|
+| `LOG_LEVEL`                 | Log level (`DEBUG`, `INFO`, `WARN`, `ERROR`)                                                  | `INFO`           |
+| `PORT`                      | HTTP server port for health/analytics                                                         | `8080`           |
+| `DATA_DIR`                  | Persistent data directory (cookies, state)                                                    | `.`              |
+| `TWITCH_CLIENT_ID_TV`       | Twitch TV client ID (falls back to built-in default if unset; override recommended)           | built-in default |
+| `TWITCH_CLIENT_ID_BROWSER`  | Twitch browser client ID (falls back to built-in default if unset; override recommended)      | built-in default |
+| `TWITCH_CLIENT_VERSION`     | Twitch browser client version (falls back to built-in default if unset; override recommended) | built-in default |
+| `TWITCH_CLIENT_ID_MOBILE`   | Twitch mobile web client ID (falls back to built-in default if unset)                         | built-in default |
+| `TWITCH_CLIENT_ID_ANDROID`  | Twitch Android client ID (falls back to built-in default if unset)                            | built-in default |
+| `TWITCH_CLIENT_ID_IOS`      | Twitch iOS client ID (falls back to built-in default if unset)                                | built-in default |
+| `DASHBOARD_USER`            | Username for analytics dashboard HTTP basic auth                                              | _(disabled)_     |
+| `DASHBOARD_PASSWORD_SHA256` | SHA-256 hash of the dashboard password                                                        | _(none)_         |
 
 > **Note:** Twitch client IDs and versions have compiled-in defaults (from `internal/constants`) that are used when the corresponding environment variables are unset. These defaults may become stale as Twitch updates their clients, so it is recommended to set these environment variables explicitly.
 
 ### 1.6.2. Per-Account Authentication
 
 | Variable                       | Description                                         |
-| ------------------------------ | --------------------------------------------------- |
+|--------------------------------|-----------------------------------------------------|
 | `TWITCH_AUTH_TOKEN_<USERNAME>` | OAuth token (fallback for headless auth)            |
 | `TWITCH_PASSWORD_<USERNAME>`   | Twitch password (last-resort auth, may require 2FA) |
 
@@ -219,19 +219,19 @@ For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN
 
 Notification credentials support two levels: **global** (`KEY`) and **per-account** (`KEY_<USERNAME>`). Per-account takes precedence — if set, the global value is ignored for that account. Use global variables to send all accounts' notifications to a single channel.
 
-| Global variable        | Per-account override             | Description           |
-| ---------------------- | -------------------------------- | --------------------- |
-| `TELEGRAM_TOKEN`       | `TELEGRAM_TOKEN_<USERNAME>`      | Telegram bot token    |
-| `TELEGRAM_CHAT_ID`     | `TELEGRAM_CHAT_ID_<USERNAME>`    | Telegram chat ID      |
-| `DISCORD_WEBHOOK`      | `DISCORD_WEBHOOK_<USERNAME>`     | Discord webhook URL   |
-| `WEBHOOK_URL`          | `WEBHOOK_URL_<USERNAME>`         | Generic webhook URL   |
-| `MATRIX_HOMESERVER`    | `MATRIX_HOMESERVER_<USERNAME>`   | Matrix homeserver URL |
-| `MATRIX_ROOM_ID`       | `MATRIX_ROOM_ID_<USERNAME>`      | Matrix room ID        |
-| `MATRIX_ACCESS_TOKEN`  | `MATRIX_ACCESS_TOKEN_<USERNAME>` | Matrix access token   |
-| `PUSHOVER_TOKEN`       | `PUSHOVER_TOKEN_<USERNAME>`      | Pushover API token    |
-| `PUSHOVER_USER_KEY`    | `PUSHOVER_USER_KEY_<USERNAME>`   | Pushover user key     |
-| `GOTIFY_URL`           | `GOTIFY_URL_<USERNAME>`          | Gotify server URL     |
-| `GOTIFY_TOKEN`         | `GOTIFY_TOKEN_<USERNAME>`        | Gotify app token      |
+| Global variable       | Per-account override             | Description           |
+|-----------------------|----------------------------------|-----------------------|
+| `TELEGRAM_TOKEN`      | `TELEGRAM_TOKEN_<USERNAME>`      | Telegram bot token    |
+| `TELEGRAM_CHAT_ID`    | `TELEGRAM_CHAT_ID_<USERNAME>`    | Telegram chat ID      |
+| `DISCORD_WEBHOOK`     | `DISCORD_WEBHOOK_<USERNAME>`     | Discord webhook URL   |
+| `WEBHOOK_URL`         | `WEBHOOK_URL_<USERNAME>`         | Generic webhook URL   |
+| `MATRIX_HOMESERVER`   | `MATRIX_HOMESERVER_<USERNAME>`   | Matrix homeserver URL |
+| `MATRIX_ROOM_ID`      | `MATRIX_ROOM_ID_<USERNAME>`      | Matrix room ID        |
+| `MATRIX_ACCESS_TOKEN` | `MATRIX_ACCESS_TOKEN_<USERNAME>` | Matrix access token   |
+| `PUSHOVER_TOKEN`      | `PUSHOVER_TOKEN_<USERNAME>`      | Pushover API token    |
+| `PUSHOVER_USER_KEY`   | `PUSHOVER_USER_KEY_<USERNAME>`   | Pushover user key     |
+| `GOTIFY_URL`          | `GOTIFY_URL_<USERNAME>`          | Gotify server URL     |
+| `GOTIFY_TOKEN`        | `GOTIFY_TOKEN_<USERNAME>`        | Gotify app token      |
 
 ### 1.6.4. `.env` File Support
 
@@ -278,8 +278,8 @@ The safest way to obtain these values is from real Twitch client requests that y
 3. Filter for `gql`.
 4. Open a request to `https://gql.twitch.tv/gql`.
 5. Copy these request headers:
-   - `Client-Id` -> `TWITCH_CLIENT_ID_BROWSER`
-   - `Client-Version` -> `TWITCH_CLIENT_VERSION`
+    - `Client-Id` -> `TWITCH_CLIENT_ID_BROWSER`
+    - `Client-Version` -> `TWITCH_CLIENT_VERSION`
 
 **TV client ID without owning a TV**
 
@@ -304,7 +304,7 @@ The miner supports multiple notification providers. Configure them in your accou
 ### 1.7.1. Supported Providers
 
 | Provider | Config key | Required env vars                                                  |
-| -------- | ---------- | ------------------------------------------------------------------ |
+|----------|------------|--------------------------------------------------------------------|
 | Telegram | `telegram` | `TELEGRAM_TOKEN_*`, `TELEGRAM_CHAT_ID_*`                           |
 | Discord  | `discord`  | `DISCORD_WEBHOOK_*`                                                |
 | Gotify   | `gotify`   | `GOTIFY_URL_*`, `GOTIFY_TOKEN_*`                                   |
@@ -343,33 +343,33 @@ The `events` list controls which events trigger a notification for a given provi
 
 **Available events:**
 
-| Event                   | Emoji | Description                       |
-| ----------------------- | ----- | --------------------------------- |
-| `STREAMER_ONLINE`       | 🟢    | Streamer goes online              |
-| `STREAMER_OFFLINE`      | ⚫    | Streamer goes offline             |
-| `GAIN_FOR_RAID`         | 💵    | Points gained from a raid         |
-| `GAIN_FOR_CLAIM`        | 💵    | Points gained from claiming bonus |
-| `GAIN_FOR_WATCH`        | 💵    | Points gained from watching       |
-| `GAIN_FOR_WATCH_STREAK` | 💵    | Points gained from watch streak   |
-| `BET_WIN`               | 🏆    | Prediction bet won                |
-| `BET_LOSE`              | 💸    | Prediction bet lost               |
-| `BET_REFUND`            | ↩️    | Prediction bet refunded           |
-| `BET_FILTERS`           | 🎰    | Prediction filtered by settings   |
-| `BET_GENERAL`           | 🎰    | General prediction info           |
-| `BET_FAILED`            | 🎰    | Prediction bet failed             |
-| `BET_START`             | 🎰    | Prediction started                |
-| `BONUS_CLAIM`           | 💵    | Bonus claimed                     |
-| `MOMENT_CLAIM`          | 🎉    | Community moment claimed          |
-| `JOIN_RAID`             | ⚔️    | Joined a raid                     |
-| `DROP_CLAIM`            | 📦    | Drop claimed                      |
-| `DROP_STATUS`           | 📦    | Drop progress status              |
-| `NEW_CAMPAIGN`          | 🆕    | New drop campaign detected        |
-| `CHAT_MENTION`          | 💬    | Mentioned in chat                 |
-| `GIFTED_SUB`            | 🎁    | Received a gifted sub (via IRC)   |
-| `MINER_STARTED`         | 🚀    | Miner started (with version info) |
-| `MINER_STOPPED`         | 🛑    | Miner stopped gracefully          |
-| `MINER_CRASHED`         | 💥    | Miner crashed (with error details)|
-| `TEST`                  | —     | Test notification (see below)     |
+| Event                   | Emoji | Description                                                                        |
+|-------------------------|-------|------------------------------------------------------------------------------------|
+| `STREAMER_ONLINE`       | 🟢    | Streamer goes online                                                               |
+| `STREAMER_OFFLINE`      | ⚫     | Streamer goes offline                                                              |
+| `GAIN_FOR_RAID`         | 💵    | Points gained from a raid                                                          |
+| `GAIN_FOR_CLAIM`        | 💵    | Points gained from claiming bonus                                                  |
+| `GAIN_FOR_WATCH`        | 💵    | Points gained from watching                                                        |
+| `GAIN_FOR_WATCH_STREAK` | 💵    | Points gained from watch streak                                                    |
+| `BET_WIN`               | 🏆    | Prediction bet won                                                                 |
+| `BET_LOSE`              | 💸    | Prediction bet lost                                                                |
+| `BET_REFUND`            | ↩️    | Prediction bet refunded                                                            |
+| `BET_FILTERS`           | 🎰    | Prediction filtered by settings                                                    |
+| `BET_GENERAL`           | 🎰    | General prediction info                                                            |
+| `BET_FAILED`            | 🎰    | Prediction bet failed                                                              |
+| `BET_START`             | 🎰    | Prediction started                                                                 |
+| `BONUS_CLAIM`           | 💵    | Bonus claimed                                                                      |
+| `MOMENT_CLAIM`          | 🎉    | Community moment claimed                                                           |
+| `JOIN_RAID`             | ⚔️    | Joined a raid                                                                      |
+| `DROP_CLAIM`            | 📦    | Drop claimed                                                                       |
+| `DROP_STATUS`           | 📦    | Drop progress status                                                               |
+| `NEW_CAMPAIGN`          | 🆕    | New drop campaign detected (requires `notify_new_campaigns` in `category_watcher`) |
+| `CHAT_MENTION`          | 💬    | Mentioned in chat                                                                  |
+| `GIFTED_SUB`            | 🎁    | Received a gifted sub (via IRC)                                                    |
+| `MINER_STARTED`         | 🚀    | Miner started (with version info)                                                  |
+| `MINER_STOPPED`         | 🛑    | Miner stopped gracefully                                                           |
+| `MINER_CRASHED`         | 💥    | Miner crashed (with error details)                                                 |
+| `TEST`                  | —     | Test notification (see below)                                                      |
 
 > **Note:** Emojis are prepended to log messages and notifications automatically. The emoji mappings are defined in [`eventEmoji`](internal/logger/logger.go:19). The event type constants are defined in [`internal/model/settings.go`](internal/model/settings.go:7).
 >
@@ -461,7 +461,7 @@ If some providers fail, you'll get a partial status with error details:
 Authentication is automatic — on first run the miner walks through a priority chain until one method succeeds:
 
 | Priority | Method                        | Description                                                                                                                                       |
-| -------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+|----------|-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
 | 1        | **Cookie file**               | Saved from a previous successful login. Reused automatically. If expired, a refresh token flow is attempted first.                                |
 | 2        | **Auth token from config**    | Token set directly in the YAML config file (`auth_token` field).                                                                                  |
 | 3        | **`TWITCH_AUTH_TOKEN_*` env** | Fallback — read via `os.Getenv()`.                                                                                                                |
@@ -489,7 +489,7 @@ The `TWITCH_AUTH_TOKEN_<USERNAME>` env var is the **recommended** fallback when 
 The variable name is `TWITCH_AUTH_TOKEN_` followed by the **uppercase** username with hyphens replaced by underscores. Examples:
 
 | Username    | Env var                       |
-| ----------- | ----------------------------- |
+|-------------|-------------------------------|
 | `guliveer_` | `TWITCH_AUTH_TOKEN_GULIVEER_` |
 | `my-user`   | `TWITCH_AUTH_TOKEN_MY_USER`   |
 
@@ -594,12 +594,12 @@ sudo ./install-service.sh uninstall
 
 ### Default File Locations
 
-| Item | Path |
-|------|------|
-| Binary | `/usr/local/bin/twitch-miner-go` |
-| Configs | `/etc/twitch-miner-go/configs/` |
-| Environment | `/etc/twitch-miner-go/.env` |
-| Data (cookies) | `/var/lib/twitch-miner-go/` |
+| Item           | Path                             |
+|----------------|----------------------------------|
+| Binary         | `/usr/local/bin/twitch-miner-go` |
+| Configs        | `/etc/twitch-miner-go/configs/`  |
+| Environment    | `/etc/twitch-miner-go/.env`      |
+| Data (cookies) | `/var/lib/twitch-miner-go/`      |
 
 > See [DEPLOYMENT.md](DEPLOYMENT.md) for the full systemd deployment guide.
 
@@ -654,7 +654,7 @@ gh secret set FLY_API_TOKEN --repo <owner>/<repo>
 # (paste the token when prompted)
 ```
 
-> If `FLY_API_TOKEN` is not set, the deploy step is **skipped gracefully** — build and version bump still run normally.
+> If `FLY_API_TOKEN` is not set, the deployment step is **skipped gracefully** — build and version bump still run normally.
 
 ### 1.11.3. Manual Deploy
 

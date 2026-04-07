@@ -431,9 +431,11 @@ func campaignDetailJSON(id, name, gameName, gameSlug string) string {
 }
 
 // testStreamer creates a minimal streamer that satisfies DropsCondition and matches the given campaign.
-func testStreamer(gameName string, campaignIDs ...string) *model.Streamer {
+// notifyNewCampaigns controls whether the streamer opts in to NEW_CAMPAIGN notifications.
+func testStreamer(gameName string, notifyNewCampaigns bool, campaignIDs ...string) *model.Streamer {
 	s := model.NewStreamer("teststreamer")
 	s.IsOnline = true
+	s.NotifyNewCampaigns = notifyNewCampaigns
 	s.Stream.Game = &model.GameInfo{Name: gameName}
 	s.Stream.CampaignIDs = campaignIDs
 	s.Settings = &model.StreamerSettings{ClaimDrops: true}
@@ -451,7 +453,7 @@ func TestSyncCampaigns_SeedsOnFirstRun(t *testing.T) {
 	client := newTestClient(t, transport)
 	capture := newEventCapture(client.Log)
 
-	streamers := []*model.Streamer{testStreamer("The Finals", "camp1")}
+	streamers := []*model.Streamer{testStreamer("The Finals", true, "camp1")}
 
 	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -479,7 +481,7 @@ func TestSyncCampaigns_SkipsKnownCampaign(t *testing.T) {
 	client := newTestClient(t, transport)
 	capture := newEventCapture(client.Log)
 
-	streamers := []*model.Streamer{testStreamer("The Finals", "camp1")}
+	streamers := []*model.Streamer{testStreamer("The Finals", true, "camp1")}
 
 	// First sync — seeds.
 	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
@@ -509,7 +511,7 @@ func TestSyncCampaigns_NotifiesNewCampaign(t *testing.T) {
 	client := newTestClient(t, transport)
 	capture := newEventCapture(client.Log)
 
-	streamers := []*model.Streamer{testStreamer("The Finals", "camp1", "camp2")}
+	streamers := []*model.Streamer{testStreamer("The Finals", true, "camp1", "camp2")}
 
 	// First sync — seeds camp1.
 	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
@@ -531,5 +533,42 @@ func TestSyncCampaigns_NotifiesNewCampaign(t *testing.T) {
 
 	if got := capture.countEvent(model.EventNewCampaign); got != 1 {
 		t.Fatalf("expected 1 NEW_CAMPAIGN event for new campaign, got %d", got)
+	}
+}
+
+func TestSyncCampaigns_SkipsWhenNotifyDisabled(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp1")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp1", "Season 5 Drops", "The Finals", "the-finals")
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	// NotifyNewCampaigns = false — should NOT fire NEW_CAMPAIGN even for new campaigns.
+	streamers := []*model.Streamer{testStreamer("The Finals", false, "camp1", "camp2")}
+
+	// First sync — seeds.
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("first sync: %v", err)
+	}
+
+	capture.reset()
+
+	// Update mock: new campaign appears.
+	transport.mu.Lock()
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp2")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp2", "New Event Drops", "The Finals", "the-finals")
+	transport.mu.Unlock()
+
+	// Second sync — camp2 is new but notify is disabled.
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("second sync: %v", err)
+	}
+
+	if got := capture.countEvent(model.EventNewCampaign); got != 0 {
+		t.Fatalf("expected 0 NEW_CAMPAIGN events (notify disabled), got %d", got)
 	}
 }

@@ -20,9 +20,10 @@ type Streamer struct {
 	Settings *StreamerSettings `json:"settings,omitempty"`
 
 	IsOnline bool `json:"is_online"`
-	IsCategoryWatched bool `json:"is_category_watched"`
-	CategorySlug string `json:"category_slug,omitempty"`
-	IsTeamWatched bool `json:"is_team_watched"`
+	IsCategoryWatched  bool `json:"is_category_watched"`
+	CategorySlug       string `json:"category_slug,omitempty"`
+	NotifyNewCampaigns bool `json:"notify_new_campaigns"`
+	IsTeamWatched      bool `json:"is_team_watched"`
 	TeamName string `json:"team_name,omitempty"`
 
 	StreamUpAt time.Time `json:"stream_up_at"`

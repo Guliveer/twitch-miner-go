@@ -54,16 +54,18 @@ type FeaturesConfig struct {
 
 // CategoryWatcherConfig holds settings for the category watcher.
 type CategoryWatcherConfig struct {
-	Enabled      bool             `yaml:"enabled"`
-	PollInterval time.Duration    `yaml:"poll_interval"`
-	DropsOnly    bool             `yaml:"drops_only"`
-	Categories   []CategoryConfig `yaml:"categories"`
+	Enabled              bool             `yaml:"enabled"`
+	PollInterval         time.Duration    `yaml:"poll_interval"`
+	DropsOnly            bool             `yaml:"drops_only"`
+	NotifyNewCampaigns   bool             `yaml:"notify_new_campaigns"`
+	Categories           []CategoryConfig `yaml:"categories"`
 }
 
 // CategoryConfig holds settings for a single game category.
 type CategoryConfig struct {
-	Slug      string `yaml:"slug"`
-	DropsOnly *bool  `yaml:"drops_only,omitempty"`
+	Slug               string `yaml:"slug"`
+	DropsOnly          *bool  `yaml:"drops_only,omitempty"`
+	NotifyNewCampaigns *bool  `yaml:"notify_new_campaigns,omitempty"`
 }
 
 // TeamWatcherConfig holds settings for the team watcher.

@@ -16,9 +16,10 @@ import (
 )
 
 type categoryEntry struct {
-	Slug      string
-	GameID    string
-	DropsOnly *bool
+	Slug               string
+	GameID             string
+	DropsOnly          *bool
+	NotifyNewCampaigns *bool
 }
 
 // CategoryWatcher polls Twitch GQL for top streams in configured categories
@@ -26,11 +27,12 @@ type categoryEntry struct {
 type CategoryWatcher struct {
 	mu sync.Mutex
 
-	gqlClient         *gql.Client
-	log               *logger.Logger
-	categories        []categoryEntry
-	globalDropsOnly   bool
-	pollInterval      time.Duration
+	gqlClient                *gql.Client
+	log                      *logger.Logger
+	categories               []categoryEntry
+	globalDropsOnly          bool
+	globalNotifyNewCampaigns bool
+	pollInterval             time.Duration
 	blacklist         map[string]bool
 	categoryBlacklist map[string]bool
 	streamerDefaults  *model.StreamerSettings
@@ -50,8 +52,9 @@ func NewCategoryWatcher(
 	categories := make([]categoryEntry, 0, len(cfg.Categories))
 	for _, categoryCfg := range cfg.Categories {
 		categories = append(categories, categoryEntry{
-			Slug:      categoryCfg.Slug,
-			DropsOnly: categoryCfg.DropsOnly,
+			Slug:               categoryCfg.Slug,
+			DropsOnly:          categoryCfg.DropsOnly,
+			NotifyNewCampaigns: categoryCfg.NotifyNewCampaigns,
 		})
 	}
 
@@ -76,15 +79,16 @@ func NewCategoryWatcher(
 	}
 
 	return &CategoryWatcher{
-		gqlClient:         gqlClient,
-		log:               log,
-		categories:        categories,
-		globalDropsOnly:   cfg.DropsOnly,
-		pollInterval:      interval,
-		blacklist:         blacklistMap,
-		categoryBlacklist: catBlacklistMap,
-		streamerDefaults:  streamerDefaults,
-		categoryStreamers: catStreamers,
+		gqlClient:                gqlClient,
+		log:                      log,
+		categories:               categories,
+		globalDropsOnly:          cfg.DropsOnly,
+		globalNotifyNewCampaigns: cfg.NotifyNewCampaigns,
+		pollInterval:             interval,
+		blacklist:                blacklistMap,
+		categoryBlacklist:        catBlacklistMap,
+		streamerDefaults:         streamerDefaults,
+		categoryStreamers:        catStreamers,
 	}
 }
 
@@ -247,11 +251,17 @@ func (cw *CategoryWatcher) evaluate(
 			continue
 		}
 
+		notifyNewCampaigns := cw.globalNotifyNewCampaigns
+		if cat.NotifyNewCampaigns != nil {
+			notifyNewCampaigns = *cat.NotifyNewCampaigns
+		}
+
 		streamer := model.NewStreamer(candidate.Username)
 		streamer.ChannelID = candidate.ChannelID
 		streamer.DisplayName = candidate.DisplayName
 		streamer.IsCategoryWatched = true
 		streamer.CategorySlug = cat.Slug
+		streamer.NotifyNewCampaigns = notifyNewCampaigns
 
 		streamer.IsOnline = true
 		streamer.OnlineAt = time.Now()
