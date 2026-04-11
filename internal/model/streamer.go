@@ -7,6 +7,17 @@ import (
 	"time"
 )
 
+// CampaignReminderConfig holds parsed campaign reminder settings for a streamer.
+type CampaignReminderConfig struct {
+	OnDetection bool            `json:"on_detection"`
+	Durations   []time.Duration `json:"durations"` // time before campaign start, sorted descending
+}
+
+// HasReminders reports whether any reminders are configured.
+func (c *CampaignReminderConfig) HasReminders() bool {
+	return c != nil && (c.OnDetection || len(c.Durations) > 0)
+}
+
 // Streamer represents a Twitch channel being watched by the miner.
 // Fields that may be accessed concurrently are protected by Mu.
 type Streamer struct {
@@ -22,7 +33,7 @@ type Streamer struct {
 	IsOnline bool `json:"is_online"`
 	IsCategoryWatched  bool `json:"is_category_watched"`
 	CategorySlug       string `json:"category_slug,omitempty"`
-	NotifyNewCampaigns bool `json:"notify_new_campaigns"`
+	CampaignReminders *CampaignReminderConfig `json:"campaign_reminders,omitempty"`
 	IsTeamWatched      bool `json:"is_team_watched"`
 	TeamName string `json:"team_name,omitempty"`
 

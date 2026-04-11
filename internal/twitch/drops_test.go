@@ -366,7 +366,7 @@ func TestClaimAllDrops_EmptyInventory(t *testing.T) {
 	}
 }
 
-// --- SyncCampaigns / NEW_CAMPAIGN notification tests ---
+// --- SyncCampaigns / CAMPAIGN_REMINDER notification tests ---
 
 // eventCapture collects notification events fired via Logger.Event.
 type eventCapture struct {
@@ -431,12 +431,15 @@ func campaignDetailJSON(id, name, gameName, gameSlug string) string {
 }
 
 // testStreamer creates a minimal streamer that satisfies DropsCondition and matches the given campaign.
-// notifyNewCampaigns controls whether the streamer opts in to NEW_CAMPAIGN notifications.
-func testStreamer(gameName string, notifyNewCampaigns bool, campaignIDs ...string) *model.Streamer {
+// withReminders controls whether the streamer opts in to CAMPAIGN_REMINDER notifications.
+func testStreamer(gameName string, withReminders bool, campaignIDs ...string) *model.Streamer {
 	s := model.NewStreamer("teststreamer")
 	s.IsOnline = true
-	s.NotifyNewCampaigns = notifyNewCampaigns
-	s.Stream.Game = &model.GameInfo{Name: gameName}
+	if withReminders {
+		s.CampaignReminders = &model.CampaignReminderConfig{OnDetection: true}
+	}
+	s.CategorySlug = strings.ToLower(strings.ReplaceAll(gameName, " ", "-"))
+	s.Stream.Game = &model.GameInfo{Name: gameName, Slug: strings.ToLower(strings.ReplaceAll(gameName, " ", "-"))}
 	s.Stream.CampaignIDs = campaignIDs
 	s.Settings = &model.StreamerSettings{ClaimDrops: true}
 	return s
@@ -459,9 +462,10 @@ func TestSyncCampaigns_SeedsOnFirstRun(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// First call seeds knownCampaigns — no NEW_CAMPAIGN notification should fire.
-	if got := capture.countEvent(model.EventNewCampaign); got != 0 {
-		t.Fatalf("expected 0 NEW_CAMPAIGN events on first sync (seeding), got %d", got)
+	// First call seeds knownCampaigns. No CAMPAIGN_REMINDER should fire because
+	// this campaign is active (StartAt in the past), so catch-up is skipped.
+	if got := capture.countEvent(model.EventCampaignReminder); got != 0 {
+		t.Fatalf("expected 0 CAMPAIGN_REMINDER events on first sync (active campaign), got %d", got)
 	}
 
 	// Verify the campaign was stored in knownCampaigns.
@@ -495,8 +499,8 @@ func TestSyncCampaigns_SkipsKnownCampaign(t *testing.T) {
 		t.Fatalf("second sync: %v", err)
 	}
 
-	if got := capture.countEvent(model.EventNewCampaign); got != 0 {
-		t.Fatalf("expected 0 NEW_CAMPAIGN events for known campaign, got %d", got)
+	if got := capture.countEvent(model.EventCampaignReminder); got != 0 {
+		t.Fatalf("expected 0 CAMPAIGN_REMINDER events for known campaign, got %d", got)
 	}
 }
 
@@ -531,8 +535,8 @@ func TestSyncCampaigns_NotifiesNewCampaign(t *testing.T) {
 		t.Fatalf("second sync: %v", err)
 	}
 
-	if got := capture.countEvent(model.EventNewCampaign); got != 1 {
-		t.Fatalf("expected 1 NEW_CAMPAIGN event for new campaign, got %d", got)
+	if got := capture.countEvent(model.EventCampaignReminder); got != 1 {
+		t.Fatalf("expected 1 CAMPAIGN_REMINDER event for new campaign, got %d", got)
 	}
 }
 
@@ -547,7 +551,7 @@ func TestSyncCampaigns_SkipsWhenNotifyDisabled(t *testing.T) {
 	client := newTestClient(t, transport)
 	capture := newEventCapture(client.Log)
 
-	// NotifyNewCampaigns = false — should NOT fire NEW_CAMPAIGN even for new campaigns.
+	// No reminders configured — should NOT fire CAMPAIGN_REMINDER even for new campaigns.
 	streamers := []*model.Streamer{testStreamer("The Finals", false, "camp1", "camp2")}
 
 	// First sync — seeds.
@@ -568,7 +572,235 @@ func TestSyncCampaigns_SkipsWhenNotifyDisabled(t *testing.T) {
 		t.Fatalf("second sync: %v", err)
 	}
 
-	if got := capture.countEvent(model.EventNewCampaign); got != 0 {
-		t.Fatalf("expected 0 NEW_CAMPAIGN events (notify disabled), got %d", got)
+	if got := capture.countEvent(model.EventCampaignReminder); got != 0 {
+		t.Fatalf("expected 0 CAMPAIGN_REMINDER events (notify disabled), got %d", got)
+	}
+}
+
+// --- Upcoming campaign / reminder-specific helpers and tests ---
+
+// upcomingDashboardJSON builds a dashboard response with UPCOMING status.
+func upcomingDashboardJSON(ids ...string) string {
+	var items []string
+	for _, id := range ids {
+		items = append(items, fmt.Sprintf(`{"id":%q,"status":"UPCOMING"}`, id))
+	}
+	return fmt.Sprintf(`{"data":{"currentUser":{"dropCampaigns":[%s]}}}`, strings.Join(items, ","))
+}
+
+// upcomingCampaignDetailJSON builds a campaign detail response with StartAt in the future.
+func upcomingCampaignDetailJSON(id, name, gameName, gameSlug string, startIn, duration time.Duration) string {
+	now := time.Now()
+	start := now.Add(startIn).Format(time.RFC3339)
+	end := now.Add(startIn + duration).Format(time.RFC3339)
+	return fmt.Sprintf(`{"data":{"user":{"dropCampaign":{`+
+		`"id":%q,"name":%q,"status":"UPCOMING","startAt":%q,"endAt":%q,`+
+		`"game":{"id":"game1","name":%q,"displayName":%q,"slug":%q},`+
+		`"allow":{"channels":[{"id":"chan1"}]},`+
+		`"timeBasedDrops":[{"id":"drop-%s","name":"Drop","requiredMinutesWatched":60,`+
+		`"startAt":%q,"endAt":%q,"benefitEdges":[{"benefit":{"name":"Reward"}}]}]`+
+		`}}}}`, id, name, start, end, gameName, gameName, gameSlug, id, start, end)
+}
+
+// testStreamerWithDurations creates a streamer with time-based reminders (no on_detection).
+func testStreamerWithDurations(gameName string, durations []time.Duration, campaignIDs ...string) *model.Streamer {
+	s := model.NewStreamer("teststreamer")
+	s.IsOnline = true
+	s.CampaignReminders = &model.CampaignReminderConfig{Durations: durations}
+	s.CategorySlug = strings.ToLower(strings.ReplaceAll(gameName, " ", "-"))
+	s.Stream.Game = &model.GameInfo{Name: gameName, Slug: strings.ToLower(strings.ReplaceAll(gameName, " ", "-"))}
+	s.Stream.CampaignIDs = campaignIDs
+	s.Settings = &model.StreamerSettings{ClaimDrops: true}
+	return s
+}
+
+func TestSyncCampaigns_CatchUpOnFirstSync(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	// Upcoming campaign starting in 2 hours.
+	transport.responses["ViewerDropsDashboard"] = upcomingDashboardJSON("camp-upcoming")
+	transport.responses["DropCampaignDetails"] = upcomingCampaignDetailJSON(
+		"camp-upcoming", "Future Drops", "The Finals", "the-finals",
+		2*time.Hour, 72*time.Hour,
+	)
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	streamers := []*model.Streamer{testStreamer("The Finals", true, "camp-upcoming")}
+
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// First sync with an upcoming campaign should fire a catch-up notification.
+	if got := capture.countEvent(model.EventCampaignReminder); got != 1 {
+		t.Fatalf("expected 1 catch-up CAMPAIGN_REMINDER on first sync, got %d", got)
+	}
+
+	// Verify campaign was seeded in knownCampaigns.
+	if _, ok := client.knownCampaigns.Load("camp-upcoming"); !ok {
+		t.Fatal("expected camp-upcoming to be stored in knownCampaigns after first sync")
+	}
+}
+
+func TestSyncCampaigns_NoCatchUpForActiveCampaign(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	// Active campaign (already started) — should NOT trigger catch-up.
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp-active")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp-active", "Current Drops", "The Finals", "the-finals")
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	streamers := []*model.Streamer{testStreamer("The Finals", true, "camp-active")}
+
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Active campaigns don't get catch-up (StartAt is in the past).
+	if got := capture.countEvent(model.EventCampaignReminder); got != 0 {
+		t.Fatalf("expected 0 CAMPAIGN_REMINDER for active campaign on first sync, got %d", got)
+	}
+}
+
+func TestSyncCampaigns_OnDetectionAfterFirstSync(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp1")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp1", "Season 5", "The Finals", "the-finals")
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	streamers := []*model.Streamer{testStreamer("The Finals", true, "camp1")}
+
+	// First sync — seeds.
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("first sync: %v", err)
+	}
+	capture.reset()
+
+	// New upcoming campaign appears on second sync.
+	transport.mu.Lock()
+	transport.responses["ViewerDropsDashboard"] = upcomingDashboardJSON("camp-new")
+	transport.responses["DropCampaignDetails"] = upcomingCampaignDetailJSON(
+		"camp-new", "New Event", "The Finals", "the-finals",
+		48*time.Hour, 72*time.Hour,
+	)
+	transport.mu.Unlock()
+
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("second sync: %v", err)
+	}
+
+	// on_detection should fire for newly seen campaign.
+	if got := capture.countEvent(model.EventCampaignReminder); got != 1 {
+		t.Fatalf("expected 1 on_detection CAMPAIGN_REMINDER, got %d", got)
+	}
+}
+
+func TestSyncCampaigns_CategoryMatchBySlug(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp1")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp1", "Drops", "The Finals", "the-finals")
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	// Streamer watching a different category — should NOT match.
+	wrongCat := testStreamer("Valorant", true)
+	wrongCat.CategorySlug = "valorant"
+	wrongCat.Stream.Game = &model.GameInfo{Name: "Valorant", Slug: "valorant"}
+
+	// First sync seeds.
+	if err := client.SyncCampaigns(context.Background(), []*model.Streamer{wrongCat}); err != nil {
+		t.Fatalf("first sync: %v", err)
+	}
+	capture.reset()
+
+	// New campaign — wrong category, should not fire.
+	transport.mu.Lock()
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp2")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp2", "New Finals Drops", "The Finals", "the-finals")
+	transport.mu.Unlock()
+
+	if err := client.SyncCampaigns(context.Background(), []*model.Streamer{wrongCat}); err != nil {
+		t.Fatalf("second sync: %v", err)
+	}
+
+	if got := capture.countEvent(model.EventCampaignReminder); got != 0 {
+		t.Fatalf("expected 0 CAMPAIGN_REMINDER for mismatched category, got %d", got)
+	}
+}
+
+func TestSyncCampaigns_CatchUpFiresWithDurationsOnly(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	// Upcoming campaign starting in 2 hours.
+	transport.responses["ViewerDropsDashboard"] = upcomingDashboardJSON("camp-upcoming")
+	transport.responses["DropCampaignDetails"] = upcomingCampaignDetailJSON(
+		"camp-upcoming", "Future Drops", "The Finals", "the-finals",
+		2*time.Hour, 72*time.Hour,
+	)
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	// Streamer with ONLY time-based durations (no on_detection).
+	streamers := []*model.Streamer{testStreamerWithDurations("The Finals", []time.Duration{24 * time.Hour, time.Hour})}
+
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// First sync should still fire a catch-up even without on_detection,
+	// because the streamer has reminders configured and the campaign is upcoming.
+	if got := capture.countEvent(model.EventCampaignReminder); got != 1 {
+		t.Fatalf("expected 1 catch-up CAMPAIGN_REMINDER with durations-only config, got %d", got)
+	}
+}
+
+func TestSyncCampaigns_NoReminderWithoutConfig(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	transport.responses["ViewerDropsDashboard"] = upcomingDashboardJSON("camp-upcoming")
+	transport.responses["DropCampaignDetails"] = upcomingCampaignDetailJSON(
+		"camp-upcoming", "Future Drops", "The Finals", "the-finals",
+		2*time.Hour, 72*time.Hour,
+	)
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	// Streamer with NO reminders configured (nil CampaignReminders).
+	s := model.NewStreamer("teststreamer")
+	s.IsOnline = true
+	s.CategorySlug = "the-finals"
+	s.Stream.Game = &model.GameInfo{Name: "The Finals", Slug: "the-finals"}
+	s.Settings = &model.StreamerSettings{ClaimDrops: true}
+
+	if err := client.SyncCampaigns(context.Background(), []*model.Streamer{s}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// No reminders configured — no notifications at all.
+	if got := capture.countEvent(model.EventCampaignReminder); got != 0 {
+		t.Fatalf("expected 0 CAMPAIGN_REMINDER without config, got %d", got)
 	}
 }

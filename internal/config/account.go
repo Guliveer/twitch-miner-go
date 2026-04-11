@@ -1,6 +1,10 @@
 package config
 
 import (
+	"fmt"
+	"sort"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Guliveer/twitch-miner-go/internal/model"
@@ -54,18 +58,70 @@ type FeaturesConfig struct {
 
 // CategoryWatcherConfig holds settings for the category watcher.
 type CategoryWatcherConfig struct {
-	Enabled              bool             `yaml:"enabled"`
-	PollInterval         time.Duration    `yaml:"poll_interval"`
-	DropsOnly            bool             `yaml:"drops_only"`
-	NotifyNewCampaigns   bool             `yaml:"notify_new_campaigns"`
-	Categories           []CategoryConfig `yaml:"categories"`
+	Enabled           bool             `yaml:"enabled"`
+	PollInterval      time.Duration    `yaml:"poll_interval"`
+	DropsOnly         bool             `yaml:"drops_only"`
+	CampaignReminders []string         `yaml:"campaign_reminders,omitempty"`
+	Categories        []CategoryConfig `yaml:"categories"`
 }
 
 // CategoryConfig holds settings for a single game category.
 type CategoryConfig struct {
-	Slug               string `yaml:"slug"`
-	DropsOnly          *bool  `yaml:"drops_only,omitempty"`
-	NotifyNewCampaigns *bool  `yaml:"notify_new_campaigns,omitempty"`
+	Slug              string   `yaml:"slug"`
+	DropsOnly         *bool    `yaml:"drops_only,omitempty"`
+	CampaignReminders []string `yaml:"campaign_reminders,omitempty"`
+}
+
+// EffectiveCampaignReminders returns the campaign reminder config for a category.
+// Per-category overrides global; if neither is set, returns nil.
+func (cwc *CategoryWatcherConfig) EffectiveCampaignReminders(cat CategoryConfig) *model.CampaignReminderConfig {
+	raw := cwc.CampaignReminders
+	if len(cat.CampaignReminders) > 0 {
+		raw = cat.CampaignReminders
+	}
+	if len(raw) == 0 {
+		return nil
+	}
+	return ParseCampaignReminders(raw)
+}
+
+// ParseCampaignReminders parses a list of reminder duration strings
+// (e.g., "on_detection", "3d", "1d", "15m") into a CampaignReminderConfig.
+func ParseCampaignReminders(raw []string) *model.CampaignReminderConfig {
+	cfg := &model.CampaignReminderConfig{}
+	for _, s := range raw {
+		if s == "on_detection" {
+			cfg.OnDetection = true
+			continue
+		}
+		d, err := parseReminderDuration(s)
+		if err == nil && d > 0 {
+			cfg.Durations = append(cfg.Durations, d)
+		}
+	}
+	// Sort descending so largest duration comes first.
+	sort.Slice(cfg.Durations, func(i, j int) bool {
+		return cfg.Durations[i] > cfg.Durations[j]
+	})
+	if !cfg.HasReminders() {
+		return nil
+	}
+	return cfg
+}
+
+// parseReminderDuration parses a duration string with support for "d" (days)
+// in addition to Go's standard time.Duration syntax (e.g., "15m", "1h").
+func parseReminderDuration(s string) (time.Duration, error) {
+	s = strings.TrimSpace(s)
+	if strings.HasSuffix(s, "d") {
+		numStr := strings.TrimSuffix(s, "d")
+		days, err := strconv.Atoi(numStr)
+		if err != nil {
+			return 0, fmt.Errorf("invalid day duration: %s", s)
+		}
+		return time.Duration(days) * 24 * time.Hour, nil
+	}
+	return time.ParseDuration(s)
 }
 
 // TeamWatcherConfig holds settings for the team watcher.

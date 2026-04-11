@@ -16,10 +16,10 @@ import (
 )
 
 type categoryEntry struct {
-	Slug               string
-	GameID             string
-	DropsOnly          *bool
-	NotifyNewCampaigns *bool
+	Slug              string
+	GameID            string
+	DropsOnly         *bool
+	CampaignReminders []string
 }
 
 // CategoryWatcher polls Twitch GQL for top streams in configured categories
@@ -31,7 +31,7 @@ type CategoryWatcher struct {
 	log                      *logger.Logger
 	categories               []categoryEntry
 	globalDropsOnly          bool
-	globalNotifyNewCampaigns bool
+	globalCampaignReminders  []string
 	pollInterval             time.Duration
 	blacklist         map[string]bool
 	categoryBlacklist map[string]bool
@@ -52,9 +52,9 @@ func NewCategoryWatcher(
 	categories := make([]categoryEntry, 0, len(cfg.Categories))
 	for _, categoryCfg := range cfg.Categories {
 		categories = append(categories, categoryEntry{
-			Slug:               categoryCfg.Slug,
-			DropsOnly:          categoryCfg.DropsOnly,
-			NotifyNewCampaigns: categoryCfg.NotifyNewCampaigns,
+			Slug:              categoryCfg.Slug,
+			DropsOnly:         categoryCfg.DropsOnly,
+			CampaignReminders: categoryCfg.CampaignReminders,
 		})
 	}
 
@@ -83,7 +83,7 @@ func NewCategoryWatcher(
 		log:                      log,
 		categories:               categories,
 		globalDropsOnly:          cfg.DropsOnly,
-		globalNotifyNewCampaigns: cfg.NotifyNewCampaigns,
+		globalCampaignReminders:  cfg.CampaignReminders,
 		pollInterval:             interval,
 		blacklist:                blacklistMap,
 		categoryBlacklist:        catBlacklistMap,
@@ -251,9 +251,9 @@ func (cw *CategoryWatcher) evaluate(
 			continue
 		}
 
-		notifyNewCampaigns := cw.globalNotifyNewCampaigns
-		if cat.NotifyNewCampaigns != nil {
-			notifyNewCampaigns = *cat.NotifyNewCampaigns
+		reminderRaw := cw.globalCampaignReminders
+		if len(cat.CampaignReminders) > 0 {
+			reminderRaw = cat.CampaignReminders
 		}
 
 		streamer := model.NewStreamer(candidate.Username)
@@ -261,7 +261,7 @@ func (cw *CategoryWatcher) evaluate(
 		streamer.DisplayName = candidate.DisplayName
 		streamer.IsCategoryWatched = true
 		streamer.CategorySlug = cat.Slug
-		streamer.NotifyNewCampaigns = notifyNewCampaigns
+		streamer.CampaignReminders = config.ParseCampaignReminders(reminderRaw)
 
 		streamer.IsOnline = true
 		streamer.OnlineAt = time.Now()

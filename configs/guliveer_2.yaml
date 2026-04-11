@@ -17,7 +17,7 @@ category_watcher:
   enabled: true
   poll_interval: 120s
   drops_only: true # Global default: only watch streams with Drops enabled
-  notify_new_campaigns: true # Notify when new drop campaigns appear
+  campaign_reminders: [on_detection, 3d, 1d] # Notify before campaigns start
   categories:
     - slug: "tom-clancys-rainbow-six-siege"
       drops_only: false
@@ -104,7 +104,7 @@ notifications:
     token: "" # Set via TELEGRAM_TOKEN_GULIVEER_2 env var
     events:
       - "DROP_CLAIM"
-      - "NEW_CAMPAIGN"
+      - "CAMPAIGN_REMINDER"
       - "GIFTED_SUB"
       - "MINER_STARTED"
       - "MINER_STOPPED"

@@ -26,12 +26,14 @@ category_watcher:
   enabled: false
   poll_interval: 120s
   drops_only: false
-  notify_new_campaigns: false # Send NEW_CAMPAIGN notification when a new drop campaign appears
+  # Campaign reminders — get notified before a campaign starts (like calendar reminders).
+  # Values: "on_detection" (notify when first seen), or durations like "7d", "3d", "1d", "1h", "15m".
+  # campaign_reminders: [on_detection, 1d]  # global default for all categories
   categories:
     - slug: "just-chatting"
     - slug: "league-of-legends"
       drops_only: true
-      notify_new_campaigns: true # Per-category override
+      campaign_reminders: [on_detection, 3d, 1d] # Per-category override
 
 # Team watcher - auto-discover streams by team membership
 # Picks one live streamer per team (highest viewers), similar to category_watcher.
@@ -109,7 +111,7 @@ notifications:
   #     - BET_WIN
   #     - BET_LOSE
   #     - DROP_CLAIM
-  #     - NEW_CAMPAIGN
+  #     - CAMPAIGN_REMINDER
   #     - STREAMER_ONLINE
   #     - CHAT_MENTION
   #     - GIFTED_SUB
@@ -120,7 +122,7 @@ notifications:
       - "BET_WIN"
       - "BET_LOSE"
       - "DROP_CLAIM"
-      - "NEW_CAMPAIGN"
+      - "CAMPAIGN_REMINDER"
       - "GIFTED_SUB"
       - "MINER_STARTED"
       - "MINER_STOPPED"

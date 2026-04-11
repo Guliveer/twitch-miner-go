@@ -90,10 +90,10 @@ type Client struct {
 	claimedDrops sync.Map
 
 	// knownCampaigns tracks campaign IDs seen during previous SyncCampaigns
-	// calls so that NEW_CAMPAIGN notifications only fire for genuinely new ones.
+	// calls so that on_detection reminders only fire for genuinely new ones.
 	knownCampaigns sync.Map
 	// campaignsInitialized is set after the first SyncCampaigns call.
-	// The first call seeds knownCampaigns without firing notifications.
+	// The first call seeds knownCampaigns and sends catch-up notifications.
 	campaignsInitialized atomic.Bool
 }
 
