@@ -167,6 +167,12 @@ func (cw *CategoryWatcher) evaluate(
 				cw.categoryStreamers[cat.Slug] = ""
 			}
 			cw.mu.Unlock()
+
+			// Propagate campaign reminders to covering regular streamers
+			// so that checkCampaignReminders can find them even when no
+			// category-watched streamer exists for this slot.
+			cw.propagateCampaignReminders(trackedStreamers, cat)
+
 			continue
 		}
 
@@ -311,6 +317,32 @@ func (cw *CategoryWatcher) evaluate(
 			"category", cat.Slug,
 			"viewers", candidate.ViewersCount,
 		)
+	}
+}
+
+// propagateCampaignReminders sets campaign reminders on regular streamers
+// that match a category. This ensures reminders fire even when no
+// category-watched streamer exists because the category is already covered.
+func (cw *CategoryWatcher) propagateCampaignReminders(streamers []*model.Streamer, cat *categoryEntry) {
+	reminderRaw := cw.globalCampaignReminders
+	if len(cat.CampaignReminders) > 0 {
+		reminderRaw = cat.CampaignReminders
+	}
+	if len(reminderRaw) == 0 {
+		return
+	}
+
+	reminderCfg := config.ParseCampaignReminders(reminderRaw)
+	if !reminderCfg.HasReminders() {
+		return
+	}
+
+	for _, s := range streamers {
+		s.Mu.Lock()
+		if !s.IsCategoryWatched && s.IsOnline && cw.streamerMatchesCategory(s, cat) {
+			s.CampaignReminders = reminderCfg
+		}
+		s.Mu.Unlock()
 	}
 }
 
