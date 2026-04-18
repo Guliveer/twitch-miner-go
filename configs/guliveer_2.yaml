@@ -104,6 +104,7 @@ notifications:
     token: "" # Set via TELEGRAM_TOKEN_GULIVEER_2 env var
     events:
       - "DROP_CLAIM"
+      - "CAMPAIGN_STARTED"
       - "CAMPAIGN_REMINDER"
       - "GIFTED_SUB"
       - "MINER_STARTED"

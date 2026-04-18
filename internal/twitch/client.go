@@ -89,6 +89,10 @@ type Client struct {
 	// to prevent notification spam across sync cycles.
 	claimedDrops sync.Map
 
+	// miningCampaigns tracks campaign IDs for which a CAMPAIGN_STARTED
+	// notification has already been emitted during this session.
+	miningCampaigns sync.Map
+
 	// knownCampaigns tracks campaign IDs seen during previous SyncCampaigns
 	// calls so that on_detection reminders only fire for genuinely new ones.
 	knownCampaigns sync.Map

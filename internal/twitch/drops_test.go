@@ -804,3 +804,80 @@ func TestSyncCampaigns_NoReminderWithoutConfig(t *testing.T) {
 		t.Fatalf("expected 0 CAMPAIGN_REMINDER without config, got %d", got)
 	}
 }
+
+func TestSyncCampaigns_EmitsCampaignStarted(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp1")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp1", "Season 5 Drops", "The Finals", "the-finals")
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	streamers := []*model.Streamer{testStreamer("The Finals", false, "camp1")}
+
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if got := capture.countEvent(model.EventCampaignStarted); got != 1 {
+		t.Fatalf("expected 1 CAMPAIGN_STARTED event, got %d", got)
+	}
+}
+
+func TestSyncCampaigns_CampaignStartedOnlyOncePerSession(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp1")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp1", "Season 5 Drops", "The Finals", "the-finals")
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	streamers := []*model.Streamer{testStreamer("The Finals", false, "camp1")}
+
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("first sync: %v", err)
+	}
+
+	if got := capture.countEvent(model.EventCampaignStarted); got != 1 {
+		t.Fatalf("expected 1 CAMPAIGN_STARTED after first sync, got %d", got)
+	}
+
+	capture.reset()
+
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("second sync: %v", err)
+	}
+
+	if got := capture.countEvent(model.EventCampaignStarted); got != 0 {
+		t.Fatalf("expected 0 CAMPAIGN_STARTED on second sync (same session), got %d", got)
+	}
+}
+
+func TestSyncCampaigns_CampaignStartedSkipsNoMatchingStreamer(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	transport.responses["ViewerDropsDashboard"] = dashboardJSON("camp1")
+	transport.responses["DropCampaignDetails"] = campaignDetailJSON("camp1", "Season 5 Drops", "The Finals", "the-finals")
+
+	client := newTestClient(t, transport)
+	capture := newEventCapture(client.Log)
+
+	// Streamer watches a different game — should not trigger CAMPAIGN_STARTED.
+	streamers := []*model.Streamer{testStreamer("Valorant", false)}
+
+	if err := client.SyncCampaigns(context.Background(), streamers); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if got := capture.countEvent(model.EventCampaignStarted); got != 0 {
+		t.Fatalf("expected 0 CAMPAIGN_STARTED for non-matching streamer, got %d", got)
+	}
+}

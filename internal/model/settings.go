@@ -23,6 +23,7 @@ const (
 	EventJoinRaid           Event = "JOIN_RAID"
 	EventDropClaim          Event = "DROP_CLAIM"
 	EventDropStatus         Event = "DROP_STATUS"
+	EventCampaignStarted    Event = "CAMPAIGN_STARTED"
 	EventCampaignReminder   Event = "CAMPAIGN_REMINDER"
 	EventChatMention        Event = "CHAT_MENTION"
 	EventGiftedSub          Event = "GIFTED_SUB"
@@ -53,6 +54,7 @@ func AllEvents() []Event {
 		EventJoinRaid,
 		EventDropClaim,
 		EventDropStatus,
+		EventCampaignStarted,
 		EventCampaignReminder,
 		EventChatMention,
 		EventGiftedSub,

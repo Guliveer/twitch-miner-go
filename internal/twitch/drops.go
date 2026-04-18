@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand/v2"
+	"sort"
 	"strings"
 	"time"
 
@@ -91,6 +92,8 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		}
 		streamer.Mu.Unlock()
 	}
+
+	c.emitCampaignStartedEvents(ctx, activeCampaigns, streamers)
 
 	return nil
 }
@@ -356,6 +359,68 @@ func campaignMatchesStreamer(campaign *model.Campaign, streamer *model.Streamer)
 	}
 
 	return false
+}
+
+// emitCampaignStartedEvents fires a CAMPAIGN_STARTED notification for each
+// active campaign that has assignable drops and matches at least one streamer.
+// Each campaign triggers at most one notification per miner session.
+func (c *Client) emitCampaignStartedEvents(ctx context.Context, campaigns []*model.Campaign, streamers []*model.Streamer) {
+	for _, campaign := range campaigns {
+		if len(campaign.Drops) == 0 {
+			continue
+		}
+
+		if _, already := c.miningCampaigns.LoadOrStore(campaign.ID, true); already {
+			continue
+		}
+
+		matched := false
+		for _, streamer := range streamers {
+			streamer.Mu.RLock()
+			if streamer.DropsCondition() && campaignMatchesStreamer(campaign, streamer) {
+				matched = true
+			}
+			streamer.Mu.RUnlock()
+			if matched {
+				break
+			}
+		}
+		if !matched {
+			c.miningCampaigns.Delete(campaign.ID)
+			continue
+		}
+
+		drops := make([]*model.Drop, len(campaign.Drops))
+		copy(drops, campaign.Drops)
+		sort.Slice(drops, func(i, j int) bool {
+			if drops[i].MinutesRequired != drops[j].MinutesRequired {
+				return drops[i].MinutesRequired < drops[j].MinutesRequired
+			}
+			return drops[i].Name < drops[j].Name
+		})
+
+		var lines []string
+		for _, drop := range drops {
+			name := drop.Name
+			if drop.Benefit != "" {
+				name = drop.Benefit
+			}
+			lines = append(lines, fmt.Sprintf("  • %s (%d min)", name, drop.MinutesRequired))
+		}
+
+		body := fmt.Sprintf("Started mining: %s\n📦 Drops (%d):\n%s\n📅 Ends: %s",
+			campaign.Name,
+			len(drops),
+			strings.Join(lines, "\n"),
+			campaign.EndAt.Format("02 Jan 15:04"),
+		)
+
+		c.Log.Event(ctx, model.EventCampaignStarted, body,
+			"campaign", campaign.Name,
+			"category", campaignGameName(campaign),
+			"ends_at", campaign.EndAt.Format("02 Jan 15:04"),
+		)
+	}
 }
 
 // checkCampaignReminders processes campaign reminder notifications.
