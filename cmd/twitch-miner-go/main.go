@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -27,13 +28,44 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const banner = `
-╔═══════════════════════════════════════╗
-║       Twitch Miner — Go Edition       ║
-║                                       ║
-║  github.com/Guliveer/twitch-miner-go  ║
-╚═══════════════════════════════════════╝
-`
+var bannerLines = []string{
+	"\033[38;5;129m  ______       _ __       __       __  ____               \033[0m",
+	"\033[38;5;128m /_  __/    __(_) /______/ /_     /  |/  (_)___  ___  ____\033[0m",
+	"\033[38;5;127m  / / | |/|/ / / __/ __/ __ \\   / /|_/ / / __ \\/ _ \\/ __/\033[0m",
+	"\033[38;5;126m / /  |__,__/ / /_/ /_/ / / /  / /  / / / / / /  __/ /   \033[0m",
+	"\033[38;5;125m/_/        /_/\\__/\\__/_/ /_/  /_/  /_/_/_/ /_/\\___/_/    \033[0m",
+}
+
+var subtitle = "⛏  twitch-miner-go " + version.String()
+
+func playStartupAnimation() {
+	spinFrames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+	for i := 0; i < 10; i++ {
+		fmt.Fprintf(os.Stderr, "\r\033[38;5;129m%s Initializing...\033[0m", spinFrames[i%len(spinFrames)])
+		time.Sleep(80 * time.Millisecond)
+	}
+	fmt.Fprint(os.Stderr, "\r\033[K")
+
+	fmt.Println()
+	for _, line := range bannerLines {
+		fmt.Println(line)
+		time.Sleep(60 * time.Millisecond)
+	}
+	fmt.Println()
+
+	for i, r := range subtitle {
+		fmt.Fprintf(os.Stderr, "%c", r)
+		if i < 3 {
+			time.Sleep(100 * time.Millisecond)
+		} else {
+			time.Sleep(25 * time.Millisecond)
+		}
+	}
+	fmt.Fprintln(os.Stderr)
+
+	sep := strings.Repeat("─", 56)
+	fmt.Printf("\033[38;5;240m%s\033[0m\n\n", sep)
+}
 
 func main() {
 	configDir := flag.String("config", "configs", "Path to the configuration directory")
@@ -85,7 +117,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Print(banner)
+	playStartupAnimation()
 	rootLog.Info("🚀 Starting Twitch Channel Points Miner (Go)", "version", version.String())
 
 	twitchRuntime := runtimecfg.LoadTwitchFromEnv(rootLog.Logger)
