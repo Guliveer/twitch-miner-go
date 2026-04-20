@@ -36,7 +36,6 @@ logs/
 **.local.*
 
 # Service installer (generated)
-tools/
 _service-start.bat
 
 # Other

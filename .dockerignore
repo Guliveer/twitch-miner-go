@@ -8,6 +8,9 @@ Dockerfile
 fly.toml
 cookies/
 analytics/
+tools/
+edit-config.bat
+edit-config.sh
 *.log
 *.pkl
 *.pyc

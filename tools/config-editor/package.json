@@ -1,0 +1,12 @@
+{
+  "name": "twitch-miner-config-editor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GUI editor for twitch-miner-go account configuration files",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

@@ -12,7 +12,10 @@ on:
       - 'install-service.sh'
       - 'run.bat'
       - 'run.sh'
+      - 'edit-config.bat'
+      - 'edit-config.sh'
       - 'scripts/**'
+      - 'tools/**'
       - '.github/**'
   pull_request:
     branches: [main]

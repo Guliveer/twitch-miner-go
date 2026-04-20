@@ -23,6 +23,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
         - [1.4.1. Flags](#141-flags)
     - [1.5. Configuration](#15-configuration)
         - [1.5.1. Quick Start](#151-quick-start)
+        - [Config Editor](#config-editor)
     - [1.6. Environment Variables](#16-environment-variables)
         - [1.6.1. Global](#161-global)
         - [1.6.2. Per-Account Authentication](#162-per-account-authentication)
@@ -132,6 +133,8 @@ cp configs/example.yaml.example configs/your_twitch_username.yaml
 
 See [`configs/example.yaml.example`](configs/example.yaml.example) for the full schema. Files with a `.yaml.example` extension are not loaded as configs — only `.yaml` and `.yml` files are loaded.
 
+> **Prefer a GUI?** Run `edit-config.bat` (Windows) or `./edit-config.sh` (Linux/macOS) to open a visual config editor in your browser. Requires [Node.js](https://nodejs.org/). See [Config Editor](#config-editor) below for details.
+
 > **After cloning:** The repository may contain personal account configs (e.g. `guliveer_.yaml`). Delete them and create your own from the example template — these configs are specific to the maintainer's accounts and will not work for you.
 
 ### 1.5.1. Quick Start
@@ -184,6 +187,33 @@ followers:
   enabled: false
   order: "ASC"
 ```
+
+### Config Editor
+
+A browser-based GUI for creating, editing, and deleting account configs. Runs as a lightweight local Node.js server — no changes to the miner binary required.
+
+**Quick start:**
+
+```bash
+# Windows
+edit-config.bat
+
+# Linux / macOS
+./edit-config.sh
+```
+
+The editor opens automatically in your browser at `http://localhost:3000`. It reads and writes YAML files directly in `configs/`.
+
+**Requirements:** [Node.js](https://nodejs.org/) (v18+). Dependencies are installed automatically on first run.
+
+**Options:**
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--port`, `-p` | `3000` | Port for the editor server |
+| `--config`, `-c` | `configs/` | Path to the config directory |
+
+> **Note:** The editor only saves files — the miner must be restarted to pick up changes.
 
 ## 1.6. Environment Variables
 

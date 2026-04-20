@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Config Editor — Twitch Miner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <h1>Config Editor</h1>
+    </div>
+    <div class="header-right">
+      <span class="config-dir" id="config-dir"></span>
+    </div>
+  </header>
+
+  <main class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2>Accounts</h2>
+        <button class="btn btn-primary btn-sm" id="new-account-btn" title="Create new account">+ New</button>
+      </div>
+      <ul class="account-list" id="account-list">
+        <li class="loading-placeholder">Loading...</li>
+      </ul>
+    </aside>
+
+    <section class="editor" id="editor">
+      <div class="editor-placeholder" id="editor-placeholder">
+        <div class="placeholder-icon">&#9881;</div>
+        <p>Select an account to edit</p>
+        <p class="placeholder-hint">or create a new one with the <strong>+ New</strong> button</p>
+      </div>
+
+      <div class="editor-content hidden" id="editor-content">
+        <div class="editor-header">
+          <h2 id="editor-title"></h2>
+          <div class="editor-badges" id="editor-badges"></div>
+        </div>
+
+        <form id="config-form" autocomplete="off">
+          <!-- General -->
+          <div class="accordion open" data-section="general">
+            <button type="button" class="accordion-header">
+              <span class="accordion-arrow">&#9654;</span>
+              General
+            </button>
+            <div class="accordion-body">
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>Enabled</label>
+                  <div class="toggle-wrap">
+                    <input type="checkbox" id="cfg-enabled" class="toggle-input">
+                    <label for="cfg-enabled" class="toggle-slider"></label>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label for="cfg-max-watch">Max watch streams</label>
+                  <input type="number" id="cfg-max-watch" min="1" max="20" value="2" class="form-input input-sm">
+                  <span class="field-hint">How many streams to watch simultaneously</span>
+                </div>
+                <div class="form-field full-width">
+                  <label>Priority order</label>
+                  <span class="field-hint">Click to toggle. Determines which streamers are watched first.</span>
+                  <div class="chip-select" id="cfg-priority"></div>
+                </div>
+                <div class="form-field full-width">
+                  <label for="cfg-proxy">Proxy</label>
+                  <input type="text" id="cfg-proxy" placeholder="socks5://127.0.0.1:1080" class="form-input">
+                  <span class="field-hint">HTTP, HTTPS, or SOCKS5 proxy for all Twitch requests</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Features -->
+          <div class="accordion" data-section="features">
+            <button type="button" class="accordion-header">
+              <span class="accordion-arrow">&#9654;</span>
+              Features
+            </button>
+            <div class="accordion-body">
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>Claim drops on startup</label>
+                  <div class="toggle-wrap">
+                    <input type="checkbox" id="cfg-claim-drops-startup" class="toggle-input">
+                    <label for="cfg-claim-drops-startup" class="toggle-slider"></label>
+                  </div>
+                  <span class="field-hint">Claim any pending drops when miner starts</span>
+                </div>
+                <div class="form-field">
+                  <label>Enable analytics</label>
+                  <div class="toggle-wrap">
+                    <input type="checkbox" id="cfg-enable-analytics" class="toggle-input">
+                    <label for="cfg-enable-analytics" class="toggle-slider"></label>
+                  </div>
+                  <span class="field-hint">Enable the web analytics dashboard for this account</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Watcher -->
+          <div class="accordion" data-section="category-watcher">
+            <button type="button" class="accordion-header">
+              <span class="accordion-arrow">&#9654;</span>
+              Category Watcher
+            </button>
+            <div class="accordion-body">
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>Enabled</label>
+                  <div class="toggle-wrap">
+                    <input type="checkbox" id="cfg-cw-enabled" class="toggle-input">
+                    <label for="cfg-cw-enabled" class="toggle-slider"></label>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label for="cfg-cw-interval">Poll Interval</label>
+                  <input type="text" id="cfg-cw-interval" placeholder="120s" class="form-input input-sm">
+                </div>
+                <div class="form-field">
+                  <label>Drops Only</label>
+                  <div class="toggle-wrap">
+                    <input type="checkbox" id="cfg-cw-drops-only" class="toggle-input">
+                    <label for="cfg-cw-drops-only" class="toggle-slider"></label>
+                  </div>
+                </div>
+                <div class="form-field full-width">
+                  <label>Campaign Reminders</label>
+                  <div class="tag-list" id="cfg-cw-reminders"></div>
+                  <div class="tag-add-row">
+                    <input type="text" id="cfg-cw-reminder-input" placeholder="e.g. on_detection, 3d, 1d, 1h" class="form-input input-sm">
+                    <button type="button" class="btn btn-ghost btn-sm" data-add-tag="cfg-cw-reminders">+ Add</button>
+                  </div>
+                </div>
+                <div class="form-field full-width">
+                  <label>Categories</label>
+                  <div class="dynamic-list" id="cfg-cw-categories"></div>
+                  <button type="button" class="btn btn-ghost btn-sm" id="add-category-btn">+ Add Category</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Team Watcher -->
+          <div class="accordion" data-section="team-watcher">
+            <button type="button" class="accordion-header">
+              <span class="accordion-arrow">&#9654;</span>
+              Team Watcher
+            </button>
+            <div class="accordion-body">
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>Enabled</label>
+                  <div class="toggle-wrap">
+                    <input type="checkbox" id="cfg-tw-enabled" class="toggle-input">
+                    <label for="cfg-tw-enabled" class="toggle-slider"></label>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label for="cfg-tw-interval">Poll Interval</label>
+                  <input type="text" id="cfg-tw-interval" placeholder="120s" class="form-input input-sm">
+                </div>
+                <div class="form-field full-width">
+                  <label>Teams</label>
+                  <div class="dynamic-list" id="cfg-tw-teams"></div>
+                  <button type="button" class="btn btn-ghost btn-sm" id="add-team-btn">+ Add Team</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Streamer Defaults -->
+          <div class="accordion" data-section="streamer-defaults">
+            <button type="button" class="accordion-header">
+              <span class="accordion-arrow">&#9654;</span>
+              Streamer Defaults
+            </button>
+            <div class="accordion-body">
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>Make Predictions</label>
+                  <select class="tri-select" id="cfg-sd-predictions"></select>
+                </div>
+                <div class="form-field">
+                  <label>Follow Raid</label>
+                  <select class="tri-select" id="cfg-sd-follow-raid"></select>
+                </div>
+                <div class="form-field">
+                  <label>Claim drops</label>
+                  <select class="tri-select" id="cfg-sd-claim-drops"></select>
+                </div>
+                <div class="form-field">
+                  <label>Claim moments</label>
+                  <select class="tri-select" id="cfg-sd-claim-moments"></select>
+                </div>
+                <div class="form-field">
+                  <label>Watch streak</label>
+                  <select class="tri-select" id="cfg-sd-watch-streak"></select>
+                </div>
+                <div class="form-field">
+                  <label>Community goals</label>
+                  <select class="tri-select" id="cfg-sd-community-goals"></select>
+                </div>
+                <div class="form-field">
+                  <label for="cfg-sd-chat">Chat</label>
+                  <select id="cfg-sd-chat" class="form-input">
+                    <option value="">— default —</option>
+                    <option value="ALWAYS">ALWAYS</option>
+                    <option value="NEVER">NEVER</option>
+                    <option value="ONLINE">ONLINE</option>
+                    <option value="OFFLINE">OFFLINE</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Bet Settings sub-section -->
+              <div class="subsection">
+                <h4 class="subsection-title">Bet Settings</h4>
+                <div class="form-grid">
+                  <div class="form-field">
+                    <label for="cfg-bet-strategy">Strategy</label>
+                    <select id="cfg-bet-strategy" class="form-input"></select>
+                  </div>
+                  <div class="form-field">
+                    <label for="cfg-bet-percentage">Percentage</label>
+                    <input type="number" id="cfg-bet-percentage" min="1" max="100" class="form-input input-sm">
+                  </div>
+                  <div class="form-field">
+                    <label for="cfg-bet-gap">Percentage Gap</label>
+                    <input type="number" id="cfg-bet-gap" min="0" max="100" class="form-input input-sm">
+                  </div>
+                  <div class="form-field">
+                    <label for="cfg-bet-max">Max Points</label>
+                    <input type="number" id="cfg-bet-max" min="0" class="form-input input-sm">
+                  </div>
+                  <div class="form-field">
+                    <label for="cfg-bet-min">Minimum Points</label>
+                    <input type="number" id="cfg-bet-min" min="0" class="form-input input-sm">
+                  </div>
+                  <div class="form-field">
+                    <label>Stealth Mode</label>
+                    <select class="tri-select" id="cfg-bet-stealth"></select>
+                  </div>
+                  <div class="form-field">
+                    <label for="cfg-bet-delay">Delay (seconds)</label>
+                    <input type="number" id="cfg-bet-delay" min="0" step="0.5" class="form-input input-sm">
+                  </div>
+                  <div class="form-field">
+                    <label for="cfg-bet-delay-mode">Delay Mode</label>
+                    <select id="cfg-bet-delay-mode" class="form-input">
+                      <option value="">— default —</option>
+                      <option value="FROM_START">FROM_START</option>
+                      <option value="FROM_END">FROM_END</option>
+                      <option value="PERCENTAGE">PERCENTAGE</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="subsection">
+                  <h5 class="subsection-title-sm">Filter Condition</h5>
+                  <div class="form-grid">
+                    <div class="form-field">
+                      <label for="cfg-bet-filter-by">By</label>
+                      <select id="cfg-bet-filter-by" class="form-input">
+                        <option value="">— none —</option>
+                      </select>
+                    </div>
+                    <div class="form-field">
+                      <label for="cfg-bet-filter-where">Where</label>
+                      <select id="cfg-bet-filter-where" class="form-input">
+                        <option value="">— none —</option>
+                      </select>
+                    </div>
+                    <div class="form-field">
+                      <label for="cfg-bet-filter-value">Value</label>
+                      <input type="number" id="cfg-bet-filter-value" min="0" class="form-input input-sm">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Streamers -->
+          <div class="accordion" data-section="streamers">
+            <button type="button" class="accordion-header">
+              <span class="accordion-arrow">&#9654;</span>
+              Streamers
+              <span class="badge" id="streamers-count">0</span>
+            </button>
+            <div class="accordion-body">
+              <div class="dynamic-list" id="cfg-streamers"></div>
+              <button type="button" class="btn btn-ghost btn-sm" id="add-streamer-btn">+ Add Streamer</button>
+            </div>
+          </div>
+
+          <!-- Blacklists -->
+          <div class="accordion" data-section="blacklists">
+            <button type="button" class="accordion-header">
+              <span class="accordion-arrow">&#9654;</span>
+              Blacklists
+            </button>
+            <div class="accordion-body">
+              <div class="form-grid">
+                <div class="form-field full-width">
+                  <label>Streamer Blacklist</label>
+                  <div class="tag-list" id="cfg-blacklist"></div>
+                  <div class="tag-add-row">
+                    <input type="text" id="cfg-blacklist-input" placeholder="username" class="form-input input-sm">
+                    <button type="button" class="btn btn-ghost btn-sm" data-add-tag="cfg-blacklist">+ Add</button>
+                  </div>
+                </div>
+                <div class="form-field full-width">
+                  <label>Category Blacklist</label>
+                  <div class="tag-list" id="cfg-cat-blacklist"></div>
+                  <div class="tag-add-row">
+                    <input type="text" id="cfg-cat-blacklist-input" placeholder="category-slug" class="form-input input-sm">
+                    <button type="button" class="btn btn-ghost btn-sm" data-add-tag="cfg-cat-blacklist">+ Add</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Followers -->
+          <div class="accordion" data-section="followers">
+            <button type="button" class="accordion-header">
+              <span class="accordion-arrow">&#9654;</span>
+              Followers
+            </button>
+            <div class="accordion-body">
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>Enabled</label>
+                  <div class="toggle-wrap">
+                    <input type="checkbox" id="cfg-fol-enabled" class="toggle-input">
+                    <label for="cfg-fol-enabled" class="toggle-slider"></label>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label for="cfg-fol-order">Order</label>
+                  <select id="cfg-fol-order" class="form-input">
+                    <option value="ASC">ASC</option>
+                    <option value="DESC">DESC</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="accordion" data-section="notifications">
+            <button type="button" class="accordion-header">
+              <span class="accordion-arrow">&#9654;</span>
+              Notifications
+            </button>
+            <div class="accordion-body">
+              <p class="form-hint">Secrets (tokens, webhook URLs) are configured via environment variables. See the README for details.</p>
+
+              <!-- Global Batch -->
+              <div class="subsection">
+                <h4 class="subsection-title">Global Batch Settings</h4>
+                <div class="form-grid">
+                  <div class="form-field">
+                    <label>Batch Enabled</label>
+                    <select class="tri-select" id="cfg-batch-enabled"></select>
+                  </div>
+                  <div class="form-field">
+                    <label for="cfg-batch-interval">Interval</label>
+                    <input type="text" id="cfg-batch-interval" placeholder="15m" class="form-input input-sm">
+                  </div>
+                  <div class="form-field">
+                    <label for="cfg-batch-max">Max Entries</label>
+                    <input type="number" id="cfg-batch-max" min="0" class="form-input input-sm">
+                  </div>
+                  <div class="form-field full-width">
+                    <label>Immediate Events</label>
+                    <div class="chip-select" id="cfg-batch-immediate"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Provider sections rendered by JS -->
+              <div id="notification-providers"></div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Sticky action bar -->
+        <div class="editor-actions">
+          <button type="button" class="btn btn-primary" id="save-btn">Save</button>
+          <button type="button" class="btn btn-danger" id="delete-btn">Delete Account</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal overlay -->
+  <div class="modal-overlay hidden" id="modal-overlay">
+    <div class="modal" id="modal">
+      <div class="modal-header" id="modal-title"></div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
