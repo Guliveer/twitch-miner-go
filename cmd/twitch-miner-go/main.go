@@ -141,6 +141,9 @@ func main() {
 	}
 
 	for _, cfg := range configs {
+		if !cfg.IsEnabled() {
+			continue
+		}
 		if err := config.Validate(cfg); err != nil {
 			rootLog.Error("Invalid config", "account", cfg.Username, "error", err)
 			os.Exit(1)

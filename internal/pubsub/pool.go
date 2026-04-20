@@ -52,10 +52,12 @@ func NewPool(authProvider auth.Provider, log *logger.Logger, handler MessageHand
 
 // Subscribe distributes topics across connections, creating new connections
 // as needed. Each connection holds up to MaxTopicsPerConn topics.
+// When the connection limit is reached, remaining topics are skipped with a warning.
 func (p *Pool) Subscribe(ctx context.Context, topics []*model.PubSubTopic) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
+	var dropped int
 	for _, topic := range topics {
 		if !topic.IsUserTopic() && topic.Streamer != nil && topic.Streamer.ChannelID == "" {
 			p.log.Warn("Skipping subscription for topic with empty channel_id",
@@ -66,8 +68,18 @@ func (p *Pool) Subscribe(ctx context.Context, topics []*model.PubSubTopic) error
 		}
 
 		if err := p.subscribeSingle(ctx, topic); err != nil {
-			return err
+			dropped++
+			continue
 		}
+	}
+
+	if dropped > 0 {
+		capacity := p.maxConns * p.maxTopics
+		p.log.Warn("PubSub connection limit reached, some topics were not subscribed",
+			"dropped", dropped,
+			"subscribed", p.topicCountLocked(),
+			"max_capacity", capacity,
+		)
 	}
 	return nil
 }
@@ -179,7 +191,10 @@ func (p *Pool) ConnectionCount() int {
 func (p *Pool) TotalTopicCount() int {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	return p.topicCountLocked()
+}
 
+func (p *Pool) topicCountLocked() int {
 	total := 0
 	for _, conn := range p.conns {
 		total += conn.TopicCount()
