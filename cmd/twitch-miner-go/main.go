@@ -28,27 +28,38 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var bannerLines = []string{
-	"\033[38;5;129m  ______       _ __       __       __  ____               \033[0m",
-	"\033[38;5;128m /_  __/    __(_) /______/ /_     /  |/  (_)___  ___  ____\033[0m",
-	"\033[38;5;127m  / / | |/|/ / / __/ __/ __ \\   / /|_/ / / __ \\/ _ \\/ __/\033[0m",
-	"\033[38;5;126m / /  |__,__/ / /_/ /_/ / / /  / /  / / / / / /  __/ /   \033[0m",
-	"\033[38;5;125m/_/        /_/\\__/\\__/_/ /_/  /_/  /_/_/_/ /_/\\___/_/    \033[0m",
+var bannerPlain = []string{
+	"  ______       _ __       __       __  ____               ",
+	" /_  __/    __(_) /______/ /_     /  |/  (_)___  ___  ____",
+	"  / / | |/|/ / / __/ __/ __ \\   / /|_/ / / __ \\/ _ \\/ __/",
+	" / /  |__,__/ / /_/ /_/ / / /  / /  / / / / / /  __/ /   ",
+	"/_/        /_/\\__/\\__/_/ /_/  /_/  /_/_/_/ /_/\\___/_/    ",
+}
+
+var bannerColors = []string{
+	"\033[38;5;129m", "\033[38;5;128m", "\033[38;5;127m",
+	"\033[38;5;126m", "\033[38;5;125m",
 }
 
 var subtitle = "⛏  twitch-miner-go " + version.String()
 
-func playStartupAnimation() {
-	spinFrames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
-	for i := 0; i < 10; i++ {
-		fmt.Fprintf(os.Stderr, "\r\033[38;5;129m%s Initializing...\033[0m", spinFrames[i%len(spinFrames)])
-		time.Sleep(80 * time.Millisecond)
+func playStartupAnimation(colored bool) {
+	if colored {
+		spinFrames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+		for i := 0; i < 10; i++ {
+			fmt.Fprintf(os.Stderr, "\r\033[38;5;129m%s Initializing...\033[0m", spinFrames[i%len(spinFrames)])
+			time.Sleep(80 * time.Millisecond)
+		}
+		fmt.Fprint(os.Stderr, "\r\033[K")
 	}
-	fmt.Fprint(os.Stderr, "\r\033[K")
 
 	fmt.Println()
-	for _, line := range bannerLines {
-		fmt.Println(line)
+	for i, line := range bannerPlain {
+		if colored {
+			fmt.Printf("%s%s\033[0m\n", bannerColors[i], line)
+		} else {
+			fmt.Println(line)
+		}
 		time.Sleep(60 * time.Millisecond)
 	}
 	fmt.Println()
@@ -64,7 +75,11 @@ func playStartupAnimation() {
 	fmt.Fprintln(os.Stderr)
 
 	sep := strings.Repeat("─", 56)
-	fmt.Printf("\033[38;5;240m%s\033[0m\n\n", sep)
+	if colored {
+		fmt.Printf("\033[38;5;240m%s\033[0m\n\n", sep)
+	} else {
+		fmt.Printf("%s\n\n", sep)
+	}
 }
 
 func main() {
@@ -108,16 +123,18 @@ func main() {
 		httpPort = envPort
 	}
 
+	colored := logger.ColorSupported()
+
 	rootLog, err := logger.Setup(logger.Config{
 		Level:   level,
-		Colored: true,
+		Colored: colored,
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to setup logger: %v\n", err)
 		os.Exit(1)
 	}
 
-	playStartupAnimation()
+	playStartupAnimation(colored)
 	rootLog.Info("🚀 Starting Twitch Channel Points Miner (Go)", "version", version.String())
 
 	twitchRuntime := runtimecfg.LoadTwitchFromEnv(rootLog.Logger)

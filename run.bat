@@ -22,8 +22,13 @@ echo Building twitch-miner-go v%VERSION%...
 go build -ldflags "%LDFLAGS%" -o twitch-miner-go.exe ./cmd/twitch-miner-go
 if %errorlevel% neq 0 (
     echo Build failed!
+    pause
     exit /b %errorlevel%
 )
 
 echo Starting twitch-miner-go...
 twitch-miner-go.exe %*
+
+echo.
+echo twitch-miner-go exited with code %errorlevel%.
+pause

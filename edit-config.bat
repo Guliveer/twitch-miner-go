@@ -10,6 +10,7 @@ where node >nul 2>&1
 if %errorlevel% neq 0 (
     echo Node.js is required but not installed.
     echo Download it from https://nodejs.org/
+    pause
     exit /b 1
 )
 
@@ -19,3 +20,7 @@ if not exist "node_modules" (
 )
 
 node server.js %*
+
+echo.
+echo Config editor exited with code %errorlevel%.
+pause
