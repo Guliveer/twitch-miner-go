@@ -63,8 +63,8 @@
                 </div>
                 <div class="form-field full-width">
                   <label>Priority order</label>
-                  <span class="field-hint">Click to toggle. Determines which streamers are watched first.</span>
-                  <div class="chip-select" id="cfg-priority"></div>
+                  <span class="field-hint">Order matters: first rule wins. Drag rows to reorder; click a value on the right to add; click × to remove. <code>ORDER</code> falls back to the order of the streamers list below.</span>
+                  <div id="cfg-priority"></div>
                 </div>
                 <div class="form-field full-width">
                   <label for="cfg-proxy">Proxy</label>
@@ -133,7 +133,7 @@
                   <label>Campaign Reminders</label>
                   <div class="tag-list" id="cfg-cw-reminders"></div>
                   <div class="tag-add-row">
-                    <input type="text" id="cfg-cw-reminder-input" placeholder="e.g. on_detection, 3d, 1d, 1h" class="form-input input-sm">
+                    <input type="text" id="cfg-cw-reminders-input" placeholder="e.g. on_detection, 3d, 1d, 1h" class="form-input input-sm">
                     <button type="button" class="btn btn-ghost btn-sm" data-add-tag="cfg-cw-reminders">+ Add</button>
                   </div>
                 </div>
@@ -379,7 +379,8 @@
                   </div>
                   <div class="form-field full-width">
                     <label>Immediate Events</label>
-                    <div class="chip-select" id="cfg-batch-immediate"></div>
+                    <span class="field-hint">Events that bypass batching. Drag rows to reorder; click a value on the right to add.</span>
+                    <div id="cfg-batch-immediate"></div>
                   </div>
                 </div>
               </div>

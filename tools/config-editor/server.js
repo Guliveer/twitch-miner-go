@@ -31,6 +31,21 @@ const MIME_TYPES = {
 
 const VALID_NAME = /^[a-zA-Z0-9_-]+$/;
 
+// Matches Go's time.ParseDuration (sequences of <number><unit>, unit ∈ ns/us/µs/ms/s/m/h).
+const DURATION_RE = /^(?:\d+(?:\.\d+)?(?:ns|us|µs|ms|s|m|h))+$/;
+// Campaign reminders additionally accept the literal "on_detection" or "Nd" (days).
+const REMINDER_DURATION_RE = /^(?:\d+(?:\.\d+)?d)$|^(?:\d+(?:\.\d+)?(?:ns|us|µs|ms|s|m|h))+$/;
+
+function isValidDuration(s) {
+  return typeof s === 'string' && DURATION_RE.test(s.trim());
+}
+
+function isValidReminderValue(s) {
+  if (typeof s !== 'string') return false;
+  const t = s.trim();
+  return t === 'on_detection' || REMINDER_DURATION_RE.test(t);
+}
+
 const SCHEMA = {
   strategies: [
     'MOST_VOTED', 'HIGH_ODDS', 'PERCENTAGE', 'SMART_MONEY', 'SMART',
@@ -189,7 +204,40 @@ function validateConfig(config) {
     errors.push('make_predictions is enabled in streamer_defaults but no bet config is set');
   }
 
+  validateDurationField(config.category_watcher && config.category_watcher.poll_interval, 'category_watcher.poll_interval', errors);
+  validateDurationField(config.team_watcher && config.team_watcher.poll_interval, 'team_watcher.poll_interval', errors);
+  validateDurationField(config.notifications && config.notifications.batch && config.notifications.batch.interval, 'notifications.batch.interval', errors);
+
+  const providers = ['telegram', 'discord', 'webhook', 'matrix', 'pushover', 'gotify'];
+  providers.forEach((p) => {
+    const b = config.notifications && config.notifications[p] && config.notifications[p].batch;
+    if (b && b.interval !== undefined && b.interval !== null && b.interval !== '') {
+      validateDurationField(b.interval, `notifications.${p}.batch.interval`, errors);
+    }
+  });
+
+  if (config.category_watcher && Array.isArray(config.category_watcher.campaign_reminders)) {
+    config.category_watcher.campaign_reminders.forEach((v, i) => {
+      if (!isValidReminderValue(v)) errors.push(`category_watcher.campaign_reminders[${i}] "${v}" is not valid (use e.g. 15m, 3d, or on_detection)`);
+    });
+  }
+
+  if (config.category_watcher && Array.isArray(config.category_watcher.categories)) {
+    config.category_watcher.categories.forEach((cat, ci) => {
+      if (Array.isArray(cat.campaign_reminders)) {
+        cat.campaign_reminders.forEach((v, i) => {
+          if (!isValidReminderValue(v)) errors.push(`category_watcher.categories[${ci}].campaign_reminders[${i}] "${v}" is not valid`);
+        });
+      }
+    });
+  }
+
   return errors;
+}
+
+function validateDurationField(value, label, errors) {
+  if (value === undefined || value === null || value === '') return;
+  if (!isValidDuration(value)) errors.push(`${label} "${value}" is not a valid duration (e.g. 120s, 15m, 1h30m)`);
 }
 
 function cleanConfig(config) {

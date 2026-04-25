@@ -1,150 +1,75 @@
-# Set to false to disable this account without deleting the config file (default: true)
-enabled: true
-
-# Features
-features:
-  claim_drops_startup: true
-  enable_analytics: false
-
-# Watch priority evaluated in order (default: DROPS > ORDER > STREAK)
+max_watch_streams: 15
 priority:
   - DROPS
   - ORDER
   - STREAK
-
-# Category watcher - auto-discover streams by game
+features:
+  claim_drops_startup: true
 category_watcher:
   enabled: true
-  poll_interval: 120s
-  drops_only: true # Global default: only watch streams with Drops enabled
-  campaign_reminders: [on_detection, 3d, 1d] # Notify before campaigns start
+  poll_interval: 60s
+  drops_only: true
+  campaign_reminders:
+    - on_detection
+    - 3d
+    - 1d
   categories:
-    - slug: "tom-clancys-rainbow-six-siege"
+    - slug: tom-clancys-rainbow-six-siege
       drops_only: false
-
-# Team watcher - auto-discover streams by team membership
 team_watcher:
   enabled: true
   poll_interval: 180s
   teams:
-    - name: "rainbow6"
-
-# Default settings for all streamers
+    - name: rainbow6
 streamer_defaults:
   make_predictions: true
   follow_raid: false
   claim_drops: true
   claim_moments: true
   watch_streak: true
-  chat: "ALWAYS" # ALWAYS | NEVER | ONLINE | OFFLINE
+  chat: ALWAYS
   bet:
-    strategy: "SMART"
+    strategy: SMART
     percentage: 5
     percentage_gap: 20
     max_points: 50000
     minimum_points: 20000
     stealth_mode: true
     delay: 6
-    delay_mode: "FROM_END" # FROM_START | FROM_END | PERCENTAGE
-    filter_condition:
-      by: "TOTAL_USERS"
-      where: "LTE"
-      value: 800
-
-# Streamers to watch (order = priority)
+    delay_mode: FROM_END
 streamers:
-  - username: "Guliveer_"
-  - username: "rainbow6"
-  - username: "rainbow6bravo"
-  - username: "rainbow6bnl"
-  - username: "rainbow6CNTwitch"
-  - username: "rainbow6de"
-  - username: "rainbow6es"
-  - username: "rainbow6fr"
-  - username: "rainbow6hk"
-  - username: "rainbow6hu"
-  - username: "rainbow6it"
-  - username: "rainbow6jp"
-  - username: "rainbow6kr"
-  - username: "rainbow6LATAM"
-  - username: "rainbow6pl"
-  - username: "rainbow6ru"
-  - username: "rainbow6th"
-  - username: "rainbow6tw"
-  - username: "rainbow6sea"
-  - username: "Pengu"
-  - username: "itsSpoit"
-  - username: "Athieno"
-  - username: "KingGeorge"
-  - username: "AnneMunition"
-  - username: "Beaulo"
-  - username: "MacieJay"
-  - username: "Interro"
-  - username: "zironicdk"
-
-# Blacklisted streamers
-blacklist: []
-
-# Follow mode
+  - username: Guliveer_
+  - username: rainbow6
+  - username: rainbow6bravo
+  - username: rainbow6LATAM
+  - username: rainbow6pl
+  - username: Pengu
+  - username: Skittlz
+  - username: itsSpoit
+  - username: KingGeorge
+  - username: AnneMunition
+  - username: Beaulo
+  - username: MacieJay
+  - username: Interro
+  - username: zironicdk
+  - username: Athieno
 followers:
   enabled: true
-  order: "ASC"
-
-# Notifications
 notifications:
   batch:
     enabled: true
     interval: 3h
     max_entries: 15
-    immediate_events: []
-
   telegram:
     enabled: true
-    chat_id: "" # Set via TELEGRAM_CHAT_ID_GULIVEER_2 env var
-    token: "" # Set via TELEGRAM_TOKEN_GULIVEER_2 env var
     events:
-      - "DROP_CLAIM"
-      - "CAMPAIGN_STARTED"
-      - "CAMPAIGN_REMINDER"
-      - "GIFTED_SUB"
-      - "MINER_STARTED"
-      - "MINER_STOPPED"
-      - "MINER_CRASHED"
+      - DROP_CLAIM
+      - CAMPAIGN_STARTED
+      - CAMPAIGN_REMINDER
+      - GIFTED_SUB
+      - MINER_STARTED
+      - MINER_STOPPED
+      - MINER_CRASHED
     disable_notification: true
-
-# Discord — disabled (commented out in Python config)
-# discord:
-#   enabled: true
-#   # webhook_url: ""  # Set via DISCORD_WEBHOOK env var
-#   events:
-#     - "STREAMER_ONLINE"
-#     - "STREAMER_OFFLINE"
-#     - "BET_LOSE"
-
-# Webhook — disabled (commented out in Python config)
-# webhook:
-#   enabled: true
-#   method: "GET"
-#   # endpoint: ""  # Set via WEBHOOK_URL env var
-#   events:
-#     - "STREAMER_ONLINE"
-#     - "STREAMER_OFFLINE"
-#     - "BET_LOSE"
-#     - "CHAT_MENTION"
-
-# Matrix — disabled (commented out in Python config)
-# matrix:
-#   enabled: true
-#   # homeserver, room_id, access_token from env vars
-#   events:
-#     - "STREAMER_ONLINE"
-#     - "STREAMER_OFFLINE"
-#     - "BET_LOSE"
-
-# Pushover — disabled (commented out in Python config)
-# pushover:
-#   enabled: true
-#   # user_key, api_token from env vars
-#   events:
-#     - "CHAT_MENTION"
-#     - "DROP_CLAIM"
+  webhook:
+    method: POST

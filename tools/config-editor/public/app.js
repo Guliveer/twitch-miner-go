@@ -46,6 +46,157 @@
     return node;
   }
 
+  // ─── Drag & Drop Reordering ───
+
+  const REORDERABLE_FLAG = '__reorderableBound';
+
+  // makeReorderable turns `container` into a drop-target whose direct children
+  // matching `itemSelector` can be reordered via .drag-handle drags OR via
+  // Alt+ArrowUp/Down on a focused handle (keyboard a11y).
+  //
+  // Uses a single listener per container (event delegation) so dynamically
+  // added items are automatically reorderable. Safe to call multiple times on
+  // the same container — subsequent calls are no-ops.
+  function makeReorderable(container, itemSelector, onReorder) {
+    if (!container || container[REORDERABLE_FLAG]) return;
+    container[REORDERABLE_FLAG] = true;
+
+    const notify = onReorder || markDirty;
+    let draggedItem = null;
+    let autoScrollRaf = 0;
+    let autoScrollDelta = 0;
+
+    function clearDropHints() {
+      container.querySelectorAll('.drop-before, .drop-after').forEach((n) => {
+        n.classList.remove('drop-before', 'drop-after');
+      });
+    }
+
+    function findItem(target) {
+      if (!target || target === container) return null;
+      return target.closest(itemSelector);
+    }
+
+    function isHorizontal(item) {
+      const parent = item.parentElement;
+      if (!parent) return false;
+      const style = window.getComputedStyle(parent);
+      if (style.display === 'flex') return style.flexDirection.startsWith('row');
+      return parent.classList.contains('chip-select') || parent.classList.contains('tag-list') || parent.classList.contains('ordered-available-wrap');
+    }
+
+    function computeDropSide(item, clientX, clientY) {
+      const rect = item.getBoundingClientRect();
+      if (isHorizontal(item)) {
+        return clientX < rect.left + rect.width / 2 ? 'before' : 'after';
+      }
+      return clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+    }
+
+    function autoScroll() {
+      if (!autoScrollDelta) { autoScrollRaf = 0; return; }
+      const scroller = container.closest('.editor') || document.scrollingElement;
+      if (scroller) scroller.scrollTop += autoScrollDelta;
+      autoScrollRaf = requestAnimationFrame(autoScroll);
+    }
+
+    function updateAutoScroll(clientY) {
+      const scroller = container.closest('.editor');
+      if (!scroller) { autoScrollDelta = 0; return; }
+      const rect = scroller.getBoundingClientRect();
+      const zone = 40;
+      if (clientY < rect.top + zone) autoScrollDelta = -8;
+      else if (clientY > rect.bottom - zone) autoScrollDelta = 8;
+      else autoScrollDelta = 0;
+      if (autoScrollDelta && !autoScrollRaf) autoScrollRaf = requestAnimationFrame(autoScroll);
+    }
+
+    container.addEventListener('dragstart', (e) => {
+      const handle = e.target.closest && e.target.closest('.drag-handle');
+      if (!handle || !container.contains(handle)) return;
+      const item = findItem(handle);
+      if (!item || item.parentElement !== container && !container.contains(item)) return;
+      draggedItem = item;
+      item.classList.add('dragging');
+      try {
+        e.dataTransfer.effectAllowed = 'move';
+        // Required for Firefox to actually start the drag.
+        e.dataTransfer.setData('text/plain', '');
+      } catch (_) { /* some browsers throw in restrictive contexts */ }
+    });
+
+    container.addEventListener('dragover', (e) => {
+      if (!draggedItem) return;
+      const overItem = findItem(e.target);
+      if (!overItem || overItem === draggedItem) {
+        clearDropHints();
+        e.preventDefault();
+        return;
+      }
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      clearDropHints();
+      const side = computeDropSide(overItem, e.clientX, e.clientY);
+      overItem.classList.add(side === 'before' ? 'drop-before' : 'drop-after');
+      updateAutoScroll(e.clientY);
+    });
+
+    container.addEventListener('dragleave', (e) => {
+      if (!draggedItem) return;
+      if (e.target === container || !container.contains(e.relatedTarget)) {
+        clearDropHints();
+      }
+    });
+
+    container.addEventListener('drop', (e) => {
+      if (!draggedItem) return;
+      e.preventDefault();
+      const overItem = findItem(e.target);
+      if (overItem && overItem !== draggedItem) {
+        const side = computeDropSide(overItem, e.clientX, e.clientY);
+        if (side === 'before') overItem.parentNode.insertBefore(draggedItem, overItem);
+        else overItem.parentNode.insertBefore(draggedItem, overItem.nextSibling);
+        notify();
+      }
+      clearDropHints();
+    });
+
+    container.addEventListener('dragend', () => {
+      if (draggedItem) draggedItem.classList.remove('dragging');
+      draggedItem = null;
+      autoScrollDelta = 0;
+      if (autoScrollRaf) { cancelAnimationFrame(autoScrollRaf); autoScrollRaf = 0; }
+      clearDropHints();
+    });
+
+    // Keyboard reordering (a11y): Alt+Up/Down while focused on a handle.
+    container.addEventListener('keydown', (e) => {
+      if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+      const handle = e.target.closest && e.target.closest('.drag-handle');
+      if (!handle || !container.contains(handle)) return;
+      const item = findItem(handle);
+      if (!item) return;
+      e.preventDefault();
+      const sibling = e.key === 'ArrowUp' ? item.previousElementSibling : item.nextElementSibling;
+      if (!sibling || !sibling.matches(itemSelector)) return;
+      if (e.key === 'ArrowUp') item.parentNode.insertBefore(item, sibling);
+      else item.parentNode.insertBefore(item, sibling.nextSibling);
+      notify();
+      handle.focus();
+    });
+  }
+
+  function dragHandle(extraClass) {
+    return el('span', {
+      className: 'drag-handle' + (extraClass ? ' ' + extraClass : ''),
+      draggable: 'true',
+      tabindex: '0',
+      role: 'button',
+      'aria-label': 'Reorder item (drag, or press Alt+Up/Down)',
+      title: 'Drag to reorder (Alt+Up/Down)',
+    }, '⋮⋮');
+  }
+
   // ─── Toast ───
 
   function showToast(message, type) {
@@ -141,7 +292,7 @@
     setVal('cfg-max-watch', config.max_watch_streams || schema.defaults.max_watch_streams);
     setVal('cfg-proxy', config.proxy || '');
 
-    renderChipSelect('cfg-priority', schema.priorities, config.priority || schema.defaults.priority);
+    renderOrderedMultiSelect(document.getElementById('cfg-priority'), schema.priorities, config.priority || schema.defaults.priority);
 
     setChecked('cfg-claim-drops-startup', config.features?.claim_drops_startup || false);
     setChecked('cfg-enable-analytics', config.features?.enable_analytics || false);
@@ -150,7 +301,7 @@
     setChecked('cfg-cw-enabled', cw.enabled || false);
     setVal('cfg-cw-interval', cw.poll_interval || schema.defaults.category_watcher_poll_interval);
     setChecked('cfg-cw-drops-only', cw.drops_only || false);
-    renderTagList('cfg-cw-reminders', cw.campaign_reminders || []);
+    renderTagList('cfg-cw-reminders', cw.campaign_reminders || [], { reorderable: true });
     renderCategories(cw.categories || []);
 
     const tw = config.team_watcher || {};
@@ -197,7 +348,7 @@
     renderTriToggle('cfg-batch-enabled', batch.enabled);
     setVal('cfg-batch-interval', batch.interval || '');
     setVal('cfg-batch-max', batch.max_entries ?? '');
-    renderChipSelect('cfg-batch-immediate', schema.notification_events, batch.immediate_events || []);
+    renderOrderedMultiSelect(document.getElementById('cfg-batch-immediate'), schema.notification_events, batch.immediate_events || []);
 
     renderNotificationProviders(notif);
 
@@ -215,8 +366,8 @@
     const maxWatch = getNum('cfg-max-watch');
     if (maxWatch) config.max_watch_streams = maxWatch;
 
-    const priority = getChipSelectValues('cfg-priority');
-    config.priority = priority;
+    const priority = getOrderedMultiSelectValues(document.getElementById('cfg-priority'));
+    if (priority.length > 0) config.priority = priority;
 
     const proxy = getVal('cfg-proxy');
     if (proxy) config.proxy = proxy;
@@ -331,30 +482,61 @@
   function collectStreamers() {
     const items = document.querySelectorAll('#cfg-streamers .dynamic-item');
     return Array.from(items).map((item) => {
-      const s = { username: item.querySelector('.streamer-username')?.value?.trim() || '' };
+      const username = item.querySelector('.streamer-username')?.value?.trim() || '';
+      const s = { username };
       const details = item.querySelector('.item-details');
-      if (details) {
-        const settings = {};
-        const predEl = details.querySelector('.s-predictions');
-        if (predEl) assignTriToggleEl(settings, 'make_predictions', predEl);
-        const chatEl = details.querySelector('.s-chat');
-        if (chatEl && chatEl.value) settings.chat = chatEl.value;
+      if (!details) return s;
 
-        const betStrategy = details.querySelector('.s-bet-strategy');
-        if (betStrategy && betStrategy.value) {
-          if (!settings.bet) settings.bet = {};
-          settings.bet.strategy = betStrategy.value;
-        }
-        const betMax = details.querySelector('.s-bet-max');
-        if (betMax && betMax.value) {
-          if (!settings.bet) settings.bet = {};
-          settings.bet.max_points = parseInt(betMax.value, 10);
-        }
+      const settings = {};
 
-        if (Object.keys(settings).length > 0) s.settings = settings;
+      STREAMER_BEHAVIOR_FIELDS.forEach(([key, , cls]) => {
+        const sel = details.querySelector('.' + cls);
+        if (sel) assignTriToggleEl(settings, key, sel);
+      });
+
+      const chatEl = details.querySelector('.s-chat');
+      if (chatEl && chatEl.value) settings.chat = chatEl.value;
+
+      const bet = {};
+      const strategyEl = details.querySelector('.s-bet-strategy');
+      if (strategyEl && strategyEl.value) bet.strategy = strategyEl.value;
+      assignNumFromEl(bet, 'percentage', details.querySelector('.s-bet-percentage'));
+      assignNumFromEl(bet, 'percentage_gap', details.querySelector('.s-bet-gap'));
+      assignNumFromEl(bet, 'max_points', details.querySelector('.s-bet-max'));
+      assignNumFromEl(bet, 'minimum_points', details.querySelector('.s-bet-min'));
+      const stealthEl = details.querySelector('.s-bet-stealth');
+      if (stealthEl) assignTriToggleEl(bet, 'stealth_mode', stealthEl);
+      assignFloatFromEl(bet, 'delay', details.querySelector('.s-bet-delay'));
+      const delayModeEl = details.querySelector('.s-bet-delay-mode');
+      if (delayModeEl && delayModeEl.value) bet.delay_mode = delayModeEl.value;
+
+      const filterBy = details.querySelector('.s-bet-filter-by')?.value || '';
+      const filterWhere = details.querySelector('.s-bet-filter-where')?.value || '';
+      const filterValueRaw = details.querySelector('.s-bet-filter-value')?.value;
+      if (filterBy && filterWhere) {
+        bet.filter_condition = {
+          by: filterBy,
+          where: filterWhere,
+          value: filterValueRaw !== '' && filterValueRaw !== undefined ? parseFloat(filterValueRaw) : 0,
+        };
       }
+
+      if (Object.keys(bet).length > 0) settings.bet = bet;
+      if (Object.keys(settings).length > 0) s.settings = settings;
       return s;
     }).filter((s) => s.username);
+  }
+
+  function assignNumFromEl(obj, key, elem) {
+    if (!elem || elem.value === '' || elem.value === undefined) return;
+    const n = parseInt(elem.value, 10);
+    if (!Number.isNaN(n)) obj[key] = n;
+  }
+
+  function assignFloatFromEl(obj, key, elem) {
+    if (!elem || elem.value === '' || elem.value === undefined) return;
+    const n = parseFloat(elem.value);
+    if (!Number.isNaN(n)) obj[key] = n;
   }
 
   function collectNotifications() {
@@ -366,7 +548,7 @@
     if (batchInt) batch.interval = batchInt;
     const batchMax = getNum('cfg-batch-max');
     if (batchMax) batch.max_entries = batchMax;
-    const immediate = getChipSelectValues('cfg-batch-immediate');
+    const immediate = getOrderedMultiSelectValues(document.getElementById('cfg-batch-immediate'));
     if (immediate.length > 0) batch.immediate_events = immediate;
     if (Object.keys(batch).length > 0) notif.batch = batch;
 
@@ -377,8 +559,8 @@
       if (!enabledEl) return;
       const pConfig = {};
       if (enabledEl.checked) pConfig.enabled = true;
-      const events = [];
-      section.querySelectorAll('.prov-events .chip.selected').forEach((c) => events.push(c.dataset.value));
+      const eventsContainer = section.querySelector('.prov-events');
+      const events = eventsContainer ? getOrderedMultiSelectValues(eventsContainer) : [];
       if (events.length > 0) pConfig.events = events;
 
       if (p === 'telegram') {
@@ -398,39 +580,117 @@
 
   // ─── Render Helpers ───
 
-  function renderChipSelect(containerId, options, selected) {
-    const container = document.getElementById(containerId);
+  // renderOrderedMultiSelect builds a two-column selector: left = selected items
+  // in user-defined order (drag-to-reorder, × to remove), right = available items
+  // (click to add, preserves schema order). Useful for config fields where both
+  // membership AND ordering matter — e.g. `priority` and immediate_events.
+  function renderOrderedMultiSelect(container, allValues, selectedValues) {
     container.textContent = '';
-    options.forEach((opt) => {
+    container.classList.add('ordered-select');
+
+    const selectedCol = el('div', { className: 'ordered-select-column selected' }, [
+      el('div', { className: 'ordered-select-column-title' }, 'Selected (drag to reorder)'),
+    ]);
+    const availableWrap = el('div', { className: 'ordered-available-wrap' });
+    const availableCol = el('div', { className: 'ordered-select-column available' }, [
+      el('div', { className: 'ordered-select-column-title' }, 'Available'),
+      availableWrap,
+    ]);
+
+    container.appendChild(selectedCol);
+    container.appendChild(availableCol);
+
+    function refreshEmptyStates() {
+      selectedCol.querySelectorAll('.ordered-empty').forEach((n) => n.remove());
+      availableWrap.querySelectorAll('.ordered-empty').forEach((n) => n.remove());
+      if (!selectedCol.querySelector('.ordered-item')) {
+        selectedCol.appendChild(el('div', { className: 'ordered-empty' }, 'Click a value on the right to add'));
+      }
+      if (!availableWrap.querySelector('.ordered-available-chip')) {
+        availableWrap.appendChild(el('div', { className: 'ordered-empty' }, 'All values selected'));
+      }
+    }
+
+    function addToAvailable(value) {
       const chip = el('span', {
-        className: 'chip' + (selected.includes(opt) ? ' selected' : ''),
-        dataset: { value: opt },
-        onclick: function () { this.classList.toggle('selected'); markDirty(); },
-      }, opt);
-      container.appendChild(chip);
-    });
+        className: 'ordered-available-chip',
+        dataset: { value: value },
+        tabindex: '0',
+        role: 'button',
+        'aria-label': 'Add ' + value,
+      }, value);
+      chip.addEventListener('click', () => {
+        chip.remove();
+        addToSelected(value);
+        refreshEmptyStates();
+        markDirty();
+      });
+      chip.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); chip.click(); }
+      });
+      const targetIdx = allValues.indexOf(value);
+      const existing = Array.from(availableWrap.querySelectorAll('.ordered-available-chip'));
+      const nextChip = existing.find((c) => allValues.indexOf(c.dataset.value) > targetIdx);
+      if (nextChip) availableWrap.insertBefore(chip, nextChip);
+      else availableWrap.appendChild(chip);
+    }
+
+    function addToSelected(value) {
+      const handle = dragHandle();
+      const label = el('span', { className: 'ordered-item-label' }, value);
+      const remove = el('button', {
+        type: 'button',
+        className: 'ordered-item-remove',
+        'aria-label': 'Remove ' + value,
+      }, '×');
+      const item = el('div', {
+        className: 'ordered-item',
+        dataset: { value: value },
+      }, [handle, label, remove]);
+      remove.addEventListener('click', () => {
+        item.remove();
+        addToAvailable(value);
+        refreshEmptyStates();
+        markDirty();
+      });
+      selectedCol.appendChild(item);
+    }
+
+    selectedValues.forEach((v) => { if (allValues.includes(v)) addToSelected(v); });
+    allValues.forEach((v) => { if (!selectedValues.includes(v)) addToAvailable(v); });
+    refreshEmptyStates();
+
+    makeReorderable(selectedCol, '.ordered-item', markDirty);
   }
 
-  function getChipSelectValues(containerId) {
-    return Array.from(document.querySelectorAll('#' + containerId + ' .chip.selected'))
-      .map((c) => c.dataset.value);
+  function getOrderedMultiSelectValues(container) {
+    if (!container) return [];
+    return Array.from(container.querySelectorAll('.ordered-select-column.selected .ordered-item'))
+      .map((item) => item.dataset.value);
   }
 
-  function renderTagList(containerId, values) {
+  function renderTagList(containerId, values, options) {
     const container = document.getElementById(containerId);
     container.textContent = '';
+    if (options && options.reorderable) container.dataset.reorderable = '1';
     values.forEach((v) => addTag(container, v));
+    if (options && options.reorderable) {
+      makeReorderable(container, '.tag', markDirty);
+    }
   }
 
   function addTag(container, value) {
     const removeBtn = el('span', {
       className: 'tag-remove',
-      onclick: function () { this.parentElement.remove(); markDirty(); },
+      onclick: function () { this.closest('.tag').remove(); markDirty(); },
     }, '\u00d7');
-    const tag = el('span', { className: 'tag', dataset: { value: value } }, [
-      document.createTextNode(value + ' '),
-      removeBtn,
-    ]);
+    const children = [];
+    if (container && container.dataset && container.dataset.reorderable === '1') {
+      children.push(dragHandle('drag-handle-tag'));
+    }
+    children.push(document.createTextNode(value + ' '));
+    children.push(removeBtn);
+    const tag = el('span', { className: 'tag', dataset: { value: value } }, children);
     container.appendChild(tag);
     markDirty();
   }
@@ -493,27 +753,85 @@
     const container = document.getElementById('cfg-cw-categories');
     container.textContent = '';
     categories.forEach((cat) => addCategoryItem(container, cat));
+    makeReorderable(container, '.dynamic-item', markDirty);
   }
 
   function addCategoryItem(container, cat) {
     cat = cat || {};
+    const handle = dragHandle();
+
+    const expandBtn = el('button', {
+      type: 'button', className: 'item-expand', title: 'Toggle per-category overrides',
+    }, '\u25b6');
+
     const slugInput = el('input', {
       type: 'text', className: 'form-input input-sm cat-slug',
       placeholder: 'category-slug', value: cat.slug || '',
       oninput: markDirty,
     });
     const triEl = el('select', { className: 'tri-select cat-drops-only' });
-    const label = el('span', { style: 'font-size:0.7rem;color:var(--text-muted)' }, 'drops only');
+    const triLabel = el('span', { style: 'font-size:0.7rem;color:var(--text-muted)' }, 'drops only');
     const removeBtn = el('button', {
       type: 'button', className: 'item-remove', title: 'Remove',
       onclick: function () { this.closest('.dynamic-item').remove(); markDirty(); },
     }, '\u00d7');
 
-    const fields = el('div', { className: 'item-fields' }, [slugInput, triEl, label]);
-    const item = el('div', { className: 'dynamic-item' }, [fields, removeBtn]);
+    const fields = el('div', { className: 'item-fields' }, [handle, expandBtn, slugInput, triEl, triLabel]);
+
+    const remindersList = el('div', { className: 'tag-list cat-reminders', dataset: { reorderable: '1' } });
+    const remindersInput = el('input', {
+      type: 'text', className: 'form-input input-sm cat-reminder-input',
+      placeholder: 'e.g. on_detection, 3d, 1h',
+    });
+    const remindersError = el('div', { className: 'duration-error hidden' });
+    const remindersAddBtn = el('button', {
+      type: 'button', className: 'btn btn-ghost btn-sm',
+    }, '+ Add');
+
+    function addReminder() {
+      const v = remindersInput.value.trim();
+      if (!v) return;
+      if (!isValidReminderValue(v)) {
+        remindersError.textContent = 'Invalid value. Use durations like "15m", "3d" or "on_detection".';
+        remindersError.classList.remove('hidden');
+        return;
+      }
+      remindersError.classList.add('hidden');
+      addTag(remindersList, v);
+      remindersInput.value = '';
+    }
+    remindersAddBtn.addEventListener('click', addReminder);
+    remindersInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); addReminder(); }
+    });
+
+    const detailGrid = el('div', { style: 'display:flex;flex-direction:column;gap:0.4rem;margin-top:0.5rem' }, [
+      el('label', { style: 'font-size:0.72rem;color:var(--text-secondary);font-weight:600' }, 'Campaign Reminders override'),
+      remindersList,
+      el('div', { className: 'tag-add-row' }, [remindersInput, remindersAddBtn]),
+      remindersError,
+    ]);
+    const details = el('div', { className: 'item-details' }, [detailGrid]);
+
+    expandBtn.addEventListener('click', () => {
+      expandBtn.classList.toggle('open');
+      details.classList.toggle('open');
+    });
+
+    const item = el('div', { className: 'dynamic-item', style: 'flex-direction:column' }, [
+      el('div', { style: 'display:flex;align-items:center;gap:0.5rem;width:100%' }, [fields, removeBtn]),
+      details,
+    ]);
     container.appendChild(item);
 
     renderTriToggleInline(triEl, cat.drops_only);
+    (cat.campaign_reminders || []).forEach((v) => addTag(remindersList, v));
+    if ((cat.campaign_reminders || []).length > 0) {
+      expandBtn.classList.add('open');
+      details.classList.add('open');
+    }
+
+    makeReorderable(remindersList, '.tag', markDirty);
   }
 
   function renderTriToggleInline(container, value) {
@@ -534,10 +852,12 @@
     const container = document.getElementById('cfg-tw-teams');
     container.textContent = '';
     teams.forEach((t) => addTeamItem(container, t));
+    makeReorderable(container, '.dynamic-item', markDirty);
   }
 
   function addTeamItem(container, team) {
     team = team || {};
+    const handle = dragHandle();
     const input = el('input', {
       type: 'text', className: 'form-input input-sm team-name',
       placeholder: 'team-name', value: team.name || '', oninput: markDirty,
@@ -546,7 +866,7 @@
       type: 'button', className: 'item-remove', title: 'Remove',
       onclick: function () { this.closest('.dynamic-item').remove(); markDirty(); },
     }, '\u00d7');
-    const fields = el('div', { className: 'item-fields' }, [input]);
+    const fields = el('div', { className: 'item-fields' }, [handle, input]);
     const item = el('div', { className: 'dynamic-item' }, [fields, removeBtn]);
     container.appendChild(item);
   }
@@ -555,13 +875,26 @@
     const container = document.getElementById('cfg-streamers');
     container.textContent = '';
     streamers.forEach((s) => addStreamerItem(container, s));
+    makeReorderable(container, '.dynamic-item', () => { updateStreamerCount(); markDirty(); });
   }
+
+  const STREAMER_BEHAVIOR_FIELDS = [
+    ['make_predictions', 'Make Predictions', 's-predictions'],
+    ['follow_raid', 'Follow Raid', 's-follow-raid'],
+    ['claim_drops', 'Claim Drops', 's-claim-drops'],
+    ['claim_moments', 'Claim Moments', 's-claim-moments'],
+    ['watch_streak', 'Watch Streak', 's-watch-streak'],
+    ['community_goals', 'Community Goals', 's-community-goals'],
+  ];
 
   function addStreamerItem(container, streamer) {
     streamer = streamer || {};
     const settings = streamer.settings || {};
+    const bet = settings.bet || {};
+    const filter = bet.filter_condition || {};
 
-    const expandBtn = el('button', { type: 'button', className: 'item-expand', title: 'Toggle settings' }, '\u25b6');
+    const handle = dragHandle();
+    const expandBtn = el('button', { type: 'button', className: 'item-expand', title: 'Toggle per-streamer overrides' }, '\u25b6');
     const usernameInput = el('input', {
       type: 'text', className: 'form-input input-sm streamer-username',
       placeholder: 'username', value: streamer.username || '', oninput: markDirty,
@@ -571,10 +904,13 @@
       onclick: function () { this.closest('.dynamic-item').remove(); updateStreamerCount(); markDirty(); },
     }, '\u00d7');
 
-    const topRow = el('div', { style: 'display:flex;align-items:center;gap:0.5rem;width:100%' }, [expandBtn, usernameInput, removeBtn]);
+    const topRow = el('div', { style: 'display:flex;align-items:center;gap:0.5rem;width:100%' }, [handle, expandBtn, usernameInput, removeBtn]);
 
-    // Per-streamer settings
-    const predTriToggle = el('select', { className: 'tri-select s-predictions' });
+    const behaviorFields = STREAMER_BEHAVIOR_FIELDS.map(([key, label, cls]) => {
+      const select = el('select', { className: 'tri-select ' + cls });
+      return { key, label, select };
+    });
+
     const chatSelect = el('select', { className: 'form-input input-sm s-chat' });
     [['', '— default —'], ['ALWAYS', 'ALWAYS'], ['NEVER', 'NEVER'], ['ONLINE', 'ONLINE'], ['OFFLINE', 'OFFLINE']].forEach(([val, text]) => {
       const opt = el('option', { value: val }, text);
@@ -582,37 +918,94 @@
       chatSelect.appendChild(opt);
     });
 
+    const behaviorGrid = el('div', { className: 'form-grid', style: 'margin-top:0.5rem' }, [
+      ...behaviorFields.map(({ label, select }) =>
+        el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, label), select])
+      ),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Chat'), chatSelect]),
+    ]);
+
     const betStrategySelect = el('select', { className: 'form-input input-sm s-bet-strategy' });
     betStrategySelect.appendChild(el('option', { value: '' }, '— default —'));
     schema.strategies.forEach((s) => {
       const opt = el('option', { value: s }, s);
-      if (settings.bet?.strategy === s) opt.selected = true;
+      if (bet.strategy === s) opt.selected = true;
       betStrategySelect.appendChild(opt);
     });
 
-    const betMaxInput = el('input', {
-      type: 'number', className: 'form-input input-sm s-bet-max',
-      min: '0', value: settings.bet?.max_points ?? '',
+    const betPercentageInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-percentage', min: '1', max: '100', value: bet.percentage ?? '' });
+    const betGapInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-gap', min: '0', max: '100', value: bet.percentage_gap ?? '' });
+    const betMaxInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-max', min: '0', value: bet.max_points ?? '' });
+    const betMinInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-min', min: '0', value: bet.minimum_points ?? '' });
+    const betStealthSelect = el('select', { className: 'tri-select s-bet-stealth' });
+    const betDelayInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-delay', min: '0', step: '0.5', value: bet.delay ?? '' });
+
+    const betDelayModeSelect = el('select', { className: 'form-input input-sm s-bet-delay-mode' });
+    [['', '— default —'], ['FROM_START', 'FROM_START'], ['FROM_END', 'FROM_END'], ['PERCENTAGE', 'PERCENTAGE']].forEach(([val, text]) => {
+      const opt = el('option', { value: val }, text);
+      if (bet.delay_mode === val) opt.selected = true;
+      betDelayModeSelect.appendChild(opt);
     });
 
-    const detailGrid = el('div', { className: 'form-grid', style: 'margin-top:0.5rem' }, [
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Make Predictions'), predTriToggle]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Chat'), chatSelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Bet Strategy'), betStrategySelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Bet Max Points'), betMaxInput]),
+    const betFilterBySelect = el('select', { className: 'form-input input-sm s-bet-filter-by' });
+    betFilterBySelect.appendChild(el('option', { value: '' }, '— none —'));
+    schema.filter_by.forEach((v) => {
+      const opt = el('option', { value: v }, v);
+      if (filter.by === v) opt.selected = true;
+      betFilterBySelect.appendChild(opt);
+    });
+
+    const betFilterWhereSelect = el('select', { className: 'form-input input-sm s-bet-filter-where' });
+    betFilterWhereSelect.appendChild(el('option', { value: '' }, '— none —'));
+    schema.filter_where.forEach((v) => {
+      const opt = el('option', { value: v }, v);
+      if (filter.where === v) opt.selected = true;
+      betFilterWhereSelect.appendChild(opt);
+    });
+
+    const betFilterValueInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-filter-value', value: filter.value ?? '' });
+
+    const betGrid = el('div', { className: 'form-grid' }, [
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Strategy'), betStrategySelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Percentage'), betPercentageInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Percentage Gap'), betGapInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Max Points'), betMaxInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Minimum Points'), betMinInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Stealth Mode'), betStealthSelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Delay (s)'), betDelayInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Delay Mode'), betDelayModeSelect]),
     ]);
 
-    const details = el('div', { className: 'item-details' }, [detailGrid]);
+    const betFilterGrid = el('div', { className: 'form-grid' }, [
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter By'), betFilterBySelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter Where'), betFilterWhereSelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter Value'), betFilterValueInput]),
+    ]);
 
-    expandBtn.onclick = () => {
+    const betSubsection = el('div', { className: 'subsection', style: 'margin-top:0.75rem' }, [
+      el('h5', { className: 'subsection-title-sm' }, 'Bet Override'),
+      betGrid,
+      el('h5', { className: 'subsection-title-sm' }, 'Filter Condition'),
+      betFilterGrid,
+    ]);
+
+    const details = el('div', { className: 'item-details' }, [behaviorGrid, betSubsection]);
+
+    expandBtn.addEventListener('click', () => {
       expandBtn.classList.toggle('open');
       details.classList.toggle('open');
-    };
+    });
 
     const item = el('div', { className: 'dynamic-item', style: 'flex-direction:column' }, [topRow, details]);
     container.appendChild(item);
 
-    renderTriToggleInline(predTriToggle, settings.make_predictions);
+    behaviorFields.forEach(({ key, select }) => renderTriToggleInline(select, settings[key]));
+    renderTriToggleInline(betStealthSelect, bet.stealth_mode);
+
+    if (Object.keys(settings).length > 0) {
+      expandBtn.classList.add('open');
+      details.classList.add('open');
+    }
   }
 
   function updateStreamerCount() {
@@ -642,18 +1035,12 @@
         el('div', { className: 'toggle-wrap' }, [enabledInput, enabledLabel]),
       ]);
 
-      const eventsContainer = el('div', { className: 'chip-select prov-events' });
-      schema.notification_events.forEach((evt) => {
-        const chip = el('span', {
-          className: 'chip' + ((pConfig.events || []).includes(evt) ? ' selected' : ''),
-          dataset: { value: evt },
-          onclick: function () { this.classList.toggle('selected'); markDirty(); },
-        }, evt);
-        eventsContainer.appendChild(chip);
-      });
+      const eventsContainer = el('div', { className: 'prov-events' });
+      renderOrderedMultiSelect(eventsContainer, schema.notification_events, pConfig.events || []);
 
       const eventsField = el('div', { className: 'form-field' }, [
         el('label', {}, 'Events'),
+        el('span', { className: 'field-hint' }, 'Drag to reorder; click a value on the right to add.'),
         eventsContainer,
       ]);
 
@@ -689,6 +1076,43 @@
 
   // ─── Validation ───
 
+  // Matches Go's time.ParseDuration: sequences of <number><unit>, where unit is
+  // one of ns/us/µs/ms/s/m/h. Numbers can be integer or decimal.
+  const DURATION_UNIT = '(?:ns|us|µs|ms|s|m|h)';
+  const DURATION_RE = new RegExp('^(?:\\d+(?:\\.\\d+)?' + DURATION_UNIT + ')+$');
+  // Campaign reminders additionally support "d" (days) and the literal "on_detection".
+  const REMINDER_DURATION_RE = /^(?:\d+(?:\.\d+)?d)$|^(?:\d+(?:\.\d+)?(?:ns|us|µs|ms|s|m|h))+$/;
+
+  function isValidDuration(s) {
+    if (typeof s !== 'string') return false;
+    return DURATION_RE.test(s.trim());
+  }
+
+  function isValidReminderValue(s) {
+    if (typeof s !== 'string') return false;
+    const t = s.trim();
+    if (t === 'on_detection') return true;
+    return REMINDER_DURATION_RE.test(t);
+  }
+
+  function validateDurationInput(inputEl) {
+    const v = (inputEl.value || '').trim();
+    if (!v) { inputEl.classList.remove('invalid'); return true; }
+    const ok = isValidDuration(v);
+    inputEl.classList.toggle('invalid', !ok);
+    return ok;
+  }
+
+  function setupDurationValidation() {
+    const ids = ['cfg-cw-interval', 'cfg-tw-interval', 'cfg-batch-interval'];
+    ids.forEach((id) => {
+      const input = document.getElementById(id);
+      if (!input) return;
+      input.addEventListener('input', () => validateDurationInput(input));
+      input.addEventListener('blur', () => validateDurationInput(input));
+    });
+  }
+
   function validateForm(config) {
     const errors = [];
     const maxWatch = config.max_watch_streams;
@@ -720,7 +1144,25 @@
       errors.push('Predictions enabled but no bet settings configured');
     }
 
+    validateDurationField(config.category_watcher?.poll_interval, 'Category watcher poll_interval', errors);
+    validateDurationField(config.team_watcher?.poll_interval, 'Team watcher poll_interval', errors);
+    validateDurationField(config.notifications?.batch?.interval, 'Global batch interval', errors);
+
+    (config.category_watcher?.campaign_reminders || []).forEach((v, i) => {
+      if (!isValidReminderValue(v)) errors.push('Campaign reminder #' + (i + 1) + ' "' + v + '" is invalid (use e.g. 15m, 3d, or on_detection)');
+    });
+    (config.category_watcher?.categories || []).forEach((cat, ci) => {
+      (cat.campaign_reminders || []).forEach((v, i) => {
+        if (!isValidReminderValue(v)) errors.push('Category "' + cat.slug + '" reminder #' + (i + 1) + ' "' + v + '" is invalid');
+      });
+    });
+
     return errors;
+  }
+
+  function validateDurationField(value, label, errors) {
+    if (value === undefined || value === null || value === '') return;
+    if (!isValidDuration(value)) errors.push(label + ' "' + value + '" is not a valid duration (e.g. 120s, 15m, 1h30m)');
   }
 
   // ─── Utilities ───
@@ -873,14 +1315,19 @@
     document.querySelectorAll('[data-add-tag]').forEach((btn) => {
       const targetId = btn.dataset.addTag;
       const inputId = targetId + '-input';
+      const input = document.getElementById(inputId);
+      const target = document.getElementById(targetId);
+      if (!input || !target) {
+        console.warn('tag-add wiring: missing input#' + inputId + ' or target#' + targetId);
+        return;
+      }
       btn.onclick = () => {
-        const input = document.getElementById(inputId);
         const val = input.value.trim();
         if (!val) return;
-        addTag(document.getElementById(targetId), val);
+        addTag(target, val);
         input.value = '';
       };
-      document.getElementById(inputId).onkeydown = (e) => {
+      input.onkeydown = (e) => {
         if (e.key === 'Enter') { e.preventDefault(); btn.click(); }
       };
     });
@@ -891,6 +1338,8 @@
     window.onbeforeunload = (e) => {
       if (isDirty) { e.preventDefault(); return ''; }
     };
+
+    setupDurationValidation();
   }
 
   // ─── Init ───
