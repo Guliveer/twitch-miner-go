@@ -15,6 +15,11 @@ func makeOnlineStreamer(username string) *model.Streamer {
 	return s
 }
 
+func withCampaigns(s *model.Streamer) *model.Streamer {
+	s.Stream.Campaigns = []model.Campaign{{ID: "c1"}}
+	return s
+}
+
 func TestSelectStreamersToWatchPreservesPriorityOrder(t *testing.T) {
 	t.Parallel()
 
@@ -33,6 +38,42 @@ func TestSelectStreamersToWatchPreservesPriorityOrder(t *testing.T) {
 	}
 	if selected[0].Username != "first" || selected[1].Username != "second" {
 		t.Fatalf("expected stable order [first second], got [%s %s]", selected[0].Username, selected[1].Username)
+	}
+}
+
+func TestSelectStreamersToWatch_DropsOnly_SkippedWhenNoCampaigns(t *testing.T) {
+	t.Parallel()
+
+	done := makeOnlineStreamer("done")
+	done.Settings.DropsOnly = true
+
+	other := makeOnlineStreamer("other")
+
+	selected := SelectStreamersToWatch(
+		[]*model.Streamer{done, other},
+		[]model.Priority{model.PriorityOrder},
+		2,
+	)
+
+	if len(selected) != 1 || selected[0].Username != "other" {
+		t.Fatalf("expected only 'other', got %v", selected)
+	}
+}
+
+func TestSelectStreamersToWatch_DropsOnly_IncludedWhenHasCampaigns(t *testing.T) {
+	t.Parallel()
+
+	active := withCampaigns(makeOnlineStreamer("active"))
+	active.Settings.DropsOnly = true
+
+	selected := SelectStreamersToWatch(
+		[]*model.Streamer{active},
+		[]model.Priority{model.PriorityOrder},
+		1,
+	)
+
+	if len(selected) != 1 {
+		t.Fatalf("expected 1 selected streamer, got %d", len(selected))
 	}
 }
 

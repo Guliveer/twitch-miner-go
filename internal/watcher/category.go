@@ -280,6 +280,7 @@ func (cw *CategoryWatcher) evaluate(
 			defaults.Bet = &betCopy
 		}
 		defaults.FollowRaid = false
+		defaults.DropsOnly = dropsOnly
 		streamer.Settings = &defaults
 
 		cw.mu.Lock()

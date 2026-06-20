@@ -49,6 +49,7 @@ streamer_defaults:
   claim_moments: true
   watch_streak: true
   community_goals: false
+  drops_only: false # skip streamer when all active drop campaigns are completed
   chat: "ONLINE" # ALWAYS | NEVER | ONLINE | OFFLINE
   bet:
     strategy: "SMART" # MOST_VOTED | HIGH_ODDS | PERCENTAGE | SMART_MONEY | SMART | NUMBER_1..8

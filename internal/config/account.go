@@ -86,6 +86,7 @@ type StreamerSettingsConfig struct {
 	ClaimMoments    *bool              `yaml:"claim_moments,omitempty"`
 	WatchStreak     *bool              `yaml:"watch_streak,omitempty"`
 	CommunityGoals  *bool              `yaml:"community_goals,omitempty"`
+	DropsOnly       *bool              `yaml:"drops_only,omitempty"`
 	Chat            string             `yaml:"chat,omitempty"`
 	Bet             *BetSettingsConfig `yaml:"bet,omitempty"`
 }
@@ -268,6 +269,9 @@ func (ssc *StreamerSettingsConfig) ToStreamerSettings(defaults *model.StreamerSe
 	}
 	if ssc.CommunityGoals != nil {
 		settings.CommunityGoalsEnabled = *ssc.CommunityGoals
+	}
+	if ssc.DropsOnly != nil {
+		settings.DropsOnly = *ssc.DropsOnly
 	}
 	if ssc.Chat != "" {
 		settings.Chat = model.ParseChatPresence(ssc.Chat)

@@ -270,11 +270,16 @@ func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Prio
 	var onlineIndices []int
 	for i, s := range streamers {
 		s.Mu.RLock()
-		isOnline := s.IsOnline
-		onlineAt := s.OnlineAt
+		isOnline     := s.IsOnline
+		onlineAt     := s.OnlineAt
+		dropsOnly    := s.Settings != nil && s.Settings.DropsOnly
+		hasCampaigns := len(s.Stream.Campaigns) > 0
 		s.Mu.RUnlock()
 
 		if isOnline && (onlineAt.IsZero() || now.Sub(onlineAt) > 30*time.Second) {
+			if dropsOnly && !hasCampaigns {
+				continue
+			}
 			onlineIndices = append(onlineIndices, i)
 		}
 	}

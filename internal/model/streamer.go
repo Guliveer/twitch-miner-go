@@ -238,6 +238,7 @@ type StreamerSettings struct {
 	ClaimMoments          bool         `json:"claim_moments" yaml:"claim_moments"`
 	WatchStreak           bool         `json:"watch_streak" yaml:"watch_streak"`
 	CommunityGoalsEnabled bool         `json:"community_goals" yaml:"community_goals"`
+	DropsOnly             bool         `json:"drops_only" yaml:"drops_only"`
 	Bet                   *BetSettings `json:"bet,omitempty" yaml:"bet"`
 	Chat                  ChatPresence `json:"chat" yaml:"chat"`
 }
