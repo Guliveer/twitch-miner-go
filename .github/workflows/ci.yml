@@ -288,16 +288,24 @@ jobs:
             "windows/amd64"
             "windows/arm64"
           )
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          LDFLAGS="-s -w -X github.com/Guliveer/twitch-miner-go/internal/version.Number=${NEW_VERSION} -X github.com/Guliveer/twitch-miner-go/internal/version.GitCommit=${GIT_COMMIT}"
+
           for target in "${targets[@]}"; do
             GOOS="${target%/*}"
             GOARCH="${target#*/}"
-            out="dist/twitch-miner-go-${GOOS}-${GOARCH}"
-            [ "$GOOS" = "windows" ] && out="${out}.exe"
+            ext=""
+            [ "$GOOS" = "windows" ] && ext=".exe"
+
             GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=0 go build \
-              -ldflags "-s -w \
-                -X github.com/Guliveer/twitch-miner-go/internal/version.Number=${NEW_VERSION} \
-                -X github.com/Guliveer/twitch-miner-go/internal/version.GitCommit=$(git rev-parse --short HEAD)" \
-              -o "$out" ./cmd/twitch-miner-go
+              -ldflags "$LDFLAGS" \
+              -o "dist/twitch-miner-go-${GOOS}-${GOARCH}${ext}" \
+              ./cmd/twitch-miner-go
+
+            GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=0 go build \
+              -ldflags "$LDFLAGS" \
+              -o "dist/config-editor-${GOOS}-${GOARCH}${ext}" \
+              ./cmd/config-editor
           done
 
       - name: Create GitHub Release

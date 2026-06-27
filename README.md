@@ -134,7 +134,7 @@ cp configs/example.yaml.example configs/your_twitch_username.yaml
 
 See [`configs/example.yaml.example`](configs/example.yaml.example) for the full schema. Files with a `.yaml.example` extension are not loaded as configs — only `.yaml` and `.yml` files are loaded.
 
-> **Prefer a GUI?** Run `edit-config.bat` (Windows) or `./edit-config.sh` (Linux/macOS) to open a visual config editor in your browser. Requires [Node.js](https://nodejs.org/). See [Config Editor](#config-editor) below for details.
+> **Prefer a GUI?** Run `edit-config.bat` (Windows) or `./edit-config.sh` (Linux/macOS) to open a visual config editor in your browser. No additional runtimes required — the editor is a self-contained Go binary. See [Config Editor](#config-editor) below for details.
 
 > **After cloning:** The repository may contain personal account configs (e.g. `guliveer_.yaml`). Delete them and create your own from the example template — these configs are specific to the maintainer's accounts and will not work for you.
 
@@ -191,7 +191,10 @@ followers:
 
 ### Config Editor
 
-A browser-based GUI for creating, editing, and deleting account configs. Runs as a lightweight local Node.js server — no changes to the miner binary required.
+A self-contained Go binary for creating, editing, and deleting account configs. Supports two modes:
+
+- **Web GUI** (default) — opens a browser-based editor at `http://localhost:3000`
+- **TUI** — interactive terminal forms, no browser required
 
 **Quick start:**
 
@@ -203,16 +206,24 @@ edit-config.bat
 ./edit-config.sh
 ```
 
-The editor opens automatically in your browser at `http://localhost:3000`. It reads and writes YAML files directly in `configs/`.
-
-**Requirements:** [Node.js](https://nodejs.org/) (v18+). Dependencies are installed automatically on first run.
+The script builds the binary on first run (requires Go), then launches it. The web editor opens automatically in your browser and reads/writes YAML files directly in `configs/`.
 
 **Options:**
 
 | Flag | Default | Description |
 | --- | --- | --- |
-| `--port`, `-p` | `3000` | Port for the editor server |
-| `--config`, `-c` | `configs/` | Path to the config directory |
+| `--config` | `configs/` | Path to the config directory |
+| `--port` | `3000` | Port for the web server |
+| `--tui` | _(off)_ | Launch TUI mode instead of the web server |
+| `--no-browser` | _(off)_ | Web mode: don't auto-open the browser |
+
+**TUI mode** provides an interactive terminal interface — useful in headless environments or when a browser isn't available:
+
+```bash
+./edit-config.sh --tui
+# or
+config-editor --tui --config /path/to/configs
+```
 
 > **Note:** The editor only saves files — the miner must be restarted to pick up changes.
 

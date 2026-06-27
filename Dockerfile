@@ -13,7 +13,7 @@ RUN go mod download
 COPY . .
 ARG VERSION=dev
 ARG GIT_COMMIT=unknown
-RUN CGO_ENABLED=0 GOOS=linux go build \
+RUN CGO_ENABLED=0 go build \
     -ldflags="-s -w -X github.com/Guliveer/twitch-miner-go/internal/version.Number=${VERSION} -X github.com/Guliveer/twitch-miner-go/internal/version.GitCommit=${GIT_COMMIT}" \
     -o /twitch-miner-go ./cmd/twitch-miner-go
 

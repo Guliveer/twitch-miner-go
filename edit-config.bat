@@ -1,25 +1,24 @@
 @echo off
 setlocal
 
-REM Open the Config Editor GUI in browser
-REM Usage: edit-config.bat [--port PORT] [--config DIR]
+REM Open the Config Editor
+REM Usage: edit-config.bat [--config DIR] [--port PORT] [--tui] [--no-browser]
 
-cd /d "%~dp0\tools\config-editor"
+set "SCRIPT_DIR=%~dp0"
+set "BINARY=%SCRIPT_DIR%config-editor.exe"
 
-where node >nul 2>&1
-if %errorlevel% neq 0 (
-    echo Node.js is required but not installed.
-    echo Download it from https://nodejs.org/
-    pause
-    exit /b 1
+if not exist "%BINARY%" (
+    echo Building config-editor...
+    cd /d "%SCRIPT_DIR%"
+    go build -o config-editor.exe ./cmd/config-editor
+    if %errorlevel% neq 0 (
+        echo Build failed.
+        pause
+        exit /b 1
+    )
 )
 
-if not exist "node_modules" (
-    echo Installing dependencies...
-    npm install --silent
-)
-
-node server.js %*
+"%BINARY%" %*
 
 echo.
 echo Config editor exited with code %errorlevel%.
