@@ -22,6 +22,9 @@ cookies/**
 *.json
 !configs/*.yaml
 !configs/*.yaml.example
+!graphify-out/graph.json
+!graphify-out/manifest.json
+graphify-out/graph.html
 
 # Logs
 *.log

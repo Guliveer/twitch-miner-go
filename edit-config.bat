@@ -7,15 +7,13 @@ REM Usage: edit-config.bat [--config DIR] [--port PORT] [--tui] [--no-browser]
 set "SCRIPT_DIR=%~dp0"
 set "BINARY=%SCRIPT_DIR%config-editor.exe"
 
-if not exist "%BINARY%" (
-    echo Building config-editor...
-    cd /d "%SCRIPT_DIR%"
-    go build -o config-editor.exe ./cmd/config-editor
-    if %errorlevel% neq 0 (
-        echo Build failed.
-        pause
-        exit /b 1
-    )
+echo Building config-editor...
+cd /d "%SCRIPT_DIR%"
+go build -o config-editor.exe ./cmd/config-editor
+if %errorlevel% neq 0 (
+    echo Build failed.
+    pause
+    exit /b 1
 )
 
 "%BINARY%" %*
