@@ -76,8 +76,8 @@ npx js-yaml configs/your_user.yaml
 
 Or use the visual config editor:
 ```bash
-./edit-config.sh   # Linux/macOS
-edit-config.bat    # Windows
+./_edit-config.sh   # Linux/macOS
+_edit-config.bat    # Windows
 ```
 
 ---

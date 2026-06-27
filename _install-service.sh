@@ -6,6 +6,11 @@ set -euo pipefail
 # Usage: sudo ./install-service.sh
 # ─────────────────────────────────────────────────
 
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Root privileges required. Re-launching with sudo..."
+  exec sudo "$0" "$@"
+fi
+
 readonly DEFAULT_SERVICE_NAME="twitch-miner-go"
 readonly DEFAULT_INSTALL_DIR="/usr/local/bin"
 readonly DEFAULT_CONFIG_DIR="/etc/${DEFAULT_SERVICE_NAME}/configs"
@@ -127,7 +132,7 @@ resolve_binary() {
         fi
     fi
 
-    error "Cannot find twitch-miner-go binary. Build it first with ./run.sh or place it next to this script."
+    error "Cannot find twitch-miner-go binary. Build it first with ./_run.sh or place it next to this script."
     exit 1
 }
 

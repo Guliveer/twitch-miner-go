@@ -27,7 +27,7 @@ body:
     attributes:
       label: Deployment method
       options:
-        - Local binary (run.sh / run.bat)
+        - Local binary (_run.sh / _run.bat)
         - Docker / Docker Compose
         - Linux service (systemd / OpenRC)
         - Windows service (NSSM)

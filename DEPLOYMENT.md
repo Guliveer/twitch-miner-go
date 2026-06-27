@@ -37,10 +37,10 @@ The installer auto-detects the init system — systemd (most distros) or OpenRC 
 # 1. Clone and build
 git clone https://github.com/Guliveer/twitch-miner-go.git
 cd twitch-miner-go
-./run.sh  # builds the binary (Ctrl+C to stop after build)
+./_run.sh  # builds the binary (Ctrl+C to stop after build)
 
 # 2. Run the interactive installer
-sudo ./install-service.sh install
+sudo ./_install-service.sh install
 ```
 
 The wizard will ask for service name, paths, port, user, and optionally enable + start the service.
@@ -49,7 +49,7 @@ The wizard will ask for service name, paths, port, user, and optionally enable +
 
 ```bash
 # Check status and recent logs (works with both init systems)
-sudo ./install-service.sh status
+sudo ./_install-service.sh status
 
 # systemd
 systemctl status twitch-miner-go
@@ -65,7 +65,7 @@ tail -f /var/log/twitch-miner-go.log
 ### Uninstalling
 
 ```bash
-sudo ./install-service.sh uninstall
+sudo ./_install-service.sh uninstall
 ```
 
 This stops and removes the service unit/init script. Binary, configs, and data are preserved — remove them manually if needed.
@@ -89,8 +89,8 @@ This stops and removes the service unit/init script. Binary, configs, and data a
 ### Quick Start
 
 ```bat
-REM Right-click install-service.bat and select "Run as administrator"
-install-service.bat install
+REM Right-click _install-service.bat and select "Run as administrator"
+_install-service.bat install
 ```
 
 The wizard will ask for config directory, port, and log level. [NSSM](https://nssm.cc/) (Non-Sucking Service Manager) is auto-downloaded if not already installed.
@@ -107,16 +107,16 @@ This ensures config changes and code updates are always picked up without manual
 ### Managing the Service
 
 ```bat
-install-service.bat start       REM starts (triggers a rebuild first)
-install-service.bat stop
-install-service.bat restart     REM restart with a fresh rebuild
-install-service.bat status
+_install-service.bat start       REM starts (triggers a rebuild first)
+_install-service.bat stop
+_install-service.bat restart     REM restart with a fresh rebuild
+_install-service.bat status
 ```
 
 ### Uninstalling
 
 ```bat
-install-service.bat uninstall
+_install-service.bat uninstall
 ```
 
 This stops and removes the Windows service. The binary, configs, and logs are preserved — remove them manually if needed.

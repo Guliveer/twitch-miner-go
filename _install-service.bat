@@ -10,6 +10,13 @@ REM  Usage: install-service.bat [install|uninstall|start|stop|restart|status]
 REM  Requires: Administrator privileges, Go toolchain
 REM ================================================================
 
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Administrator privileges required. Re-launching with UAC prompt...
+    powershell -NoProfile -Command "Start-Process cmd -ArgumentList '/c \"%~f0\" %*' -Verb RunAs"
+    exit /b 0
+)
+
 set SERVICE_NAME=twitch-miner-go
 set SCRIPT_DIR=%~dp0
 if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
@@ -145,7 +152,7 @@ if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 > "%WRAPPER_SCRIPT%" echo @echo off
 >> "%WRAPPER_SCRIPT%" echo setlocal
 >> "%WRAPPER_SCRIPT%" echo cd /d "%SCRIPT_DIR%"
->> "%WRAPPER_SCRIPT%" echo call run.bat -config "!SVC_CONFIG!" -port !SVC_PORT! -log-level !SVC_LOG_LEVEL!
+>> "%WRAPPER_SCRIPT%" echo call _run.bat -config "!SVC_CONFIG!" -port !SVC_PORT! -log-level !SVC_LOG_LEVEL!
 
 REM -- Install via NSSM --------------------------------------------
 echo [+] Installing service via NSSM...
