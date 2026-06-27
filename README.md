@@ -88,7 +88,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 
 ## 1.4. Running Locally
 
-**Prerequisites:** [Go 1.24+](https://go.dev/dl/)
+**Prerequisites:** [Go 1.25+](https://go.dev/dl/)
 
 **Unix (macOS/Linux):**
 

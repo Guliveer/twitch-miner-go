@@ -4,7 +4,7 @@ This page walks you from a fresh clone to a running miner in under 5 minutes.
 
 ## Prerequisites
 
-- [Go 1.24+](https://go.dev/dl/) — required for local builds
+- [Go 1.25+](https://go.dev/dl/) — required for local builds
 - A Twitch account
 - Twitch runtime identifiers (see [Authentication](Authentication) and [How to obtain Twitch runtime identifiers](https://github.com/Guliveer/twitch-miner-go#how-to-obtain-twitch-runtime-identifiers))
 

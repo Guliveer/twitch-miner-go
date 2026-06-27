@@ -21,7 +21,7 @@
       "Bash(graphify query *)",
       "Bash(graphify path *)"
     ]
-  }
+  },
   "hooks": {
     "PreToolUse": [
       {
