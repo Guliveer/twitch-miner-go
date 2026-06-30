@@ -6,9 +6,11 @@ CREATE TABLE IF NOT EXISTS accounts (
     updated_at      BIGINT NOT NULL
 );
 
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION accounts_notify() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN PERFORM pg_notify('accounts_changed', ''); RETURN NULL; END;
 $$;
+-- +goose StatementEnd
 
 DROP TRIGGER IF EXISTS accounts_changed_trigger ON accounts;
 CREATE TRIGGER accounts_changed_trigger
