@@ -18,6 +18,7 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/constants"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
 	"github.com/Guliveer/twitch-miner-go/internal/model"
+	"github.com/Guliveer/twitch-miner-go/internal/store"
 	"github.com/Guliveer/twitch-miner-go/internal/utils"
 )
 
@@ -51,7 +52,9 @@ type AnalyticsServer struct {
 	streamerFunc   StreamerFunc
 	notifyTestFunc NotifyTestFunc
 	debugFunc      DebugSnapshotFunc
+	accountStore   store.Store
 }
+
 
 // NewAnalyticsServer creates a new AnalyticsServer bound to the given address.
 // If auth is non-nil, all endpoints (except /health and /static) require
@@ -76,6 +79,11 @@ func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth) *A
 	mux.HandleFunc("GET /api/debug", s.handleDebug)
 
 	mux.HandleFunc("POST /api/test-notification", s.handleTestNotification)
+
+	mux.HandleFunc("GET /api/accounts", s.handleListAccounts)
+	mux.HandleFunc("POST /api/accounts", s.handleCreateAccount)
+	mux.HandleFunc("PUT /api/accounts/{username}", s.handleUpdateAccount)
+	mux.HandleFunc("DELETE /api/accounts/{username}", s.handleDeleteAccount)
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(staticFS)))
 
 	// pprof endpoints for remote memory profiling

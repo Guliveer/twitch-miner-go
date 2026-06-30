@@ -1,0 +1,157 @@
+package server
+
+import (
+	"encoding/json"
+	"net/http"
+	"time"
+
+	"github.com/Guliveer/twitch-miner-go/internal/config"
+	"github.com/Guliveer/twitch-miner-go/internal/store"
+)
+
+// SetAccountStore wires up the accounts REST API. When st is nil, the endpoints
+// respond 501 Not Implemented (DB mode not enabled).
+func (s *AnalyticsServer) SetAccountStore(st store.Store) {
+	s.mu.Lock()
+	s.accountStore = st
+	s.mu.Unlock()
+}
+
+// handleListAccounts GET /api/accounts
+func (s *AnalyticsServer) handleListAccounts(w http.ResponseWriter, r *http.Request) {
+	st := s.getAccountStore()
+	if st == nil {
+		http.Error(w, "DB mode not enabled", http.StatusNotImplemented)
+		return
+	}
+	rows, err := st.ListAccounts()
+	if err != nil {
+		http.Error(w, "failed to list accounts: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	type accountSummary struct {
+		Username  string    `json:"username"`
+		Enabled   bool      `json:"enabled"`
+		UpdatedAt time.Time `json:"updated_at"`
+	}
+	out := make([]accountSummary, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, accountSummary{row.Username, row.Enabled, row.UpdatedAt})
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+
+// handleCreateAccount POST /api/accounts
+func (s *AnalyticsServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
+	st := s.getAccountStore()
+	if st == nil {
+		http.Error(w, "DB mode not enabled", http.StatusNotImplemented)
+		return
+	}
+
+	var cfg config.AccountConfig
+	if err := json.NewDecoder(r.Body).Decode(&cfg); err != nil {
+		http.Error(w, "invalid JSON: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	if cfg.Username == "" {
+		http.Error(w, "username is required", http.StatusBadRequest)
+		return
+	}
+	if err := config.Validate(&cfg); err != nil {
+		http.Error(w, "invalid config: "+err.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+
+	blob, err := config.AccountConfigToJSON(&cfg)
+	if err != nil {
+		http.Error(w, "serialisation error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	row := store.AccountRow{
+		Username:   cfg.Username,
+		ConfigJSON: blob,
+		Enabled:    cfg.IsEnabled(),
+		UpdatedAt:  time.Now(),
+	}
+	if err := st.UpsertAccount(row); err != nil {
+		http.Error(w, "failed to save account: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+// handleUpdateAccount PUT /api/accounts/{username}
+func (s *AnalyticsServer) handleUpdateAccount(w http.ResponseWriter, r *http.Request) {
+	st := s.getAccountStore()
+	if st == nil {
+		http.Error(w, "DB mode not enabled", http.StatusNotImplemented)
+		return
+	}
+
+	username := r.PathValue("username")
+	if username == "" {
+		http.Error(w, "username is required", http.StatusBadRequest)
+		return
+	}
+
+	var cfg config.AccountConfig
+	if err := json.NewDecoder(r.Body).Decode(&cfg); err != nil {
+		http.Error(w, "invalid JSON: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	cfg.Username = username
+
+	if err := config.Validate(&cfg); err != nil {
+		http.Error(w, "invalid config: "+err.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+
+	blob, err := config.AccountConfigToJSON(&cfg)
+	if err != nil {
+		http.Error(w, "serialisation error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	row := store.AccountRow{
+		Username:   cfg.Username,
+		ConfigJSON: blob,
+		Enabled:    cfg.IsEnabled(),
+		UpdatedAt:  time.Now(),
+	}
+	if err := st.UpsertAccount(row); err != nil {
+		http.Error(w, "failed to update account: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// handleDeleteAccount DELETE /api/accounts/{username}
+func (s *AnalyticsServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
+	st := s.getAccountStore()
+	if st == nil {
+		http.Error(w, "DB mode not enabled", http.StatusNotImplemented)
+		return
+	}
+
+	username := r.PathValue("username")
+	if username == "" {
+		http.Error(w, "username is required", http.StatusBadRequest)
+		return
+	}
+
+	if err := st.DeleteAccount(username); err != nil {
+		http.Error(w, "failed to delete account: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *AnalyticsServer) getAccountStore() store.Store {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.accountStore
+}

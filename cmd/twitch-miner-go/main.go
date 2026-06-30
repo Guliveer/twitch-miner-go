@@ -12,16 +12,17 @@ import (
 	"os"
 	"os/signal"
 	"strings"
-	"sync"
 	"syscall"
 	"time"
 
 	"github.com/Guliveer/twitch-miner-go/internal/config"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
+	"github.com/Guliveer/twitch-miner-go/internal/managedminer"
 	"github.com/Guliveer/twitch-miner-go/internal/miner"
 	"github.com/Guliveer/twitch-miner-go/internal/model"
 	"github.com/Guliveer/twitch-miner-go/internal/runtimecfg"
 	"github.com/Guliveer/twitch-miner-go/internal/server"
+	"github.com/Guliveer/twitch-miner-go/internal/store"
 	"github.com/Guliveer/twitch-miner-go/internal/updater"
 	"github.com/Guliveer/twitch-miner-go/internal/utils"
 	"github.com/Guliveer/twitch-miner-go/internal/version"
@@ -80,11 +81,6 @@ func playStartupAnimation(colored bool) {
 	} else {
 		fmt.Printf("%s\n\n", sep)
 	}
-}
-
-type minerEntry struct {
-	cfg   *config.AccountConfig
-	miner *miner.Miner
 }
 
 func main() {
@@ -165,9 +161,38 @@ func main() {
 		})
 	})
 
-	miners := buildMiners(configs, rootLog, twitchRuntime)
+	mgr := managedminer.NewManager(ctx, rootLog, twitchRuntime)
 
-	analyticsServer := setupAnalyticsServer(":"+httpPort, rootLog, miners)
+	dbEnabled := os.Getenv("DB_ENABLED") == "true"
+	var accountStore store.Store = store.NoopStore{}
+
+	if dbEnabled {
+		dsn := os.Getenv("DB_DSN")
+		if dsn == "" {
+			rootLog.Error("DB_ENABLED=true but DB_DSN is not set")
+			os.Exit(1)
+		}
+		pg, err := store.OpenPostgres(dsn)
+		if err != nil {
+			rootLog.Error("Failed to connect to database", "error", err)
+			os.Exit(1)
+		}
+		defer pg.Close()
+		accountStore = pg
+
+		pollInterval := resolvePollInterval()
+		poller := managedminer.NewPoller(pg, mgr, pollInterval, rootLog)
+		utils.SafeGo(func() { poller.Run(ctx) })
+		rootLog.Info("🗄️ DB mode active — account configs loaded from database", "poll_interval", pollInterval)
+	} else {
+		for _, cfg := range configs {
+			if cfg.IsEnabled() {
+				mgr.Start(cfg)
+			}
+		}
+	}
+
+	analyticsServer := setupAnalyticsServer(":"+httpPort, rootLog, mgr, accountStore)
 	utils.SafeGo(func() {
 		if err := analyticsServer.Run(ctx); err != nil && ctx.Err() == nil {
 			rootLog.Error("Analytics server failed", "error", err)
@@ -175,28 +200,9 @@ func main() {
 	})
 	rootLog.Info("🌐 Health/analytics server started", "addr", ":"+httpPort)
 
-	var wg sync.WaitGroup
-	for _, entry := range miners {
-		cfg := entry.cfg
-		minerInstance := entry.miner
-		accountLog := rootLog.WithAccount(cfg.Username)
-		wg.Add(1)
-		go func(m *miner.Miner) {
-			defer wg.Done()
-			if err := m.Run(ctx); err != nil {
-				if ctx.Err() != nil {
-					accountLog.Info("Miner stopped due to shutdown", "account", cfg.Username)
-				} else {
-					accountLog.Error("Miner failed", "account", cfg.Username, "error", err)
-				}
-			}
-		}(minerInstance)
-	}
-
-	wg.Wait()
-	if ctx.Err() != nil {
-		rootLog.Info("🛑 Shutdown complete")
-	}
+	<-ctx.Done()
+	mgr.StopAll()
+	rootLog.Info("🛑 Shutdown complete")
 	rootLog.Info("👋 All miners stopped. Goodbye!")
 }
 
@@ -217,20 +223,7 @@ func resolvePort(flag string) string {
 	return flag
 }
 
-func buildMiners(configs []*config.AccountConfig, rootLog *logger.Logger, twitchRuntime *runtimecfg.Twitch) []minerEntry {
-	miners := make([]minerEntry, 0, len(configs))
-	for _, cfg := range configs {
-		if !cfg.IsEnabled() {
-			rootLog.Info("Account is disabled, skipping", "account", cfg.Username)
-			continue
-		}
-		accountLog := rootLog.WithAccount(cfg.Username)
-		miners = append(miners, minerEntry{cfg: cfg, miner: miner.NewMiner(cfg, accountLog, twitchRuntime)})
-	}
-	return miners
-}
-
-func setupAnalyticsServer(addr string, rootLog *logger.Logger, miners []minerEntry) *server.AnalyticsServer {
+func setupAnalyticsServer(addr string, rootLog *logger.Logger, mgr *managedminer.Manager, accountStore store.Store) *server.AnalyticsServer {
 	var dashboardAuth *server.DashboardAuth
 	if user := os.Getenv("DASHBOARD_USER"); user != "" {
 		dashboardAuth = &server.DashboardAuth{
@@ -242,20 +235,21 @@ func setupAnalyticsServer(addr string, rootLog *logger.Logger, miners []minerEnt
 
 	srv.SetStreamerFunc(func() []*model.Streamer {
 		var all []*model.Streamer
-		for _, e := range miners {
-			all = append(all, e.miner.Streamers()...)
+		for _, e := range mgr.Entries() {
+			all = append(all, e.Miner.Streamers()...)
 		}
 		return all
 	})
 
 	srv.SetNotifyTestFunc(func(ctx context.Context) []error {
-		return testNotifiers(ctx, miners)
+		return testNotifiers(ctx, mgr)
 	})
 
 	srv.SetDebugFunc(func() any {
-		snapshots := make([]miner.DebugSnapshot, 0, len(miners))
-		for _, e := range miners {
-			snapshots = append(snapshots, e.miner.DebugSnapshot())
+		entries := mgr.Entries()
+		snapshots := make([]miner.DebugSnapshot, 0, len(entries))
+		for _, e := range entries {
+			snapshots = append(snapshots, e.Miner.DebugSnapshot())
 		}
 		return map[string]any{
 			"timestamp": time.Now().UTC().Format(time.RFC3339),
@@ -263,22 +257,25 @@ func setupAnalyticsServer(addr string, rootLog *logger.Logger, miners []minerEnt
 		}
 	})
 
+	srv.SetAccountStore(accountStore)
+
 	return srv
 }
 
-func testNotifiers(ctx context.Context, miners []minerEntry) []error {
+func testNotifiers(ctx context.Context, mgr *managedminer.Manager) []error {
+	entries := mgr.Entries()
 	var allErrs []error
-	for _, entry := range miners {
-		d := entry.miner.NotifyDispatcher()
+	for _, e := range entries {
+		d := e.Miner.NotifyDispatcher()
 		if d == nil || !d.HasNotifiers() {
 			continue
 		}
 		errs := d.TestAll(ctx, "Twitch Miner", "🔔 Test notification — if you see this, notifications are working!")
 		allErrs = append(allErrs, errs...)
 	}
-	if len(miners) > 0 && allErrs == nil {
-		for _, entry := range miners {
-			d := entry.miner.NotifyDispatcher()
+	if len(entries) > 0 && allErrs == nil {
+		for _, e := range entries {
+			d := e.Miner.NotifyDispatcher()
 			if d != nil && d.HasNotifiers() {
 				return nil
 			}
@@ -286,6 +283,15 @@ func testNotifiers(ctx context.Context, miners []minerEntry) []error {
 		return []error{fmt.Errorf("no notification providers configured in any miner")}
 	}
 	return allErrs
+}
+
+func resolvePollInterval() time.Duration {
+	if s := os.Getenv("DB_POLL_INTERVAL"); s != "" {
+		if d, err := time.ParseDuration(s); err == nil {
+			return d
+		}
+	}
+	return 30 * time.Second
 }
 
 func runAutoUpdate(rootLog *logger.Logger, autoUpdate bool) {
