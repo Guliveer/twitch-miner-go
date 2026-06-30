@@ -5,8 +5,10 @@ package store
 // Store interface without nil checks.
 type NoopStore struct{}
 
-func (NoopStore) ListAccounts() ([]AccountRow, error) { return nil, nil }
-func (NoopStore) UpsertAccount(AccountRow) error       { return nil }
-func (NoopStore) DeleteAccount(string) error           { return nil }
-func (NoopStore) Changes() <-chan struct{}              { return nil }
-func (NoopStore) Close() error                         { return nil }
+func (NoopStore) ListAccounts() ([]AccountRow, error)    { return nil, nil }
+func (NoopStore) GetAccount(string) (*AccountRow, error)  { return nil, nil }
+func (NoopStore) UpsertAccount(AccountRow) error          { return nil }
+func (NoopStore) DeleteAccount(string) error              { return nil }
+func (NoopStore) TouchLastStartedAt(string) error         { return nil }
+func (NoopStore) Changes() <-chan struct{}                 { return nil }
+func (NoopStore) Close() error                            { return nil }

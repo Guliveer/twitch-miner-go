@@ -34,19 +34,40 @@ type Manager struct {
 	mu      sync.RWMutex
 	entries map[string]*entry
 
-	parentCtx   context.Context
-	rootLog     *logger.Logger
-	twitchRT    *runtimecfg.Twitch
+	parentCtx context.Context
+	rootLog   *logger.Logger
+	twitchRT  *runtimecfg.Twitch
+
+	// launchFn starts the miner goroutine for an entry. Swappable in tests.
+	launchFn func(e *entry, ctx context.Context, log *logger.Logger)
+
+	suppressLifecycleNotify bool
+}
+
+// SetSuppressLifecycleNotify controls whether all miners started by this
+// Manager will suppress MINER_STARTED / MINER_STOPPED / MINER_CRASHED
+// notifications. Must be called before the first Start().
+func (m *Manager) SetSuppressLifecycleNotify(suppress bool) {
+	m.suppressLifecycleNotify = suppress
 }
 
 // NewManager creates a Manager. parentCtx is used as the base for all miner contexts.
 func NewManager(parentCtx context.Context, rootLog *logger.Logger, twitchRT *runtimecfg.Twitch) *Manager {
-	return &Manager{
-		entries:  make(map[string]*entry),
+	m := &Manager{
+		entries:   make(map[string]*entry),
 		parentCtx: parentCtx,
 		rootLog:   rootLog,
 		twitchRT:  twitchRT,
 	}
+	m.launchFn = func(e *entry, ctx context.Context, log *logger.Logger) {
+		go func() {
+			defer close(e.done)
+			if err := e.miner.Run(ctx); err != nil && ctx.Err() == nil {
+				log.Error("Miner failed", "account", e.cfg.Username, "error", err)
+			}
+		}()
+	}
+	return m
 }
 
 // Start creates and launches a miner for the given account config.
@@ -126,6 +147,7 @@ func (m *Manager) startLocked(cfg *config.AccountConfig) {
 	ctx, cancel := context.WithCancel(m.parentCtx)
 	accountLog := m.rootLog.WithAccount(cfg.Username)
 	minerInstance := miner.NewMiner(cfg, accountLog, m.twitchRT)
+	minerInstance.SetSuppressLifecycleNotify(m.suppressLifecycleNotify)
 
 	e := &entry{
 		cfg:    cfg,
@@ -134,11 +156,5 @@ func (m *Manager) startLocked(cfg *config.AccountConfig) {
 		done:   make(chan struct{}),
 	}
 	m.entries[cfg.Username] = e
-
-	go func() {
-		defer close(e.done)
-		if err := minerInstance.Run(ctx); err != nil && ctx.Err() == nil {
-			accountLog.Error("Miner failed", "account", cfg.Username, "error", err)
-		}
-	}()
+	m.launchFn(e, ctx, accountLog)
 }

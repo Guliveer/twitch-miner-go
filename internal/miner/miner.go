@@ -34,7 +34,8 @@ type Miner struct {
 	twitch twitch.API
 	pubsub *pubsub.Pool
 	chat   *chat.Manager
-	notify *notify.Dispatcher
+	notify            *notify.Dispatcher
+	suppressLifecycle bool
 
 	running atomic.Bool
 
@@ -81,6 +82,12 @@ func (m *Miner) Streamers() []*model.Streamer {
 // May return nil if the miner hasn't been started yet.
 func (m *Miner) NotifyDispatcher() *notify.Dispatcher {
 	return m.notify
+}
+
+// SetSuppressLifecycleNotify controls whether MINER_STARTED, MINER_STOPPED,
+// and MINER_CRASHED notifications are sent. Must be called before Run().
+func (m *Miner) SetSuppressLifecycleNotify(suppress bool) {
+	m.suppressLifecycle = suppress
 }
 
 // IsRunning reports whether the miner is currently running its main loop.
@@ -136,6 +143,7 @@ func (m *Miner) Run(ctx context.Context) error {
 	}
 
 	m.notify = notify.NewDispatcher(m.cfg.Notifications, m.log)
+	m.notify.SuppressLifecycle(m.suppressLifecycle)
 	m.log.SetNotifyFunc(m.notify.NotifyFunc(m.cfg.Username))
 
 	m.pubsub = pubsub.NewPool(m.twitch.AuthProvider(), m.log, m)

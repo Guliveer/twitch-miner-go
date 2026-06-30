@@ -9,12 +9,19 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/store"
 )
 
+// minerManager is the subset of Manager that Poller needs.
+type minerManager interface {
+	Start(cfg *config.AccountConfig)
+	Stop(username string)
+	Restart(cfg *config.AccountConfig)
+}
+
 // Poller watches a Store for changes and drives a Manager accordingly.
 // On every tick (or LISTEN/NOTIFY signal from the store) it compares the DB
 // state to its last-seen watermark and calls Start / Restart / Stop as needed.
 type Poller struct {
 	store    store.Store
-	manager  *Manager
+	manager  minerManager
 	interval time.Duration
 	log      *logger.Logger
 
@@ -23,7 +30,7 @@ type Poller struct {
 }
 
 // NewPoller creates a Poller that polls the given store on the given interval.
-func NewPoller(st store.Store, mgr *Manager, interval time.Duration, log *logger.Logger) *Poller {
+func NewPoller(st store.Store, mgr minerManager, interval time.Duration, log *logger.Logger) *Poller {
 	return &Poller{
 		store:     st,
 		manager:   mgr,
@@ -55,6 +62,12 @@ func (p *Poller) Run(ctx context.Context) {
 			}
 			p.sync(ctx)
 		}
+	}
+}
+
+func (p *Poller) touch(username string) {
+	if err := p.store.TouchLastStartedAt(username); err != nil {
+		p.log.Error("Failed to update last_started_at", "account", username, "error", err)
 	}
 }
 
@@ -95,9 +108,11 @@ func (p *Poller) sync(_ context.Context) {
 		case !known:
 			p.log.Info("New account detected in DB, starting miner", "account", row.Username)
 			p.manager.Start(cfg)
+			p.touch(row.Username)
 		case ts > prev:
 			p.log.Info("Account config changed in DB, restarting miner", "account", row.Username)
 			p.manager.Restart(cfg)
+			p.touch(row.Username)
 		}
 
 		p.watermark[row.Username] = ts

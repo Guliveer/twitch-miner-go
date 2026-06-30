@@ -11,11 +11,14 @@ import (
 
 const schema = `
 CREATE TABLE IF NOT EXISTS accounts (
-	username    TEXT PRIMARY KEY,
-	config_json TEXT NOT NULL,
-	enabled     BOOLEAN NOT NULL DEFAULT TRUE,
-	updated_at  BIGINT NOT NULL
+	username        TEXT PRIMARY KEY,
+	config_json     TEXT NOT NULL,
+	enabled         BOOLEAN NOT NULL DEFAULT TRUE,
+	updated_at      BIGINT NOT NULL,
+	last_started_at BIGINT
 );
+
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS last_started_at BIGINT;
 
 -- Notify on any change so listeners wake up immediately.
 CREATE OR REPLACE FUNCTION accounts_notify() RETURNS trigger LANGUAGE plpgsql AS $$
@@ -93,7 +96,7 @@ func (s *PostgresStore) notify() {
 }
 
 func (s *PostgresStore) ListAccounts() ([]AccountRow, error) {
-	rows, err := s.db.Query(`SELECT username, config_json, enabled, updated_at FROM accounts`)
+	rows, err := s.db.Query(`SELECT username, config_json, enabled, updated_at, last_started_at FROM accounts`)
 	if err != nil {
 		return nil, fmt.Errorf("listing accounts: %w", err)
 	}
@@ -101,15 +104,55 @@ func (s *PostgresStore) ListAccounts() ([]AccountRow, error) {
 
 	var accounts []AccountRow
 	for rows.Next() {
-		var r AccountRow
-		var updatedAtUnix int64
-		if err := rows.Scan(&r.Username, &r.ConfigJSON, &r.Enabled, &updatedAtUnix); err != nil {
+		r, err := scanRow(rows.Scan)
+		if err != nil {
 			return nil, fmt.Errorf("scanning account row: %w", err)
 		}
-		r.UpdatedAt = time.Unix(updatedAtUnix, 0)
 		accounts = append(accounts, r)
 	}
 	return accounts, rows.Err()
+}
+
+func (s *PostgresStore) GetAccount(username string) (*AccountRow, error) {
+	row := s.db.QueryRow(
+		`SELECT username, config_json, enabled, updated_at, last_started_at FROM accounts WHERE username = $1`,
+		username,
+	)
+	r, err := scanRow(row.Scan)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("getting account %s: %w", username, err)
+	}
+	return &r, nil
+}
+
+func (s *PostgresStore) TouchLastStartedAt(username string) error {
+	_, err := s.db.Exec(
+		`UPDATE accounts SET last_started_at = $1 WHERE username = $2`,
+		time.Now().Unix(), username,
+	)
+	if err != nil {
+		return fmt.Errorf("touching last_started_at for %s: %w", username, err)
+	}
+	return nil
+}
+
+// scanRow scans the 5-column account row using the provided Scan function.
+func scanRow(scan func(...any) error) (AccountRow, error) {
+	var r AccountRow
+	var updatedAtUnix int64
+	var lastStartedAtUnix sql.NullInt64
+	if err := scan(&r.Username, &r.ConfigJSON, &r.Enabled, &updatedAtUnix, &lastStartedAtUnix); err != nil {
+		return AccountRow{}, err
+	}
+	r.UpdatedAt = time.Unix(updatedAtUnix, 0)
+	if lastStartedAtUnix.Valid {
+		t := time.Unix(lastStartedAtUnix.Int64, 0)
+		r.LastStartedAt = &t
+	}
+	return r, nil
 }
 
 func (s *PostgresStore) UpsertAccount(row AccountRow) error {

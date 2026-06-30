@@ -88,8 +88,9 @@ func main() {
 	port := flag.String("port", "8080", "Port for the health/analytics HTTP server")
 	logLevel := flag.String("log-level", "", "Log level: DEBUG, INFO, WARN, ERROR (overrides LOG_LEVEL env)")
 	healthcheckURL := flag.String("healthcheck-url", "", "Probe the given HTTP URL and exit with status 0 only on HTTP 200")
-	showVersion := flag.Bool("version", false, "Print version and exit")
-	autoUpdate := flag.Bool("auto-update", false, "Automatically download and apply updates on startup")
+	showVersion             := flag.Bool("version", false, "Print version and exit")
+	autoUpdate              := flag.Bool("auto-update", false, "Automatically download and apply updates on startup")
+	noLifecycleNotify       := flag.Bool("no-lifecycle-notify", false, "Suppress MINER_STARTED / MINER_STOPPED / MINER_CRASHED notifications for this run")
 	flag.Parse()
 
 	if *showVersion {
@@ -162,6 +163,7 @@ func main() {
 	})
 
 	mgr := managedminer.NewManager(ctx, rootLog, twitchRuntime)
+	mgr.SetSuppressLifecycleNotify(*noLifecycleNotify)
 
 	dbEnabled := os.Getenv("DB_ENABLED") == "true"
 	var accountStore store.Store = store.NoopStore{}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/Guliveer/twitch-miner-go/internal/config"
@@ -35,8 +36,17 @@ type notifierEntry struct {
 // Dispatcher manages multiple notifiers and dispatches notifications to all
 // enabled notifiers that match the event.
 type Dispatcher struct {
-	entries []notifierEntry
-	log     *logger.Logger
+	entries            []notifierEntry
+	log                *logger.Logger
+	suppressLifecycle  atomic.Bool
+}
+
+// SuppressLifecycle controls whether MINER_STARTED, MINER_STOPPED, and
+// MINER_CRASHED notifications are sent. When set to true they are silently
+// dropped. Intended for use during startup/shutdown to avoid notification
+// spam when many miners start or stop at once.
+func (d *Dispatcher) SuppressLifecycle(suppress bool) {
+	d.suppressLifecycle.Store(suppress)
 }
 
 // NewDispatcher creates a Dispatcher from the notification configuration.
@@ -169,6 +179,12 @@ func (d *Dispatcher) Stop(ctx context.Context) {
 // Use for lifecycle events (start/stop/crash) where delivery must be guaranteed
 // before the dispatcher is shut down.
 func (d *Dispatcher) DispatchSync(ctx context.Context, event model.Event, title, message string) {
+	if d.suppressLifecycle.Load() {
+		switch event {
+		case model.EventMinerStarted, model.EventMinerStopped, model.EventMinerCrashed:
+			return
+		}
+	}
 	var wg sync.WaitGroup
 	for _, e := range d.entries {
 		if !e.notifier.IsEnabled() || !e.notifier.ShouldNotify(event) {

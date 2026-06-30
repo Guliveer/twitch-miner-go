@@ -31,17 +31,64 @@ func (s *AnalyticsServer) handleListAccounts(w http.ResponseWriter, r *http.Requ
 	}
 
 	type accountSummary struct {
-		Username  string    `json:"username"`
-		Enabled   bool      `json:"enabled"`
-		UpdatedAt time.Time `json:"updated_at"`
+		Username      string     `json:"username"`
+		Enabled       bool       `json:"enabled"`
+		UpdatedAt     time.Time  `json:"updated_at"`
+		LastStartedAt *time.Time `json:"last_started_at"`
 	}
 	out := make([]accountSummary, 0, len(rows))
 	for _, row := range rows {
-		out = append(out, accountSummary{row.Username, row.Enabled, row.UpdatedAt})
+		out = append(out, accountSummary{row.Username, row.Enabled, row.UpdatedAt, row.LastStartedAt})
 	}
 	writeJSON(w, http.StatusOK, out)
 }
 
+
+// handleGetAccount GET /api/accounts/{username}
+func (s *AnalyticsServer) handleGetAccount(w http.ResponseWriter, r *http.Request) {
+	st := s.getAccountStore()
+	if st == nil {
+		http.Error(w, "DB mode not enabled", http.StatusNotImplemented)
+		return
+	}
+
+	username := r.PathValue("username")
+	if username == "" {
+		http.Error(w, "username is required", http.StatusBadRequest)
+		return
+	}
+
+	row, err := st.GetAccount(username)
+	if err != nil {
+		http.Error(w, "failed to get account: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if row == nil {
+		http.Error(w, "account not found", http.StatusNotFound)
+		return
+	}
+
+	cfg, err := config.AccountConfigFromJSON(row.Username, row.ConfigJSON)
+	if err != nil {
+		http.Error(w, "failed to parse account config: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	type accountDetail struct {
+		Username      string                `json:"username"`
+		Enabled       bool                  `json:"enabled"`
+		UpdatedAt     time.Time             `json:"updated_at"`
+		LastStartedAt *time.Time            `json:"last_started_at"`
+		Config        *config.AccountConfig `json:"config"`
+	}
+	writeJSON(w, http.StatusOK, accountDetail{
+		Username:      row.Username,
+		Enabled:       row.Enabled,
+		UpdatedAt:     row.UpdatedAt,
+		LastStartedAt: row.LastStartedAt,
+		Config:        cfg,
+	})
+}
 
 // handleCreateAccount POST /api/accounts
 func (s *AnalyticsServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
