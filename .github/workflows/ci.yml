@@ -32,24 +32,30 @@ concurrency:
 
 jobs:
   commit-lint:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Validate PR title
+      - name: Validate commit message
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           PATTERN='^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\([a-zA-Z0-9_-]+\))?(!)?: .+'
 
-          echo "PR title: $PR_TITLE"
-          if ! echo "$PR_TITLE" | grep -qE "$PATTERN"; then
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            MSG="$PR_TITLE"
+            LABEL="PR title"
+          else
+            MSG="$(git log -1 --format='%s')"
+            LABEL="Commit message"
+          fi
+
+          echo "$LABEL: $MSG"
+          if ! echo "$MSG" | grep -qE "$PATTERN"; then
             echo ""
-            echo "🚫 PR title does not follow Conventional Commits format."
-            echo "This matters because squash-merge uses the PR title as the commit message."
+            echo "🚫 $LABEL does not follow Conventional Commits format."
+            echo "This matters because squash-merge uses the PR title as the commit message,"
+            echo "and the version bump pipeline reads commit messages on main."
             echo ""
             echo "Format: <type>[optional scope][!]: <description>"
             echo "Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build"
@@ -60,43 +66,8 @@ jobs:
             exit 1
           fi
 
-          echo "✅ PR title follows Conventional Commits format."
+          echo "✅ $LABEL follows Conventional Commits format."
 
-      - name: Validate Conventional Commits
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          PATTERN='^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\([a-zA-Z0-9_-]+\))?(!)?: .+'
-
-          errors=0
-          while IFS= read -r line; do
-            sha="${line%% *}"
-            msg="${line#* }"
-
-            # Skip merge commits
-            if echo "$msg" | grep -qE '^Merge '; then
-              continue
-            fi
-
-            if ! echo "$msg" | grep -qE "$PATTERN"; then
-              echo "❌ ${sha:0:7}: $msg"
-              errors=$((errors + 1))
-            else
-              echo "✅ ${sha:0:7}: $msg"
-            fi
-          done <<< "$(git log "${BASE_SHA}..${HEAD_SHA}" --format='%H %s')"
-
-          if [ "$errors" -gt 0 ]; then
-            echo ""
-            echo "🚫 $errors commit(s) don't follow Conventional Commits format."
-            echo "Format: <type>[optional scope][!]: <description>"
-            echo "Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build"
-            exit 1
-          fi
-
-          echo ""
-          echo "✅ All commits follow Conventional Commits format."
 
   build:
     runs-on: ubuntu-latest
