@@ -4,6 +4,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -206,6 +207,28 @@ func applyEnvOverrides(cfg *AccountConfig) {
 			cfg.Notifications.Gotify.Token = envValue
 		}
 	}
+}
+
+// AccountConfigToJSON serialises an AccountConfig to a JSON blob for DB storage.
+func AccountConfigToJSON(cfg *AccountConfig) (string, error) {
+	b, err := json.Marshal(cfg)
+	if err != nil {
+		return "", fmt.Errorf("marshalling account config for %s: %w", cfg.Username, err)
+	}
+	return string(b), nil
+}
+
+// AccountConfigFromJSON parses a JSON blob into an AccountConfig and applies the
+// same defaults and env-var overrides as LoadAccountConfig.
+func AccountConfigFromJSON(username, jsonBlob string) (*AccountConfig, error) {
+	var cfg AccountConfig
+	if err := json.Unmarshal([]byte(jsonBlob), &cfg); err != nil {
+		return nil, fmt.Errorf("parsing account config for %s: %w", username, err)
+	}
+	cfg.Username = username
+	applyDefaults(&cfg)
+	applyEnvOverrides(&cfg)
+	return &cfg, nil
 }
 
 // Validate checks the configuration for common errors and contradictory settings.
