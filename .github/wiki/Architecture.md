@@ -6,8 +6,12 @@ This page describes the internal structure of `twitch-miner-go` for contributors
 
 ```
 cmd/twitch-miner-go/
-└── main.go              Entry point: flag parsing, .env loading, config loading,
-                         per-account miner startup, HTTP server startup
+└── main.go              Entry point: flag parsing, .env loading, miner startup,
+                         HTTP server startup, FileWatcher or DB Poller
+
+cmd/db-seed/
+└── main.go              One-shot tool: seed PostgreSQL from existing YAML configs
+                         (idempotent upsert; --dry-run flag)
 
 internal/
 ├── model/               Pure data types — no external dependencies, no I/O
@@ -20,7 +24,18 @@ internal/
 │   ├── message.go       PubSub message types
 │   └── ...              (game_registry, community_goal, raid, etc.)
 │
-├── config/              YAML config loading + env var overrides
+├── config/              YAML config loading + env var overrides + JSON serialisation
+│
+├── store/               Account persistence interface and implementations
+│   ├── store.go         Store interface (ListAccounts, GetAccount, UpsertAccount, …)
+│   ├── postgres.go      PostgreSQL implementation; LISTEN/NOTIFY + goose migrations
+│   ├── noop.go          No-op implementation used in file mode (satisfies interface)
+│   └── migrations/      Versioned SQL files (goose format, embedded in binary)
+│
+├── managedminer/        Dynamic miner lifecycle management
+│   ├── manager.go       Manager: Start/Stop/Restart miners; exponential-backoff auto-restart
+│   ├── poller.go        Poller: syncs DB → Manager (DB mode); driven by NOTIFY + ticker
+│   └── filewatcher.go   FileWatcher: syncs configs/ → Manager (file mode); driven by mtime poll
 │
 ├── auth/                OAuth2 flow, token refresh, cookie persistence
 │   ├── auth.go          Priority chain (cookie → auth_token → env → device code)
@@ -67,8 +82,9 @@ internal/
 │   └── team.go          Discover streams by Twitch team (poll loop)
 │
 ├── server/              Built-in HTTP analytics server
-│   ├── analytics.go     Dashboard data + API endpoints
-│   └── handlers.go      HTTP handlers (health, test-notification, etc.)
+│   ├── analytics.go     Dashboard data, route registration, HTTP Basic Auth
+│   ├── handlers.go      HTTP handlers (health, streamers, stats, test-notification, etc.)
+│   └── accounts_api.go  REST API for account CRUD (DB mode only; returns 501 otherwise)
 │
 ├── runtimecfg/          Twitch client IDs and version (with env var overrides)
 ├── constants/           Global constants (timeouts, limits)
@@ -86,11 +102,20 @@ internal/
 ```
 main.go
   ├─ Load .env
-  ├─ Parse flags (config dir, port, log level)
-  ├─ Load *.yaml configs from configs/
+  ├─ Parse flags (config dir, port, log level, --no-lifecycle-notify, …)
   ├─ Start HTTP analytics server (server/)
   ├─ Start update checker background goroutine (updater/)
-  └─ For each config → go miner.Run()
+  ├─ Create Manager (managedminer/)
+  └─ Choose account source:
+       ├─ DB_ENABLED=true
+       │    ├─ Connect to PostgreSQL (DB_DSN)
+       │    ├─ Run goose migrations automatically
+       │    ├─ Start DB Poller goroutine (DB_POLL_INTERVAL, default 30s)
+       │    │    └─ On NOTIFY or tick → sync DB rows → Manager.Start/RestartChanged/Stop
+       │    └─ Wire accounts REST API (/api/accounts)
+       └─ DB_ENABLED=false (default)
+            └─ Start FileWatcher goroutine (FILE_POLL_INTERVAL, default 5s)
+                 └─ On mtime change → Manager.Start/RestartChanged/Stop
 ```
 
 ### Per-account miner lifecycle
@@ -144,3 +169,7 @@ Event fires in miner/
 **Android client ID is the default for GQL requests.** Twitch's GraphQL API accepts requests from the Android client ID without requiring the stricter integrity checks applied to browser clients.
 
 **Notification batching is provider-level.** Each provider has an independent batcher. Per-provider `batch` config overrides the global defaults, allowing Telegram to be instant while Discord is batched.
+
+**Store interface abstracts the persistence layer.** Both `PostgresStore` and `NoopStore` implement the same `Store` interface. The `Poller` (DB mode) and `FileWatcher` (file mode) both drive the same `Manager` interface, keeping the miner core agnostic to where configs come from.
+
+**Miners auto-restart on crash.** The `Manager.launchFn` wraps `miner.Run()` in a retry loop with exponential backoff (10 s initial, 5 min cap). A cancelled context (graceful shutdown) exits the loop immediately without retrying.

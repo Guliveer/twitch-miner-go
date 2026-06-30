@@ -2,6 +2,10 @@
 # Copy this file to configs/<your_twitch_username>.yaml and edit as needed.
 # The filename (without extension) becomes the Twitch username for this account.
 # For example: configs/my_twitch_name.yaml → username "my_twitch_name"
+#
+# Note: This file is used in file-based mode (default).
+# In DB mode (DB_ENABLED=true) account configs are stored in PostgreSQL
+# and managed via the REST API (/api/accounts) or the db-seed tool.
 
 # Set to false to disable this account without deleting the config file (default: true)
 enabled: true
@@ -122,6 +126,7 @@ notifications:
       - "MINER_STARTED"
       - "MINER_STOPPED"
       - "MINER_CRASHED"
+      - "ACCOUNT_CONFIG_RELOADED"
     disable_notification: false
     # chat_id and token from env vars (per-account takes precedence over global):
     #   TELEGRAM_CHAT_ID / TELEGRAM_CHAT_ID_<UPPERCASE_USERNAME>

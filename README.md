@@ -24,6 +24,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
     - [1.5. Configuration](#15-configuration)
         - [1.5.1. Quick Start](#151-quick-start)
         - [Config Editor](#config-editor)
+        - [1.5.2. Database Mode (optional)](#152-database-mode-optional)
     - [1.6. Environment Variables](#16-environment-variables)
         - [1.6.1. Global](#161-global)
         - [1.6.2. Per-Account Authentication](#162-per-account-authentication)
@@ -59,7 +60,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 
 ## 1.2. Features
 
-- **Multi-account support** — run multiple Twitch accounts from a single binary
+- **Multi-account support** — run multiple Twitch accounts from a single binary; configs can be stored as YAML files or in a PostgreSQL database (hot-reloaded without restart)
 - **Channel points mining** — automatic minute-watched events, bonus claims, watch streaks
 - **Predictions** — configurable betting strategies (SMART, HIGH_ODDS, MOST_VOTED, etc.)
 - **Drops** — automatic campaign sync and drop claiming
@@ -112,14 +113,15 @@ _run.bat
 
 ### 1.4.1. Flags
 
-| Flag               | Default   | Description                                                     |
-|--------------------|-----------|-----------------------------------------------------------------|
-| `-config`          | `configs` | Path to the configuration directory                             |
-| `-port`            | `8080`    | Port for the health/analytics server                            |
-| `-log-level`       | `INFO`    | Log level: DEBUG, INFO, WARN, ERROR (effective default: `INFO`) |
-| `-healthcheck-url` | _(none)_  | Probe the given HTTP URL and exit 0 on HTTP 200                 |
-| `-version`         | `false`   | Print version and exit                                          |
-| `-auto-update`     | `false`   | Download and apply the latest release automatically on startup  |
+| Flag                     | Default   | Description                                                     |
+|--------------------------|-----------|-----------------------------------------------------------------|
+| `-config`                | `configs` | Path to the configuration directory                             |
+| `-port`                  | `8080`    | Port for the health/analytics server                            |
+| `-log-level`             | `INFO`    | Log level: DEBUG, INFO, WARN, ERROR (effective default: `INFO`) |
+| `-healthcheck-url`       | _(none)_  | Probe the given HTTP URL and exit 0 on HTTP 200                 |
+| `-version`               | `false`   | Print version and exit                                          |
+| `-auto-update`           | `false`   | Download and apply the latest release automatically on startup  |
+| `-no-lifecycle-notify`   | `false`   | Suppress `MINER_STARTED`, `MINER_STOPPED`, `MINER_CRASHED` notifications for this run |
 
 ## 1.5. Configuration
 
@@ -225,7 +227,42 @@ The script builds the binary on first run (requires Go), then launches it. The w
 config-editor --tui --config /path/to/configs
 ```
 
-> **Note:** The editor only saves files — the miner must be restarted to pick up changes.
+> **Note:** In file mode the miner hot-reloads YAML changes automatically — no restart needed. See [Database Mode](#152-database-mode-optional) for the PostgreSQL-backed alternative.
+
+### 1.5.2. Database Mode (optional)
+
+By default the miner loads account configs from YAML files. You can optionally store them in a PostgreSQL database instead — useful when managing accounts programmatically via REST API (e.g. from a dashboard) without file system access.
+
+**Enable DB mode:**
+
+```dotenv
+DB_ENABLED=true
+DB_DSN=postgresql://user:password@host:5432/dbname?sslmode=require
+```
+
+The schema and migrations run automatically on first connection (via [goose](https://github.com/pressly/goose)).
+
+**Migrate existing YAML configs to DB:**
+
+```bash
+go run ./cmd/db-seed              # seed from configs/ (default)
+go run ./cmd/db-seed --dry-run    # preview without writing
+go run ./cmd/db-seed --config /path/to/configs
+```
+
+**How it works:** The `Poller` watches the `accounts` table using PostgreSQL `LISTEN/NOTIFY` (instant) and a periodic ticker (default 30s). When a row changes, the corresponding miner is started, restarted, or stopped automatically. Changes via the REST API (`POST/PUT/DELETE /api/accounts`) are picked up within milliseconds.
+
+**REST API endpoints** (only available when `DB_ENABLED=true`):
+
+| Method   | Endpoint                        | Description                              |
+|----------|---------------------------------|------------------------------------------|
+| `GET`    | `/api/accounts`                 | List all accounts (username, enabled, updated_at, last_started_at) |
+| `POST`   | `/api/accounts`                 | Create account (body: full config JSON)  |
+| `GET`    | `/api/accounts/{username}`      | Get single account with full config      |
+| `PUT`    | `/api/accounts/{username}`      | Update account config                    |
+| `DELETE` | `/api/accounts/{username}`      | Delete account                           |
+
+All endpoints return `501 Not Implemented` when `DB_ENABLED=false`. Auth follows the same HTTP Basic Auth as the dashboard (`DASHBOARD_USER` / `DASHBOARD_PASSWORD_SHA256`).
 
 ## 1.6. Environment Variables
 
@@ -251,6 +288,10 @@ For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN
 | `DASHBOARD_USER`            | Username for analytics dashboard HTTP basic auth                                              | _(disabled)_     |
 | `DASHBOARD_PASSWORD_SHA256` | SHA-256 hash of the dashboard password                                                        | _(none)_         |
 | `RUN_OWNER_ACCOUNTS`        | Set to `true` to also run the maintainer's own account configs included in the repository     | `false`          |
+| `DB_ENABLED`                | Set to `true` to use PostgreSQL-backed account store instead of YAML files                    | `false`          |
+| `DB_DSN`                    | PostgreSQL connection string (required when `DB_ENABLED=true`)                                | _(unset)_        |
+| `DB_POLL_INTERVAL`          | How often the DB Poller syncs when no `NOTIFY` is received (e.g. `30s`, `2m`)                | `30s`            |
+| `FILE_POLL_INTERVAL`        | How often the file watcher checks `configs/` for YAML changes (file mode only)               | `5s`             |
 
 > **Note:** Twitch client IDs and versions have compiled-in defaults (from `internal/constants`) that are used when the corresponding environment variables are unset. These defaults may become stale as Twitch updates their clients, so it is recommended to set these environment variables explicitly.
 
@@ -411,14 +452,17 @@ The `events` list controls which events trigger a notification for a given provi
 | `DROP_STATUS`           | 📦    | Drop progress status                                                               |
 | `CHAT_MENTION`          | 💬    | Mentioned in chat                                                                  |
 | `GIFTED_SUB`            | 🎁    | Received a gifted sub (via IRC)                                                    |
-| `MINER_STARTED`         | 🚀    | Miner started (with version info)                                                  |
-| `MINER_STOPPED`         | 🛑    | Miner stopped gracefully                                                           |
-| `MINER_CRASHED`         | 💥    | Miner crashed (with error details)                                                 |
-| `TEST`                  | —     | Test notification (see below)                                                      |
+| `MINER_STARTED`              | 🚀    | Miner started (with version info)                                                  |
+| `MINER_STOPPED`              | 🛑    | Miner stopped gracefully                                                           |
+| `MINER_CRASHED`              | 💥    | Miner crashed (with error details); miner auto-restarts with exponential backoff   |
+| `ACCOUNT_CONFIG_RELOADED`    | 🔄    | Account config changed in DB or YAML and miner was restarted (DB mode and file mode) |
+| `TEST`                       | —     | Test notification (see below)                                                      |
 
 > **Note:** Emojis are prepended to log messages and notifications automatically. The emoji mappings are defined in [`eventEmoji`](internal/logger/logger.go:19). The event type constants are defined in [`internal/model/settings.go`](internal/model/settings.go:7).
 >
-> **Note:** Lifecycle events (`MINER_STARTED`, `MINER_STOPPED`, `MINER_CRASHED`) are always sent immediately — they bypass notification batching entirely.
+> **Note:** Lifecycle events (`MINER_STARTED`, `MINER_STOPPED`, `MINER_CRASHED`, `ACCOUNT_CONFIG_RELOADED`) are always sent immediately — they bypass notification batching entirely.
+>
+> **Note:** Use `--no-lifecycle-notify` flag to suppress `MINER_STARTED`, `MINER_STOPPED`, and `MINER_CRASHED` for a single run — useful when restarting the process frequently (e.g. during deploys).
 
 **Example — send only specific events to Telegram:**
 

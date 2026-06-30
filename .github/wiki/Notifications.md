@@ -137,12 +137,13 @@ Multiple accounts can share one global Telegram channel, or each have their own.
 | `DROP_STATUS` | 📦 | Drop campaign progress update |
 | `CHAT_MENTION` | 💬 | Your account was mentioned in chat |
 | `GIFTED_SUB` | 🎁 | Received a gifted subscription |
-| `MINER_STARTED` | 🚀 | Miner started (includes version) |
-| `MINER_STOPPED` | 🛑 | Miner stopped gracefully |
-| `MINER_CRASHED` | 💥 | Miner crashed (includes error) |
-| `TEST` | — | Test notification (via API endpoint) |
+| `MINER_STARTED`           | 🚀 | Miner started (includes version) |
+| `MINER_STOPPED`           | 🛑 | Miner stopped gracefully |
+| `MINER_CRASHED`           | 💥 | Miner crashed (includes error); miner auto-restarts with backoff |
+| `ACCOUNT_CONFIG_RELOADED` | 🔄 | Config changed in DB or YAML file and miner was restarted |
+| `TEST`                    | — | Test notification (via API endpoint) |
 
-If the `events` list is **empty or omitted**, all events are sent. Lifecycle events (`MINER_STARTED`, `MINER_STOPPED`, `MINER_CRASHED`) always bypass batching.
+If the `events` list is **empty or omitted**, all events are sent. Lifecycle events (`MINER_STARTED`, `MINER_STOPPED`, `MINER_CRASHED`, `ACCOUNT_CONFIG_RELOADED`) always bypass batching.
 
 ---
 
