@@ -11,10 +11,15 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/config"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
 	"github.com/Guliveer/twitch-miner-go/internal/miner"
+	"github.com/Guliveer/twitch-miner-go/internal/model"
 	"github.com/Guliveer/twitch-miner-go/internal/runtimecfg"
 )
 
-const stopTimeout = 15 * time.Second
+const (
+	stopTimeout         = 15 * time.Second
+	initialRestartDelay = 10 * time.Second
+	maxRestartDelay     = 5 * time.Minute
+)
 
 type entry struct {
 	cfg    *config.AccountConfig
@@ -62,8 +67,27 @@ func NewManager(parentCtx context.Context, rootLog *logger.Logger, twitchRT *run
 	m.launchFn = func(e *entry, ctx context.Context, log *logger.Logger) {
 		go func() {
 			defer close(e.done)
-			if err := e.miner.Run(ctx); err != nil && ctx.Err() == nil {
-				log.Error("Miner failed", "account", e.cfg.Username, "error", err)
+			delay := initialRestartDelay
+			for {
+				err := e.miner.Run(ctx)
+				if ctx.Err() != nil {
+					return
+				}
+				if err == nil {
+					return
+				}
+				log.Error("Miner crashed, restarting", "account", e.cfg.Username, "error", err, "retry_in", delay)
+				select {
+				case <-ctx.Done():
+					return
+				case <-time.After(delay):
+				}
+				delay *= 2
+				if delay > maxRestartDelay {
+					delay = maxRestartDelay
+				}
+				e.miner = miner.NewMiner(e.cfg, log, m.twitchRT)
+				e.miner.SetSuppressLifecycleNotify(m.suppressLifecycleNotify)
 			}
 		}()
 	}
@@ -79,7 +103,16 @@ func (m *Manager) Start(cfg *config.AccountConfig) {
 	if _, exists := m.entries[cfg.Username]; exists {
 		return
 	}
-	m.startLocked(cfg)
+	m.startLocked(cfg, "")
+}
+
+// RestartChanged stops the miner for cfg.Username (if running) and starts a
+// new one, firing an ACCOUNT_CONFIG_RELOADED notification once it is up.
+func (m *Manager) RestartChanged(cfg *config.AccountConfig) {
+	m.Stop(cfg.Username)
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.startLocked(cfg, model.EventAccountConfigReloaded)
 }
 
 // Stop gracefully shuts down the miner for the given username and waits for it
@@ -107,7 +140,7 @@ func (m *Manager) Restart(cfg *config.AccountConfig) {
 	m.Stop(cfg.Username)
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	m.startLocked(cfg)
+	m.startLocked(cfg, "")
 }
 
 // Entries returns a snapshot of all currently running miners.
@@ -143,11 +176,14 @@ func (m *Manager) StopAll() {
 }
 
 // startLocked creates and launches a miner. Must be called with m.mu held.
-func (m *Manager) startLocked(cfg *config.AccountConfig) {
+func (m *Manager) startLocked(cfg *config.AccountConfig, oneTimeEvent model.Event) {
 	ctx, cancel := context.WithCancel(m.parentCtx)
 	accountLog := m.rootLog.WithAccount(cfg.Username)
 	minerInstance := miner.NewMiner(cfg, accountLog, m.twitchRT)
 	minerInstance.SetSuppressLifecycleNotify(m.suppressLifecycleNotify)
+	if oneTimeEvent != "" {
+		minerInstance.SetOneTimeEvent(oneTimeEvent)
+	}
 
 	e := &entry{
 		cfg:    cfg,

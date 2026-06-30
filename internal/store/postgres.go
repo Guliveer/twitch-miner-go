@@ -2,34 +2,17 @@ package store
 
 import (
 	"database/sql"
+	"embed"
 	"fmt"
 	"sync"
 	"time"
 
 	"github.com/lib/pq"
+	"github.com/pressly/goose/v3"
 )
 
-const schema = `
-CREATE TABLE IF NOT EXISTS accounts (
-	username        TEXT PRIMARY KEY,
-	config_json     TEXT NOT NULL,
-	enabled         BOOLEAN NOT NULL DEFAULT TRUE,
-	updated_at      BIGINT NOT NULL,
-	last_started_at BIGINT
-);
-
-ALTER TABLE accounts ADD COLUMN IF NOT EXISTS last_started_at BIGINT;
-
--- Notify on any change so listeners wake up immediately.
-CREATE OR REPLACE FUNCTION accounts_notify() RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN PERFORM pg_notify('accounts_changed', ''); RETURN NULL; END;
-$$;
-
-DROP TRIGGER IF EXISTS accounts_changed_trigger ON accounts;
-CREATE TRIGGER accounts_changed_trigger
-	AFTER INSERT OR UPDATE OR DELETE ON accounts
-	FOR EACH STATEMENT EXECUTE FUNCTION accounts_notify();
-`
+//go:embed migrations/*.sql
+var migrations embed.FS
 
 // PostgresStore is a Store backed by a PostgreSQL database.
 type PostgresStore struct {
@@ -39,7 +22,7 @@ type PostgresStore struct {
 	done    chan struct{}
 }
 
-// OpenPostgres opens a connection to the given DSN and runs the schema migration.
+// OpenPostgres opens a connection to the given DSN and runs all pending migrations.
 func OpenPostgres(dsn string) (*PostgresStore, error) {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -50,9 +33,15 @@ func OpenPostgres(dsn string) (*PostgresStore, error) {
 		return nil, fmt.Errorf("connecting to postgres: %w", err)
 	}
 
-	if _, err := db.Exec(schema); err != nil {
+	goose.SetBaseFS(migrations)
+	goose.SetLogger(goose.NopLogger())
+	if err := goose.SetDialect("postgres"); err != nil {
 		db.Close()
-		return nil, fmt.Errorf("running schema migration: %w", err)
+		return nil, fmt.Errorf("setting goose dialect: %w", err)
+	}
+	if err := goose.Up(db, "migrations"); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("running migrations: %w", err)
 	}
 
 	s := &PostgresStore{

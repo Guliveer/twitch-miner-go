@@ -64,6 +64,7 @@ notifications:
       - MINER_STARTED
       - MINER_STOPPED
       - MINER_CRASHED
+      - ACCOUNT_CONFIG_RELOADED
     disable_notification: true
   webhook:
     method: POST

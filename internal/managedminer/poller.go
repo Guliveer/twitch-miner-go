@@ -12,8 +12,8 @@ import (
 // minerManager is the subset of Manager that Poller needs.
 type minerManager interface {
 	Start(cfg *config.AccountConfig)
+	RestartChanged(cfg *config.AccountConfig)
 	Stop(username string)
-	Restart(cfg *config.AccountConfig)
 }
 
 // Poller watches a Store for changes and drives a Manager accordingly.
@@ -111,7 +111,7 @@ func (p *Poller) sync(_ context.Context) {
 			p.touch(row.Username)
 		case ts > prev:
 			p.log.Info("Account config changed in DB, restarting miner", "account", row.Username)
-			p.manager.Restart(cfg)
+			p.manager.RestartChanged(cfg)
 			p.touch(row.Username)
 		}
 

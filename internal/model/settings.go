@@ -25,10 +25,11 @@ const (
 	EventDropStatus         Event = "DROP_STATUS"
 	EventChatMention        Event = "CHAT_MENTION"
 	EventGiftedSub          Event = "GIFTED_SUB"
-	EventMinerStarted       Event = "MINER_STARTED"
-	EventMinerStopped       Event = "MINER_STOPPED"
-	EventMinerCrashed       Event = "MINER_CRASHED"
-	EventTest               Event = "TEST"
+	EventMinerStarted          Event = "MINER_STARTED"
+	EventMinerStopped          Event = "MINER_STOPPED"
+	EventMinerCrashed          Event = "MINER_CRASHED"
+	EventAccountConfigReloaded Event = "ACCOUNT_CONFIG_RELOADED"
+	EventTest                  Event = "TEST"
 )
 
 // AllEvents returns a slice of all defined events.
@@ -57,6 +58,7 @@ func AllEvents() []Event {
 		EventMinerStarted,
 		EventMinerStopped,
 		EventMinerCrashed,
+		EventAccountConfigReloaded,
 		EventTest,
 	}
 }

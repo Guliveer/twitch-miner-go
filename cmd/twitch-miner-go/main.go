@@ -15,7 +15,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Guliveer/twitch-miner-go/internal/config"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
 	"github.com/Guliveer/twitch-miner-go/internal/managedminer"
 	"github.com/Guliveer/twitch-miner-go/internal/miner"
@@ -129,24 +128,6 @@ func main() {
 
 	utils.SafeGo(func() { runAutoUpdate(rootLog, *autoUpdate) })
 
-	configs, err := config.LoadAllAccountConfigs(*configDir)
-	if err != nil {
-		rootLog.Error("Failed to load account configs", "dir", *configDir, "error", err)
-		os.Exit(1)
-	}
-
-	for _, cfg := range configs {
-		if !cfg.IsEnabled() {
-			continue
-		}
-		if err := config.Validate(cfg); err != nil {
-			rootLog.Error("Invalid config", "account", cfg.Username, "error", err)
-			os.Exit(1)
-		}
-	}
-
-	rootLog.Info("📂 Loaded account configurations", "count", len(configs), "config_dir", *configDir)
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -187,11 +168,10 @@ func main() {
 		utils.SafeGo(func() { poller.Run(ctx) })
 		rootLog.Info("🗄️ DB mode active — account configs loaded from database", "poll_interval", pollInterval)
 	} else {
-		for _, cfg := range configs {
-			if cfg.IsEnabled() {
-				mgr.Start(cfg)
-			}
-		}
+		fileInterval := resolveFileWatchInterval()
+		fw := managedminer.NewFileWatcher(*configDir, mgr, fileInterval, rootLog)
+		utils.SafeGo(func() { fw.Run(ctx) })
+		rootLog.Info("📁 File watcher active — hot-reload enabled", "dir", *configDir, "poll_interval", fileInterval)
 	}
 
 	analyticsServer := setupAnalyticsServer(":"+httpPort, rootLog, mgr, accountStore)
@@ -294,6 +274,15 @@ func resolvePollInterval() time.Duration {
 		}
 	}
 	return 30 * time.Second
+}
+
+func resolveFileWatchInterval() time.Duration {
+	if s := os.Getenv("FILE_POLL_INTERVAL"); s != "" {
+		if d, err := time.ParseDuration(s); err == nil {
+			return d
+		}
+	}
+	return 5 * time.Second
 }
 
 func runAutoUpdate(rootLog *logger.Logger, autoUpdate bool) {

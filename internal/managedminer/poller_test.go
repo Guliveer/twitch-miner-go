@@ -35,9 +35,9 @@ type fakeMgr struct {
 	restarted []string
 }
 
-func (m *fakeMgr) Start(cfg *config.AccountConfig)   { m.started = append(m.started, cfg.Username) }
-func (m *fakeMgr) Stop(username string)              { m.stopped = append(m.stopped, username) }
-func (m *fakeMgr) Restart(cfg *config.AccountConfig) { m.restarted = append(m.restarted, cfg.Username) }
+func (m *fakeMgr) Start(cfg *config.AccountConfig)          { m.started = append(m.started, cfg.Username) }
+func (m *fakeMgr) Stop(username string)                     { m.stopped = append(m.stopped, username) }
+func (m *fakeMgr) RestartChanged(cfg *config.AccountConfig) { m.restarted = append(m.restarted, cfg.Username) }
 
 func minimalConfigJSON() string {
 	return `{"streamers":[{"username":"s1"}]}`

@@ -35,8 +35,10 @@ var eventEmoji = map[string]string{
 	"STREAMER_OFFLINE":      "⚫",
 	"JOIN_RAID":             "⚔️",
 	"CHAT_MENTION":          "💬",
-	"MOMENT_CLAIM":          "🎉",
-	"GIFTED_SUB":            "🎁",
+	"MOMENT_CLAIM":              "🎉",
+	"GIFTED_SUB":                "🎁",
+	"ACCOUNT_ADDED":             "➕",
+	"ACCOUNT_CONFIG_RELOADED":   "🔄",
 }
 
 // ANSI color codes for terminal output.

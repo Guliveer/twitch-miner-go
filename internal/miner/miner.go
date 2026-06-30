@@ -36,6 +36,7 @@ type Miner struct {
 	chat   *chat.Manager
 	notify            *notify.Dispatcher
 	suppressLifecycle bool
+	oneTimeEvent      model.Event
 
 	running atomic.Bool
 
@@ -88,6 +89,13 @@ func (m *Miner) NotifyDispatcher() *notify.Dispatcher {
 // and MINER_CRASHED notifications are sent. Must be called before Run().
 func (m *Miner) SetSuppressLifecycleNotify(suppress bool) {
 	m.suppressLifecycle = suppress
+}
+
+// SetOneTimeEvent sets an additional event to dispatch once immediately after
+// MINER_STARTED. Intended for DB-driven events like ACCOUNT_ADDED and
+// ACCOUNT_CONFIG_RELOADED. Must be called before Run().
+func (m *Miner) SetOneTimeEvent(event model.Event) {
+	m.oneTimeEvent = event
 }
 
 // IsRunning reports whether the miner is currently running its main loop.
@@ -234,6 +242,11 @@ func (m *Miner) Run(ctx context.Context) error {
 
 	m.notify.DispatchSync(ctx, model.EventMinerStarted, m.cfg.Username,
 		fmt.Sprintf("🚀 Miner started — %s", version.String()))
+
+	if m.oneTimeEvent != "" {
+		m.notify.DispatchSync(ctx, m.oneTimeEvent, m.cfg.Username,
+			oneTimeEventMessage(m.oneTimeEvent, m.cfg.Username))
+	}
 
 	err = g.Wait()
 
@@ -450,4 +463,13 @@ func (m *Miner) joinInitialChats() {
 // It delegates to the handler logic in handler.go.
 func (m *Miner) HandlePubSubMessage(ctx context.Context, msg *model.Message) {
 	m.handleMessage(ctx, msg)
+}
+
+func oneTimeEventMessage(event model.Event, username string) string {
+	switch event {
+	case model.EventAccountConfigReloaded:
+		return fmt.Sprintf("🔄 Account config reloaded from DB — %s", username)
+	default:
+		return fmt.Sprintf("%s — %s", string(event), username)
+	}
 }

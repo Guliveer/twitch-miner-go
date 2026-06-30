@@ -47,6 +47,7 @@ var schema = map[string]any{
 		"DROP_CLAIM", "DROP_STATUS",
 		"CHAT_MENTION", "GIFTED_SUB",
 		"MINER_STARTED", "MINER_STOPPED", "MINER_CRASHED",
+		"ACCOUNT_CONFIG_RELOADED",
 		"TEST",
 	},
 	"defaults": map[string]any{
