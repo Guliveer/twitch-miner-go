@@ -54,6 +54,11 @@ func main() {
 
 	var seeded, failed int
 	for _, cfg := range configs {
+		if err := config.Validate(cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "  SKIP  %s: invalid config: %v\n", cfg.Username, err)
+			failed++
+			continue
+		}
 		blob, err := config.AccountConfigToJSON(cfg)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  ERROR serialising %s: %v\n", cfg.Username, err)

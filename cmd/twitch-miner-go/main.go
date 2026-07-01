@@ -147,7 +147,7 @@ func main() {
 	mgr.SetSuppressLifecycleNotify(*noLifecycleNotify)
 
 	dbEnabled := os.Getenv("DB_ENABLED") == "true"
-	var accountStore store.Store = store.NoopStore{}
+	var accountStore store.Store
 
 	if dbEnabled {
 		dsn := os.Getenv("DB_DSN")

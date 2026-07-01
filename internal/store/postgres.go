@@ -120,7 +120,7 @@ func (s *PostgresStore) GetAccount(username string) (*AccountRow, error) {
 func (s *PostgresStore) TouchLastStartedAt(username string) error {
 	_, err := s.db.Exec(
 		`UPDATE accounts SET last_started_at = $1 WHERE username = $2`,
-		time.Now().Unix(), username,
+		time.Now().UnixMilli(), username,
 	)
 	if err != nil {
 		return fmt.Errorf("touching last_started_at for %s: %w", username, err)
@@ -129,16 +129,17 @@ func (s *PostgresStore) TouchLastStartedAt(username string) error {
 }
 
 // scanRow scans the 5-column account row using the provided Scan function.
+// Timestamps are stored as Unix milliseconds.
 func scanRow(scan func(...any) error) (AccountRow, error) {
 	var r AccountRow
-	var updatedAtUnix int64
-	var lastStartedAtUnix sql.NullInt64
-	if err := scan(&r.Username, &r.ConfigJSON, &r.Enabled, &updatedAtUnix, &lastStartedAtUnix); err != nil {
+	var updatedAtMs int64
+	var lastStartedAtMs sql.NullInt64
+	if err := scan(&r.Username, &r.ConfigJSON, &r.Enabled, &updatedAtMs, &lastStartedAtMs); err != nil {
 		return AccountRow{}, err
 	}
-	r.UpdatedAt = time.Unix(updatedAtUnix, 0)
-	if lastStartedAtUnix.Valid {
-		t := time.Unix(lastStartedAtUnix.Int64, 0)
+	r.UpdatedAt = time.UnixMilli(updatedAtMs)
+	if lastStartedAtMs.Valid {
+		t := time.UnixMilli(lastStartedAtMs.Int64)
 		r.LastStartedAt = &t
 	}
 	return r, nil
@@ -152,7 +153,7 @@ func (s *PostgresStore) UpsertAccount(row AccountRow) error {
 		   SET config_json = EXCLUDED.config_json,
 		       enabled     = EXCLUDED.enabled,
 		       updated_at  = EXCLUDED.updated_at`,
-		row.Username, row.ConfigJSON, row.Enabled, time.Now().Unix(),
+		row.Username, row.ConfigJSON, row.Enabled, time.Now().UnixMilli(),
 	)
 	if err != nil {
 		return fmt.Errorf("upserting account %s: %w", row.Username, err)

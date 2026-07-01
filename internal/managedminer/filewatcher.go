@@ -62,12 +62,14 @@ func (w *FileWatcher) Run(ctx context.Context) {
 func (w *FileWatcher) sync() {
 	cfgs, err := config.LoadAllAccountConfigs(w.dir)
 	if err != nil {
-		// An empty directory is a valid state — treat it as no accounts so
-		// the watermark cleanup below still runs and stops any running miners.
-		if len(w.watermark) > 0 {
+		// Only treat the directory as empty (and stop running miners) when
+		// there genuinely are no YAML files. Any other error (parse failure,
+		// permission issue, transient I/O) is logged and the last-known-good
+		// set of miners is preserved.
+		if isEmptyDirError(w.dir) {
 			cfgs = nil
 		} else {
-			w.log.Error("File watcher: failed to load configs", "dir", w.dir, "error", err)
+			w.log.Error("File watcher: failed to load configs, keeping current miners", "dir", w.dir, "error", err)
 			return
 		}
 	}
@@ -117,6 +119,24 @@ func (w *FileWatcher) sync() {
 			delete(w.watermark, username)
 		}
 	}
+}
+
+// isEmptyDirError reports whether dir contains no YAML/YML files at all.
+func isEmptyDirError(dir string) bool {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return false
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		ext := filepath.Ext(e.Name())
+		if ext == ".yaml" || ext == ".yml" {
+			return false
+		}
+	}
+	return true
 }
 
 // fileMtime returns the modification time (Unix seconds) of the YAML file for

@@ -92,8 +92,8 @@ func (m *Miner) SetSuppressLifecycleNotify(suppress bool) {
 }
 
 // SetOneTimeEvent sets an additional event to dispatch once immediately after
-// MINER_STARTED. Intended for DB-driven events like ACCOUNT_ADDED and
-// ACCOUNT_CONFIG_RELOADED. Must be called before Run().
+// MINER_STARTED. Intended for DB-driven events like ACCOUNT_CONFIG_RELOADED.
+// Must be called before Run().
 func (m *Miner) SetOneTimeEvent(event model.Event) {
 	m.oneTimeEvent = event
 }

@@ -86,8 +86,11 @@ func NewManager(parentCtx context.Context, rootLog *logger.Logger, twitchRT *run
 				if delay > maxRestartDelay {
 					delay = maxRestartDelay
 				}
-				e.miner = miner.NewMiner(e.cfg, log, m.twitchRT)
-				e.miner.SetSuppressLifecycleNotify(m.suppressLifecycleNotify)
+				newMiner := miner.NewMiner(e.cfg, log, m.twitchRT)
+				newMiner.SetSuppressLifecycleNotify(m.suppressLifecycleNotify)
+				m.mu.Lock()
+				e.miner = newMiner
+				m.mu.Unlock()
 			}
 		}()
 	}

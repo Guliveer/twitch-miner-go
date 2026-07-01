@@ -82,7 +82,7 @@ func (p *Poller) sync(_ context.Context) {
 
 	for _, row := range rows {
 		seen[row.Username] = struct{}{}
-		ts := row.UpdatedAt.Unix()
+		ts := row.UpdatedAt.UnixMilli()
 		prev, known := p.watermark[row.Username]
 
 		if !row.Enabled {
