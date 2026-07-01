@@ -73,7 +73,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 - **Followers mode** — automatically watch all followed channels
 - **Notifications** — Telegram, Discord, Webhook, Matrix, Pushover, Gotify
 - **Lifecycle alerts** — start, stop, and crash notifications with version info
-- **Analytics dashboard** — built-in web UI for monitoring
+- **Analytics dashboard** — built-in web UI for monitoring; see also [twitch-miner-go-dashboard](https://github.com/Guliveer/twitch-miner-go-dashboard) for a full management UI (DB mode)
 - **Fly.io ready** — deploy with a single command; Docker Compose and systemd service also supported
 
 ## 1.3. Resource Comparison
@@ -263,6 +263,8 @@ go run ./cmd/db-seed --config /path/to/configs
 | `DELETE` | `/api/accounts/{username}`      | Delete account                           |
 
 All endpoints return `501 Not Implemented` when `DB_ENABLED=false`. Auth follows the same HTTP Basic Auth as the dashboard (`DASHBOARD_USER` / `DASHBOARD_PASSWORD_SHA256`).
+
+> **[twitch-miner-go-dashboard](https://github.com/Guliveer/twitch-miner-go-dashboard)** — a dedicated management UI for DB mode: add, edit, and disable accounts without touching YAML files or the API directly.
 
 ## 1.6. Environment Variables
 
