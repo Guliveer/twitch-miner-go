@@ -91,6 +91,8 @@ type Client struct {
 	// seenClaimable tracks drops that have already been reported as claimable
 	// so we only emit DROP_CLAIM_AVAILABLE once per drop lifetime.
 	seenClaimable sync.Map
+
+	startupDropsLogged bool
 }
 
 // NewClient creates a new high-level Twitch Client from account configuration.
@@ -460,12 +462,7 @@ func (c *Client) contributeToCommunityGoals(ctx context.Context, streamer *model
 func (c *Client) ClaimChannelPoints(ctx context.Context, streamer *model.Streamer, claimID string) error {
 	streamer.Mu.RLock()
 	channelID := streamer.ChannelID
-	username := streamer.Username
 	streamer.Mu.RUnlock()
-
-	c.Log.Info("Claiming channel points bonus",
-		"streamer", username,
-		"claim_id", claimID)
 
 	return c.GQL.ClaimCommunityPoints(ctx, claimID, channelID)
 }

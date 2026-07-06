@@ -26,7 +26,10 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 	}
 
 	if len(dashboardCampaigns) == 0 {
-		c.logDropStatuses(ctx)
+		if !c.startupDropsLogged {
+			c.startupDropsLogged = true
+			c.logDropStatuses(ctx)
+		}
 		return nil
 	}
 
@@ -117,7 +120,12 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		streamer.Mu.Unlock()
 	}
 
-	c.logDropStatuses(ctx)
+	if !c.startupDropsLogged {
+		c.startupDropsLogged = true
+		c.logDropStatuses(ctx)
+	} else {
+		c.logUpdatedDropProgress(ctx, streamers)
+	}
 
 	return nil
 }
@@ -450,11 +458,11 @@ func (c *Client) logDropStatuses(ctx context.Context) {
 				status = "CLAIMABLE"
 			}
 
-		c.Log.Info("📦 Drop in progress",
-			"reward", rewardName,
-			"category", gameName,
-			"progress", fmt.Sprintf("%d/%dm", drop.Self.CurrentMinutesWatched, drop.RequiredMinutes),
-			"status", status)
+			c.Log.Info("📦 Drop in progress",
+				"reward", rewardName,
+				"category", gameName,
+				"progress", fmt.Sprintf("%d/%dm", drop.Self.CurrentMinutesWatched, drop.RequiredMinutes),
+				"status", status)
 
 			if !drop.Self.IsClaimed && drop.Self.DropInstanceID != "" {
 				if _, alreadySeen := c.seenClaimable.LoadOrStore(drop.ID, true); !alreadySeen {
@@ -465,5 +473,57 @@ func (c *Client) logDropStatuses(ctx context.Context) {
 				}
 			}
 		}
+	}
+}
+
+func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.Streamer) {
+	for _, streamer := range streamers {
+		streamer.Mu.RLock()
+		if streamer.Settings == nil || !streamer.Settings.ClaimDrops {
+			streamer.Mu.RUnlock()
+			continue
+		}
+
+		for _, campaign := range streamer.Stream.Campaigns {
+			gameName := ""
+			if campaign.Game != nil {
+				gameName = campaign.Game.Slug
+				if gameName == "" {
+					gameName = campaign.Game.DisplayName
+				}
+			}
+
+			for _, drop := range campaign.Drops {
+				if drop.IsPrintable {
+					status := "IN_PROGRESS"
+					if drop.IsClaimed {
+						status = "CLAIMED"
+					} else if drop.IsClaimable {
+						status = "CLAIMABLE"
+					}
+
+					c.Log.Info("📦 Drop in progress",
+						"streamer", streamer.Username,
+						"reward", drop.Benefit,
+						"category", gameName,
+						"progress", drop.ProgressBar(),
+						"status", status)
+				}
+
+				if drop.IsClaimable {
+					rewardName := drop.Benefit
+					if rewardName == "" {
+						rewardName = drop.Name
+					}
+					if _, alreadySeen := c.seenClaimable.LoadOrStore(drop.ID, true); !alreadySeen {
+						c.Log.Event(ctx, model.EventDropClaimAvailable,
+							fmt.Sprintf("Drop available to claim: %s", rewardName),
+							"reward", rewardName,
+							"category", gameName)
+					}
+				}
+			}
+		}
+		streamer.Mu.RUnlock()
 	}
 }
