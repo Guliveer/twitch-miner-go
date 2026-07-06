@@ -1,16 +1,16 @@
 # Graph Report - twitch-miner-go  (2026-07-06)
 
 ## Corpus Check
-- 152 files · ~134,303 words
+- 153 files · ~135,363 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1877 nodes · 3482 edges · 113 communities (90 shown, 23 thin omitted)
-- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 329 edges (avg confidence: 0.8)
+- 1912 nodes · 3553 edges · 113 communities (89 shown, 24 thin omitted)
+- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 330 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `040a07cb`
+- Built from commit: `c1faed1f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -145,7 +145,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (113 total, 23 thin omitted)
+## Communities (113 total, 24 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
@@ -157,7 +157,7 @@ Nodes (58): addCategoryItem(), addStreamerItem(), addTag(), addTeamItem(), api()
 
 ### Community 2 - "Community 2"
 Cohesion: 0.06
-Nodes (76): B, Bet, BetSettingsConfig, FilterConditionConfig, BetSettings, Mutex, Streamer, Time (+68 more)
+Nodes (74): B, Bet, BetSettings, Mutex, Streamer, Time, T, BetSettings (+66 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.04
@@ -176,8 +176,8 @@ Cohesion: 0.05
 Nodes (43): 1.10.1. Managing the Service, 1.10.2. Uninstalling, 1.10.3. Default File Locations, 1.10. Linux Service (systemd / OpenRC), 1.11.1. Managing the Service, 1.11.2. Uninstalling, 1.11. Windows Service, 1.12.1. Setup (+35 more)
 
 ### Community 7 - "Community 7"
-Cohesion: 0.07
-Nodes (37): BetSettingsConfig, CategoryConfig, ResolveBatchConfig(), AuthConfig, boolPtr(), TestIsBatchEnabled_Nil(), TestResolveBatchConfig_BothNil(), TestResolveBatchConfig_GlobalOnly() (+29 more)
+Cohesion: 0.06
+Nodes (39): BetSettingsConfig, CategoryConfig, ResolveBatchConfig(), AuthConfig, boolPtr(), TestIsBatchEnabled_Nil(), TestResolveBatchConfig_BothNil(), TestResolveBatchConfig_GlobalOnly() (+31 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.08
@@ -193,7 +193,7 @@ Nodes (14): generateDeviceID(), NewAuthenticator(), NewForTest(), CookieJar, Acc
 
 ### Community 11 - "Community 11"
 Cohesion: 0.06
-Nodes (29): NewManager(), Handler, NewHandler(), Manager, Client, Context, Handler, Logger (+21 more)
+Nodes (25): NewManager(), Handler, NewHandler(), Manager, Client, Context, Handler, Logger (+17 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.08
@@ -224,8 +224,8 @@ Cohesion: 0.13
 Nodes (22): historyAggregate, HistoryEntry, Request, ResponseWriter, AnalyticsServer, Streamer, T, errorResponse (+14 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.07
-Nodes (38): Int64, T, Outcome, Context, EventPrediction, Message, Miner, Streamer (+30 more)
+Cohesion: 0.06
+Nodes (47): Int64, T, CommunityGoal, Context, Event, Message, Miner, Outcome (+39 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.13
@@ -236,8 +236,8 @@ Cohesion: 0.09
 Nodes (13): Connection, Context, Mutex, Provider, T, newTestConnection(), TestHandleResponse_ERR_BADAUTH_AlreadyRefreshedByAnother(), TestHandleResponse_ERR_BADAUTH_RefreshesAndResubscribes() (+5 more)
 
 ### Community 22 - "Community 22"
-Cohesion: 0.11
-Nodes (23): Attr, Context, Event, Handler, Level, Mutex, Logger, Logger (+15 more)
+Cohesion: 0.12
+Nodes (21): Attr, Context, Event, Handler, Level, Mutex, Logger, T (+13 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.18
@@ -260,16 +260,16 @@ Cohesion: 0.08
 Nodes (24): `401 Unauthorized` errors in logs, All bets on one outcome keep losing, `authenticated as "X" but config expects "Y"`, Authentication errors, Config changes not taking effect, Config issues, Drop issues, Drops not being claimed (+16 more)
 
 ### Community 28 - "Community 28"
-Cohesion: 0.09
-Nodes (22): API, CategoryWatcher, Dispatcher, AccountConfig, Bool, DeviceCodeStatus, Event, EventPrediction (+14 more)
+Cohesion: 0.10
+Nodes (20): API, CategoryWatcher, Dispatcher, AccountConfig, Bool, DeviceCodeStatus, Event, EventPrediction (+12 more)
 
 ### Community 29 - "Community 29"
 Cohesion: 0.09
 Nodes (11): CommunityGoal, HistoryEntry, PointsMultiplier, RWMutex, StreamerSettings, Time, HistoryEntry, PointsMultiplier (+3 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.30
-Nodes (9): CommunityGoal, Context, Event, Message, Miner, Streamer, extractNestedInt(), mapReasonToEvent() (+1 more)
+Cohesion: 0.12
+Nodes (18): Client, Context, EventPrediction, Message, Miner, Mutex, Provider, Streamer (+10 more)
 
 ### Community 31 - "Community 31"
 Cohesion: 0.15
@@ -280,16 +280,16 @@ Cohesion: 0.11
 Nodes (18): `batch` (global batching defaults), `bet.filter_condition` (optional), `bet` (nested under `streamer_defaults` and per-streamer `settings`), `blacklist`, `category_blacklist`, `category_watcher`, Configuration Reference, `features` (+10 more)
 
 ### Community 33 - "Community 33"
-Cohesion: 0.14
-Nodes (26): AnalyticsServer, Context, Duration, Level, Logger, Manager, Store, getEnv() (+18 more)
+Cohesion: 0.18
+Nodes (21): AnalyticsServer, Context, Duration, Level, Manager, Store, getEnv(), ColorSupported() (+13 more)
 
 ### Community 34 - "Community 34"
 Cohesion: 0.07
 Nodes (48): AccountConfigFromJSON(), AccountConfigToJSON(), applyDefaults(), applyEnvOverrides(), isOwnerAccount(), LoadAccountConfig(), LoadAllAccountConfigs(), parseProxyURL() (+40 more)
 
 ### Community 35 - "Community 35"
-Cohesion: 0.13
-Nodes (18): AccountConfig, AccountRow, Store, T, fakeMgr, fakePollerStore, minimalConfigJSON(), newTestPoller() (+10 more)
+Cohesion: 0.09
+Nodes (32): AccountConfig, Manager, T, AccountConfig, AccountRow, Logger, Store, T (+24 more)
 
 ### Community 36 - "Community 36"
 Cohesion: 0.27
@@ -329,7 +329,7 @@ Nodes (4): promptLine(), loginResponse, Authenticator, Context
 
 ### Community 46 - "Community 46"
 Cohesion: 0.20
-Nodes (11): CancelFunc, AccountConfig, Context, Event, Logger, RWMutex, Twitch, entry (+3 more)
+Nodes (11): CancelFunc, AccountConfig, Context, Event, Logger, Miner, RWMutex, Twitch (+3 more)
 
 ### Community 47 - "Community 47"
 Cohesion: 0.42
@@ -444,44 +444,40 @@ Cohesion: 0.37
 Nodes (13): NewServer(), HandlerFunc, T, TestCheckForUpdate_DevVersion(), TestCheckForUpdate_NewerAvailable(), TestCheckForUpdate_NoMatchingAsset(), TestCheckForUpdate_PopulatesAssetURL(), TestCheckForUpdate_ServerError() (+5 more)
 
 ### Community 108 - "Community 108"
-Cohesion: 0.28
-Nodes (12): ghAsset, Context, ghAsset, ghRelease, UpdateInfo, CheckForUpdate(), checkWithURL(), DownloadAsset() (+4 more)
-
-### Community 109 - "Community 109"
-Cohesion: 0.41
-Nodes (12): AccountConfig, Manager, T, newTestManager(), testConfig(), TestManager_EntriesReturnsSnapshot(), TestManager_RestartReplacesEntry(), TestManager_StartAddsEntry() (+4 more)
+Cohesion: 0.20
+Nodes (17): Logger, ghAsset, Context, Logger, runAutoUpdate(), ghAsset, ghRelease, UpdateInfo (+9 more)
 
 ### Community 110 - "Community 110"
-Cohesion: 0.27
+Cohesion: 0.31
 Nodes (8): Logger, T, Twitch, envOrDefault(), LoadTwitchFromEnv(), TestClientIDsForGQL_Dedup(), TestLoadTwitchFromEnv_Defaults(), TestLoadTwitchFromEnv_EnvOverride()
 
 ### Community 111 - "Community 111"
-Cohesion: 0.31
-Nodes (3): GenerateHex(), PubSubTopic, Request
+Cohesion: 0.18
+Nodes (7): GenerateHex(), PubSubTopic, Request, Context, EventPrediction, Streamer, Client
 
 ### Community 112 - "Community 112"
 Cohesion: 0.22
 Nodes (8): Attribution, Code of Conduct, Corrective Action Guide, Enforcement, Our Pledge, Our Standards, Reporting, Scope
 
 ## Knowledge Gaps
-- **467 isolated node(s):** `_edit-config.sh script`, `DEFAULT_SERVICE_NAME`, `DEFAULT_INSTALL_DIR`, `DEFAULT_CONFIG_DIR`, `DEFAULT_DATA_DIR` (+462 more)
+- **473 isolated node(s):** `_edit-config.sh script`, `DEFAULT_SERVICE_NAME`, `DEFAULT_INSTALL_DIR`, `DEFAULT_CONFIG_DIR`, `DEFAULT_DATA_DIR` (+468 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **23 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **24 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `main()` connect `Community 33` to `Community 34`, `Community 100`, `Community 106`, `Community 11`, `Community 44`, `Community 108`, `Community 110`, `Community 22`, `Community 28`, `Community 31`?**
-  _High betweenness centrality (0.218) - this node is a cross-community bridge._
+  _High betweenness centrality (0.215) - this node is a cross-community bridge._
 - **Why does `Parse()` connect `Community 100` to `Community 33`, `Community 34`, `Community 108`, `Community 17`, `Community 19`, `Community 24`?**
-  _High betweenness centrality (0.129) - this node is a cross-community bridge._
-- **Why does `Setup()` connect `Community 22` to `Community 33`, `Community 4`, `Community 15`, `Community 20`, `Community 21`?**
-  _High betweenness centrality (0.126) - this node is a cross-community bridge._
+  _High betweenness centrality (0.137) - this node is a cross-community bridge._
+- **Why does `Setup()` connect `Community 22` to `Community 33`, `Community 35`, `Community 4`, `Community 15`, `Community 20`, `Community 21`, `Community 30`?**
+  _High betweenness centrality (0.136) - this node is a cross-community bridge._
 - **Are the 39 inferred relationships involving `DefaultBetSettings()` (e.g. with `BenchmarkBetCalculate()` and `BenchmarkFilterConditionSkip()`) actually correct?**
   _`DefaultBetSettings()` has 39 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 23 inferred relationships involving `main()` (e.g. with `.Load()` and `getEnv()`) actually correct?**
   _`main()` has 23 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `_edit-config.sh script`, `DEFAULT_SERVICE_NAME`, `DEFAULT_INSTALL_DIR` to the rest of the system?**
-  _467 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _473 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.05069124423963134 - nodes in this community are weakly interconnected._

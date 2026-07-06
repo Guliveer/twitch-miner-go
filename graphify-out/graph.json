@@ -652,7 +652,7 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "cmd_twitch_miner_go_main_go_logger",
-      "community": 33,
+      "community": 108,
       "norm_label": "logger"
     },
     {
@@ -742,7 +742,7 @@
       "source_location": "L365",
       "_origin": "ast",
       "id": "twitch_miner_go_main_runautoupdate",
-      "community": 33,
+      "community": 108,
       "norm_label": "runautoupdate()"
     },
     {
@@ -1144,7 +1144,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "auth_cookiejar_load",
-      "community": 110,
+      "community": 34,
       "norm_label": ".load()"
     },
     {
@@ -2014,7 +2014,7 @@
       "source_location": "L169",
       "_origin": "ast",
       "id": "config_betsettingsconfig",
-      "community": 2,
+      "community": 7,
       "norm_label": "betsettingsconfig"
     },
     {
@@ -2024,7 +2024,7 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "filterconditionconfig",
-      "community": 2,
+      "community": 7,
       "norm_label": "filterconditionconfig"
     },
     {
@@ -5663,7 +5663,7 @@
       "source_file": "internal/managedminer/manager.go",
       "source_location": "L26",
       "_origin": "ast",
-      "id": "miner",
+      "id": "internal_managedminer_manager_go_miner",
       "community": 46,
       "norm_label": "miner"
     },
@@ -5824,7 +5824,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "managedminer_manager_test",
-      "community": 109,
+      "community": 35,
       "norm_label": "manager_test.go"
     },
     {
@@ -5834,7 +5834,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "managedminer_manager_test_newtestmanager",
-      "community": 109,
+      "community": 35,
       "norm_label": "newtestmanager()"
     },
     {
@@ -5844,7 +5844,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "internal_managedminer_manager_test_go_t",
-      "community": 109,
+      "community": 35,
       "norm_label": "t"
     },
     {
@@ -5854,7 +5854,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "internal_managedminer_manager_test_go_manager",
-      "community": 109,
+      "community": 35,
       "norm_label": "manager"
     },
     {
@@ -5864,7 +5864,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "managedminer_manager_test_testconfig",
-      "community": 109,
+      "community": 35,
       "norm_label": "testconfig()"
     },
     {
@@ -5874,7 +5874,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "internal_managedminer_manager_test_go_accountconfig",
-      "community": 109,
+      "community": 35,
       "norm_label": "accountconfig"
     },
     {
@@ -5884,7 +5884,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_startaddsentry",
-      "community": 109,
+      "community": 35,
       "norm_label": "testmanager_startaddsentry()"
     },
     {
@@ -5894,7 +5894,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_startidempotent",
-      "community": 109,
+      "community": 35,
       "norm_label": "testmanager_startidempotent()"
     },
     {
@@ -5904,7 +5904,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_stopremovesentry",
-      "community": 109,
+      "community": 35,
       "norm_label": "testmanager_stopremovesentry()"
     },
     {
@@ -5914,7 +5914,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_stopunknownisnoop",
-      "community": 109,
+      "community": 35,
       "norm_label": "testmanager_stopunknownisnoop()"
     },
     {
@@ -5924,7 +5924,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_restartreplacesentry",
-      "community": 109,
+      "community": 35,
       "norm_label": "testmanager_restartreplacesentry()"
     },
     {
@@ -5934,7 +5934,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_stopallclearsentries",
-      "community": 109,
+      "community": 35,
       "norm_label": "testmanager_stopallclearsentries()"
     },
     {
@@ -5944,7 +5944,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_entriesreturnssnapshot",
-      "community": 109,
+      "community": 35,
       "norm_label": "testmanager_entriesreturnssnapshot()"
     },
     {
@@ -6214,7 +6214,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "managedminer_poller_test_discardlogger",
-      "community": 22,
+      "community": 35,
       "norm_label": "discardlogger()"
     },
     {
@@ -6224,7 +6224,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "internal_managedminer_poller_test_go_logger",
-      "community": 22,
+      "community": 35,
       "norm_label": "logger"
     },
     {
@@ -6464,7 +6464,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "miner_handler",
-      "community": 30,
+      "community": 19,
       "norm_label": "handler.go"
     },
     {
@@ -6474,7 +6474,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "internal_miner_handler_go_miner_miner",
-      "community": 30,
+      "community": 19,
       "norm_label": "miner"
     },
     {
@@ -6484,7 +6484,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "miner_miner_handlemessage",
-      "community": 30,
+      "community": 19,
       "norm_label": ".handlemessage()"
     },
     {
@@ -6494,7 +6494,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "internal_miner_handler_go_context",
-      "community": 30,
+      "community": 19,
       "norm_label": "context"
     },
     {
@@ -6504,7 +6504,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "internal_miner_handler_go_message",
-      "community": 30,
+      "community": 19,
       "norm_label": "message"
     },
     {
@@ -6514,7 +6514,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "miner_miner_handlecommunitypoints",
-      "community": 30,
+      "community": 19,
       "norm_label": ".handlecommunitypoints()"
     },
     {
@@ -6524,7 +6524,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "internal_miner_handler_go_streamer",
-      "community": 30,
+      "community": 19,
       "norm_label": "streamer"
     },
     {
@@ -6534,7 +6534,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "miner_miner_handlepointsearnedorspent",
-      "community": 30,
+      "community": 19,
       "norm_label": ".handlepointsearnedorspent()"
     },
     {
@@ -6544,7 +6544,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "miner_miner_handleclaimavailable",
-      "community": 30,
+      "community": 19,
       "norm_label": ".handleclaimavailable()"
     },
     {
@@ -6554,7 +6554,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "miner_miner_handlevideoplayback",
-      "community": 30,
+      "community": 19,
       "norm_label": ".handlevideoplayback()"
     },
     {
@@ -6564,7 +6564,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "miner_miner_handlestreamup",
-      "community": 30,
+      "community": 19,
       "norm_label": ".handlestreamup()"
     },
     {
@@ -6574,7 +6574,7 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "miner_miner_handlestreamdown",
-      "community": 30,
+      "community": 19,
       "norm_label": ".handlestreamdown()"
     },
     {
@@ -6584,7 +6584,7 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "miner_miner_handleviewcount",
-      "community": 30,
+      "community": 19,
       "norm_label": ".handleviewcount()"
     },
     {
@@ -6594,7 +6594,7 @@
       "source_location": "L197",
       "_origin": "ast",
       "id": "miner_miner_handleraid",
-      "community": 30,
+      "community": 19,
       "norm_label": ".handleraid()"
     },
     {
@@ -6604,7 +6604,7 @@
       "source_location": "L254",
       "_origin": "ast",
       "id": "miner_miner_handlecommunitymoments",
-      "community": 30,
+      "community": 19,
       "norm_label": ".handlecommunitymoments()"
     },
     {
@@ -6614,7 +6614,7 @@
       "source_location": "L290",
       "_origin": "ast",
       "id": "miner_miner_handlecommunitygoals",
-      "community": 30,
+      "community": 19,
       "norm_label": ".handlecommunitygoals()"
     },
     {
@@ -6624,7 +6624,7 @@
       "source_location": "L331",
       "_origin": "ast",
       "id": "miner_miner_updatechatpresence",
-      "community": 30,
+      "community": 19,
       "norm_label": ".updatechatpresence()"
     },
     {
@@ -6634,7 +6634,7 @@
       "source_location": "L353",
       "_origin": "ast",
       "id": "miner_handler_mapreasontoevent",
-      "community": 30,
+      "community": 19,
       "norm_label": "mapreasontoevent()"
     },
     {
@@ -6644,7 +6644,7 @@
       "source_location": "L353",
       "_origin": "ast",
       "id": "internal_miner_handler_go_event",
-      "community": 30,
+      "community": 19,
       "norm_label": "event"
     },
     {
@@ -6674,7 +6674,7 @@
       "source_location": "L405",
       "_origin": "ast",
       "id": "miner_handler_parsecommunitygoal",
-      "community": 30,
+      "community": 19,
       "norm_label": "parsecommunitygoal()"
     },
     {
@@ -6684,7 +6684,7 @@
       "source_location": "L405",
       "_origin": "ast",
       "id": "internal_miner_handler_go_communitygoal",
-      "community": 30,
+      "community": 19,
       "norm_label": "communitygoal"
     },
     {
@@ -6694,8 +6694,358 @@
       "source_location": "L413",
       "_origin": "ast",
       "id": "miner_handler_extractnestedint",
-      "community": 30,
+      "community": 19,
       "norm_label": "extractnestedint()"
+    },
+    {
+      "label": "handler_test.go",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "miner_handler_test",
+      "community": 30,
+      "norm_label": "handler_test.go"
+    },
+    {
+      "label": "mockTwitch",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "miner_mocktwitch",
+      "community": 30,
+      "norm_label": "mocktwitch"
+    },
+    {
+      "label": "Mutex",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "internal_miner_handler_test_go_mutex",
+      "community": 30,
+      "norm_label": "mutex"
+    },
+    {
+      "label": ".JoinRaid()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_joinraid",
+      "community": 30,
+      "norm_label": ".joinraid()"
+    },
+    {
+      "label": "Context",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "internal_miner_handler_test_go_context",
+      "community": 30,
+      "norm_label": "context"
+    },
+    {
+      "label": ".Login()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_login",
+      "community": 30,
+      "norm_label": ".login()"
+    },
+    {
+      "label": ".CheckStreamerOnline()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_checkstreameronline",
+      "community": 30,
+      "norm_label": ".checkstreameronline()"
+    },
+    {
+      "label": "Streamer",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "internal_miner_handler_test_go_streamer",
+      "community": 30,
+      "norm_label": "streamer"
+    },
+    {
+      "label": ".LoadChannelPointsContext()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_loadchannelpointscontext",
+      "community": 30,
+      "norm_label": ".loadchannelpointscontext()"
+    },
+    {
+      "label": ".SendMinuteWatchedEvents()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L32",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_sendminutewatchedevents",
+      "community": 30,
+      "norm_label": ".sendminutewatchedevents()"
+    },
+    {
+      "label": ".MakePrediction()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_makeprediction",
+      "community": 30,
+      "norm_label": ".makeprediction()"
+    },
+    {
+      "label": "EventPrediction",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "internal_miner_handler_test_go_eventprediction",
+      "community": 30,
+      "norm_label": "eventprediction"
+    },
+    {
+      "label": ".ClaimChannelPoints()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_claimchannelpoints",
+      "community": 30,
+      "norm_label": ".claimchannelpoints()"
+    },
+    {
+      "label": ".ClaimMoment()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_claimmoment",
+      "community": 30,
+      "norm_label": ".claimmoment()"
+    },
+    {
+      "label": ".SyncCampaigns()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_synccampaigns",
+      "community": 30,
+      "norm_label": ".synccampaigns()"
+    },
+    {
+      "label": ".ClaimAllDropsFromInventory()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_claimalldropsfrominventory",
+      "community": 30,
+      "norm_label": ".claimalldropsfrominventory()"
+    },
+    {
+      "label": ".GetChannelID()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_getchannelid",
+      "community": 30,
+      "norm_label": ".getchannelid()"
+    },
+    {
+      "label": ".GetFollowers()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_getfollowers",
+      "community": 30,
+      "norm_label": ".getfollowers()"
+    },
+    {
+      "label": ".CheckViewerIsMod()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_checkviewerismod",
+      "community": 30,
+      "norm_label": ".checkviewerismod()"
+    },
+    {
+      "label": ".RefreshSpadeURL()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_refreshspadeurl",
+      "community": 30,
+      "norm_label": ".refreshspadeurl()"
+    },
+    {
+      "label": ".GQLClient()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_gqlclient",
+      "community": 30,
+      "norm_label": ".gqlclient()"
+    },
+    {
+      "label": "Client",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "internal_miner_handler_test_go_client",
+      "community": 30,
+      "norm_label": "client"
+    },
+    {
+      "label": ".AuthProvider()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L43",
+      "_origin": "ast",
+      "id": "miner_mocktwitch_authprovider",
+      "community": 30,
+      "norm_label": ".authprovider()"
+    },
+    {
+      "label": "Provider",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L43",
+      "_origin": "ast",
+      "id": "internal_miner_handler_test_go_provider",
+      "community": 30,
+      "norm_label": "provider"
+    },
+    {
+      "label": "newTestMiner()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "miner_handler_test_newtestminer",
+      "community": 30,
+      "norm_label": "newtestminer()"
+    },
+    {
+      "label": "T",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "internal_miner_handler_test_go_t",
+      "community": 30,
+      "norm_label": "t"
+    },
+    {
+      "label": "Miner",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "internal_miner_handler_test_go_miner",
+      "community": 30,
+      "norm_label": "miner"
+    },
+    {
+      "label": "raidMessage()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "miner_handler_test_raidmessage",
+      "community": 30,
+      "norm_label": "raidmessage()"
+    },
+    {
+      "label": "Message",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "internal_miner_handler_test_go_message",
+      "community": 30,
+      "norm_label": "message"
+    },
+    {
+      "label": "TestHandleRaid_Dedup()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L84",
+      "_origin": "ast",
+      "id": "miner_handler_test_testhandleraid_dedup",
+      "community": 30,
+      "norm_label": "testhandleraid_dedup()"
+    },
+    {
+      "label": "TestHandleRaid_FollowRaidDisabled()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L156",
+      "_origin": "ast",
+      "id": "miner_handler_test_testhandleraid_followraiddisabled",
+      "community": 30,
+      "norm_label": "testhandleraid_followraiddisabled()"
+    },
+    {
+      "label": "TestHandleRaid_NoStreamer()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L188",
+      "_origin": "ast",
+      "id": "miner_handler_test_testhandleraid_nostreamer",
+      "community": 30,
+      "norm_label": "testhandleraid_nostreamer()"
+    },
+    {
+      "label": "TestHandleRaid_MissingRaidData()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L206",
+      "_origin": "ast",
+      "id": "miner_handler_test_testhandleraid_missingraiddata",
+      "community": 30,
+      "norm_label": "testhandleraid_missingraiddata()"
+    },
+    {
+      "label": "TestHandleRaid_EmptyRaidID()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L246",
+      "_origin": "ast",
+      "id": "miner_handler_test_testhandleraid_emptyraidid",
+      "community": 30,
+      "norm_label": "testhandleraid_emptyraidid()"
+    },
+    {
+      "label": "TestHandleRaid_WrongMessageType()",
+      "file_type": "code",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L289",
+      "_origin": "ast",
+      "id": "miner_handler_test_testhandleraid_wrongmessagetype",
+      "community": 30,
+      "norm_label": "testhandleraid_wrongmessagetype()"
     },
     {
       "label": "Miner",
@@ -6814,7 +7164,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "internal_miner_miner_go_streamer",
-      "community": 28,
+      "community": 109,
       "norm_label": "streamer"
     },
     {
@@ -6894,7 +7244,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "miner_miner_streamers",
-      "community": 28,
+      "community": 109,
       "norm_label": ".streamers()"
     },
     {
@@ -7044,7 +7394,7 @@
       "source_location": "L427",
       "_origin": "ast",
       "id": "miner_miner_streamertopics",
-      "community": 28,
+      "community": 109,
       "norm_label": ".streamertopics()"
     },
     {
@@ -7054,7 +7404,7 @@
       "source_location": "L427",
       "_origin": "ast",
       "id": "internal_miner_miner_go_pubsubtopic",
-      "community": 28,
+      "community": 109,
       "norm_label": "pubsubtopic"
     },
     {
@@ -14874,7 +15224,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "internal_twitch_predictions_go_twitch_client",
-      "community": 11,
+      "community": 111,
       "norm_label": "client"
     },
     {
@@ -14884,7 +15234,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "twitch_client_makeprediction",
-      "community": 11,
+      "community": 111,
       "norm_label": ".makeprediction()"
     },
     {
@@ -14894,7 +15244,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "internal_twitch_predictions_go_context",
-      "community": 11,
+      "community": 111,
       "norm_label": "context"
     },
     {
@@ -14904,7 +15254,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "internal_twitch_predictions_go_streamer",
-      "community": 11,
+      "community": 111,
       "norm_label": "streamer"
     },
     {
@@ -14914,7 +15264,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "internal_twitch_predictions_go_eventprediction",
-      "community": 11,
+      "community": 111,
       "norm_label": "eventprediction"
     },
     {
@@ -15034,7 +15384,7 @@
       "source_location": "L183",
       "_origin": "ast",
       "id": "updater_updater_replacebinary",
-      "community": 33,
+      "community": 108,
       "norm_label": "replacebinary()"
     },
     {
@@ -15044,7 +15394,7 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "updater_updater_exitforrestart",
-      "community": 33,
+      "community": 108,
       "norm_label": "exitforrestart()"
     },
     {
@@ -15054,7 +15404,7 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "internal_updater_updater_go_logger",
-      "community": 33,
+      "community": 108,
       "norm_label": "logger"
     },
     {
@@ -19927,9 +20277,9 @@
       "source_file": "cmd/twitch-miner-go/main.go",
       "source_location": "L255",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_miner_go_main",
-      "target": "twitch_miner_go_main_resolvelogdir",
-      "confidence_score": 1.0
+      "target": "twitch_miner_go_main_resolvelogdir"
     },
     {
       "relation": "contains",
@@ -19957,9 +20307,9 @@
       "source_file": "cmd/twitch-miner-go/main.go",
       "source_location": "L248",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_miner_go_main",
-      "target": "twitch_miner_go_main_resolvelognotime",
-      "confidence_score": 1.0
+      "target": "twitch_miner_go_main_resolvelognotime"
     },
     {
       "relation": "contains",
@@ -20226,9 +20576,9 @@
       "source_file": "cmd/twitch-miner-go/main.go",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_miner_go_main_main",
-      "target": "twitch_miner_go_main_resolvelogdir",
-      "confidence_score": 1.0
+      "target": "twitch_miner_go_main_resolvelogdir"
     },
     {
       "relation": "calls",
@@ -20259,9 +20609,9 @@
       "source_file": "cmd/twitch-miner-go/main.go",
       "source_location": "L123",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_miner_go_main_main",
-      "target": "twitch_miner_go_main_resolvelognotime",
-      "confidence_score": 1.0
+      "target": "twitch_miner_go_main_resolvelognotime"
     },
     {
       "relation": "calls",
@@ -20819,9 +21169,9 @@
       "source_file": "internal/auth/auth.go",
       "source_location": "L287",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_auth_auth_go_auth_authenticator",
-      "target": "auth_authenticator_devicecodestatus",
-      "confidence_score": 1.0
+      "target": "auth_authenticator_devicecodestatus"
     },
     {
       "relation": "method",
@@ -20954,9 +21304,9 @@
       "source_location": "L51",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "internal_auth_auth_go_auth_authenticator",
-      "target": "internal_auth_auth_go_mutex",
-      "confidence_score": 1.0
+      "target": "internal_auth_auth_go_mutex"
     },
     {
       "relation": "references",
@@ -21174,9 +21524,9 @@
       "source_location": "L287",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "auth_authenticator_devicecodestatus",
-      "target": "internal_auth_auth_go_devicecodestatus",
-      "confidence_score": 1.0
+      "target": "internal_auth_auth_go_devicecodestatus"
     },
     {
       "relation": "calls",
@@ -21436,9 +21786,9 @@
       "source_file": "internal/auth/device_code.go",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "auth_device_code",
-      "target": "auth_devicecodestatus",
-      "confidence_score": 1.0
+      "target": "auth_devicecodestatus"
     },
     {
       "relation": "contains",
@@ -30634,6 +30984,17 @@
       "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "miner_handler_test_newtestminer",
+      "target": "logger_logger_setup"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
       "source_file": "internal/notify/batcher_test.go",
       "source_location": "L45",
       "weight": 1.0,
@@ -31790,9 +32151,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "context": "field",
-      "confidence_score": 1.0,
       "source": "managedminer_entry",
-      "target": "miner"
+      "target": "internal_managedminer_manager_go_miner",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -34060,6 +34421,751 @@
       "target": "model_community_goal_communitygoalfrompubsub"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "miner_handler_test",
+      "target": "miner_handler_test_newtestminer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "miner_handler_test",
+      "target": "miner_handler_test_raidmessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L84",
+      "weight": 1.0,
+      "source": "miner_handler_test",
+      "target": "miner_handler_test_testhandleraid_dedup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L246",
+      "weight": 1.0,
+      "source": "miner_handler_test",
+      "target": "miner_handler_test_testhandleraid_emptyraidid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L156",
+      "weight": 1.0,
+      "source": "miner_handler_test",
+      "target": "miner_handler_test_testhandleraid_followraiddisabled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L206",
+      "weight": 1.0,
+      "source": "miner_handler_test",
+      "target": "miner_handler_test_testhandleraid_missingraiddata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L188",
+      "weight": 1.0,
+      "source": "miner_handler_test",
+      "target": "miner_handler_test_testhandleraid_nostreamer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L289",
+      "weight": 1.0,
+      "source": "miner_handler_test",
+      "target": "miner_handler_test_testhandleraid_wrongmessagetype",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "miner_handler_test",
+      "target": "miner_mocktwitch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "miner_handler_test_newtestminer",
+      "target": "miner_mocktwitch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "field",
+      "source": "miner_mocktwitch",
+      "target": "internal_miner_handler_test_go_mutex",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_authprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_checkstreameronline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_checkviewerismod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_claimalldropsfrominventory",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_claimchannelpoints",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_claimmoment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_getchannelid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_getfollowers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_gqlclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_joinraid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_loadchannelpointscontext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_login",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_makeprediction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_refreshspadeurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_sendminutewatchedevents",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "miner_mocktwitch",
+      "target": "miner_mocktwitch_synccampaigns",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L22",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_joinraid",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_checkstreameronline",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L40",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_checkviewerismod",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L37",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_claimalldropsfrominventory",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_claimchannelpoints",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L35",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_claimmoment",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L38",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_getchannelid",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L39",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_getfollowers",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L31",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_loadchannelpointscontext",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_login",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L33",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_makeprediction",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_refreshspadeurl",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L32",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_sendminutewatchedevents",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_synccampaigns",
+      "target": "internal_miner_handler_test_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_checkstreameronline",
+      "target": "internal_miner_handler_test_go_streamer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L40",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_checkviewerismod",
+      "target": "internal_miner_handler_test_go_streamer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_claimchannelpoints",
+      "target": "internal_miner_handler_test_go_streamer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L31",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_loadchannelpointscontext",
+      "target": "internal_miner_handler_test_go_streamer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L33",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_makeprediction",
+      "target": "internal_miner_handler_test_go_streamer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_refreshspadeurl",
+      "target": "internal_miner_handler_test_go_streamer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L32",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_sendminutewatchedevents",
+      "target": "internal_miner_handler_test_go_streamer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_synccampaigns",
+      "target": "internal_miner_handler_test_go_streamer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L33",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_mocktwitch_makeprediction",
+      "target": "internal_miner_handler_test_go_eventprediction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "miner_mocktwitch_gqlclient",
+      "target": "internal_miner_handler_test_go_client",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L43",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "miner_mocktwitch_authprovider",
+      "target": "internal_miner_handler_test_go_provider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "miner_handler_test_newtestminer",
+      "target": "internal_miner_handler_test_go_miner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_handler_test_newtestminer",
+      "target": "internal_miner_handler_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L85",
+      "weight": 1.0,
+      "source": "miner_handler_test_testhandleraid_dedup",
+      "target": "miner_handler_test_newtestminer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L247",
+      "weight": 1.0,
+      "source": "miner_handler_test_testhandleraid_emptyraidid",
+      "target": "miner_handler_test_newtestminer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L157",
+      "weight": 1.0,
+      "source": "miner_handler_test_testhandleraid_followraiddisabled",
+      "target": "miner_handler_test_newtestminer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L207",
+      "weight": 1.0,
+      "source": "miner_handler_test_testhandleraid_missingraiddata",
+      "target": "miner_handler_test_newtestminer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L189",
+      "weight": 1.0,
+      "source": "miner_handler_test_testhandleraid_nostreamer",
+      "target": "miner_handler_test_newtestminer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L290",
+      "weight": 1.0,
+      "source": "miner_handler_test_testhandleraid_wrongmessagetype",
+      "target": "miner_handler_test_newtestminer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L84",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_handler_test_testhandleraid_dedup",
+      "target": "internal_miner_handler_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L246",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_handler_test_testhandleraid_emptyraidid",
+      "target": "internal_miner_handler_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L156",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_handler_test_testhandleraid_followraiddisabled",
+      "target": "internal_miner_handler_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L206",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_handler_test_testhandleraid_missingraiddata",
+      "target": "internal_miner_handler_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L188",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_handler_test_testhandleraid_nostreamer",
+      "target": "internal_miner_handler_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L289",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "miner_handler_test_testhandleraid_wrongmessagetype",
+      "target": "internal_miner_handler_test_go_t",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L68",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "miner_handler_test_raidmessage",
+      "target": "internal_miner_handler_test_go_message",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "miner_handler_test_testhandleraid_dedup",
+      "target": "miner_handler_test_raidmessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L172",
+      "weight": 1.0,
+      "source": "miner_handler_test_testhandleraid_followraiddisabled",
+      "target": "miner_handler_test_raidmessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/miner/handler_test.go",
+      "source_location": "L194",
+      "weight": 1.0,
+      "source": "miner_handler_test_testhandleraid_nostreamer",
+      "target": "miner_handler_test_raidmessage",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "internal/miner/miner.go",
@@ -34239,9 +35345,9 @@
       "source_file": "internal/miner/miner.go",
       "source_location": "L115",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_miner_miner_go_miner_miner",
-      "target": "miner_miner_devicecodestatus",
-      "confidence_score": 1.0
+      "target": "miner_miner_devicecodestatus"
     },
     {
       "relation": "method",
@@ -34522,9 +35628,9 @@
       "source_file": "internal/miner/miner.go",
       "source_location": "L115",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "miner_miner_devicecodestatus",
-      "target": "internal_miner_miner_go_devicecodestatus",
-      "confidence_score": 1.0
+      "target": "internal_miner_miner_go_devicecodestatus"
     },
     {
       "relation": "references",
@@ -45898,9 +47004,9 @@
       "source_file": "internal/server/analytics.go",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_analytics",
-      "target": "server_authstatusfunc",
-      "confidence_score": 1.0
+      "target": "server_authstatusfunc"
     },
     {
       "relation": "contains",
@@ -46025,9 +47131,9 @@
       "source_location": "L57",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "internal_server_analytics_go_server_analyticsserver",
-      "target": "server_authstatusfunc",
-      "confidence_score": 1.0
+      "target": "server_authstatusfunc"
     },
     {
       "relation": "references",
@@ -46036,9 +47142,9 @@
       "source_location": "L149",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "server_analyticsserver_setauthstatusfunc",
-      "target": "server_authstatusfunc",
-      "confidence_score": 1.0
+      "target": "server_authstatusfunc"
     },
     {
       "relation": "references",
@@ -46165,9 +47271,9 @@
       "source_file": "internal/server/analytics.go",
       "source_location": "L149",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_server_analytics_go_server_analyticsserver",
-      "target": "server_analyticsserver_setauthstatusfunc",
-      "confidence_score": 1.0
+      "target": "server_analyticsserver_setauthstatusfunc"
     },
     {
       "relation": "method",
@@ -46564,9 +47670,9 @@
       "source_location": "L101",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "server_analyticsserver_handleauthstatus",
-      "target": "internal_server_handlers_go_request",
-      "confidence_score": 1.0
+      "target": "internal_server_handlers_go_request"
     },
     {
       "relation": "references",
@@ -46750,9 +47856,9 @@
       "source_file": "internal/server/handlers.go",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_server_handlers_go_server_analyticsserver",
-      "target": "server_analyticsserver_handleauthstatus",
-      "confidence_score": 1.0
+      "target": "server_analyticsserver_handleauthstatus"
     },
     {
       "relation": "method",
@@ -46882,9 +47988,9 @@
       "source_location": "L101",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "server_analyticsserver_handleauthstatus",
-      "target": "internal_server_handlers_go_responsewriter",
-      "confidence_score": 1.0
+      "target": "internal_server_handlers_go_responsewriter"
     },
     {
       "relation": "references",
@@ -47036,9 +48142,9 @@
       "source_file": "internal/server/handlers.go",
       "source_location": "L104",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_analyticsserver_handleauthstatus",
-      "target": "server_handlers_writejson",
-      "confidence_score": 1.0
+      "target": "server_handlers_writejson"
     },
     {
       "relation": "calls",
@@ -48387,9 +49493,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry",
-      "target": "telemetry_config",
-      "confidence_score": 1.0
+      "target": "telemetry_config"
     },
     {
       "relation": "contains",
@@ -48397,9 +49503,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry",
-      "target": "telemetry_heartbeatpayload",
-      "confidence_score": 1.0
+      "target": "telemetry_heartbeatpayload"
     },
     {
       "relation": "contains",
@@ -48407,9 +49513,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry",
-      "target": "telemetry_sender",
-      "confidence_score": 1.0
+      "target": "telemetry_sender"
     },
     {
       "relation": "contains",
@@ -48417,9 +49523,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L272",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry",
-      "target": "telemetry_telemetry_detectdeployment",
-      "confidence_score": 1.0
+      "target": "telemetry_telemetry_detectdeployment"
     },
     {
       "relation": "contains",
@@ -48427,9 +49533,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry",
-      "target": "telemetry_telemetry_loadconfigfromenv",
-      "confidence_score": 1.0
+      "target": "telemetry_telemetry_loadconfigfromenv"
     },
     {
       "relation": "contains",
@@ -48437,9 +49543,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L230",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry",
-      "target": "telemetry_telemetry_loadorgenerateinstanceid",
-      "confidence_score": 1.0
+      "target": "telemetry_telemetry_loadorgenerateinstanceid"
     },
     {
       "relation": "contains",
@@ -48447,9 +49553,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L130",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry",
-      "target": "telemetry_telemetry_newsender",
-      "confidence_score": 1.0
+      "target": "telemetry_telemetry_newsender"
     },
     {
       "relation": "contains",
@@ -48457,9 +49563,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L257",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry",
-      "target": "telemetry_telemetry_newuuid",
-      "confidence_score": 1.0
+      "target": "telemetry_telemetry_newuuid"
     },
     {
       "relation": "references",
@@ -48468,9 +49574,9 @@
       "source_location": "L50",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "telemetry_config",
-      "target": "internal_telemetry_telemetry_go_duration",
-      "confidence_score": 1.0
+      "target": "internal_telemetry_telemetry_go_duration"
     },
     {
       "relation": "references",
@@ -48479,9 +49585,9 @@
       "source_location": "L110",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "telemetry_sender",
-      "target": "telemetry_config",
-      "confidence_score": 1.0
+      "target": "telemetry_config"
     },
     {
       "relation": "references",
@@ -48490,9 +49596,9 @@
       "source_location": "L67",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry_loadconfigfromenv",
-      "target": "telemetry_config",
-      "confidence_score": 1.0
+      "target": "telemetry_config"
     },
     {
       "relation": "references",
@@ -48501,9 +49607,9 @@
       "source_location": "L130",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry_newsender",
-      "target": "telemetry_config",
-      "confidence_score": 1.0
+      "target": "telemetry_config"
     },
     {
       "relation": "references",
@@ -48512,9 +49618,9 @@
       "source_location": "L67",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry_loadconfigfromenv",
-      "target": "internal_telemetry_telemetry_go_logger",
-      "confidence_score": 1.0
+      "target": "internal_telemetry_telemetry_go_logger"
     },
     {
       "relation": "calls",
@@ -48523,9 +49629,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry_loadconfigfromenv",
-      "target": "telemetry_telemetry_loadorgenerateinstanceid",
-      "confidence_score": 1.0
+      "target": "telemetry_telemetry_loadorgenerateinstanceid"
     },
     {
       "relation": "references",
@@ -48534,9 +49640,9 @@
       "source_location": "L112",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "telemetry_sender",
-      "target": "internal_telemetry_telemetry_go_logger",
-      "confidence_score": 1.0
+      "target": "internal_telemetry_telemetry_go_logger"
     },
     {
       "relation": "references",
@@ -48545,9 +49651,9 @@
       "source_location": "L130",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry_newsender",
-      "target": "internal_telemetry_telemetry_go_logger",
-      "confidence_score": 1.0
+      "target": "internal_telemetry_telemetry_go_logger"
     },
     {
       "relation": "references",
@@ -48556,9 +49662,9 @@
       "source_location": "L111",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "telemetry_sender",
-      "target": "internal_telemetry_telemetry_go_client",
-      "confidence_score": 1.0
+      "target": "internal_telemetry_telemetry_go_client"
     },
     {
       "relation": "method",
@@ -48566,9 +49672,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L141",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_sender",
-      "target": "telemetry_sender_run",
-      "confidence_score": 1.0
+      "target": "telemetry_sender_run"
     },
     {
       "relation": "method",
@@ -48576,9 +49682,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L169",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_sender",
-      "target": "telemetry_sender_sendheartbeat",
-      "confidence_score": 1.0
+      "target": "telemetry_sender_sendheartbeat"
     },
     {
       "relation": "method",
@@ -48586,9 +49692,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L119",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_sender",
-      "target": "telemetry_sender_setrunningaccountsfunc",
-      "confidence_score": 1.0
+      "target": "telemetry_sender_setrunningaccountsfunc"
     },
     {
       "relation": "method",
@@ -48596,9 +49702,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L125",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_sender",
-      "target": "telemetry_sender_settotalconfigsfunc",
-      "confidence_score": 1.0
+      "target": "telemetry_sender_settotalconfigsfunc"
     },
     {
       "relation": "references",
@@ -48607,9 +49713,9 @@
       "source_location": "L130",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry_newsender",
-      "target": "telemetry_sender",
-      "confidence_score": 1.0
+      "target": "telemetry_sender"
     },
     {
       "relation": "references",
@@ -48618,9 +49724,9 @@
       "source_location": "L141",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "telemetry_sender_run",
-      "target": "internal_telemetry_telemetry_go_context",
-      "confidence_score": 1.0
+      "target": "internal_telemetry_telemetry_go_context"
     },
     {
       "relation": "calls",
@@ -48629,9 +49735,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L154",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_sender_run",
-      "target": "telemetry_sender_sendheartbeat",
-      "confidence_score": 1.0
+      "target": "telemetry_sender_sendheartbeat"
     },
     {
       "relation": "references",
@@ -48640,9 +49746,9 @@
       "source_location": "L169",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "telemetry_sender_sendheartbeat",
-      "target": "internal_telemetry_telemetry_go_context",
-      "confidence_score": 1.0
+      "target": "internal_telemetry_telemetry_go_context"
     },
     {
       "relation": "calls",
@@ -48651,9 +49757,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L184",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_sender_sendheartbeat",
-      "target": "telemetry_telemetry_detectdeployment",
-      "confidence_score": 1.0
+      "target": "telemetry_telemetry_detectdeployment"
     },
     {
       "relation": "calls",
@@ -48662,9 +49768,9 @@
       "source_file": "internal/telemetry/telemetry.go",
       "source_location": "L240",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "telemetry_telemetry_loadorgenerateinstanceid",
-      "target": "telemetry_telemetry_newuuid",
-      "confidence_score": 1.0
+      "target": "telemetry_telemetry_newuuid"
     },
     {
       "relation": "references",
@@ -53553,9 +54659,9 @@
       "source_file": ".github/wiki/Architecture.md",
       "source_location": "L153",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wiki_architecture_data_flow",
-      "target": "wiki_architecture_telemetry_flow",
-      "confidence_score": 1.0
+      "target": "wiki_architecture_telemetry_flow"
     },
     {
       "relation": "references",
@@ -54063,9 +55169,9 @@
       "source_file": ".github/wiki/Getting-Started.md",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "wiki_getting_started_getting_started",
-      "target": "wiki_getting_started_telemetry",
-      "confidence_score": 1.0
+      "target": "wiki_getting_started_telemetry"
     },
     {
       "relation": "references",
@@ -54733,9 +55839,9 @@
       "source_file": "CODE_OF_CONDUCT.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "code_of_conduct",
-      "target": "code_of_conduct_code_of_conduct",
-      "confidence_score": 1.0
+      "target": "code_of_conduct_code_of_conduct"
     },
     {
       "relation": "references",
@@ -54743,9 +55849,9 @@
       "source_file": "CONTRIBUTING.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "contributing",
-      "target": "code_of_conduct",
-      "confidence_score": 1.0
+      "target": "code_of_conduct"
     },
     {
       "relation": "contains",
@@ -54753,9 +55859,9 @@
       "source_file": "CODE_OF_CONDUCT.md",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "code_of_conduct_code_of_conduct",
-      "target": "code_of_conduct_attribution",
-      "confidence_score": 1.0
+      "target": "code_of_conduct_attribution"
     },
     {
       "relation": "contains",
@@ -54763,9 +55869,9 @@
       "source_file": "CODE_OF_CONDUCT.md",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "code_of_conduct_code_of_conduct",
-      "target": "code_of_conduct_enforcement",
-      "confidence_score": 1.0
+      "target": "code_of_conduct_enforcement"
     },
     {
       "relation": "contains",
@@ -54773,9 +55879,9 @@
       "source_file": "CODE_OF_CONDUCT.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "code_of_conduct_code_of_conduct",
-      "target": "code_of_conduct_our_pledge",
-      "confidence_score": 1.0
+      "target": "code_of_conduct_our_pledge"
     },
     {
       "relation": "contains",
@@ -54783,9 +55889,9 @@
       "source_file": "CODE_OF_CONDUCT.md",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "code_of_conduct_code_of_conduct",
-      "target": "code_of_conduct_our_standards",
-      "confidence_score": 1.0
+      "target": "code_of_conduct_our_standards"
     },
     {
       "relation": "contains",
@@ -54793,9 +55899,9 @@
       "source_file": "CODE_OF_CONDUCT.md",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "code_of_conduct_code_of_conduct",
-      "target": "code_of_conduct_reporting",
-      "confidence_score": 1.0
+      "target": "code_of_conduct_reporting"
     },
     {
       "relation": "contains",
@@ -54803,9 +55909,9 @@
       "source_file": "CODE_OF_CONDUCT.md",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "code_of_conduct_code_of_conduct",
-      "target": "code_of_conduct_scope",
-      "confidence_score": 1.0
+      "target": "code_of_conduct_scope"
     },
     {
       "relation": "contains",
@@ -54813,9 +55919,9 @@
       "source_file": "CODE_OF_CONDUCT.md",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "code_of_conduct_enforcement",
-      "target": "code_of_conduct_corrective_action_guide",
-      "confidence_score": 1.0
+      "target": "code_of_conduct_corrective_action_guide"
     },
     {
       "relation": "contains",
@@ -55383,9 +56489,9 @@
       "source_file": "README.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme",
-      "target": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "confidence_score": 1.0
+      "target": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch"
     },
     {
       "relation": "contains",
@@ -55393,9 +56499,9 @@
       "source_file": "README.md",
       "source_location": "L680",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_10_linux_service_systemd_openrc",
-      "confidence_score": 1.0
+      "target": "readme_1_10_linux_service_systemd_openrc"
     },
     {
       "relation": "contains",
@@ -55403,9 +56509,9 @@
       "source_file": "README.md",
       "source_location": "L725",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_11_windows_service",
-      "confidence_score": 1.0
+      "target": "readme_1_11_windows_service"
     },
     {
       "relation": "contains",
@@ -55413,9 +56519,9 @@
       "source_file": "README.md",
       "source_location": "L753",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_12_deploy_to_fly_io",
-      "confidence_score": 1.0
+      "target": "readme_1_12_deploy_to_fly_io"
     },
     {
       "relation": "contains",
@@ -55423,9 +56529,9 @@
       "source_file": "README.md",
       "source_location": "L822",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_13_development",
-      "confidence_score": 1.0
+      "target": "readme_1_13_development"
     },
     {
       "relation": "contains",
@@ -55433,9 +56539,9 @@
       "source_file": "README.md",
       "source_location": "L826",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_14_auto_update",
-      "confidence_score": 1.0
+      "target": "readme_1_14_auto_update"
     },
     {
       "relation": "contains",
@@ -55443,9 +56549,9 @@
       "source_file": "README.md",
       "source_location": "L854",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_15_license",
-      "confidence_score": 1.0
+      "target": "readme_1_15_license"
     },
     {
       "relation": "contains",
@@ -55453,9 +56559,9 @@
       "source_file": "README.md",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_1_table_of_contents",
-      "confidence_score": 1.0
+      "target": "readme_1_1_table_of_contents"
     },
     {
       "relation": "contains",
@@ -55463,9 +56569,9 @@
       "source_file": "README.md",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_2_features",
-      "confidence_score": 1.0
+      "target": "readme_1_2_features"
     },
     {
       "relation": "contains",
@@ -55473,9 +56579,9 @@
       "source_file": "README.md",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_3_resource_comparison",
-      "confidence_score": 1.0
+      "target": "readme_1_3_resource_comparison"
     },
     {
       "relation": "contains",
@@ -55483,9 +56589,9 @@
       "source_file": "README.md",
       "source_location": "L96",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_4_running_locally",
-      "confidence_score": 1.0
+      "target": "readme_1_4_running_locally"
     },
     {
       "relation": "contains",
@@ -55493,9 +56599,9 @@
       "source_file": "README.md",
       "source_location": "L135",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_5_configuration",
-      "confidence_score": 1.0
+      "target": "readme_1_5_configuration"
     },
     {
       "relation": "contains",
@@ -55503,9 +56609,9 @@
       "source_file": "README.md",
       "source_location": "L278",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_6_environment_variables",
-      "confidence_score": 1.0
+      "target": "readme_1_6_environment_variables"
     },
     {
       "relation": "contains",
@@ -55513,9 +56619,9 @@
       "source_file": "README.md",
       "source_location": "L411",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_7_notifications",
-      "confidence_score": 1.0
+      "target": "readme_1_7_notifications"
     },
     {
       "relation": "contains",
@@ -55523,9 +56629,9 @@
       "source_file": "README.md",
       "source_location": "L572",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_8_authentication",
-      "confidence_score": 1.0
+      "target": "readme_1_8_authentication"
     },
     {
       "relation": "contains",
@@ -55533,9 +56639,9 @@
       "source_file": "README.md",
       "source_location": "L611",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_twitch_miner_go_efficient_auto_drops_points_claim_for_twitch",
-      "target": "readme_1_9_docker",
-      "confidence_score": 1.0
+      "target": "readme_1_9_docker"
     },
     {
       "relation": "contains",
@@ -55563,9 +56669,9 @@
       "source_file": "README.md",
       "source_location": "L203",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_1_5_configuration",
-      "target": "readme_1_5_2_config_editor",
-      "confidence_score": 1.0
+      "target": "readme_1_5_2_config_editor"
     },
     {
       "relation": "contains",
@@ -55573,9 +56679,9 @@
       "source_file": "README.md",
       "source_location": "L241",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_1_5_configuration",
-      "target": "readme_1_5_3_database_mode_optional",
-      "confidence_score": 1.0
+      "target": "readme_1_5_3_database_mode_optional"
     },
     {
       "relation": "contains",
@@ -55623,9 +56729,9 @@
       "source_file": "README.md",
       "source_location": "L381",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_1_6_4_env_file_support",
-      "target": "readme_1_6_4_1_how_to_obtain_twitch_runtime_identifiers",
-      "confidence_score": 1.0
+      "target": "readme_1_6_4_1_how_to_obtain_twitch_runtime_identifiers"
     },
     {
       "relation": "contains",
@@ -55693,9 +56799,9 @@
       "source_file": "README.md",
       "source_location": "L647",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_1_9_docker",
-      "target": "readme_1_9_1_docker_compose",
-      "confidence_score": 1.0
+      "target": "readme_1_9_1_docker_compose"
     },
     {
       "relation": "contains",
@@ -55703,9 +56809,9 @@
       "source_file": "README.md",
       "source_location": "L667",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_1_9_docker",
-      "target": "readme_1_9_2_github_container_registry",
-      "confidence_score": 1.0
+      "target": "readme_1_9_2_github_container_registry"
     },
     {
       "relation": "contains",
@@ -55713,9 +56819,9 @@
       "source_file": "README.md",
       "source_location": "L694",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_1_10_linux_service_systemd_openrc",
-      "target": "readme_1_10_1_managing_the_service",
-      "confidence_score": 1.0
+      "target": "readme_1_10_1_managing_the_service"
     },
     {
       "relation": "contains",
@@ -55723,9 +56829,9 @@
       "source_file": "README.md",
       "source_location": "L708",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_1_10_linux_service_systemd_openrc",
-      "target": "readme_1_10_2_uninstalling",
-      "confidence_score": 1.0
+      "target": "readme_1_10_2_uninstalling"
     },
     {
       "relation": "contains",
@@ -55733,9 +56839,9 @@
       "source_file": "README.md",
       "source_location": "L714",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_1_10_linux_service_systemd_openrc",
-      "target": "readme_1_10_3_default_file_locations",
-      "confidence_score": 1.0
+      "target": "readme_1_10_3_default_file_locations"
     },
     {
       "relation": "contains",
@@ -55743,9 +56849,9 @@
       "source_file": "README.md",
       "source_location": "L736",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_1_11_windows_service",
-      "target": "readme_1_11_1_managing_the_service",
-      "confidence_score": 1.0
+      "target": "readme_1_11_1_managing_the_service"
     },
     {
       "relation": "contains",
@@ -55753,9 +56859,9 @@
       "source_file": "README.md",
       "source_location": "L745",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_1_11_windows_service",
-      "target": "readme_1_11_2_uninstalling",
-      "confidence_score": 1.0
+      "target": "readme_1_11_2_uninstalling"
     },
     {
       "relation": "contains",
@@ -55803,9 +56909,9 @@
       "source_file": "README.md",
       "source_location": "L830",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_1_14_auto_update",
-      "target": "readme_1_14_1_automatic_updates",
-      "confidence_score": 1.0
+      "target": "readme_1_14_1_automatic_updates"
     },
     {
       "relation": "contains",
@@ -55849,5 +56955,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "040a07cbd3f7ad20ebc8e5dd50093add1728f619"
+  "built_at_commit": "c1faed1f7897704e3c41deec466792f5a944de58"
 }

@@ -893,5 +893,10 @@
     "mtime": 1783260875.9140172,
     "ast_hash": "cd964587556cc35929c843bba44f4a81",
     "semantic_hash": ""
+  },
+  "internal/miner/handler_test.go": {
+    "mtime": 1783347497.19075,
+    "ast_hash": "970dd75164d455cfe5c8a3534a42a218",
+    "semantic_hash": ""
   }
 }
