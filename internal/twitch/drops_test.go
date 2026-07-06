@@ -126,8 +126,10 @@ func newTestClient(t *testing.T, transport *mockTransport) *Client {
 // Twitch API shape: {"data": {"currentUser": {"inventory": {...}}}}.
 func inventoryJSON(drops []inventoryDrop) string {
 	type selfData struct {
-		DropInstanceID string `json:"dropInstanceID"`
-		IsClaimed      bool   `json:"isClaimed"`
+		DropInstanceID        string `json:"dropInstanceID"`
+		IsClaimed             bool   `json:"isClaimed"`
+		HasPreconditionsMet   bool   `json:"hasPreconditionsMet"`
+		CurrentMinutesWatched int    `json:"currentMinutesWatched"`
 	}
 	type benefit struct {
 		Name string `json:"name"`
@@ -136,10 +138,11 @@ func inventoryJSON(drops []inventoryDrop) string {
 		Benefit benefit `json:"benefit"`
 	}
 	type dropEntry struct {
-		ID           string        `json:"id"`
-		Name         string        `json:"name"`
-		BenefitEdges []benefitEdge `json:"benefitEdges"`
-		Self         *selfData     `json:"self"`
+		ID              string        `json:"id"`
+		Name            string        `json:"name"`
+		RequiredMinutes int           `json:"requiredMinutesWatched"`
+		BenefitEdges    []benefitEdge `json:"benefitEdges"`
+		Self            *selfData     `json:"self"`
 	}
 	type game struct {
 		Name string `json:"name"`
@@ -160,12 +163,15 @@ func inventoryJSON(drops []inventoryDrop) string {
 			edges = []benefitEdge{{Benefit: benefit{Name: d.benefitName}}}
 		}
 		entries = append(entries, dropEntry{
-			ID:           d.id,
-			Name:         d.timeName,
-			BenefitEdges: edges,
+			ID:              d.id,
+			Name:            d.timeName,
+			RequiredMinutes: d.requiredMinutes,
+			BenefitEdges:    edges,
 			Self: &selfData{
-				DropInstanceID: d.instanceID,
-				IsClaimed:      d.claimed,
+				DropInstanceID:        d.instanceID,
+				IsClaimed:             d.claimed,
+				HasPreconditionsMet:   d.hasPreconditionsMet,
+				CurrentMinutesWatched: d.currentMinutes,
 			},
 		})
 	}
@@ -199,11 +205,14 @@ func inventoryJSON(drops []inventoryDrop) string {
 }
 
 type inventoryDrop struct {
-	id          string
-	timeName    string
-	benefitName string
-	instanceID  string
-	claimed     bool
+	id                  string
+	timeName            string
+	benefitName         string
+	instanceID          string
+	claimed             bool
+	requiredMinutes     int
+	currentMinutes      int
+	hasPreconditionsMet bool
 }
 
 func claimSuccessResponse() string {
