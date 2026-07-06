@@ -20,6 +20,8 @@ RUN CGO_ENABLED=0 go build \
 # Stage 2: Runtime
 FROM gcr.io/distroless/static-debian12
 
+LABEL org.opencontainers.image.description="Efficient auto drops and points claim for Twitch"
+
 COPY --from=builder /twitch-miner-go /twitch-miner-go
 # Only example configs are copied; real configs should be mounted via volume or created at runtime
 COPY --from=builder /app/configs /configs
