@@ -4,7 +4,9 @@ package server
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/subtle"
+	"encoding/hex"
 	"fmt"
 	"net"
 	"net/http"
@@ -226,7 +228,11 @@ func withBasicAuth(creds *DashboardAuth, next http.Handler) http.Handler {
 
 func checkCredentials(user, pass string, creds *DashboardAuth) bool {
 	userMatch := subtle.ConstantTimeCompare([]byte(user), []byte(creds.Username)) == 1
-	passMatch := subtle.ConstantTimeCompare([]byte(pass), []byte(creds.PasswordHash)) == 1
+
+	hash := sha256.Sum256([]byte(pass))
+	passHash := hex.EncodeToString(hash[:])
+	passMatch := subtle.ConstantTimeCompare([]byte(passHash), []byte(creds.PasswordHash)) == 1
+
 	return userMatch && passMatch
 }
 
