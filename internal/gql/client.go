@@ -322,6 +322,24 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 			}
 
 			errMsg := response.Errors[0].Message
+
+			// PersistedQueryNotFound means the server doesn't recognize this
+			// persisted query hash — a transient condition during ad breaks
+			// or when Twitch's registry is stale. It is not client-ID-dependent:
+			// cycling through alternate client IDs wastes time and logs.
+			// Log at DEBUG since it's expected during ads and the caller
+			// already treats a nil response as "streamer offline".
+			if strings.Contains(errMsg, "PersistedQueryNotFound") {
+				c.log.Debug("GQL operation returned known transient error",
+					"operation", opName,
+					"error", errMsg,
+					"client_id_attempt", idx+1)
+				if behavior.failOnErrors {
+					return nil, fmt.Errorf("%s: GQL operation returned error: %s", opName, errMsg)
+				}
+				return response.Data, nil
+			}
+
 			if strings.Contains(errMsg, "integrity check") && integrityFailureOps[opName] {
 				c.log.Debug("GQL integrity check failure (expected)",
 					"operation", opName,

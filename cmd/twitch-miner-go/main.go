@@ -277,7 +277,8 @@ func setupAnalyticsServer(addr string, rootLog *logger.Logger, mgr *managedminer
 			PasswordHash: os.Getenv("DASHBOARD_PASSWORD_SHA256"),
 		}
 	}
-	srv := server.NewAnalyticsServer(addr, rootLog, dashboardAuth)
+	dashboardAPIKey := os.Getenv("DASHBOARD_API_KEY")
+	srv := server.NewAnalyticsServer(addr, rootLog, dashboardAuth, dashboardAPIKey)
 
 	srv.SetStreamerFunc(func() []*model.Streamer {
 		var all []*model.Streamer

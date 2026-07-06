@@ -4,14 +4,10 @@ package server
 
 import (
 	"context"
-	"crypto/sha256"
-	"crypto/subtle"
-	"encoding/hex"
 	"fmt"
 	"net"
 	"net/http"
 	"net/http/pprof"
-	"strings"
 	"sync"
 	"time"
 
@@ -46,10 +42,11 @@ type DashboardAuth struct {
 
 // AnalyticsServer serves the analytics dashboard and JSON API endpoints.
 type AnalyticsServer struct {
-	addr string
-	log  *logger.Logger
-	srv  *http.Server
-	auth *DashboardAuth
+	addr   string
+	log    *logger.Logger
+	srv    *http.Server
+	auth   *DashboardAuth
+	apiKey string
 
 	mu             sync.RWMutex
 	streamers      []*model.Streamer
@@ -60,15 +57,15 @@ type AnalyticsServer struct {
 	accountStore   store.Store
 }
 
-
 // NewAnalyticsServer creates a new AnalyticsServer bound to the given address.
-// If auth is non-nil, all endpoints (except /health and /static) require
-// HTTP Basic Auth with the configured username and SHA-256 hashed password.
-func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth) *AnalyticsServer {
+// If auth or apiKey is provided, all endpoints (except /health and /static)
+// require either HTTP Basic Auth (browser users) or an X-API-Key header (machine clients).
+func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth, apiKey string) *AnalyticsServer {
 	s := &AnalyticsServer{
-		addr: addr,
-		log:  log,
-		auth: auth,
+		addr:   addr,
+		log:    log,
+		auth:   auth,
+		apiKey: apiKey,
 	}
 
 	mux := http.NewServeMux()
@@ -94,7 +91,6 @@ func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth) *A
 	mux.HandleFunc("DELETE /api/accounts/{username}", s.handleDeleteAccount)
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(staticFS)))
 
-	// pprof endpoints for remote memory profiling
 	mux.HandleFunc("GET /debug/pprof/", pprof.Index)
 	mux.HandleFunc("GET /debug/pprof/cmdline", pprof.Cmdline)
 	mux.HandleFunc("GET /debug/pprof/profile", pprof.Profile)
@@ -105,8 +101,8 @@ func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth) *A
 	mux.Handle("GET /debug/pprof/allocs", pprof.Handler("allocs"))
 
 	var handler http.Handler = mux
-	if auth != nil {
-		handler = withBasicAuth(auth, mux)
+	if auth != nil || apiKey != "" {
+		handler = withAuth(auth, apiKey, mux)
 	}
 
 	s.srv = &http.Server{
@@ -203,60 +199,4 @@ func (s *AnalyticsServer) Run(ctx context.Context) error {
 	case err := <-errCh:
 		return err
 	}
-}
-
-// withBasicAuth enforces HTTP Basic Auth with SHA-256 password comparison.
-// Health endpoint and static assets are excluded.
-func withBasicAuth(creds *DashboardAuth, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Always allow health checks and static assets without auth.
-		if r.URL.Path == "/health" || strings.HasPrefix(r.URL.Path, "/static/") {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		user, pass, ok := r.BasicAuth()
-		if !ok || !checkCredentials(user, pass, creds) {
-			w.Header().Set("WWW-Authenticate", `Basic realm="Twitch Miner Dashboard"`)
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func checkCredentials(user, pass string, creds *DashboardAuth) bool {
-	userMatch := subtle.ConstantTimeCompare([]byte(user), []byte(creds.Username)) == 1
-
-	hash := sha256.Sum256([]byte(pass))
-	passHash := hex.EncodeToString(hash[:])
-	passMatch := subtle.ConstantTimeCompare([]byte(passHash), []byte(creds.PasswordHash)) == 1
-
-	return userMatch && passMatch
-}
-
-func withLogging(log *logger.Logger, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		rw := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
-		next.ServeHTTP(rw, r)
-		log.Debug("HTTP request",
-			"method", r.Method,
-			"path", r.URL.Path,
-			"status", rw.statusCode,
-			"duration", time.Since(start).String(),
-		)
-	})
-}
-
-type responseWriter struct {
-	http.ResponseWriter
-	statusCode int
-}
-
-// WriteHeader captures the status code before writing it.
-func (rw *responseWriter) WriteHeader(code int) {
-	rw.statusCode = code
-	rw.ResponseWriter.WriteHeader(code)
 }

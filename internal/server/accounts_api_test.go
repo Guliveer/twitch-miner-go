@@ -58,7 +58,7 @@ func (f *fakeStore) Close() error                    { return nil }
 // registered ServeMux (mirrors how analytics.go wires up routes).
 func newTestAccountsServer(t *testing.T, st store.Store) *AnalyticsServer {
 	t.Helper()
-	s := NewAnalyticsServer(":0", newTestLogger(t), nil)
+	s := NewAnalyticsServer(":0", newTestLogger(t), nil, "")
 	s.SetAccountStore(st)
 	return s
 }
