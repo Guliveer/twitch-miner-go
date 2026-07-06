@@ -473,6 +473,7 @@ The `events` list controls which events trigger a notification for a given provi
 | `MOMENT_CLAIM`          | 🎉    | Community moment claimed                                                           |
 | `JOIN_RAID`             | ⚔️    | Joined a raid                                                                      |
 | `DROP_CLAIM`            | 📦    | Drop claimed                                                                       |
+| `DROP_CLAIM_AVAILABLE`  | 📦    | Drop available to claim (one-time notification per drop)                           |
 | `DROP_STATUS`           | 📦    | Drop progress status                                                               |
 | `CHAT_MENTION`          | 💬    | Mentioned in chat                                                                  |
 | `GIFTED_SUB`            | 🎁    | Received a gifted sub (via IRC)                                                    |

@@ -21,8 +21,9 @@ const (
 	EventBonusClaim         Event = "BONUS_CLAIM"
 	EventMomentClaim        Event = "MOMENT_CLAIM"
 	EventJoinRaid           Event = "JOIN_RAID"
-	EventDropClaim          Event = "DROP_CLAIM"
-	EventDropStatus         Event = "DROP_STATUS"
+	EventDropClaim              Event = "DROP_CLAIM"
+	EventDropClaimAvailable     Event = "DROP_CLAIM_AVAILABLE"
+	EventDropStatus             Event = "DROP_STATUS"
 	EventChatMention        Event = "CHAT_MENTION"
 	EventGiftedSub          Event = "GIFTED_SUB"
 	EventMinerStarted          Event = "MINER_STARTED"
@@ -52,6 +53,7 @@ func AllEvents() []Event {
 		EventMomentClaim,
 		EventJoinRaid,
 		EventDropClaim,
+		EventDropClaimAvailable,
 		EventDropStatus,
 		EventChatMention,
 		EventGiftedSub,

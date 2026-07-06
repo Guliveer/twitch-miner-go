@@ -286,6 +286,44 @@ func (s *AnalyticsServer) handleStreamer(w http.ResponseWriter, r *http.Request)
 					detail.Multipliers = append(detail.Multipliers, m.Factor)
 				}
 			}
+			if streamer.Stream != nil && len(streamer.Stream.Campaigns) > 0 {
+				detail.DropCampaigns = make([]campaignInfo, 0, len(streamer.Stream.Campaigns))
+				for _, c := range streamer.Stream.Campaigns {
+					ci := campaignInfo{
+						Name:   c.Name,
+						Status: c.Status,
+						EndAt:  c.EndAt.Format(time.RFC3339),
+						Drops:  make([]dropInfo, 0, len(c.Drops)),
+					}
+					if c.Game != nil {
+						ci.Game = c.Game.DisplayName
+					}
+					for _, d := range c.Drops {
+						if d == nil {
+							continue
+						}
+						benefit := d.Benefit
+						if benefit == "" {
+							benefit = d.Name
+						}
+						ci.Drops = append(ci.Drops, dropInfo{
+							Name:            d.Name,
+							Benefit:         benefit,
+							ProgressPercent: d.PercentageProgress,
+							WatchedMinutes:  d.CurrentMinutesWatched,
+							RequiredMinutes: d.MinutesRequired,
+							IsClaimable:     d.IsClaimable,
+							IsClaimed:       d.IsClaimed,
+						})
+					}
+					if len(ci.Drops) > 0 {
+						detail.DropCampaigns = append(detail.DropCampaigns, ci)
+					}
+				}
+				if len(detail.DropCampaigns) == 0 {
+					detail.DropCampaigns = nil
+				}
+			}
 			streamer.Mu.RUnlock()
 			writeJSON(w, http.StatusOK, detail)
 			return
@@ -525,6 +563,25 @@ type streamerDetail struct {
 	Stream            *streamInfo                    `json:"stream,omitempty"`
 	Multipliers       []float64                      `json:"multipliers,omitempty"`
 	History           map[string]*model.HistoryEntry `json:"history,omitempty"`
+	DropCampaigns     []campaignInfo                 `json:"drop_campaigns,omitempty"`
+}
+
+type campaignInfo struct {
+	Game     string     `json:"game,omitempty"`
+	Name     string     `json:"name,omitempty"`
+	Status   string     `json:"status,omitempty"`
+	EndAt    string     `json:"end_at,omitempty"`
+	Drops    []dropInfo `json:"drops,omitempty"`
+}
+
+type dropInfo struct {
+	Name            string `json:"name,omitempty"`
+	Benefit         string `json:"benefit,omitempty"`
+	ProgressPercent int    `json:"progress_percent"`
+	WatchedMinutes  int    `json:"watched_minutes"`
+	RequiredMinutes int    `json:"required_minutes"`
+	IsClaimable     bool   `json:"is_claimable"`
+	IsClaimed       bool   `json:"is_claimed"`
 }
 
 type streamInfo struct {

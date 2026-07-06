@@ -187,13 +187,18 @@ func (m *Miner) Run(ctx context.Context) error {
 		return m.chat.Run(ctx)
 	})
 
+	startupInitDone := &sync.WaitGroup{}
+	startupInitDone.Add(2)
+
 	g.Go(func() error {
+		defer startupInitDone.Done()
 		m.loadAllChannelPointsContext(ctx)
 		m.twitch.GQLClient().SetNormalMode()
 		return nil
 	})
 
 	g.Go(func() error {
+		defer startupInitDone.Done()
 		m.checkAllStreamersOnline(ctx)
 		return nil
 	})

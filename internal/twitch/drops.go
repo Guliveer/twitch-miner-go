@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"slices"
+	"sync"
 	"time"
 
+	"github.com/Guliveer/twitch-miner-go/internal/constants"
 	"github.com/Guliveer/twitch-miner-go/internal/model"
 )
 
@@ -24,6 +26,7 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 	}
 
 	if len(dashboardCampaigns) == 0 {
+		c.logDropStatuses(ctx)
 		return nil
 	}
 
@@ -66,9 +69,43 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		c.Log.Warn("Failed to sync campaigns with inventory", "error", err)
 	}
 
+	// Pre-populate CampaignIDs for streamers with ClaimDrops but no CampaignIDs yet.
+	// campaignMatchesStreamer requires CampaignIDs, which are normally set by
+	// updateStream() during the minute-watched loop. At startup updateStream()
+	// hasn't been called yet, so CampaignIDs would be empty and no campaign would
+	// match. Fetch them here so DROP_STATUS can be reported immediately.
+	var campaignIDWg sync.WaitGroup
+	sem := make(chan struct{}, constants.StartupWorkers)
+	for _, streamer := range streamers {
+		streamer.Mu.RLock()
+		needsIDs := streamer.Settings != nil && streamer.Settings.ClaimDrops && len(streamer.Stream.CampaignIDs) == 0
+		channelID := streamer.ChannelID
+		streamer.Mu.RUnlock()
+		if !needsIDs {
+			continue
+		}
+		campaignIDWg.Add(1)
+		go func(s *model.Streamer, cid string) {
+			defer campaignIDWg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			ids, err := c.GQL.GetAvailableCampaigns(ctx, cid)
+			if err != nil {
+				c.Log.Debug("Failed to fetch available campaigns",
+					"streamer", s.Username, "error", err)
+				return
+			}
+			s.Mu.Lock()
+			s.Stream.CampaignIDs = ids
+			s.Mu.Unlock()
+		}(streamer, channelID)
+	}
+	campaignIDWg.Wait()
+
 	for _, streamer := range streamers {
 		streamer.Mu.Lock()
-		if streamer.DropsCondition() {
+		if streamer.Settings != nil && streamer.Settings.ClaimDrops {
 			var matchingCampaigns []model.Campaign
 			for _, campaign := range activeCampaigns {
 				if len(campaign.Drops) > 0 && campaignMatchesStreamer(campaign, streamer) {
@@ -79,6 +116,8 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		}
 		streamer.Mu.Unlock()
 	}
+
+	c.logDropStatuses(ctx)
 
 	return nil
 }
@@ -336,4 +375,95 @@ func campaignMatchesStreamer(campaign *model.Campaign, streamer *model.Streamer)
 		return false
 	}
 	return slices.Contains(streamer.Stream.CampaignIDs, campaign.ID)
+}
+
+func (c *Client) logDropStatuses(ctx context.Context) {
+	inventoryData, err := c.GQL.GetDropsInventory(ctx)
+	if err != nil {
+		c.Log.Debug("Failed to get drops inventory for status", "error", err)
+		return
+	}
+
+	if inventoryData == nil {
+		c.Log.Info("📦 No active drops")
+		return
+	}
+
+	var inventory struct {
+		DropCampaignsInProgress []struct {
+			Game *struct {
+				Name string `json:"name"`
+				Slug string `json:"slug"`
+			} `json:"game"`
+			TimeBasedDrops []struct {
+				ID              string `json:"id"`
+				Name            string `json:"name"`
+				RequiredMinutes int    `json:"requiredMinutesWatched"`
+				BenefitEdges []struct {
+					Benefit struct {
+						Name string `json:"name"`
+					} `json:"benefit"`
+				} `json:"benefitEdges"`
+				Self *struct {
+					HasPreconditionsMet   bool   `json:"hasPreconditionsMet"`
+					CurrentMinutesWatched int    `json:"currentMinutesWatched"`
+					DropInstanceID        string `json:"dropInstanceID"`
+					IsClaimed             bool   `json:"isClaimed"`
+				} `json:"self"`
+			} `json:"timeBasedDrops"`
+		} `json:"dropCampaignsInProgress"`
+	}
+
+	if err := json.Unmarshal(inventoryData, &inventory); err != nil {
+		c.Log.Debug("Failed to parse inventory for status", "error", err)
+		return
+	}
+
+	if len(inventory.DropCampaignsInProgress) == 0 {
+		c.Log.Info("📦 No active drops")
+		return
+	}
+
+	for _, campaign := range inventory.DropCampaignsInProgress {
+		gameName := ""
+		if campaign.Game != nil {
+			gameName = campaign.Game.Slug
+			if gameName == "" {
+				gameName = campaign.Game.Name
+			}
+		}
+
+		for _, drop := range campaign.TimeBasedDrops {
+			if drop.Self == nil {
+				continue
+			}
+
+			rewardName := drop.Name
+			if len(drop.BenefitEdges) > 0 && drop.BenefitEdges[0].Benefit.Name != "" {
+				rewardName = drop.BenefitEdges[0].Benefit.Name
+			}
+
+			status := "IN_PROGRESS"
+			if drop.Self.IsClaimed {
+				status = "CLAIMED"
+			} else if drop.Self.DropInstanceID != "" {
+				status = "CLAIMABLE"
+			}
+
+		c.Log.Info("📦 Drop in progress",
+			"reward", rewardName,
+			"category", gameName,
+			"progress", fmt.Sprintf("%d/%dm", drop.Self.CurrentMinutesWatched, drop.RequiredMinutes),
+			"status", status)
+
+			if !drop.Self.IsClaimed && drop.Self.DropInstanceID != "" {
+				if _, alreadySeen := c.seenClaimable.LoadOrStore(drop.ID, true); !alreadySeen {
+					c.Log.Event(ctx, model.EventDropClaimAvailable,
+						fmt.Sprintf("Drop available to claim: %s", rewardName),
+						"reward", rewardName,
+						"category", gameName)
+				}
+			}
+		}
+	}
 }

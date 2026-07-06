@@ -87,6 +87,10 @@ type Client struct {
 	// claimedDrops tracks drop instance IDs that have already been attempted
 	// to prevent notification spam across sync cycles.
 	claimedDrops sync.Map
+
+	// seenClaimable tracks drops that have already been reported as claimable
+	// so we only emit DROP_CLAIM_AVAILABLE once per drop lifetime.
+	seenClaimable sync.Map
 }
 
 // NewClient creates a new high-level Twitch Client from account configuration.

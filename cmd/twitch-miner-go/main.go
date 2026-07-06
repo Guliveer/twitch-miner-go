@@ -30,16 +30,16 @@ import (
 )
 
 var bannerPlain = []string{
-	"  ______       _ __       __       __  ____               ",
-	" /_  __/    __(_) /______/ /_     /  |/  (_)___  ___  ____",
+	"  ______       _ __       __      __  ____               ",
+	" /_  __/    __(_) /______/ /     /  |/  (_)___  ___  ____",
 	"  / / | |/|/ / / __/ __/ __ \\   / /|_/ / / __ \\/ _ \\/ __/",
 	" / /  |__,__/ / /_/ /_/ / / /  / /  / / / / / /  __/ /   ",
 	"/_/        /_/\\__/\\__/_/ /_/  /_/  /_/_/_/ /_/\\___/_/    ",
 }
 
 var bannerColors = []string{
-	"\033[38;5;129m", "\033[38;5;128m", "\033[38;5;127m",
-	"\033[38;5;126m", "\033[38;5;125m",
+	"\033[38;5;129m", "\033[38;5;128m", "\033[38;5;128m",
+	"\033[38;5;127m", "\033[38;5;127m",
 }
 
 var subtitle = "⛏  twitch-miner-go " + version.String()
@@ -87,13 +87,13 @@ func main() {
 	configDir := flag.String("config", "configs", "Path to the configuration directory")
 	port := flag.String("port", "8080", "Port for the health/analytics HTTP server")
 	logLevel := flag.String("log-level", "", "Log level: DEBUG, INFO, WARN, ERROR (overrides LOG_LEVEL env)")
-	logFormat    := flag.String("log-format", "", "Log format: text or json (overrides LOG_FORMAT env)")
-	logDirFlag   := flag.String("log-dir", "", "Enable file logging; directory for .log files named with startup timestamp (overrides LOG_DIR env)")
+	logFormat := flag.String("log-format", "", "Log format: text or json (overrides LOG_FORMAT env)")
+	logDirFlag := flag.String("log-dir", "", "Enable file logging; directory for .log files named with startup timestamp (overrides LOG_DIR env)")
 	healthcheckURL := flag.String("healthcheck-url", "", "Probe the given HTTP URL and exit with status 0 only on HTTP 200")
-	showVersion             := flag.Bool("version", false, "Print version and exit")
-	autoUpdate              := flag.Bool("auto-update", false, "Automatically download and apply updates on startup")
-	noLifecycleNotify       := flag.Bool("no-lifecycle-notify", false, "Suppress MINER_STARTED / MINER_STOPPED / MINER_CRASHED notifications for this run")
-	logNoTime               := flag.Bool("log-no-time", false, "Omit timestamps in console logs (useful when the platform adds its own, e.g. Fly.io); overrides LOG_NO_TIME env")
+	showVersion := flag.Bool("version", false, "Print version and exit")
+	autoUpdate := flag.Bool("auto-update", false, "Automatically download and apply updates on startup")
+	noLifecycleNotify := flag.Bool("no-lifecycle-notify", false, "Suppress MINER_STARTED / MINER_STOPPED / MINER_CRASHED notifications for this run")
+	logNoTime := flag.Bool("log-no-time", false, "Omit timestamps in console logs (useful when the platform adds its own, e.g. Fly.io); overrides LOG_NO_TIME env")
 	flag.Parse()
 
 	if *showVersion {
@@ -129,7 +129,7 @@ func main() {
 	}
 
 	playStartupAnimation(colored)
-	rootLog.Info("🚀 Starting Twitch Channel Points Miner (Go)", "version", version.String())
+	rootLog.Info("Starting twitch-miner-go", "version", version.String())
 
 	twitchRuntime := runtimecfg.LoadTwitchFromEnv(rootLog.Logger)
 
