@@ -241,6 +241,86 @@ h2 {
   font-weight: 600;
 }
 
+/* Drops progress */
+.drops {
+  margin-top: 0.6rem;
+  border-top: 1px solid #26262c;
+  padding-top: 0.5rem;
+}
+
+.drop-item {
+  margin-bottom: 0.4rem;
+}
+
+.drop-item:last-child {
+  margin-bottom: 0;
+}
+
+.drop-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
+}
+
+.drop-game {
+  color: #adadb8;
+}
+
+.drop-reward {
+  color: #efeff1;
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drop-status-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.drop-status-badge.status-in-progress {
+  background: #1a3a5c;
+  color: #63b3ed;
+}
+
+.drop-status-badge.status-claimable {
+  background: #1a3a1a;
+  color: #68d391;
+}
+
+.drop-status-badge.status-claimed {
+  background: #3a3a3a;
+  color: #a0aec0;
+}
+
+.drop-bar-bg {
+  height: 6px;
+  background: #26262c;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.drop-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #9147ff, #bf94ff);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.drop-bar-label {
+  font-size: 0.65rem;
+  color: #adadb8;
+  margin-top: 0.15rem;
+}
+
 /* History table */
 #history-section {
   margin-top: 2rem;

@@ -65,6 +65,7 @@ notifications:
       - MINER_STOPPED
       - MINER_CRASHED
       - ACCOUNT_CONFIG_RELOADED
+      - DROP_STATUS
     disable_notification: true
   webhook:
     method: POST

@@ -203,6 +203,37 @@ func (s *AnalyticsServer) handleStreamers(w http.ResponseWriter, r *http.Request
 		if streamer.Stream != nil {
 			summary.ViewersCount = streamer.Stream.ViewersCount
 			summary.Title = streamer.Stream.Title
+
+			if len(streamer.Stream.Campaigns) > 0 {
+				drops := make([]dropProgressShort, 0)
+				for _, c := range streamer.Stream.Campaigns {
+					gameName := ""
+					if c.Game != nil {
+						gameName = c.Game.DisplayName
+					}
+					for _, d := range c.Drops {
+						if d == nil {
+							continue
+						}
+						reward := d.Benefit
+						if reward == "" {
+							reward = d.Name
+						}
+						drops = append(drops, dropProgressShort{
+							Game:            gameName,
+							Reward:          reward,
+							ProgressPercent: d.PercentageProgress,
+							WatchedMinutes:  d.CurrentMinutesWatched,
+							RequiredMinutes: d.MinutesRequired,
+							IsClaimable:     d.IsClaimable,
+							IsClaimed:       d.IsClaimed,
+						})
+					}
+				}
+				if len(drops) > 0 {
+					summary.ActiveDrops = drops
+				}
+			}
 		}
 		streamer.Mu.RUnlock()
 		result = append(result, summary)
@@ -536,17 +567,28 @@ func sortedKeys(m map[string]bool) []string {
 }
 
 type streamerSummary struct {
-	Account           string `json:"account"`
-	Username          string `json:"username"`
-	DisplayName       string `json:"display_name,omitempty"`
-	ChannelID         string `json:"channel_id"`
-	IsOnline          bool   `json:"is_online"`
-	IsCategoryWatched bool   `json:"is_category_watched"`
-	ChannelPoints     int    `json:"channel_points"`
-	StreamerURL       string `json:"streamer_url"`
-	Game              string `json:"game,omitempty"`
-	ViewersCount      int    `json:"viewers_count"`
-	Title             string `json:"title,omitempty"`
+	Account           string               `json:"account"`
+	Username          string               `json:"username"`
+	DisplayName       string               `json:"display_name,omitempty"`
+	ChannelID         string               `json:"channel_id"`
+	IsOnline          bool                 `json:"is_online"`
+	IsCategoryWatched bool                 `json:"is_category_watched"`
+	ChannelPoints     int                  `json:"channel_points"`
+	StreamerURL       string               `json:"streamer_url"`
+	Game              string               `json:"game,omitempty"`
+	ViewersCount      int                  `json:"viewers_count"`
+	Title             string               `json:"title,omitempty"`
+	ActiveDrops       []dropProgressShort  `json:"active_drops,omitempty"`
+}
+
+type dropProgressShort struct {
+	Game            string `json:"game,omitempty"`
+	Reward          string `json:"reward,omitempty"`
+	ProgressPercent int    `json:"progress_percent"`
+	WatchedMinutes  int    `json:"watched_minutes"`
+	RequiredMinutes int    `json:"required_minutes"`
+	IsClaimable     bool   `json:"is_claimable"`
+	IsClaimed       bool   `json:"is_claimed"`
 }
 
 type streamerDetail struct {

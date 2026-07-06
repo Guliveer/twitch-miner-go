@@ -97,6 +97,57 @@
     refresh();
   }
 
+  // ── Drops rendering ────────────────────────────────────────────────────
+  function renderDrops(drops) {
+    if (!drops || drops.length === 0) return "";
+    return (
+      '<div class="drops">' +
+      drops
+        .map(function (d) {
+          var statusClass = "status-in-progress";
+          var statusLabel = "IN_PROGRESS";
+          if (d.is_claimed) {
+            statusClass = "status-claimed";
+            statusLabel = "CLAIMED";
+          } else if (d.is_claimable) {
+            statusClass = "status-claimable";
+            statusLabel = "CLAIMABLE";
+          }
+          return (
+            '<div class="drop-item">' +
+            '<div class="drop-header">' +
+            '<span class="drop-game">' +
+            escapeHTML(d.game) +
+            "</span>" +
+            '<span class="drop-reward">' +
+            escapeHTML(d.reward) +
+            "</span>" +
+            '<span class="drop-status-badge ' +
+            statusClass +
+            '">' +
+            statusLabel +
+            "</span>" +
+            "</div>" +
+            '<div class="drop-bar-bg">' +
+            '<div class="drop-bar-fill" style="width:' +
+            d.progress_percent +
+            '%"></div>' +
+            "</div>" +
+            '<div class="drop-bar-label">' +
+            d.progress_percent +
+            "% (" +
+            d.watched_minutes +
+            "/" +
+            d.required_minutes +
+            "m)</div>" +
+            "</div>"
+          );
+        })
+        .join("") +
+      "</div>"
+    );
+  }
+
   // ── Rendering ─────────────────────────────────────────────────────────
   function renderStreamers(streamers) {
     var grid = document.getElementById("streamers-grid");
@@ -121,7 +172,7 @@
         var viewersText = s.is_online ? s.viewers_count + " viewers" : "";
         var details = [gameText, viewersText].filter(Boolean).join(" · ");
 
-        return '<div class="streamer-card ' + statusClass + '">' + '  <div class="name"><a href="' + escapeHTML(s.streamer_url) + '" target="_blank">' + escapeHTML(s.display_name || s.username) + "</a>" + accountBadge + "</div>" + '  <div class="status">' + '    <span class="badge ' + statusClass + '">' + statusText + "</span>" + categoryBadge + "  </div>" + '  <div class="details">' + '    <span class="points">' + formatPoints(s.channel_points) + " pts</span>" + (details ? " · " + details : "") + (s.title ? "<br><em>" + escapeHTML(s.title) + "</em>" : "") + "  </div>" + "</div>";
+        return '<div class="streamer-card ' + statusClass + '">' + '  <div class="name"><a href="' + escapeHTML(s.streamer_url) + '" target="_blank">' + escapeHTML(s.display_name || s.username) + "</a>" + accountBadge + "</div>" + '  <div class="status">' + '    <span class="badge ' + statusClass + '">' + statusText + "</span>" + categoryBadge + "  </div>" + '  <div class="details">' + '    <span class="points">' + formatPoints(s.channel_points) + " pts</span>" + (details ? " · " + details : "") + (s.title ? "<br><em>" + escapeHTML(s.title) + "</em>" : "") + "  </div>" + renderDrops(s.active_drops) + "</div>";
       })
       .join("");
   }
