@@ -10,8 +10,8 @@
     "semantic_hash": ""
   },
   "cmd/twitch-miner-go/main.go": {
-    "mtime": 1783192224.5760288,
-    "ast_hash": "db77555ffdb7a504a20962f9462e4dfb",
+    "mtime": 1783279040.7608998,
+    "ast_hash": "ee953cd6fdfa3112b84b1a943c5a8885",
     "semantic_hash": ""
   },
   "go.mod": {
@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "internal/auth/auth.go": {
-    "mtime": 1783170452.8293157,
-    "ast_hash": "ff5f8eb8278bde39ef4d54b51b5952c4",
+    "mtime": 1783276714.61564,
+    "ast_hash": "7c1010bb482207e8c5f2f6006c827a71",
     "semantic_hash": ""
   },
   "internal/auth/cookies.go": {
@@ -30,8 +30,8 @@
     "semantic_hash": ""
   },
   "internal/auth/device_code.go": {
-    "mtime": 1782763813.0181797,
-    "ast_hash": "9694df3661f481fabc93448388d5f57d",
+    "mtime": 1783276706.8736932,
+    "ast_hash": "4d05e743b636466cd5cd544538149090",
     "semantic_hash": ""
   },
   "internal/auth/iface.go": {
@@ -140,8 +140,8 @@
     "semantic_hash": ""
   },
   "internal/logger/logger.go": {
-    "mtime": 1783192201.6885562,
-    "ast_hash": "46229c2d96e8999f43eb74d68e1effd7",
+    "mtime": 1783268430.824555,
+    "ast_hash": "753d545854235d2d4875d4d0bc3a01dc",
     "semantic_hash": ""
   },
   "internal/miner/debug.go": {
@@ -150,18 +150,18 @@
     "semantic_hash": ""
   },
   "internal/miner/handler.go": {
-    "mtime": 1782763813.04121,
-    "ast_hash": "4e3df81be2fcd3d68712e5606c2c2d4a",
+    "mtime": 1783347155.2167454,
+    "ast_hash": "c157633266cacca0b092ffd9d756fbf9",
     "semantic_hash": ""
   },
   "internal/miner/miner.go": {
-    "mtime": 1783006657.4750502,
-    "ast_hash": "5b84f8c8b2e3a5917e5b9067f5dfee25",
+    "mtime": 1783276740.9109788,
+    "ast_hash": "121a712e3f99be81d3768b548b5a609b",
     "semantic_hash": ""
   },
   "internal/miner/prediction_handler.go": {
-    "mtime": 1782763813.0422132,
-    "ast_hash": "a2c643ef93b214de0d1f1c5ca2e31652",
+    "mtime": 1783197353.1994188,
+    "ast_hash": "e1b5e35d5730aad3ba4c6d4f834308ce",
     "semantic_hash": ""
   },
   "internal/miner/scheduler.go": {
@@ -340,13 +340,13 @@
     "semantic_hash": ""
   },
   "internal/server/analytics.go": {
-    "mtime": 1783006657.4775507,
-    "ast_hash": "4b20695c1923157a5c65bb0bb5b220f1",
+    "mtime": 1783279404.9786801,
+    "ast_hash": "e6c2450110296626e01f2f270021d798",
     "semantic_hash": ""
   },
   "internal/server/handlers.go": {
-    "mtime": 1782763813.057748,
-    "ast_hash": "d55a4937fac046fd51a6238ac42414a3",
+    "mtime": 1783276952.0058172,
+    "ast_hash": "81d37ba20467e3608ed12dd1f45fd19d",
     "semantic_hash": ""
   },
   "internal/server/static.go": {
@@ -360,8 +360,8 @@
     "semantic_hash": ""
   },
   "internal/server/static/logs.js": {
-    "mtime": 1782763813.0592484,
-    "ast_hash": "9f59b17b06f2bc073cb7047c454a32cc",
+    "mtime": 1783197353.8991077,
+    "ast_hash": "46d1c925b5167a87f810ae01d5255458",
     "semantic_hash": ""
   },
   "internal/twitch/client.go": {
@@ -575,8 +575,8 @@
     "semantic_hash": ""
   },
   ".github/wiki/Architecture.md": {
-    "mtime": 1783006657.4620543,
-    "ast_hash": "c62bbe0ad036705615653fa8a2a15493",
+    "mtime": 1783252769.7340865,
+    "ast_hash": "362022e2173ec7ed47bacff00fca269f",
     "semantic_hash": ""
   },
   ".github/wiki/Authentication.md": {
@@ -590,13 +590,13 @@
     "semantic_hash": ""
   },
   ".github/wiki/Getting-Started.md": {
-    "mtime": 1782771854.2368212,
-    "ast_hash": "7017c54e45b9830cf96ce653f55146c2",
+    "mtime": 1783252790.8340743,
+    "ast_hash": "384be4c5b7a2fca4860eea935f1b7f87",
     "semantic_hash": ""
   },
   ".github/wiki/Home.md": {
-    "mtime": 1782763812.984646,
-    "ast_hash": "131c7d61186cfccbc6f9117eaaed654e",
+    "mtime": 1783261713.6073437,
+    "ast_hash": "86332853fddee4cbdcfcefb0de85544e",
     "semantic_hash": ""
   },
   ".github/wiki/Notifications.md": {
@@ -660,8 +660,8 @@
     "semantic_hash": ""
   },
   "CONTRIBUTING.md": {
-    "mtime": 1782763812.9911504,
-    "ast_hash": "d8b9bf3866b4839104209e9f88632bbd",
+    "mtime": 1783256788.0054162,
+    "ast_hash": "33f97285fd1d95556845731e7080cf38",
     "semantic_hash": ""
   },
   "DEPLOYMENT.md": {
@@ -680,8 +680,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1783192299.7378361,
-    "ast_hash": "246523f40e9e64ca87d47b70876b7de5",
+    "mtime": 1783268454.558472,
+    "ast_hash": "045d409b816eceafcaa8255b29e5c603",
     "semantic_hash": ""
   },
   "SECURITY.md": {
@@ -780,7 +780,7 @@
     "semantic_hash": ""
   },
   "configs/supermixerr.yaml": {
-    "mtime": 1783006657.7855368,
+    "mtime": 1783257672.2067366,
     "ast_hash": "d08a59e5aea8afabfc4f1954a2b4bcab",
     "semantic_hash": ""
   },
@@ -790,8 +790,8 @@
     "semantic_hash": ""
   },
   "internal/managedminer/filewatcher.go": {
-    "mtime": 1783006657.4685497,
-    "ast_hash": "11fab4a619c7f582c5ec8c912e1d7f5c",
+    "mtime": 1783253398.1187208,
+    "ast_hash": "e515598f65095584536f7bc8c6722005",
     "semantic_hash": ""
   },
   "internal/managedminer/filewatcher_test.go": {
@@ -810,8 +810,8 @@
     "semantic_hash": ""
   },
   "internal/managedminer/poller.go": {
-    "mtime": 1783006657.4745512,
-    "ast_hash": "40b64f6ac650818797e896674f23c7c2",
+    "mtime": 1783253385.0325837,
+    "ast_hash": "f99086080263e810ce5b64c627f06c1f",
     "semantic_hash": ""
   },
   "internal/managedminer/poller_test.go": {
@@ -870,8 +870,33 @@
     "semantic_hash": ""
   },
   "configs/georg3ks.yaml": {
-    "mtime": 1783036482.911091,
+    "mtime": 1783257672.2057357,
     "ast_hash": "27c9cc3143a3957dce127248cd65398e",
+    "semantic_hash": ""
+  },
+  "internal/telemetry/telemetry.go": {
+    "mtime": 1783253372.8188567,
+    "ast_hash": "35f72b606650871144666174792d71c7",
+    "semantic_hash": ""
+  },
+  "CODE_OF_CONDUCT.md": {
+    "mtime": 1783256780.9342663,
+    "ast_hash": "5012c4bd3df31974e1f5ec19c9d2b8d0",
+    "semantic_hash": ""
+  },
+  "docs/social_preview_1.png": {
+    "mtime": 1783261657.3239353,
+    "ast_hash": "b971bd426a69acfe951998ad0ff4401f",
+    "semantic_hash": ""
+  },
+  "docs/social_preview_2.png": {
+    "mtime": 1783260875.9140172,
+    "ast_hash": "cd964587556cc35929c843bba44f4a81",
+    "semantic_hash": ""
+  },
+  "internal/miner/handler_test.go": {
+    "mtime": 1783347497.19075,
+    "ast_hash": "970dd75164d455cfe5c8a3534a42a218",
     "semantic_hash": ""
   }
 }

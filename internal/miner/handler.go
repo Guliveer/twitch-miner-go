@@ -207,6 +207,7 @@ func (m *Miner) handleRaid(ctx context.Context, msg *model.Message, streamer *mo
 	followRaid := streamer.Settings != nil && streamer.Settings.FollowRaid
 	username := streamer.Username
 	category := streamer.ResolveCategory()
+	existingRaid := streamer.Raid
 	streamer.Mu.RUnlock()
 
 	if !followRaid {
@@ -222,6 +223,12 @@ func (m *Miner) handleRaid(ctx context.Context, msg *model.Message, streamer *mo
 	targetLogin, _ := raidData["target_login"].(string)
 
 	if raidID == "" {
+		return
+	}
+
+	// Debounce: skip if we already processed this raid (PubSub sends
+	// raid_update_v2 repeatedly while the raid is active).
+	if existingRaid != nil && existingRaid.RaidID == raidID {
 		return
 	}
 
