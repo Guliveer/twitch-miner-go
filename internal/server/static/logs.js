@@ -19,6 +19,7 @@
     BET_LOSE: "💸",
     BET_REFUND: "↩️",
     DROP_CLAIM: "🎯",
+    DROP_CLAIM_AVAILABLE: "📦",
     DROP_STATUS: "📦",
     STREAMER_ONLINE: "🟢",
     STREAMER_OFFLINE: "⚫",
@@ -39,7 +40,7 @@
 
   // Category to events mapping (must match backend)
   const CATEGORY_EVENTS = {
-    drops: ["DROP_CLAIM", "DROP_STATUS"],
+    drops: ["DROP_CLAIM", "DROP_CLAIM_AVAILABLE", "DROP_STATUS"],
     points: ["GAIN_FOR_WATCH", "GAIN_FOR_WATCH_STREAK", "GAIN_FOR_CLAIM", "GAIN_FOR_RAID", "BONUS_CLAIM"],
     bets: ["BET_START", "BET_WIN", "BET_LOSE", "BET_REFUND", "BET_FILTERS", "BET_GENERAL", "BET_FAILED"],
     raids: ["JOIN_RAID"],
