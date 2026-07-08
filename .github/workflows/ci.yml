@@ -289,7 +289,7 @@ jobs:
 
   docker-publish:
     needs: [version]
-    if: needs.version.outputs.bumped != 'skip'
+    if: github.event_name == 'push' && needs.version.outputs.bumped != 'skip'
     uses: ./.github/workflows/docker-publish.yml
     with:
       version: ${{ needs.version.outputs.new_version }}
@@ -298,6 +298,7 @@ jobs:
 
   deploy:
     needs: [build, version]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     uses: ./.github/workflows/fly-deploy.yml
     with:
       version: ${{ needs.version.outputs.new_version }}
