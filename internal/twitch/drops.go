@@ -478,9 +478,9 @@ func (c *Client) logDropStatuses(ctx context.Context) {
 
 func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.Streamer) {
 	for _, streamer := range streamers {
-		streamer.Mu.RLock()
+		streamer.Mu.Lock()
 		if streamer.Settings == nil || !streamer.Settings.ClaimDrops {
-			streamer.Mu.RUnlock()
+			streamer.Mu.Unlock()
 			continue
 		}
 
@@ -495,6 +495,8 @@ func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.
 
 			for _, drop := range campaign.Drops {
 				if drop.IsPrintable {
+					streamer.UpdateHistory(string(model.EventDropStatus), 0, 1)
+
 					status := "IN_PROGRESS"
 					if drop.IsClaimed {
 						status = "CLAIMED"
@@ -516,6 +518,7 @@ func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.
 						rewardName = drop.Name
 					}
 					if _, alreadySeen := c.seenClaimable.LoadOrStore(drop.ID, true); !alreadySeen {
+						streamer.UpdateHistory(string(model.EventDropClaimAvailable), 0, 1)
 						c.Log.Event(ctx, model.EventDropClaimAvailable,
 							fmt.Sprintf("Drop available to claim: %s", rewardName),
 							"reward", rewardName,
@@ -524,6 +527,6 @@ func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.
 				}
 			}
 		}
-		streamer.Mu.RUnlock()
+		streamer.Mu.Unlock()
 	}
 }

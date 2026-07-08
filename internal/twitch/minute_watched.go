@@ -196,8 +196,8 @@ func (c *Client) sendMinuteWatchedForStreamer(ctx context.Context, httpClient *h
 }
 
 func (c *Client) logDropProgress(ctx context.Context, streamer *model.Streamer) {
-	streamer.Mu.RLock()
-	defer streamer.Mu.RUnlock()
+	streamer.Mu.Lock()
+	defer streamer.Mu.Unlock()
 
 	for _, campaign := range streamer.Stream.Campaigns {
 		for _, drop := range campaign.Drops {
@@ -205,6 +205,7 @@ func (c *Client) logDropProgress(ctx context.Context, streamer *model.Streamer) 
 				continue
 			}
 			if drop.IsPrintable {
+				streamer.UpdateHistory(string(model.EventDropStatus), 0, 1)
 				c.Log.Event(ctx, model.EventDropStatus, "Drop progress",
 					"streamer", streamer.Username,
 					"stream", streamer.Stream.String(),
