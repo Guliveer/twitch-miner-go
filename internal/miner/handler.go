@@ -243,6 +243,7 @@ func (m *Miner) handleRaid(ctx context.Context, msg *model.Message, streamer *mo
 		RaidID:      raidID,
 		TargetLogin: targetLogin,
 	}
+	streamer.UpdateHistory(string(model.EventJoinRaid), 0, 1)
 	streamer.Mu.Unlock()
 
 	if err := m.twitch.JoinRaid(ctx, raidID); err != nil {

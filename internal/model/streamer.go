@@ -86,6 +86,9 @@ func (s *Streamer) SetOnline() {
 
 // UpdateHistory adds earned points for a given reason code.
 func (s *Streamer) UpdateHistory(reasonCode string, earned int, counter int) {
+	if s.History == nil {
+		s.History = make(map[string]*HistoryEntry)
+	}
 	if _, ok := s.History[reasonCode]; !ok {
 		s.History[reasonCode] = &HistoryEntry{}
 	}
