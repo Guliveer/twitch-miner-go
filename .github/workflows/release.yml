@@ -79,21 +79,28 @@ jobs:
             exit 0
           fi
 
-          LAST_TAG=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1)
-          if [ -z "$LAST_TAG" ]; then
-            RANGE="HEAD"
+          # On PRs, use the PR title (will become the squash-merge commit message on main).
+          # On pushes to main, scan actual commit messages since last tag.
+          if [ "${{ inputs.dry_run }}" = "true" ] && [ -n "${{ github.event.pull_request.title }}" ]; then
+            COMMITS="${{ github.event.pull_request.title }}"
+            echo "Using PR title for bump detection:"
           else
-            RANGE="${LAST_TAG}..HEAD"
+            LAST_TAG=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1)
+            if [ -z "$LAST_TAG" ]; then
+              RANGE="HEAD"
+            else
+              RANGE="${LAST_TAG}..HEAD"
+            fi
+            COMMITS=$(git log --first-parent --format="%s" "$RANGE")
+            echo "Commits since last tag:"
           fi
 
-          COMMITS=$(git log --first-parent --format="%s" "$RANGE")
           if [ -z "$COMMITS" ]; then
             echo "No new commits since last tag."
             echo "bump=skip" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          echo "Commits since last tag:"
           echo "$COMMITS"
 
           BUMP="skip"
