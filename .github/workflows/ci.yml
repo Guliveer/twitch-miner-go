@@ -210,9 +210,6 @@ jobs:
     with:
       dry_run: ${{ github.event_name != 'push' }}
     secrets: inherit
-    outputs:
-      bumped: ${{ jobs.release.outputs.bump }}
-      new_version: ${{ jobs.release.outputs.new_version }}
 
   docker-publish:
     needs: [release]

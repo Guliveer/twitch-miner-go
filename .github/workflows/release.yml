@@ -12,6 +12,16 @@ on:
         description: "Version to release (leave empty to auto-detect from commits)"
         required: false
         type: string
+    outputs:
+      bumped:
+        description: "Bump type (major/minor/patch/skip/explicit)"
+        value: ${{ jobs.detect-bump.outputs.bump }}
+      new_version:
+        description: "New version string"
+        value: ${{ jobs.bump-version.outputs.new_version }}
+      current_version:
+        description: "Current version before bump"
+        value: ${{ jobs.detect-bump.outputs.current_version }}
   workflow_dispatch:
     inputs:
       dry_run:
@@ -121,17 +131,23 @@ jobs:
 
   bump-version:
     needs: [detect-bump]
-    if: needs.detect-bump.outputs.bump != 'skip'
+    if: ${{ inputs.dry_run || needs.detect-bump.outputs.bump != 'skip' }}
     runs-on: ubuntu-latest
     outputs:
       new_version: ${{ steps.bump.outputs.new_version }}
     steps:
-      - name: Checkout code
+      - name: Checkout code (dry-run)
+        if: inputs.dry_run
+        uses: actions/checkout@v4
+
+      - name: Checkout code (release)
+        if: ${{ !inputs.dry_run }}
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
 
       - name: Configure git
+        if: ${{ !inputs.dry_run }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -142,7 +158,9 @@ jobs:
           CURRENT="${{ needs.detect-bump.outputs.current_version }}"
           BUMP="${{ needs.detect-bump.outputs.bump }}"
 
-          if [ "$BUMP" = "explicit" ]; then
+          if [ "$BUMP" = "skip" ]; then
+            NEW_VERSION="$CURRENT"
+          elif [ "$BUMP" = "explicit" ]; then
             NEW_VERSION="${{ inputs.version }}"
           else
             IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
@@ -175,7 +193,7 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- Previous: \`v${{ needs.detect-bump.outputs.current_version }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- New: \`v${{ steps.bump.outputs.new_version }}\`" >> "$GITHUB_STEP_SUMMARY"
-          if [ "${{ inputs.draw_run }}" = "true" ] || [ "${{ inputs.dry_run }}" = "true" ]; then
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
             echo "- Mode: **DRY RUN** — no commit or tag created" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- Tag: \`v${{ steps.bump.outputs.new_version }}\` pushed" >> "$GITHUB_STEP_SUMMARY"
