@@ -83,8 +83,65 @@ jobs:
             echo "Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build" >> "$GITHUB_STEP_SUMMARY"
           fi
 
+  vet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Vet
+        run: go vet ./...
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v7
+        with:
+          version: latest
+
+  test:
+    needs: [vet, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Test
+        run: go test -v ./...
 
   build:
+    needs: [vet, lint, test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -100,273 +157,69 @@ jobs:
         run: go mod download
 
       - name: Build
-        id: build
         run: |
           VERSION=$(cat VERSION)
           GIT_COMMIT=$(git rev-parse --short HEAD)
           go build -v -ldflags "-X github.com/Guliveer/twitch-miner-go/internal/version.Number=${VERSION} -X github.com/Guliveer/twitch-miner-go/internal/version.GitCommit=${GIT_COMMIT}" ./...
 
-      - name: Test
-        id: test
-        run: go test -v ./...
-
-      - name: Vet
-        id: vet
-        run: go vet ./...
-
-      - name: Lint
-        id: lint
-        uses: golangci/golangci-lint-action@v7
-        with:
-          version: latest
-
-      - name: Summary
-        if: always()
-        run: |
-          echo "## Build & Test" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-
-          if [ "${{ steps.build.outcome }}" = "success" ]; then
-            echo "- ✅ **Build**: Compiled successfully" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- ❌ **Build**: Failed" >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-          if [ "${{ steps.test.outcome }}" = "success" ]; then
-            echo "- ✅ **Test**: All tests passed" >> "$GITHUB_STEP_SUMMARY"
-          elif [ "${{ steps.test.outcome }}" = "skipped" ]; then
-            echo "- ⏭️ **Test**: Skipped" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- ❌ **Test**: Some tests failed" >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-          if [ "${{ steps.vet.outcome }}" = "success" ]; then
-            echo "- ✅ **Vet**: No issues found" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- ❌ **Vet**: Issues found" >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-          if [ "${{ steps.lint.outcome }}" = "success" ]; then
-            echo "- ✅ **Lint**: No issues found" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- ❌ **Lint**: Issues found" >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-  version:
-    needs: [build]
-    if: >-
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/main' &&
-      !startsWith(github.event.head_commit.message, 'chore:')
+  summary:
+    if: always()
+    needs: [commit-lint, vet, lint, test, build]
     runs-on: ubuntu-latest
-    outputs:
-      new_version: ${{ steps.version.outputs.new_version }}
-      bumped: ${{ steps.bump.outputs.bump }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
-
-      - name: Configure git user
+      - name: Pipeline Summary
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Determine version bump
-        id: bump
-        run: |
-          # Find the last version tag
-          LAST_TAG=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1)
-
-          if [ -z "$LAST_TAG" ]; then
-            echo "No previous version tag found. Using first commit as base."
-            RANGE="HEAD"
-            COMMITS=$(git log --first-parent --format="%s" "$RANGE")
-          else
-            echo "Last tag: $LAST_TAG"
-            RANGE="${LAST_TAG}..HEAD"
-            # --first-parent: only analyze commits directly on main,
-            # not internal commits from merged branches/forks.
-            # This prevents external PR commit history from influencing version bumps.
-            COMMITS=$(git log --first-parent --format="%s" "$RANGE")
-          fi
-
-          if [ -z "$COMMITS" ]; then
-            echo "No new commits since last tag."
-            echo "bump=skip" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "Commits since last tag:"
-          echo "$COMMITS"
-          echo ""
-
-          BUMP="skip"
-
-          while IFS= read -r msg; do
-            [ -z "$msg" ] && continue
-
-            # Check for breaking changes
-            if echo "$msg" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\([a-zA-Z0-9_-]+\))?!: '; then
-              BUMP="major"
-              break
-            fi
-            if echo "$msg" | grep -qiE 'BREAKING CHANGE:'; then
-              BUMP="major"
-              break
-            fi
-
-            # Check for features
-            if echo "$msg" | grep -qE '^feat(\([a-zA-Z0-9_-]+\))?: '; then
-              if [ "$BUMP" != "major" ]; then
-                BUMP="minor"
-              fi
-              continue
-            fi
-
-            # Check for patch-level types
-            if echo "$msg" | grep -qE '^(fix|perf|refactor|build)(\([a-zA-Z0-9_-]+\))?: '; then
-              if [ "$BUMP" = "skip" ]; then
-                BUMP="patch"
-              fi
-              continue
-            fi
-
-            # Check for no-bump types (docs, style, test, ci, chore)
-            if echo "$msg" | grep -qE '^(docs|style|test|ci|chore)(\([a-zA-Z0-9_-]+\))?: '; then
-              continue
-            fi
-
-            # Non-conventional commit — skip
-            continue
-          done <<< "$COMMITS"
-
-          echo "Determined bump type: $BUMP"
-          echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
-
-      - name: Bump version
-        if: steps.bump.outputs.bump != 'skip'
-        id: version
-        run: |
-          # Derive current version from the latest git tag (immutable, fork-safe).
-          # Falls back to VERSION file only if no tags exist yet.
-          LAST_TAG=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1)
-          if [ -n "$LAST_TAG" ]; then
-            CURRENT="${LAST_TAG#v}"
-          else
-            CURRENT=$(cat VERSION)
-          fi
-          echo "Current version: $CURRENT (source: ${LAST_TAG:-VERSION file})"
-
-          BUMP="${{ steps.bump.outputs.bump }}"
-
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
-
-          case "$BUMP" in
-            major)
-              MAJOR=$((MAJOR + 1))
-              MINOR=0
-              PATCH=0
-              ;;
-            minor)
-              MINOR=$((MINOR + 1))
-              PATCH=0
-              ;;
-            patch)
-              PATCH=$((PATCH + 1))
-              ;;
-          esac
-
-          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          echo "New version: $NEW_VERSION"
-
-          printf "%s" "$NEW_VERSION" > VERSION
-
-          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Commit and tag
-        if: steps.bump.outputs.bump != 'skip'
-        env:
-          NEW_VERSION: ${{ steps.version.outputs.new_version }}
-        run: |
-          git add VERSION
-          git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
-          git tag -a "v${NEW_VERSION}" -m "v${NEW_VERSION}"
-          git push origin main --follow-tags
-
-      - name: Build release binaries
-        if: steps.bump.outputs.bump != 'skip'
-        env:
-          NEW_VERSION: ${{ steps.version.outputs.new_version }}
-        run: |
-          mkdir -p dist
-          targets=(
-            "linux/amd64"
-            "linux/arm64"
-            "darwin/amd64"
-            "darwin/arm64"
-            "windows/amd64"
-            "windows/arm64"
-          )
-          GIT_COMMIT=$(git rev-parse --short HEAD)
-          LDFLAGS="-s -w -X github.com/Guliveer/twitch-miner-go/internal/version.Number=${NEW_VERSION} -X github.com/Guliveer/twitch-miner-go/internal/version.GitCommit=${GIT_COMMIT}"
-
-          for target in "${targets[@]}"; do
-            GOOS="${target%/*}"
-            GOARCH="${target#*/}"
-            ext=""
-            [ "$GOOS" = "windows" ] && ext=".exe"
-
-            GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=0 go build \
-              -ldflags "$LDFLAGS" \
-              -o "dist/twitch-miner-go-${GOOS}-${GOARCH}${ext}" \
-              ./cmd/twitch-miner-go
-
-            GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=0 go build \
-              -ldflags "$LDFLAGS" \
-              -o "dist/config-editor-${GOOS}-${GOARCH}${ext}" \
-              ./cmd/config-editor
-          done
-
-      - name: Create GitHub Release
-        id: release
-        if: steps.bump.outputs.bump != 'skip'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: "v${{ steps.version.outputs.new_version }}"
-          generate_release_notes: true
-          files: dist/*
-
-      - name: Summary
-        if: always()
-        run: |
-          echo "## Version" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Pipeline Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
-          BUMP="${{ steps.bump.outputs.bump }}"
-          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          check_status() {
+            local name="$1"
+            local result="$2"
+            case "$result" in
+              success)    echo "| $name | ✅ Passed |" ;;
+              failure)    echo "| $name | ❌ Failed |" ;;
+              skipped)    echo "| $name | ⏭️ Skipped |" ;;
+              *)          echo "| $name | ❓ Unknown ($result) |" ;;
+            esac
+          }
 
-          if [ "$BUMP" = "skip" ]; then
-            echo "⏭️ **No version bump needed** — commit messages don't trigger a release" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Step | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          check_status "commit-lint" "${{ needs.commit-lint.result }}" >> "$GITHUB_STEP_SUMMARY"
+          check_status "vet" "${{ needs.vet.result }}" >> "$GITHUB_STEP_SUMMARY"
+          check_status "lint" "${{ needs.lint.result }}" >> "$GITHUB_STEP_SUMMARY"
+          check_status "test" "${{ needs.test.result }}" >> "$GITHUB_STEP_SUMMARY"
+          check_status "build" "${{ needs.build.result }}" >> "$GITHUB_STEP_SUMMARY"
+
+          # Overall status
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${{ needs.commit-lint.result }}" == "failure" ]] || \
+             [[ "${{ needs.vet.result }}" == "failure" ]] || \
+             [[ "${{ needs.lint.result }}" == "failure" ]] || \
+             [[ "${{ needs.test.result }}" == "failure" ]] || \
+             [[ "${{ needs.build.result }}" == "failure" ]]; then
+            echo "❌ **Pipeline failed** — check the individual steps for details" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
           else
-            if [ -n "$NEW_VERSION" ]; then
-              echo "- 🏷️ **Bumped**: \`v${NEW_VERSION}\` (${BUMP} bump)" >> "$GITHUB_STEP_SUMMARY"
-            fi
-
-            if [ "${{ steps.release.outcome }}" = "success" ]; then
-              echo "- ✅ **GitHub Release**: Created" >> "$GITHUB_STEP_SUMMARY"
-            elif [ "${{ steps.release.outcome }}" = "skipped" ]; then
-              echo "- ⏭️ **GitHub Release**: Skipped" >> "$GITHUB_STEP_SUMMARY"
-            else
-              echo "- ❌ **GitHub Release**: Failed" >> "$GITHUB_STEP_SUMMARY"
-            fi
+            echo "✅ **Pipeline passed** — all checks succeeded" >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  release:
+    needs: [build]
+    uses: ./.github/workflows/release.yml
+    with:
+      dry_run: ${{ github.event_name != 'push' }}
+    secrets: inherit
+    outputs:
+      bumped: ${{ jobs.release.outputs.bump }}
+      new_version: ${{ jobs.release.outputs.new_version }}
 
   docker-publish:
-    needs: [version]
-    if: needs.version.outputs.bumped != 'skip'
+    needs: [release]
+    if: >-
+      github.event_name == 'push' &&
+      needs.release.outputs.bumped != 'skip' &&
+      needs.release.outputs.bumped != ''
     permissions:
       contents: read
       packages: write
@@ -374,14 +227,17 @@ jobs:
       id-token: write
     uses: ./.github/workflows/docker-publish.yml
     with:
-      version: ${{ needs.version.outputs.new_version }}
+      version: ${{ needs.release.outputs.new_version }}
       dry-run: false
     secrets: inherit
 
   deploy:
-    needs: [build, version]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [release]
+    if: >-
+      github.event_name == 'push' &&
+      needs.release.outputs.bumped != 'skip' &&
+      needs.release.outputs.bumped != ''
     uses: ./.github/workflows/fly-deploy.yml
     with:
-      version: ${{ needs.version.outputs.new_version }}
+      version: ${{ needs.release.outputs.new_version }}
     secrets: inherit

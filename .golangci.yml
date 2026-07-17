@@ -23,7 +23,6 @@ linters:
     - misspell
     - bodyclose
     - durationcheck
-    - exportloopref
     - makezero
     - nilerr
     - prealloc
@@ -38,52 +37,53 @@ linters:
     # Duplication
     - dupl
 
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: false
-    exclude-functions:
-      - (io.Closer).Close
-      - (net.Listener).Close
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: false
+      exclude-functions:
+        - (io.Closer).Close
+        - (net.Listener).Close
 
-  gosec:
-    excludes:
-      - G104  # unhandled errors on deferred close - handled by errcheck
-      - G304  # file inclusion via variable - expected for config loading
+    gosec:
+      excludes:
+        - G104  # unhandled errors on deferred close - handled by errcheck
+        - G304  # file inclusion via variable - expected for config loading
 
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - style
-      - performance
-    disabled-checks:
-      - hugeParam
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - style
+        - performance
+      disabled-checks:
+        - hugeParam
 
-  gocyclo:
-    min-complexity: 25
+    gocyclo:
+      min-complexity: 25
 
-  cyclop:
-    max-complexity: 25
-    skip-tests: true
+    cyclop:
+      max-complexity: 25
 
-  dupl:
-    threshold: 100
+    dupl:
+      threshold: 100
+
+  exclusions:
+    rules:
+      # Test files can be less strict
+      - path: _test\.go
+        linters:
+          - errcheck
+          - gosec
+          - dupl
+          - gocyclo
+          - cyclop
+      # Generated files
+      - path: generated
+        linters:
+          - errcheck
+          - gosec
+          - dupl
 
 issues:
   max-issues-per-linter: 50
   max-same-issues: 5
-  exclude-rules:
-    # Test files can be less strict
-    - path: _test\.go
-      linters:
-        - errcheck
-        - gosec
-        - dupl
-        - gocyclo
-        - cyclop
-    # Generated files
-    - path: generated
-      linters:
-        - errcheck
-        - gosec
-        - dupl

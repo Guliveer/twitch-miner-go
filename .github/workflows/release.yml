@@ -1,0 +1,292 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      dry_run:
+        description: "Dry run - build only, skip commit/tag/release"
+        required: false
+        type: boolean
+        default: false
+      version:
+        description: "Version to release (leave empty to auto-detect from commits)"
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run - build only, skip commit/tag/release"
+        required: false
+        type: boolean
+        default: false
+      version:
+        description: "Version to release (leave empty to auto-detect from commits)"
+        required: false
+        type: string
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  detect-bump:
+    runs-on: ubuntu-latest
+    outputs:
+      bump: ${{ steps.bump.outputs.bump }}
+      current_version: ${{ steps.current.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current version
+        id: current
+        run: |
+          LAST_TAG=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1)
+          if [ -n "$LAST_TAG" ]; then
+            VERSION="${LAST_TAG#v}"
+            SOURCE="tag ${LAST_TAG}"
+          else
+            VERSION="$(cat VERSION)"
+            SOURCE="VERSION file"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Current version: ${VERSION} (source: ${SOURCE})"
+
+      - name: Determine version bump
+        id: bump
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "Explicit version provided: ${{ inputs.version }}"
+            echo "bump=explicit" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          LAST_TAG=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1)
+          if [ -z "$LAST_TAG" ]; then
+            RANGE="HEAD"
+          else
+            RANGE="${LAST_TAG}..HEAD"
+          fi
+
+          COMMITS=$(git log --first-parent --format="%s" "$RANGE")
+          if [ -z "$COMMITS" ]; then
+            echo "No new commits since last tag."
+            echo "bump=skip" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Commits since last tag:"
+          echo "$COMMITS"
+
+          BUMP="skip"
+          while IFS= read -r msg; do
+            [ -z "$msg" ] && continue
+
+            if echo "$msg" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\([a-zA-Z0-9_-]+\))?!: '; then
+              BUMP="major"
+              break
+            fi
+            if echo "$msg" | grep -qiE 'BREAKING CHANGE:'; then
+              BUMP="major"
+              break
+            fi
+            if echo "$msg" | grep -qE '^feat(\([a-zA-Z0-9_-]+\))?: '; then
+              [ "$BUMP" != "major" ] && BUMP="minor"
+              continue
+            fi
+            if echo "$msg" | grep -qE '^(fix|perf|refactor|build)(\([a-zA-Z0-9_-]+\))?: '; then
+              [ "$BUMP" = "skip" ] && BUMP="patch"
+              continue
+            fi
+          done <<< "$COMMITS"
+
+          echo "Bump type: ${BUMP}"
+          echo "bump=${BUMP}" >> "$GITHUB_OUTPUT"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Detect Bump" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Current version: \`v${{ steps.current.outputs.version }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Bump type: **${{ steps.bump.outputs.bump }}**" >> "$GITHUB_STEP_SUMMARY"
+
+  bump-version:
+    needs: [detect-bump]
+    if: needs.detect-bump.outputs.bump != 'skip'
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.bump.outputs.new_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Compute new version
+        id: bump
+        run: |
+          CURRENT="${{ needs.detect-bump.outputs.current_version }}"
+          BUMP="${{ needs.detect-bump.outputs.bump }}"
+
+          if [ "$BUMP" = "explicit" ]; then
+            NEW_VERSION="${{ inputs.version }}"
+          else
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+            case "$BUMP" in
+              major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+              minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+              patch) PATCH=$((PATCH + 1)) ;;
+            esac
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          fi
+
+          echo "New version: ${NEW_VERSION}"
+          echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and tag
+        if: ${{ !inputs.dry_run }}
+        env:
+          NEW_VERSION: ${{ steps.bump.outputs.new_version }}
+        run: |
+          printf "%s" "$NEW_VERSION" > VERSION
+          git add VERSION
+          git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
+          git tag -a "v${NEW_VERSION}" -m "v${NEW_VERSION}"
+          git push origin main --follow-tags
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Bump Version" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Previous: \`v${{ needs.detect-bump.outputs.current_version }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- New: \`v${{ steps.bump.outputs.new_version }}\`" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ inputs.draw_run }}" = "true" ] || [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "- Mode: **DRY RUN** — no commit or tag created" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- Tag: \`v${{ steps.bump.outputs.new_version }}\` pushed" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  build-binaries:
+    needs: [bump-version]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.dry_run && '' || format('v{0}', needs.bump-version.outputs.new_version) }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      - name: Build matrix binaries
+        env:
+          NEW_VERSION: ${{ needs.bump-version.outputs.new_version }}
+        run: |
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          LDFLAGS="-s -w -X github.com/Guliveer/twitch-miner-go/internal/version.Number=${NEW_VERSION} -X github.com/Guliveer/twitch-miner-go/internal/version.GitCommit=${GIT_COMMIT}"
+
+          mkdir -p dist
+
+          targets=(
+            "linux/amd64"
+            "linux/arm64"
+            "darwin/amd64"
+            "darwin/arm64"
+            "windows/amd64"
+            "windows/arm64"
+          )
+
+          build_target() {
+            local target="$1"
+            local GOOS="${target%/*}"
+            local GOARCH="${target#*/}"
+            local ext=""
+            [ "$GOOS" = "windows" ] && ext=".exe"
+
+            GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=0 go build \
+              -ldflags "$LDFLAGS" \
+              -o "dist/twitch-miner-go-${GOOS}-${GOARCH}${ext}" \
+              ./cmd/twitch-miner-go &
+
+            GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=0 go build \
+              -ldflags "$LDFLAGS" \
+              -o "dist/config-editor-${GOOS}-${GOARCH}${ext}" \
+              ./cmd/config-editor &
+          }
+
+          for target in "${targets[@]}"; do
+            build_target "$target"
+          done
+
+          wait
+
+          echo "Built binaries:"
+          ls -la dist/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: dist/
+          retention-days: 1
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Build Binaries" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "**DRY RUN** — binaries built but not uploaded to a release" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "| Binary | Size |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|------|" >> "$GITHUB_STEP_SUMMARY"
+          for f in dist/*; do
+            SIZE=$(du -h "$f" | cut -f1)
+            echo "| $(basename $f) | ${SIZE} |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+  create-release:
+    needs: [bump-version, build-binaries]
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ needs.bump-version.outputs.new_version }}"
+          generate_release_notes: true
+          files: dist/*
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## GitHub Release" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Tag: \`v${{ needs.bump-version.outputs.new_version }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Release notes: auto-generated" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Artifacts: $(ls dist/ | wc -l) files" >> "$GITHUB_STEP_SUMMARY"
