@@ -206,7 +206,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.dry_run && '' || format('v{0}', needs.bump-version.outputs.new_version) }}
+          ref: ${{ !inputs.dry_run && format('v{0}', needs.bump-version.outputs.new_version) || '' }}
 
       - name: Set up Go
         uses: actions/setup-go@v5

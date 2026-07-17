@@ -50,7 +50,7 @@ func main() {
 	if err != nil {
 		fatalf("connecting to database: %v", err)
 	}
-	defer st.Close()
+	defer st.Close() //nolint:errcheck // cleanup on exit; best-effort
 
 	var seeded, failed int
 	for _, cfg := range configs {

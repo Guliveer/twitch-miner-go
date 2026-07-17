@@ -167,7 +167,7 @@ func DownloadAsset(ctx context.Context, url string) (string, error) {
 	}
 	tmp.Close()
 
-	if err := os.Chmod(tmp.Name(), 0755); err != nil {
+	if err := os.Chmod(tmp.Name(), 0o755); err != nil {
 		os.Remove(tmp.Name())
 		return "", fmt.Errorf("chmod temp file: %w", err)
 	}

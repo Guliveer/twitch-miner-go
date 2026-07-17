@@ -146,7 +146,7 @@ func (c *Client) CheckStreamerOnline(ctx context.Context, streamer *model.Stream
 			streamer.Mu.Lock()
 			streamer.SetOffline()
 			streamer.Mu.Unlock()
-			return nil
+			return nil //nolint:nilerr // streamer set offline; error logged upstream
 		}
 
 		streamer.Mu.Lock()

@@ -99,7 +99,18 @@ jobs:
         run: go mod download
 
       - name: Vet
+        id: vet
         run: go vet ./...
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Vet" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.vet.outcome }}" = "success" ]; then
+            echo "✅ No issues found" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ go vet failed — check logs for details" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   lint:
     runs-on: ubuntu-latest
@@ -117,9 +128,20 @@ jobs:
         run: go mod download
 
       - name: Lint
+        id: lint
         uses: golangci/golangci-lint-action@v7
         with:
           version: latest
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Lint" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.lint.outcome }}" = "success" ]; then
+            echo "✅ No lint issues found" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ Lint issues found — check logs for details" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   test:
     needs: [vet, lint]
@@ -138,7 +160,18 @@ jobs:
         run: go mod download
 
       - name: Test
+        id: test
         run: go test -v ./...
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Test" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.test.outcome }}" = "success" ]; then
+            echo "✅ All tests passed" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ Tests failed — check logs for details" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   build:
     needs: [vet, lint, test]
@@ -157,51 +190,20 @@ jobs:
         run: go mod download
 
       - name: Build
+        id: build
         run: |
           VERSION=$(cat VERSION)
           GIT_COMMIT=$(git rev-parse --short HEAD)
           go build -v -ldflags "-X github.com/Guliveer/twitch-miner-go/internal/version.Number=${VERSION} -X github.com/Guliveer/twitch-miner-go/internal/version.GitCommit=${GIT_COMMIT}" ./...
 
-  summary:
-    if: always()
-    needs: [commit-lint, vet, lint, test, build]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pipeline Summary
+      - name: Summary
+        if: always()
         run: |
-          echo "## Pipeline Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-
-          check_status() {
-            local name="$1"
-            local result="$2"
-            case "$result" in
-              success)    echo "| $name | ✅ Passed |" ;;
-              failure)    echo "| $name | ❌ Failed |" ;;
-              skipped)    echo "| $name | ⏭️ Skipped |" ;;
-              *)          echo "| $name | ❓ Unknown ($result) |" ;;
-            esac
-          }
-
-          echo "| Step | Status |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|------|--------|" >> "$GITHUB_STEP_SUMMARY"
-          check_status "commit-lint" "${{ needs.commit-lint.result }}" >> "$GITHUB_STEP_SUMMARY"
-          check_status "vet" "${{ needs.vet.result }}" >> "$GITHUB_STEP_SUMMARY"
-          check_status "lint" "${{ needs.lint.result }}" >> "$GITHUB_STEP_SUMMARY"
-          check_status "test" "${{ needs.test.result }}" >> "$GITHUB_STEP_SUMMARY"
-          check_status "build" "${{ needs.build.result }}" >> "$GITHUB_STEP_SUMMARY"
-
-          # Overall status
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          if [[ "${{ needs.commit-lint.result }}" == "failure" ]] || \
-             [[ "${{ needs.vet.result }}" == "failure" ]] || \
-             [[ "${{ needs.lint.result }}" == "failure" ]] || \
-             [[ "${{ needs.test.result }}" == "failure" ]] || \
-             [[ "${{ needs.build.result }}" == "failure" ]]; then
-            echo "❌ **Pipeline failed** — check the individual steps for details" >> "$GITHUB_STEP_SUMMARY"
-            exit 1
+          echo "## Build" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.build.outcome }}" = "success" ]; then
+            echo "✅ Build succeeded" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "✅ **Pipeline passed** — all checks succeeded" >> "$GITHUB_STEP_SUMMARY"
+            echo "❌ Build failed — check logs for details" >> "$GITHUB_STEP_SUMMARY"
           fi
 
   release:

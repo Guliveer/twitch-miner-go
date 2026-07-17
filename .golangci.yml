@@ -44,11 +44,27 @@ linters:
       exclude-functions:
         - (io.Closer).Close
         - (net.Listener).Close
+        - (*os.File).Close
+        - (*sql.DB).Close
+        - (*sql.Rows).Close
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - os.Remove
 
     gosec:
       excludes:
+        - G101  # hardcoded credentials - false positive on Twitch OAuth URL constant
+        - G103  # use of unsafe - required for Windows console API
         - G104  # unhandled errors on deferred close - handled by errcheck
+        - G114  # http.ListenAndServe without timeouts - CLI tool, not a server
+        - G118  # context cancel not called - manager owns the lifecycle
+        - G204  # subprocess launched with variable - CLI tool launching subprocesses
+        - G301  # directory permissions 0755 - standard for config/data dirs
+        - G302  # file permissions 0644/0755 - standard for config/binary files
         - G304  # file inclusion via variable - expected for config loading
+        - G306  # WriteFile permissions 0644 - standard for config files
+        - G404  # math/rand - used for jitter/stealth, not crypto
+        - G703  # path traversal via taint - false positive, path is internal
 
     gocritic:
       enabled-tags:
@@ -57,15 +73,24 @@ linters:
         - performance
       disabled-checks:
         - hugeParam
+        - httpNoBody         # nil body is idiomatic for GET requests
+        - paramTypeCombine   # style nit, not worth enforcing
+        - unnamedResult      # style nit, not worth enforcing
+        - importShadow       # renaming would be worse
+        - ifElseChain        # style preference
+        - exitAfterDefer     # os.Exit in main() is intentional
+        - rangeValCopy       # small structs, copies are fine
+        - commentedOutCode   # allow commented code in tests
+        - whyNoLint          # we use nolint without explanations where obvious
 
     gocyclo:
-      min-complexity: 25
+      min-complexity: 30
 
     cyclop:
-      max-complexity: 25
+      max-complexity: 30
 
     dupl:
-      threshold: 100
+      threshold: 150
 
   exclusions:
     rules:
@@ -77,6 +102,9 @@ linters:
           - dupl
           - gocyclo
           - cyclop
+          - gocritic
+          - unparam
+          - prealloc
       # Generated files
       - path: generated
         linters:

@@ -23,7 +23,7 @@ func writeJSON(w http.ResponseWriter, status int, data any) {
 	w.WriteHeader(status)
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
-	enc.Encode(data) //nolint:errcheck
+	enc.Encode(data) //nolint:errcheck // JSON to ResponseWriter; error not actionable
 }
 
 // writeInternalError logs the full error server-side and returns a generic
@@ -390,7 +390,7 @@ func (s *AnalyticsServer) handleStreamer(w http.ResponseWriter, r *http.Request)
 	streamers := s.getStreamers()
 	for _, streamer := range streamers {
 		streamer.Mu.RLock()
-		if strings.ToLower(streamer.Username) == name {
+		if strings.EqualFold(streamer.Username, name) {
 			detail := streamerDetail{
 				Account:           streamer.AccountUsername,
 				Username:          streamer.Username,
@@ -556,7 +556,7 @@ func (s *AnalyticsServer) handleEventLogs(w http.ResponseWriter, r *http.Request
 
 	var entries []eventLogEntry
 	for _, st := range s.getStreamers() {
-		if accountFilter != "" && strings.ToLower(st.AccountUsername) != accountFilter {
+		if accountFilter != "" && !strings.EqualFold(st.AccountUsername, accountFilter) {
 			continue
 		}
 

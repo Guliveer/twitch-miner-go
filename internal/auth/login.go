@@ -70,7 +70,7 @@ func (a *Authenticator) loginWithPassword(ctx context.Context, password string) 
 	return fmt.Errorf("twitch login failed with unknown error code %d", resp.ErrorCode)
 }
 
-func (a *Authenticator) handle2FA(ctx context.Context, password string, basePayload map[string]any, tokenKey, label string) error {
+func (a *Authenticator) handle2FA(ctx context.Context, password string, _ map[string]any, tokenKey, label string) error {
 	a.log.Info("Two-factor authentication required", "type", label)
 
 	code, err := promptLine(fmt.Sprintf("Enter your %s code: ", label))

@@ -169,7 +169,7 @@ func main() {
 			rootLog.Error("Failed to connect to database", "error", err)
 			os.Exit(1)
 		}
-		defer pg.Close()
+		defer pg.Close() //nolint:errcheck // cleanup on exit; best-effort
 		accountStore = pg
 
 		pollInterval := resolvePollInterval()

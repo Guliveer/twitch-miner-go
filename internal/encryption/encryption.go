@@ -53,7 +53,10 @@ func Encrypt(key []byte, plaintext string) (string, error) {
 
 	ciphertext := gcm.Seal(nil, nonce, []byte(plaintext), nil)
 
-	payload := base64.StdEncoding.EncodeToString(append(nonce, ciphertext...))
+	result := make([]byte, 0, gcm.NonceSize()+len(ciphertext))
+	result = append(result, nonce...)
+	result = append(result, ciphertext...)
+	payload := base64.StdEncoding.EncodeToString(result)
 	return Prefix + AlgAES256GCM + ":" + payload, nil
 }
 

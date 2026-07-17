@@ -32,18 +32,18 @@ func OpenPostgres(dsn string) (*PostgresStore, error) {
 		return nil, fmt.Errorf("opening postgres: %w", err)
 	}
 	if err := db.Ping(); err != nil {
-		db.Close()
+		db.Close() //nolint:errcheck // cleanup on error path; best-effort
 		return nil, fmt.Errorf("connecting to postgres: %w", err)
 	}
 
 	goose.SetBaseFS(migrations)
 	goose.SetLogger(goose.NopLogger())
 	if err := goose.SetDialect("postgres"); err != nil {
-		db.Close()
+		db.Close() //nolint:errcheck // cleanup on error path; best-effort
 		return nil, fmt.Errorf("setting goose dialect: %w", err)
 	}
 	if err := goose.Up(db, "migrations"); err != nil {
-		db.Close()
+		db.Close() //nolint:errcheck // cleanup on error path; best-effort
 		return nil, fmt.Errorf("running migrations: %w", err)
 	}
 
@@ -60,7 +60,7 @@ func OpenPostgres(dsn string) (*PostgresStore, error) {
 // to s.changes. Reconnects automatically on disconnect.
 func (s *PostgresStore) listen(dsn string) {
 	listener := pq.NewListener(dsn, 5*time.Second, time.Minute, nil)
-	defer listener.Close()
+	defer listener.Close() //nolint:errcheck // cleanup on exit; best-effort
 
 	if err := listener.Listen("accounts_changed"); err != nil {
 		// Non-fatal: fall back to polling only.
@@ -95,7 +95,7 @@ func (s *PostgresStore) ListAccounts() ([]AccountRow, error) {
 	if err != nil {
 		return nil, fmt.Errorf("listing accounts: %w", err)
 	}
-	defer rows.Close()
+	defer rows.Close() //nolint:errcheck // cleanup after query; best-effort
 
 	var accounts []AccountRow
 	for rows.Next() {

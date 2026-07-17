@@ -11,12 +11,12 @@ func (s *AnalyticsServer) handleDashboard(w http.ResponseWriter, r *http.Request
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write(dashboardHTML) //nolint:errcheck
+	w.Write(dashboardHTML) //nolint:errcheck // static HTML to ResponseWriter; error not actionable
 }
 
 func (s *AnalyticsServer) handleLogs(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write(logsHTML) //nolint:errcheck
+	w.Write(logsHTML) //nolint:errcheck // static HTML to ResponseWriter; error not actionable
 }
 
 func (s *AnalyticsServer) handleHealth(w http.ResponseWriter, _ *http.Request) {

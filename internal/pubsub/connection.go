@@ -160,7 +160,7 @@ func (c *Connection) Close() {
 		// never arrive after disconnect, so these entries would leak otherwise.
 		clear(c.nonceToTopic)
 		if c.conn != nil {
-			c.conn.Close(websocket.StatusNormalClosure, "closing")
+			c.conn.Close(websocket.StatusNormalClosure, "closing") //nolint:errcheck // best-effort WebSocket close
 		}
 		close(c.messages)
 	})
