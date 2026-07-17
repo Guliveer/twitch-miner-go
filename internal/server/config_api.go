@@ -123,9 +123,7 @@ func (s *AnalyticsServer) handleConfigGenerate(w http.ResponseWriter, r *http.Re
 
 	yamlData, err := yaml.Marshal(&cfg)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]any{
-			"error": "failed to generate YAML: " + err.Error(),
-		})
+		writeInternalError(w, s.log, "POST /api/config/generate", err)
 		return
 	}
 

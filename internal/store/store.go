@@ -14,6 +14,9 @@ type AccountRow struct {
 
 // Store is the persistence interface for account configurations.
 type Store interface {
+	// Ping verifies the underlying connection is alive.
+	Ping() error
+
 	// ListAccounts returns all account rows.
 	ListAccounts() ([]AccountRow, error)
 

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Guliveer/twitch-miner-go/internal/logger"
 	"github.com/Guliveer/twitch-miner-go/internal/model"
 )
 
@@ -23,6 +24,14 @@ func writeJSON(w http.ResponseWriter, status int, data any) {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	enc.Encode(data) //nolint:errcheck
+}
+
+// writeInternalError logs the full error server-side and returns a generic
+// error message to the client. This prevents leaking internal details
+// (database errors, file paths, etc.) to API consumers.
+func writeInternalError(w http.ResponseWriter, log *logger.Logger, route string, err error) {
+	log.Error("API error", "route", route, "error", err)
+	writeJSON(w, http.StatusInternalServerError, errorResponse{Error: "internal server error"})
 }
 
 // ---- pagination ----

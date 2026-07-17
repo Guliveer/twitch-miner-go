@@ -28,6 +28,7 @@ func (f *fakePollerStore) DeleteAccount(string) error           { return nil }
 func (f *fakePollerStore) TouchLastStartedAt(string) error      { return nil }
 func (f *fakePollerStore) Changes() <-chan struct{}              { return nil }
 func (f *fakePollerStore) Close() error                         { return nil }
+func (f *fakePollerStore) Ping() error                          { return nil }
 
 type fakeMgr struct {
 	started   []string

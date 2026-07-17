@@ -110,6 +110,10 @@ func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth, ap
 		handler = withAuth(auth, apiKey, mux)
 	}
 
+	limiter := newRateLimiter(100, time.Minute)
+	handler = withRateLimit(limiter, handler)
+	handler = withRequestID(handler)
+
 	s.srv = &http.Server{
 		Addr:              addr,
 		Handler:           withLogging(log, handler),

@@ -49,6 +49,7 @@ func (f *fakeStore) DeleteAccount(username string) error {
 	delete(f.rows, username)
 	return nil
 }
+func (f *fakeStore) Ping() error { return nil }
 
 func (f *fakeStore) TouchLastStartedAt(string) error { return nil }
 func (f *fakeStore) Changes() <-chan struct{}         { return f.changes }

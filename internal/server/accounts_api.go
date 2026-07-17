@@ -26,7 +26,7 @@ func (s *AnalyticsServer) handleListAccounts(w http.ResponseWriter, r *http.Requ
 	}
 	rows, err := st.ListAccounts()
 	if err != nil {
-		http.Error(w, "failed to list accounts: "+err.Error(), http.StatusInternalServerError)
+		writeInternalError(w, s.log, "GET /api/accounts", err)
 		return
 	}
 
@@ -60,7 +60,7 @@ func (s *AnalyticsServer) handleGetAccount(w http.ResponseWriter, r *http.Reques
 
 	row, err := st.GetAccount(username)
 	if err != nil {
-		http.Error(w, "failed to get account: "+err.Error(), http.StatusInternalServerError)
+		writeInternalError(w, s.log, "GET /api/accounts/{username}", err)
 		return
 	}
 	if row == nil {
@@ -70,7 +70,7 @@ func (s *AnalyticsServer) handleGetAccount(w http.ResponseWriter, r *http.Reques
 
 	cfg, err := config.AccountConfigFromJSON(row.Username, row.ConfigJSON)
 	if err != nil {
-		http.Error(w, "failed to parse account config: "+err.Error(), http.StatusInternalServerError)
+		writeInternalError(w, s.log, "GET /api/accounts/{username}", err)
 		return
 	}
 
@@ -114,7 +114,7 @@ func (s *AnalyticsServer) handleCreateAccount(w http.ResponseWriter, r *http.Req
 
 	blob, err := config.AccountConfigToJSON(&cfg)
 	if err != nil {
-		http.Error(w, "serialisation error: "+err.Error(), http.StatusInternalServerError)
+		writeInternalError(w, s.log, "POST /api/accounts", err)
 		return
 	}
 
@@ -125,7 +125,7 @@ func (s *AnalyticsServer) handleCreateAccount(w http.ResponseWriter, r *http.Req
 		UpdatedAt:  time.Now(),
 	}
 	if err := st.UpsertAccount(row); err != nil {
-		http.Error(w, "failed to save account: "+err.Error(), http.StatusInternalServerError)
+		writeInternalError(w, s.log, "POST /api/accounts", err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -159,7 +159,7 @@ func (s *AnalyticsServer) handleUpdateAccount(w http.ResponseWriter, r *http.Req
 
 	blob, err := config.AccountConfigToJSON(&cfg)
 	if err != nil {
-		http.Error(w, "serialisation error: "+err.Error(), http.StatusInternalServerError)
+		writeInternalError(w, s.log, "PUT /api/accounts/{username}", err)
 		return
 	}
 
@@ -170,7 +170,7 @@ func (s *AnalyticsServer) handleUpdateAccount(w http.ResponseWriter, r *http.Req
 		UpdatedAt:  time.Now(),
 	}
 	if err := st.UpsertAccount(row); err != nil {
-		http.Error(w, "failed to update account: "+err.Error(), http.StatusInternalServerError)
+		writeInternalError(w, s.log, "PUT /api/accounts/{username}", err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -191,7 +191,7 @@ func (s *AnalyticsServer) handleDeleteAccount(w http.ResponseWriter, r *http.Req
 	}
 
 	if err := st.DeleteAccount(username); err != nil {
-		http.Error(w, "failed to delete account: "+err.Error(), http.StatusInternalServerError)
+		writeInternalError(w, s.log, "DELETE /api/accounts/{username}", err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
