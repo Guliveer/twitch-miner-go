@@ -208,6 +208,7 @@ jobs:
 
   build-binaries:
     needs: [bump-version]
+    if: ${{ !inputs.dry_run }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
