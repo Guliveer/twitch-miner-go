@@ -144,7 +144,6 @@ jobs:
           fi
 
   test:
-    needs: [vet, lint]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -207,7 +206,7 @@ jobs:
           fi
 
   release:
-    needs: [build]
+    needs: [build, commit-lint]
     uses: ./.github/workflows/release.yml
     with:
       dry_run: ${{ github.event_name != 'push' }}
