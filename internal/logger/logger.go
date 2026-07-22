@@ -35,6 +35,7 @@ var eventEmoji = map[string]string{
 	"DROP_CLAIM":              "📦",
 	"DROP_CLAIM_AVAILABLE":    "📦",
 	"DROP_STATUS":             "📦",
+	"DROP_MILESTONE":          "📊",
 	"STREAMER_ONLINE":       "🟢",
 	"STREAMER_OFFLINE":      "⚫",
 	"JOIN_RAID":             "⚔️",

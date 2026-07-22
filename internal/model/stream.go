@@ -25,6 +25,9 @@ type Stream struct {
 	IsWatchStreakMissing bool    `json:"watch_streak_missing"`
 	MinuteWatched        float64 `json:"minute_watched"`
 
+	LastMinuteCreditedAt   time.Time `json:"last_minute_credited_at,omitempty"`
+	StalledCooldownUntil   time.Time `json:"stalled_cooldown_until,omitempty"`
+
 	lastUpdate             time.Time
 	minuteWatchedTimestamp time.Time
 }
@@ -157,6 +160,14 @@ func (s *Stream) UpdateMinuteWatched() {
 		s.MinuteWatched += elapsed
 	}
 	s.minuteWatchedTimestamp = now
+	s.LastMinuteCreditedAt = now
+}
+
+// IsMinuteWatchStalled returns true when the last successful minute-watched
+// credit is older than the given threshold. A zero LastMinuteCreditedAt
+// (never credited) is not considered stalled — the streamer is simply new.
+func (s *Stream) IsMinuteWatchStalled(threshold time.Duration) bool {
+	return !s.LastMinuteCreditedAt.IsZero() && time.Since(s.LastMinuteCreditedAt) > threshold
 }
 
 // String returns a human-readable representation of the stream.

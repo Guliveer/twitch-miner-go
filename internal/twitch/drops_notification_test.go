@@ -470,3 +470,172 @@ func TestLogDropProgress_MixedPrintable(t *testing.T) {
 func boolPtr(v bool) *bool {
 	return &v
 }
+
+// makeStreamerWithDropAtProgress returns a streamer with a drop configured
+// at a specific percentage progress and DropInstanceID for milestone testing.
+func makeStreamerWithDropAtProgress(username, dropID, instanceID string, minutesRequired, pct int) *model.Streamer {
+	s := model.NewStreamer(username)
+	s.Settings = &model.StreamerSettings{}
+
+	game := &model.GameInfo{Name: "Test Game", Slug: "test-game"}
+	camp := model.NewCampaign("camp1", "Test Campaign", "ACTIVE", game,
+		time.Now().Add(-1*time.Hour), time.Now().Add(1*time.Hour), nil)
+
+	drop := model.NewDrop(dropID, "Test Drop", []string{"Reward"}, minutesRequired,
+		time.Now().Add(-1*time.Hour), time.Now().Add(1*time.Hour))
+	drop.DropInstanceID = instanceID
+	drop.PercentageProgress = pct
+	drop.CurrentMinutesWatched = pct * minutesRequired / 100
+	drop.IsPrintable = true
+
+	camp.Drops = append(camp.Drops, drop)
+	s.Stream.Campaigns = append(s.Stream.Campaigns, *camp)
+
+	return s
+}
+
+func TestLogUpdatedDropProgress_MilestoneFiresAt25(t *testing.T) {
+	t.Parallel()
+
+	client, lc := newTestClientWithCapture(t, newMockTransport())
+	streamer := makeStreamerWithDropAtProgress("s1", "d1", "inst-1", 60, 25)
+
+	client.logUpdatedDropProgress(context.Background(), []*model.Streamer{streamer})
+
+	entries := lc.infoEntries(t)
+	var found bool
+	for _, e := range entries {
+		if e["event"] == "DROP_MILESTONE" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected DROP_MILESTONE event at 25%%, got entries: %v", entries)
+	}
+}
+
+func TestLogUpdatedDropProgress_MilestoneFiresAt50(t *testing.T) {
+	t.Parallel()
+
+	client, lc := newTestClientWithCapture(t, newMockTransport())
+	streamer := makeStreamerWithDropAtProgress("s1", "d1", "inst-1", 60, 50)
+
+	client.logUpdatedDropProgress(context.Background(), []*model.Streamer{streamer})
+
+	entries := lc.infoEntries(t)
+	var found bool
+	for _, e := range entries {
+		if e["event"] == "DROP_MILESTONE" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected DROP_MILESTONE event at 50%%, got entries: %v", entries)
+	}
+}
+
+func TestLogUpdatedDropProgress_MilestoneFiresAt75(t *testing.T) {
+	t.Parallel()
+
+	client, lc := newTestClientWithCapture(t, newMockTransport())
+	streamer := makeStreamerWithDropAtProgress("s1", "d1", "inst-1", 60, 75)
+
+	client.logUpdatedDropProgress(context.Background(), []*model.Streamer{streamer})
+
+	entries := lc.infoEntries(t)
+	var found bool
+	for _, e := range entries {
+		if e["event"] == "DROP_MILESTONE" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected DROP_MILESTONE event at 75%%, got entries: %v", entries)
+	}
+}
+
+func TestLogUpdatedDropProgress_MilestoneFiresAt100(t *testing.T) {
+	t.Parallel()
+
+	client, lc := newTestClientWithCapture(t, newMockTransport())
+	streamer := makeStreamerWithDropAtProgress("s1", "d1", "inst-1", 60, 100)
+
+	client.logUpdatedDropProgress(context.Background(), []*model.Streamer{streamer})
+
+	entries := lc.infoEntries(t)
+	var found bool
+	for _, e := range entries {
+		if e["event"] == "DROP_MILESTONE" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected DROP_MILESTONE event at 100%%, got entries: %v", entries)
+	}
+}
+
+func TestLogUpdatedDropProgress_MilestoneDedup(t *testing.T) {
+	t.Parallel()
+
+	client, lc := newTestClientWithCapture(t, newMockTransport())
+	streamer := makeStreamerWithDropAtProgress("s1", "d1", "inst-1", 60, 25)
+
+	client.logUpdatedDropProgress(context.Background(), []*model.Streamer{streamer})
+
+	count := milestoneEventCount(t, lc)
+	if count != 1 {
+		t.Fatalf("expected 1 DROP_MILESTONE on first call, got %d", count)
+	}
+
+	lc.reset()
+	client.logUpdatedDropProgress(context.Background(), []*model.Streamer{streamer})
+
+	count = milestoneEventCount(t, lc)
+	if count != 0 {
+		t.Errorf("expected 0 DROP_MILESTONE on second call (dedup), got %d", count)
+	}
+}
+
+func TestLogUpdatedDropProgress_NoMilestoneAtNonQuarter(t *testing.T) {
+	t.Parallel()
+
+	client, lc := newTestClientWithCapture(t, newMockTransport())
+	streamer := makeStreamerWithDropAtProgress("s1", "d1", "inst-1", 60, 30)
+
+	client.logUpdatedDropProgress(context.Background(), []*model.Streamer{streamer})
+
+	count := milestoneEventCount(t, lc)
+	if count != 0 {
+		t.Errorf("expected 0 DROP_MILESTONE at 30%%, got %d", count)
+	}
+}
+
+func TestLogUpdatedDropProgress_NoMilestoneForNonPrintable(t *testing.T) {
+	t.Parallel()
+
+	client, lc := newTestClientWithCapture(t, newMockTransport())
+	streamer := makeStreamerWithDropAtProgress("s1", "d1", "inst-1", 60, 25)
+	streamer.Stream.Campaigns[0].Drops[0].IsPrintable = false
+
+	client.logUpdatedDropProgress(context.Background(), []*model.Streamer{streamer})
+
+	count := milestoneEventCount(t, lc)
+	if count != 0 {
+		t.Errorf("expected 0 DROP_MILESTONE for non-printable drop, got %d", count)
+	}
+}
+
+func milestoneEventCount(t *testing.T, lc *logCapture) int {
+	t.Helper()
+	count := 0
+	for _, e := range lc.infoEntries(t) {
+		if e["event"] == "DROP_MILESTONE" {
+			count++
+		}
+	}
+	return count
+}

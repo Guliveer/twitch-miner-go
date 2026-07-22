@@ -13,10 +13,11 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/config"
 )
 
-// mockTwitch is a test double for twitch.API that tracks JoinRaid calls.
 type mockTwitch struct {
-	mu         sync.Mutex
-	joinCalls  []string // raid IDs passed to JoinRaid
+	mu                  sync.Mutex
+	joinCalls           []string
+	checkOnlineErrors   map[string]error
+	resolveLoginResults map[string]string
 }
 
 func (m *mockTwitch) JoinRaid(_ context.Context, raidID string) error {
@@ -40,6 +41,7 @@ func (m *mockTwitch) GetChannelID(_ context.Context, _ string) (string, error) {
 func (m *mockTwitch) GetFollowers(_ context.Context, _ int, _ string) ([]string, error) { return nil, nil }
 func (m *mockTwitch) CheckViewerIsMod(_ context.Context, _ *model.Streamer) {}
 func (m *mockTwitch) RefreshSpadeURL(_ context.Context, _ *model.Streamer) error { return nil }
+func (m *mockTwitch) ResolveLoginFromID(_ context.Context, _ string) (string, error) { return "", nil }
 func (m *mockTwitch) GQLClient() *gql.Client { return nil }
 func (m *mockTwitch) AuthProvider() auth.Provider { return nil }
 

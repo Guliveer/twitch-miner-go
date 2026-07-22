@@ -21,6 +21,7 @@ type Drop struct {
 	IsClaimed             bool   `json:"is_claimed"`
 	IsClaimable           bool   `json:"is_claimable"`
 	IsPrintable           bool   `json:"is_printable"`
+	IsSynthetic           bool   `json:"is_synthetic"`
 	PercentageProgress    int    `json:"percentage_progress"`
 
 	EndAt              time.Time `json:"end_at"`

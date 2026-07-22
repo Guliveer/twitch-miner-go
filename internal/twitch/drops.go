@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -165,7 +166,21 @@ func (c *Client) syncCampaignsWithInventory(ctx context.Context, campaigns []*mo
 		return campaigns, nil
 	}
 
+	currentDropIDs := make(map[string]struct{})
+	for _, progress := range inventory.DropCampaignsInProgress {
+		for _, timeDrop := range progress.TimeBasedDrops {
+			currentDropIDs[timeDrop.ID] = struct{}{}
+		}
+	}
+	c.detectVanishedDrops(currentDropIDs)
+	c.detectSyntheticDrops(campaigns, currentDropIDs)
+
 	for i, campaign := range campaigns {
+		for _, drop := range campaign.Drops {
+			if _, synthetic := c.dropSynthetic.Load(drop.ID); synthetic {
+				drop.IsSynthetic = true
+			}
+		}
 		campaign.ClearDrops()
 		for _, progress := range inventory.DropCampaignsInProgress {
 			if progress.ID == campaign.ID {
@@ -189,6 +204,82 @@ func (c *Client) syncCampaignsWithInventory(ctx context.Context, campaigns []*mo
 	}
 
 	return campaigns, nil
+}
+
+func (c *Client) detectVanishedDrops(currentDropIDs map[string]struct{}) {
+	var missing []string
+
+	c.dropSeenCount.Range(func(key, value any) bool {
+		dropID := key.(string)
+		if _, present := currentDropIDs[dropID]; present {
+			c.dropSeenCount.Store(dropID, 0)
+		} else {
+			missing = append(missing, dropID)
+		}
+		return true
+	})
+
+	for _, dropID := range missing {
+		val, _ := c.dropSeenCount.LoadAndDelete(dropID)
+		count := val.(int) + 1
+		if count >= 3 {
+			if _, already := c.dropVanished.LoadOrStore(dropID, true); !already {
+				c.Log.Warn("Drop vanished from inventory after repeated polls", "drop_id", dropID)
+			}
+		} else {
+			c.dropSeenCount.Store(dropID, count)
+		}
+	}
+
+	for dropID := range currentDropIDs {
+		if _, exists := c.dropSeenCount.Load(dropID); !exists {
+			c.dropSeenCount.Store(dropID, 0)
+		}
+	}
+}
+
+func (c *Client) detectSyntheticDrops(campaigns []*model.Campaign, currentDropIDs map[string]struct{}) {
+	campaignDropIDs := make(map[string]struct{})
+	for _, campaign := range campaigns {
+		for _, drop := range campaign.Drops {
+			campaignDropIDs[drop.ID] = struct{}{}
+		}
+	}
+
+	var missing []string
+	c.dropSynthMissingCount.Range(func(key, value any) bool {
+		dropID := key.(string)
+		if _, present := campaignDropIDs[dropID]; !present {
+			c.dropSynthMissingCount.Delete(dropID)
+			return true
+		}
+		if _, inInventory := currentDropIDs[dropID]; inInventory {
+			c.dropSynthMissingCount.Store(dropID, 0)
+		} else {
+			missing = append(missing, dropID)
+		}
+		return true
+	})
+
+	for _, dropID := range missing {
+		val, _ := c.dropSynthMissingCount.LoadAndDelete(dropID)
+		count := val.(int) + 1
+		if count >= constants.SynthSkipPolls {
+			if _, already := c.dropSynthetic.LoadOrStore(dropID, true); !already {
+				c.Log.Warn("Drop is synthetic — never appeared in inventory", "drop_id", dropID)
+			}
+		} else {
+			c.dropSynthMissingCount.Store(dropID, count)
+		}
+	}
+
+	for dropID := range campaignDropIDs {
+		if _, exists := c.dropSynthMissingCount.Load(dropID); !exists {
+			if _, inInventory := currentDropIDs[dropID]; !inInventory {
+				c.dropSynthMissingCount.Store(dropID, 1)
+			}
+		}
+	}
 }
 
 // ClaimDrop claims a single drop reward.
@@ -284,8 +375,14 @@ func (c *Client) ClaimAllDropsFromInventory(ctx context.Context) error {
 
 			claimed, err := c.GQL.ClaimDropRewards(ctx, drop.Self.DropInstanceID)
 			if err != nil {
-				c.Log.Warn("Failed to claim drop from inventory",
-					"drop", dropName, "error", err)
+				if strings.Contains(err.Error(), "PRECONDITIONS_NOT_MET") {
+					c.Log.Warn("Drop claim requires external account linking",
+						"drop", dropName, "category", categoryName,
+						"hint", "Link your game account to Twitch to claim this drop")
+				} else {
+					c.Log.Warn("Failed to claim drop from inventory",
+						"drop", dropName, "error", err)
+				}
 			} else if !claimed {
 				c.Log.Warn("Drop claim was not accepted",
 					"drop", dropName)
@@ -479,7 +576,7 @@ func (c *Client) logDropStatuses(ctx context.Context) {
 func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.Streamer) {
 	for _, streamer := range streamers {
 		streamer.Mu.Lock()
-		if streamer.Settings == nil || !streamer.Settings.ClaimDrops {
+		if streamer.Settings == nil {
 			streamer.Mu.Unlock()
 			continue
 		}
@@ -510,6 +607,19 @@ func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.
 						"category", gameName,
 						"progress", drop.ProgressBar(),
 						"status", status)
+
+					if isQuarterMilestone(drop.PercentageProgress) {
+						key := drop.DropInstanceID + ":" + fmt.Sprintf("%d", drop.PercentageProgress)
+						if _, loaded := c.dropMilestoneNotified.LoadOrStore(key, true); !loaded {
+							streamer.UpdateHistory(string(model.EventDropMilestone), 0, 1)
+							c.Log.Event(ctx, model.EventDropMilestone,
+								fmt.Sprintf("Drop milestone: %d%%", drop.PercentageProgress),
+								"streamer", streamer.Username,
+								"reward", drop.Benefit,
+								"category", gameName,
+								"progress", drop.ProgressBar())
+						}
+					}
 				}
 
 				if drop.IsClaimable {
@@ -529,4 +639,8 @@ func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.
 		}
 		streamer.Mu.Unlock()
 	}
+}
+
+func isQuarterMilestone(pct int) bool {
+	return pct > 0 && pct%25 == 0
 }

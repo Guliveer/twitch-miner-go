@@ -30,6 +30,7 @@ const (
 	EventMinerStopped          Event = "MINER_STOPPED"
 	EventMinerCrashed          Event = "MINER_CRASHED"
 	EventAccountConfigReloaded Event = "ACCOUNT_CONFIG_RELOADED"
+	EventDropMilestone         Event = "DROP_MILESTONE"
 	EventTest                  Event = "TEST"
 )
 
@@ -61,6 +62,7 @@ func AllEvents() []Event {
 		EventMinerStopped,
 		EventMinerCrashed,
 		EventAccountConfigReloaded,
+		EventDropMilestone,
 		EventTest,
 	}
 }
@@ -96,6 +98,10 @@ const (
 	PriorityPointsAscending
 	// PriorityPointsDescending prioritizes streamers with the most points.
 	PriorityPointsDescending
+	// PriorityEndingSoonest prioritizes campaigns ending soonest.
+	PriorityEndingSoonest
+	// PriorityLowAvailabilityFirst prioritizes campaigns with the lowest availability.
+	PriorityLowAvailabilityFirst
 )
 
 // String returns the string representation of a Priority.
@@ -113,6 +119,10 @@ func (p Priority) String() string {
 		return "POINTS_ASCENDING"
 	case PriorityPointsDescending:
 		return "POINTS_DESCENDING"
+	case PriorityEndingSoonest:
+		return "ENDING_SOONEST"
+	case PriorityLowAvailabilityFirst:
+		return "LOW_AVAILABILITY_FIRST"
 	default:
 		return "ORDER"
 	}
@@ -133,6 +143,10 @@ func ParsePriority(s string) Priority {
 		return PriorityPointsAscending
 	case "POINTS_DESCENDING":
 		return PriorityPointsDescending
+	case "ENDING_SOONEST":
+		return PriorityEndingSoonest
+	case "LOW_AVAILABILITY_FIRST":
+		return PriorityLowAvailabilityFirst
 	default:
 		return PriorityOrder
 	}

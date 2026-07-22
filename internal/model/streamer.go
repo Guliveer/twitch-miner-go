@@ -76,11 +76,25 @@ func (s *Streamer) SetOffline() {
 }
 
 // SetOnline marks the streamer as online. Must be called with Mu held.
+//
+// When the streamer returns after a short offline gap (< 30 min), the streak
+// resolution state from the previous segment is carried over. If the streak was
+// already resolved before going offline, it stays resolved — Twitch counts short
+// restarts as the same stream.
 func (s *Streamer) SetOnline() {
 	if !s.IsOnline {
 		s.OnlineAt = time.Now()
 		s.IsOnline = true
+
+		// Capture streak state before InitWatchStreak resets it.
+		streakResolved := !s.Stream.IsWatchStreakMissing
+		shortGap := !s.OfflineAt.IsZero() && time.Since(s.OfflineAt) <= 30*time.Minute
+
 		s.Stream.InitWatchStreak()
+
+		if shortGap && streakResolved {
+			s.Stream.IsWatchStreakMissing = false
+		}
 	}
 }
 

@@ -121,6 +121,17 @@ const (
 	DefaultPubSubPongTimeout = 10 * time.Second
 	// DefaultMinuteWatchedInterval is the interval between minute-watched event sends.
 	DefaultMinuteWatchedInterval = 20 * time.Second
+	// FreezeDetectionThreshold is the duration after which a streamer that hasn't
+	// received a successful minute-watched credit is considered frozen and excluded
+	// from selection.
+	FreezeDetectionThreshold = 5 * time.Minute
+	// StalledCooldownDuration is how long a frozen streamer stays in cooldown
+	// before becoming eligible for selection again.
+	StalledCooldownDuration = 30 * time.Minute
+	// SynthSkipPolls is the number of consecutive polls in which a drop must
+	// appear in campaign details but not in inventory before it is considered
+	// synthetic (never actually available). At ~20s per poll, 6 polls ≈ 2min.
+	SynthSkipPolls = 6
 	// DefaultCampaignSyncInterval is the interval between drop campaign syncs.
 	// Reduced from 30min to 10min so claimable drops are claimed faster and
 	// new campaigns are discovered sooner.
@@ -204,6 +215,10 @@ var (
 		OperationName: "GetIDFromLogin",
 		SHA256Hash:    "94e82a7b1e3c21e186daa73ee2afc4b8f23bade1fbbff6fe8ac133f50a2f58ca",
 	}
+	GQLGetLoginFromID = GQLOperation{
+		OperationName: "GetLoginFromID",
+		Query:         `query GetLoginFromID($id: ID!) { user(id: $id) { login } }`,
+	}
 	GQLPersonalSections = GQLOperation{
 		OperationName: "PersonalSections",
 		SHA256Hash:    "9fbdfb00156f754c26bde81eb47436dee146655c92682328457037da1a48ed39",
@@ -252,6 +267,7 @@ func AllGQLOperations() []GQLOperation {
 		GQLDropCampaignDetails,
 		GQLDropsHighlightServiceAvailableDrops,
 		GQLGetIDFromLogin,
+		GQLGetLoginFromID,
 		GQLPersonalSections,
 		GQLChannelFollows,
 		GQLUserPointsContribution,

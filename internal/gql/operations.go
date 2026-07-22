@@ -214,6 +214,31 @@ func (c *Client) GetUserID(ctx context.Context, login string) (string, error) {
 	return resp.User.ID, nil
 }
 
+// GetLoginFromID fetches the Twitch login name for a given user ID.
+func (c *Client) GetLoginFromID(ctx context.Context, id string) (string, error) {
+	vars := map[string]any{"id": id}
+	data, err := c.PostGQL(ctx, constants.GQLGetLoginFromID, vars)
+	if err != nil {
+		return "", fmt.Errorf("GetLoginFromID for %s: %w", id, err)
+	}
+
+	var resp struct {
+		User *struct {
+			Login string `json:"login"`
+		} `json:"user"`
+	}
+
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return "", fmt.Errorf("parsing GetLoginFromID response: %w", err)
+	}
+
+	if resp.User == nil || resp.User.Login == "" {
+		return "", nil
+	}
+
+	return resp.User.Login, nil
+}
+
 // GetFollowedStreamers fetches the list of followed channel logins for a user.
 // It paginates through all results.
 func (c *Client) GetFollowedStreamers(ctx context.Context, limit int, order string) ([]string, error) {
