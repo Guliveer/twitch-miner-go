@@ -263,7 +263,7 @@ func getSecondLastURL(playlist string) string {
 // This implements the priority selection logic from the Python version.
 func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Priority, maxWatch int) []*model.Streamer {
 	if maxWatch <= 0 {
-		maxWatch = constants.MaxWatchStreams
+		maxWatch = len(streamers)
 	}
 
 	now := time.Now()

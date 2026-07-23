@@ -121,8 +121,9 @@ func isOwnerAccount(username string) bool {
 }
 
 func applyDefaults(cfg *AccountConfig) {
-	if cfg.MaxWatchStreams <= 0 {
-		cfg.MaxWatchStreams = constants.MaxWatchStreams
+	if cfg.MaxWatchStreams == nil {
+		v := constants.MaxWatchStreams
+		cfg.MaxWatchStreams = &v
 	}
 
 	if len(cfg.Priority) == 0 {
@@ -237,8 +238,8 @@ func Validate(cfg *AccountConfig) error {
 		return fmt.Errorf("username is required")
 	}
 
-	if cfg.MaxWatchStreams < 1 {
-		return fmt.Errorf("account %s: max_watch_streams must be at least 1", cfg.Username)
+	if cfg.MaxWatchStreams != nil && *cfg.MaxWatchStreams < 0 {
+		return fmt.Errorf("account %s: max_watch_streams must be non-negative (0 = unlimited)", cfg.Username)
 	}
 
 	if len(cfg.Streamers) == 0 && !cfg.Followers.Enabled && !cfg.CategoryWatcher.Enabled && !cfg.TeamWatcher.Enabled {

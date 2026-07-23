@@ -105,7 +105,7 @@ func TestFileWatcher_RemovedFileStopsMiner(t *testing.T) {
 
 func TestFileWatcher_InvalidYAMLSkipped(t *testing.T) {
 	dir := t.TempDir()
-	writeYAML(t, dir, "bad", "max_watch_streams: 0\n") // fails Validate (< 1)
+	writeYAML(t, dir, "bad", "max_watch_streams: -1\n") // fails Validate (< 0)
 
 	mgr := &fakeMgr{}
 	w := newTestFileWatcher(dir, mgr)

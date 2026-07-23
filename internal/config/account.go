@@ -38,7 +38,7 @@ type AccountConfig struct {
 
 	Features FeaturesConfig `yaml:"features" json:"features"`
 
-	MaxWatchStreams int `yaml:"max_watch_streams,omitempty" json:"max_watch_streams,omitempty"`
+	MaxWatchStreams *int `yaml:"max_watch_streams,omitempty" json:"max_watch_streams,omitempty"`
 
 	Priority []string `yaml:"priority" json:"priority"`
 
