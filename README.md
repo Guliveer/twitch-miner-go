@@ -85,14 +85,15 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 
 ## 1.3. Resource Comparison
 
-| Resource     | Python (per account) | Go (per account)  |
-|--------------|----------------------|-------------------|
-| Memory       | ~80–120 MB           | ~5–15 MB          |
-| Docker image | ~800 MB              | ~10–15 MB         |
-| Startup time | ~5–10 s              | < 100 ms          |
-| Threads      | 60+                  | ~10–20 goroutines |
+| Resource        | 🐍 Python               | 🐹 Go                                   | Go advantage           |
+|-----------------|-------------------------|------------------------------------------|------------------------|
+| Memory          | >250 MB *(spikes)*      | **~80 MB** *(stable)*                    | **3× less**            |
+| Docker image    | 200–500 MB              | **~12 MB**                               | **20–40× smaller**     |
+| Startup time    | 5–10 s                  | **~2–3 s**                               | **2–4× faster**        |
+| Streamer loading| ~4 500 ms / 5 streamers | **~260 ms / 5 streamers** *(concurrent)* | **3.5× faster**        |
+| OS threads      | 60+                     | **~4–5** / ~25 goroutines                | **12× fewer**          |
 
-> Impressed by the difference? A [⭐ star](https://github.com/Guliveer/twitch-miner-go/stargazers) helps the next person find this instead of running the 800 MB Python image. Already using the miner? That one click keeps you in the loop for what ships next.
+> Impressed by the difference? A [⭐ star](https://github.com/Guliveer/twitch-miner-go/stargazers) helps the next person find this instead of running the bloated Python image. Already using the miner? That one click keeps you in the loop for what ships next.
 
 ## 1.4. Running Locally
 
