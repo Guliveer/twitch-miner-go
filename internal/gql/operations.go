@@ -44,6 +44,13 @@ func (c *Client) GetChannelPointsContext(ctx context.Context, channelLogin strin
 		return nil, fmt.Errorf("ChannelPointsContext for %s: %w", channelLogin, err)
 	}
 
+	if len(data) == 0 || string(data) == "null" {
+		c.log.Debug("ChannelPointsContext returned empty data — persisted query hash may be stale",
+			"channel", channelLogin,
+			"data_len", len(data))
+		return nil, nil
+	}
+
 	var resp struct {
 		Community *struct {
 			Channel struct {

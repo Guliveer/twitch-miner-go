@@ -398,6 +398,10 @@ func (c *Client) LoadChannelPointsContext(ctx context.Context, streamer *model.S
 		return fmt.Errorf("loading channel points context for %s: %w", username, err)
 	}
 
+	if cpc == nil {
+		return nil
+	}
+
 	streamer.Mu.Lock()
 	streamer.ChannelPoints = cpc.Balance
 	streamer.ActiveMultipliers = cpc.ActiveMultipliers
