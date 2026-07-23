@@ -44,12 +44,18 @@ jobs:
 
       - name: Run benchmarks
         id: bench
+        run: go test -bench=. -benchmem -count=5 -timeout=300s ./... | tee bench_raw.txt
+
+      - name: Generate summary (main)
+        if: github.event_name == 'push'
         run: |
-          go test -bench=. -benchmem -count=5 -timeout=300s ./... | tee bench_raw.txt
-          echo "## Benchmark Results" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          cat bench_raw.txt >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## 🏃 Benchmarks — main"
+            echo ""
+            echo '```'
+            benchstat bench_raw.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Compare with baseline (PR only)
         if: github.event_name == 'pull_request'
@@ -61,20 +67,21 @@ jobs:
           git checkout -
           git stash pop || true
 
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "## Comparison with main" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          benchstat bench_base.txt bench_raw.txt >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          benchstat bench_base.txt bench_raw.txt 2>&1 | tee benchstat.txt || true
 
-      - name: Check for regressions (PR only)
-        if: github.event_name == 'pull_request'
-        run: |
           REGRESSED=$(benchstat -alpha 0.05 bench_base.txt bench_raw.txt 2>&1 | grep -c "slower" || true)
-          if [ "$REGRESSED" -gt 0 ]; then
-            echo "## ⚠️ Performance Regressions Detected" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            benchstat -alpha 0.05 bench_base.txt bench_raw.txt >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
-          else
-            echo "## ✅ No performance regressions" >> "$GITHUB_STEP_SUMMARY"
-          fi
+
+          {
+            echo "## 🏃 Benchmarks — PR vs main"
+            echo ""
+            if [ "$REGRESSED" -gt 0 ]; then
+              echo "> ⚠️ **Performance regressions detected**"
+            else
+              echo "> ✅ **No performance regressions**"
+            fi
+            echo ""
+            echo "### benchstat comparison"
+            echo '```'
+            cat benchstat.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
