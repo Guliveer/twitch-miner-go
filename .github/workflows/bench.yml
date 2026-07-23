@@ -56,10 +56,9 @@ jobs:
         run: |
           git fetch origin main --depth=1
           git stash --include-untracked
-          git checkout origin/main -- .
-          git clean -fd
+          git checkout origin/main
           go test -bench=. -benchmem -count=5 -timeout=300s ./... | tee bench_base.txt || true
-          git checkout - .
+          git checkout -
           git stash pop || true
 
           echo "" >> "$GITHUB_STEP_SUMMARY"
