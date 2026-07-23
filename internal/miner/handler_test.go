@@ -14,10 +14,8 @@ import (
 )
 
 type mockTwitch struct {
-	mu                  sync.Mutex
-	joinCalls           []string
-	checkOnlineErrors   map[string]error
-	resolveLoginResults map[string]string
+	mu        sync.Mutex
+	joinCalls []string
 }
 
 func (m *mockTwitch) JoinRaid(_ context.Context, raidID string) error {

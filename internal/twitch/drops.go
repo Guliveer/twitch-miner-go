@@ -210,7 +210,10 @@ func (c *Client) detectVanishedDrops(currentDropIDs map[string]struct{}) {
 	var missing []string
 
 	c.dropSeenCount.Range(func(key, value any) bool {
-		dropID := key.(string)
+		dropID, ok := key.(string)
+		if !ok {
+			return true
+		}
 		if _, present := currentDropIDs[dropID]; present {
 			c.dropSeenCount.Store(dropID, 0)
 		} else {
@@ -221,7 +224,11 @@ func (c *Client) detectVanishedDrops(currentDropIDs map[string]struct{}) {
 
 	for _, dropID := range missing {
 		val, _ := c.dropSeenCount.LoadAndDelete(dropID)
-		count := val.(int) + 1
+		count, ok := val.(int)
+		if !ok {
+			continue
+		}
+		count++
 		if count >= 3 {
 			if _, already := c.dropVanished.LoadOrStore(dropID, true); !already {
 				c.Log.Warn("Drop vanished from inventory after repeated polls", "drop_id", dropID)
@@ -248,7 +255,10 @@ func (c *Client) detectSyntheticDrops(campaigns []*model.Campaign, currentDropID
 
 	var missing []string
 	c.dropSynthMissingCount.Range(func(key, value any) bool {
-		dropID := key.(string)
+		dropID, ok := key.(string)
+		if !ok {
+			return true
+		}
 		if _, present := campaignDropIDs[dropID]; !present {
 			c.dropSynthMissingCount.Delete(dropID)
 			return true
@@ -263,7 +273,11 @@ func (c *Client) detectSyntheticDrops(campaigns []*model.Campaign, currentDropID
 
 	for _, dropID := range missing {
 		val, _ := c.dropSynthMissingCount.LoadAndDelete(dropID)
-		count := val.(int) + 1
+		count, ok := val.(int)
+		if !ok {
+			continue
+		}
+		count++
 		if count >= constants.SynthSkipPolls {
 			if _, already := c.dropSynthetic.LoadOrStore(dropID, true); !already {
 				c.Log.Warn("Drop is synthetic — never appeared in inventory", "drop_id", dropID)

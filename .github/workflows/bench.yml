@@ -38,7 +38,9 @@ jobs:
           cache: true
 
       - name: Download dependencies
-        run: go mod download
+        run: |
+          go mod download
+          go install golang.org/x/perf/cmd/benchstat@latest
 
       - name: Run benchmarks
         id: bench
@@ -49,16 +51,14 @@ jobs:
           cat bench_raw.txt >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Install benchstat
-        run: go install golang.org/x/perf/cmd/benchstat@latest
-
       - name: Compare with baseline (PR only)
         if: github.event_name == 'pull_request'
         run: |
           git fetch origin main --depth=1
           git stash --include-untracked
           git checkout origin/main -- .
-          go test -bench=. -benchmem -count=5 -timeout=300s ./... | tee bench_base.txt
+          git clean -fd
+          go test -bench=. -benchmem -count=5 -timeout=300s ./... | tee bench_base.txt || true
           git checkout - .
           git stash pop || true
 

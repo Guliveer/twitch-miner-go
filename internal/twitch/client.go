@@ -179,12 +179,12 @@ func (c *Client) CheckStreamerOnline(ctx context.Context, streamer *model.Stream
 					streamer.Mu.Unlock()
 					c.Log.Info("Streamer renamed", "old", oldLogin, "new", newLogin)
 
-					if retryErr := c.updateStream(ctx, streamer); retryErr != nil {
-						streamer.Mu.Lock()
-						streamer.SetOffline()
-						streamer.Mu.Unlock()
-						return nil
-					}
+				if retryErr := c.updateStream(ctx, streamer); retryErr != nil {
+					streamer.Mu.Lock()
+					streamer.SetOffline()
+					streamer.Mu.Unlock()
+					return nil //nolint:nilerr // streamer already set offline; caller only needs to know check completed
+				}
 				} else {
 					streamer.Mu.Lock()
 					streamer.SetOffline()
