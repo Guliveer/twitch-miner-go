@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"testing"
 
 	"github.com/Guliveer/twitch-miner-go/internal/constants"
 )
@@ -94,7 +95,7 @@ func LoadTwitchFromEnv(log *slog.Logger) *Twitch {
 		ClientVersion:   load(envTwitchClientVersion, constants.ClientVersion),
 	}
 
-	if len(usedDefaults) > 0 && log != nil {
+	if len(usedDefaults) > 0 && log != nil && !testing.Testing() {
 		log.Warn("Using built-in default Twitch client identifiers (may be outdated). "+
 			"Set environment variables for fresh values.",
 			"defaults_used", strings.Join(usedDefaults, ", "))
