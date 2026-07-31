@@ -15,11 +15,6 @@ func makeOnlineStreamer(username string) *model.Streamer {
 	return s
 }
 
-func withCampaigns(s *model.Streamer) *model.Streamer {
-	s.Stream.Campaigns = []model.Campaign{{ID: "c1"}}
-	return s
-}
-
 func TestSelectStreamersToWatchPreservesPriorityOrder(t *testing.T) {
 	t.Parallel()
 
@@ -41,11 +36,13 @@ func TestSelectStreamersToWatchPreservesPriorityOrder(t *testing.T) {
 	}
 }
 
-func TestSelectStreamersToWatch_DropsOnly_SkippedWhenNoCampaigns(t *testing.T) {
+func TestSelectStreamersToWatch_DropsOnly_SkippedWhenNoCampaignIDs(t *testing.T) {
 	t.Parallel()
 
 	done := makeOnlineStreamer("done")
 	done.Settings.DropsOnly = true
+	// Campaigns alone (stale detail from a previous sync) must not pass the gate.
+	done.Stream.Campaigns = []model.Campaign{{ID: "c1"}}
 
 	other := makeOnlineStreamer("other")
 
@@ -60,11 +57,12 @@ func TestSelectStreamersToWatch_DropsOnly_SkippedWhenNoCampaigns(t *testing.T) {
 	}
 }
 
-func TestSelectStreamersToWatch_DropsOnly_IncludedWhenHasCampaigns(t *testing.T) {
+func TestSelectStreamersToWatch_DropsOnly_IncludedWhenHasCampaignIDs(t *testing.T) {
 	t.Parallel()
 
-	active := withCampaigns(makeOnlineStreamer("active"))
+	active := makeOnlineStreamer("active")
 	active.Settings.DropsOnly = true
+	active.Stream.CampaignIDs = []string{"c1"}
 
 	selected := SelectStreamersToWatch(
 		[]*model.Streamer{active},

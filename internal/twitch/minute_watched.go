@@ -308,7 +308,9 @@ func collectOnlineIndices(streamers []*model.Streamer, now time.Time) []int {
 		isOnline := s.IsOnline
 		onlineAt := s.OnlineAt
 		dropsOnly := s.Settings != nil && s.Settings.DropsOnly
-		hasCampaigns := len(s.Stream.Campaigns) > 0
+		// Gate on CampaignIDs (populated at discovery and by updateStream), not
+		// Campaigns, which is only refreshed by the periodic campaign sync.
+		hasCampaignIDs := len(s.Stream.CampaignIDs) > 0
 		frozen := s.Stream.IsMinuteWatchStalled(constants.FreezeDetectionThreshold)
 		cooldownUntil := s.Stream.StalledCooldownUntil
 		s.Mu.RUnlock()
@@ -324,7 +326,7 @@ func collectOnlineIndices(streamers []*model.Streamer, now time.Time) []int {
 			continue
 		}
 		if isOnline && (onlineAt.IsZero() || now.Sub(onlineAt) > 30*time.Second) {
-			if dropsOnly && !hasCampaigns {
+			if dropsOnly && !hasCampaignIDs {
 				continue
 			}
 			out = append(out, i)
@@ -515,7 +517,7 @@ func applyPriorityEndingSoonest(streamers []*model.Streamer, onlineIndices []int
 
 func applyPriorityLowAvailability(streamers []*model.Streamer, onlineIndices []int, watching map[int]struct{}, remaining int, add func(int) bool) {
 	type indexDrops struct {
-		index  int
+		index     int
 		dropCount int
 	}
 	var candidates []indexDrops

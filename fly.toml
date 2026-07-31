@@ -1,5 +1,5 @@
 app = 'twitch-miner-go'
-primary_region = 'fra'
+primary_region = 'iad'
 
 [env]
   PORT = '8080'
