@@ -226,6 +226,8 @@ func (tw *TeamWatcher) evaluate(
 		stream.ViewersCount = best.ViewersCount
 		streamer.Stream = stream
 
+		tw.populateCampaignIDs(ctx, stream, best.UserID, best.GameID)
+
 		defaults := *tw.streamerDefaults
 		if defaults.Bet != nil {
 			betCopy := *defaults.Bet
@@ -249,5 +251,19 @@ func (tw *TeamWatcher) evaluate(
 			"team", teamName,
 			"viewers", best.ViewersCount,
 		)
+	}
+}
+
+// populateCampaignIDs pre-fetches active campaign IDs for a newly discovered
+// streamer. The drops-only watch gate and DropsCondition() need CampaignIDs
+// immediately: without this they would wait for the periodic campaign sync,
+// or never be satisfied when claim_drops is disabled and the sync is skipped.
+func (tw *TeamWatcher) populateCampaignIDs(ctx context.Context, stream *model.Stream, channelID, gameID string) {
+	if gameID == "" {
+		return
+	}
+	campaignIDs, err := tw.gqlClient.GetAvailableCampaigns(ctx, channelID)
+	if err == nil && len(campaignIDs) > 0 {
+		stream.CampaignIDs = campaignIDs
 	}
 }

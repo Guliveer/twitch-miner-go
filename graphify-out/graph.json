@@ -256,7 +256,7 @@
       "source_location": "L288",
       "_origin": "ast",
       "id": "twitch_miner_go_main_setupanalyticsserver",
-      "community": 33,
+      "community": 98,
       "norm_label": "setupanalyticsserver()"
     },
     {
@@ -266,7 +266,7 @@
       "source_location": "L288",
       "_origin": "ast",
       "id": "cmd_twitch_miner_go_main_go_logger",
-      "community": 33,
+      "community": 98,
       "norm_label": "logger"
     },
     {
@@ -276,7 +276,7 @@
       "source_location": "L288",
       "_origin": "ast",
       "id": "cmd_twitch_miner_go_main_go_manager",
-      "community": 33,
+      "community": 98,
       "norm_label": "manager"
     },
     {
@@ -286,7 +286,7 @@
       "source_location": "L288",
       "_origin": "ast",
       "id": "cmd_twitch_miner_go_main_go_store",
-      "community": 33,
+      "community": 98,
       "norm_label": "store"
     },
     {
@@ -296,7 +296,7 @@
       "source_location": "L288",
       "_origin": "ast",
       "id": "cmd_twitch_miner_go_main_go_analyticsserver",
-      "community": 33,
+      "community": 98,
       "norm_label": "analyticsserver"
     },
     {
@@ -306,7 +306,7 @@
       "source_location": "L347",
       "_origin": "ast",
       "id": "twitch_miner_go_main_testnotifiers",
-      "community": 33,
+      "community": 98,
       "norm_label": "testnotifiers()"
     },
     {
@@ -316,7 +316,7 @@
       "source_location": "L347",
       "_origin": "ast",
       "id": "cmd_twitch_miner_go_main_go_context",
-      "community": 33,
+      "community": 98,
       "norm_label": "context"
     },
     {
@@ -698,7 +698,7 @@
       "source_location": "L412",
       "_origin": "ast",
       "id": "auth_auth_generatehex",
-      "community": 10,
+      "community": 25,
       "norm_label": "generatehex()"
     },
     {
@@ -2448,7 +2448,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "configeditor_server_newserver",
-      "community": 107,
+      "community": 35,
       "norm_label": "newserver()"
     },
     {
@@ -2518,7 +2518,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "handlerfunc",
-      "community": 107,
+      "community": 35,
       "norm_label": "handlerfunc"
     },
     {
@@ -5778,7 +5778,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "managedminer_filewatcher",
-      "community": 99,
+      "community": 79,
       "norm_label": "filewatcher"
     },
     {
@@ -5788,7 +5788,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "internal_managedminer_filewatcher_go_filemanager",
-      "community": 99,
+      "community": 79,
       "norm_label": "filemanager"
     },
     {
@@ -5798,7 +5798,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "internal_managedminer_filewatcher_go_duration",
-      "community": 99,
+      "community": 79,
       "norm_label": "duration"
     },
     {
@@ -5808,7 +5808,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "internal_managedminer_filewatcher_go_logger",
-      "community": 99,
+      "community": 79,
       "norm_label": "logger"
     },
     {
@@ -5818,7 +5818,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "managedminer_filemanager",
-      "community": 99,
+      "community": 79,
       "norm_label": "filemanager"
     },
     {
@@ -5828,7 +5828,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "managedminer_filewatcher_newfilewatcher",
-      "community": 99,
+      "community": 79,
       "norm_label": "newfilewatcher()"
     },
     {
@@ -5838,7 +5838,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "managedminer_filewatcher_run",
-      "community": 99,
+      "community": 79,
       "norm_label": ".run()"
     },
     {
@@ -5848,7 +5848,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "internal_managedminer_filewatcher_go_context",
-      "community": 99,
+      "community": 79,
       "norm_label": "context"
     },
     {
@@ -5858,7 +5858,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "managedminer_filewatcher_sync",
-      "community": 99,
+      "community": 79,
       "norm_label": ".sync()"
     },
     {
@@ -5868,7 +5868,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "managedminer_filewatcher_isemptydirerror",
-      "community": 99,
+      "community": 79,
       "norm_label": "isemptydirerror()"
     },
     {
@@ -5878,7 +5878,7 @@
       "source_location": "L153",
       "_origin": "ast",
       "id": "managedminer_filewatcher_filemtime",
-      "community": 99,
+      "community": 79,
       "norm_label": ".filemtime()"
     },
     {
@@ -5888,7 +5888,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "managedminer_filewatcher_test",
-      "community": 34,
+      "community": 79,
       "norm_label": "filewatcher_test.go"
     },
     {
@@ -5898,7 +5898,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "managedminer_filewatcher_test_writeyaml",
-      "community": 34,
+      "community": 79,
       "norm_label": "writeyaml()"
     },
     {
@@ -5908,7 +5908,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "internal_managedminer_filewatcher_test_go_t",
-      "community": 34,
+      "community": 79,
       "norm_label": "t"
     },
     {
@@ -5918,7 +5918,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "managedminer_filewatcher_test_newtestfilewatcher",
-      "community": 34,
+      "community": 79,
       "norm_label": "newtestfilewatcher()"
     },
     {
@@ -5928,7 +5928,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "internal_managedminer_filewatcher_test_go_filemanager",
-      "community": 34,
+      "community": 79,
       "norm_label": "filemanager"
     },
     {
@@ -5938,7 +5938,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "filewatcher",
-      "community": 34,
+      "community": 79,
       "norm_label": "filewatcher"
     },
     {
@@ -5948,7 +5948,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "managedminer_filewatcher_test_testfilewatcher_newfilestartsminer",
-      "community": 34,
+      "community": 79,
       "norm_label": "testfilewatcher_newfilestartsminer()"
     },
     {
@@ -5958,7 +5958,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "managedminer_filewatcher_test_testfilewatcher_changedmtimerestartsminer",
-      "community": 34,
+      "community": 79,
       "norm_label": "testfilewatcher_changedmtimerestartsminer()"
     },
     {
@@ -5968,7 +5968,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "managedminer_filewatcher_test_testfilewatcher_samemtimenorestart",
-      "community": 34,
+      "community": 79,
       "norm_label": "testfilewatcher_samemtimenorestart()"
     },
     {
@@ -5978,7 +5978,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "managedminer_filewatcher_test_testfilewatcher_removedfilestopsminer",
-      "community": 34,
+      "community": 79,
       "norm_label": "testfilewatcher_removedfilestopsminer()"
     },
     {
@@ -5988,7 +5988,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "managedminer_filewatcher_test_testfilewatcher_invalidyamlskipped",
-      "community": 34,
+      "community": 79,
       "norm_label": "testfilewatcher_invalidyamlskipped()"
     },
     {
@@ -5998,7 +5998,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "managedminer_filewatcher_test_testfilewatcher_multipleaccounts",
-      "community": 34,
+      "community": 79,
       "norm_label": "testfilewatcher_multipleaccounts()"
     },
     {
@@ -6008,7 +6008,7 @@
       "source_location": "L133",
       "_origin": "ast",
       "id": "managedminer_filewatcher_test_testfilewatcher_emptydirnostarts",
-      "community": 34,
+      "community": 79,
       "norm_label": "testfilewatcher_emptydirnostarts()"
     },
     {
@@ -6018,7 +6018,7 @@
       "source_location": "L149",
       "_origin": "ast",
       "id": "managedminer_filewatcher_test_testfilewatcher_minimalyamlvalid",
-      "community": 34,
+      "community": 79,
       "norm_label": "testfilewatcher_minimalyamlvalid()"
     },
     {
@@ -6228,7 +6228,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "managedminer_manager_test",
-      "community": 35,
+      "community": 22,
       "norm_label": "manager_test.go"
     },
     {
@@ -6238,7 +6238,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "managedminer_manager_test_newtestmanager",
-      "community": 35,
+      "community": 22,
       "norm_label": "newtestmanager()"
     },
     {
@@ -6248,7 +6248,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "internal_managedminer_manager_test_go_t",
-      "community": 35,
+      "community": 22,
       "norm_label": "t"
     },
     {
@@ -6258,7 +6258,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "internal_managedminer_manager_test_go_manager",
-      "community": 35,
+      "community": 22,
       "norm_label": "manager"
     },
     {
@@ -6268,7 +6268,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "managedminer_manager_test_testconfig",
-      "community": 35,
+      "community": 22,
       "norm_label": "testconfig()"
     },
     {
@@ -6278,7 +6278,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "internal_managedminer_manager_test_go_accountconfig",
-      "community": 35,
+      "community": 22,
       "norm_label": "accountconfig"
     },
     {
@@ -6288,7 +6288,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_startaddsentry",
-      "community": 35,
+      "community": 22,
       "norm_label": "testmanager_startaddsentry()"
     },
     {
@@ -6298,7 +6298,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_startidempotent",
-      "community": 35,
+      "community": 22,
       "norm_label": "testmanager_startidempotent()"
     },
     {
@@ -6308,7 +6308,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_stopremovesentry",
-      "community": 35,
+      "community": 22,
       "norm_label": "testmanager_stopremovesentry()"
     },
     {
@@ -6318,7 +6318,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_stopunknownisnoop",
-      "community": 35,
+      "community": 22,
       "norm_label": "testmanager_stopunknownisnoop()"
     },
     {
@@ -6328,7 +6328,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_restartreplacesentry",
-      "community": 35,
+      "community": 22,
       "norm_label": "testmanager_restartreplacesentry()"
     },
     {
@@ -6338,7 +6338,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_stopallclearsentries",
-      "community": 35,
+      "community": 22,
       "norm_label": "testmanager_stopallclearsentries()"
     },
     {
@@ -6348,7 +6348,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "managedminer_manager_test_testmanager_entriesreturnssnapshot",
-      "community": 35,
+      "community": 22,
       "norm_label": "testmanager_entriesreturnssnapshot()"
     },
     {
@@ -6358,7 +6358,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "managedminer_poller",
-      "community": 108,
+      "community": 79,
       "norm_label": "poller"
     },
     {
@@ -6368,7 +6368,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "managedminer_minermanager",
-      "community": 108,
+      "community": 79,
       "norm_label": "minermanager"
     },
     {
@@ -6378,7 +6378,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "internal_managedminer_poller_go_store",
-      "community": 108,
+      "community": 79,
       "norm_label": "store"
     },
     {
@@ -6388,7 +6388,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "internal_managedminer_poller_go_duration",
-      "community": 108,
+      "community": 79,
       "norm_label": "duration"
     },
     {
@@ -6398,7 +6398,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "internal_managedminer_poller_go_logger",
-      "community": 108,
+      "community": 79,
       "norm_label": "logger"
     },
     {
@@ -6408,7 +6408,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "managedminer_poller_newpoller",
-      "community": 108,
+      "community": 79,
       "norm_label": "newpoller()"
     },
     {
@@ -6418,7 +6418,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "managedminer_poller_run",
-      "community": 108,
+      "community": 79,
       "norm_label": ".run()"
     },
     {
@@ -6428,7 +6428,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "internal_managedminer_poller_go_context",
-      "community": 108,
+      "community": 79,
       "norm_label": "context"
     },
     {
@@ -6438,7 +6438,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "managedminer_poller_touch",
-      "community": 108,
+      "community": 79,
       "norm_label": ".touch()"
     },
     {
@@ -6448,7 +6448,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "managedminer_poller_sync",
-      "community": 108,
+      "community": 79,
       "norm_label": ".sync()"
     },
     {
@@ -6458,7 +6458,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "managedminer_poller_test",
-      "community": 22,
+      "community": 34,
       "norm_label": "poller_test.go"
     },
     {
@@ -6468,7 +6468,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "managedminer_fakepollerstore",
-      "community": 22,
+      "community": 34,
       "norm_label": "fakepollerstore"
     },
     {
@@ -6478,7 +6478,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "internal_managedminer_poller_test_go_accountrow",
-      "community": 22,
+      "community": 34,
       "norm_label": "accountrow"
     },
     {
@@ -6488,7 +6488,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "managedminer_fakepollerstore_listaccounts",
-      "community": 22,
+      "community": 34,
       "norm_label": ".listaccounts()"
     },
     {
@@ -6498,7 +6498,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "managedminer_fakepollerstore_getaccount",
-      "community": 22,
+      "community": 34,
       "norm_label": ".getaccount()"
     },
     {
@@ -6508,7 +6508,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "managedminer_fakepollerstore_upsertaccount",
-      "community": 22,
+      "community": 34,
       "norm_label": ".upsertaccount()"
     },
     {
@@ -6518,7 +6518,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "managedminer_fakepollerstore_deleteaccount",
-      "community": 22,
+      "community": 34,
       "norm_label": ".deleteaccount()"
     },
     {
@@ -6528,7 +6528,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "managedminer_fakepollerstore_touchlaststartedat",
-      "community": 22,
+      "community": 34,
       "norm_label": ".touchlaststartedat()"
     },
     {
@@ -6538,7 +6538,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "managedminer_fakepollerstore_changes",
-      "community": 22,
+      "community": 34,
       "norm_label": ".changes()"
     },
     {
@@ -6548,7 +6548,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "managedminer_fakepollerstore_close",
-      "community": 22,
+      "community": 34,
       "norm_label": ".close()"
     },
     {
@@ -6558,7 +6558,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "managedminer_fakepollerstore_ping",
-      "community": 22,
+      "community": 34,
       "norm_label": ".ping()"
     },
     {
@@ -6568,7 +6568,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "managedminer_fakemgr",
-      "community": 22,
+      "community": 34,
       "norm_label": "fakemgr"
     },
     {
@@ -6578,7 +6578,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "managedminer_fakemgr_start",
-      "community": 22,
+      "community": 34,
       "norm_label": ".start()"
     },
     {
@@ -6588,7 +6588,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "internal_managedminer_poller_test_go_accountconfig",
-      "community": 22,
+      "community": 34,
       "norm_label": "accountconfig"
     },
     {
@@ -6598,7 +6598,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "managedminer_fakemgr_stop",
-      "community": 22,
+      "community": 34,
       "norm_label": ".stop()"
     },
     {
@@ -6608,7 +6608,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "managedminer_fakemgr_restartchanged",
-      "community": 22,
+      "community": 34,
       "norm_label": ".restartchanged()"
     },
     {
@@ -6618,7 +6618,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "managedminer_poller_test_minimalconfigjson",
-      "community": 22,
+      "community": 34,
       "norm_label": "minimalconfigjson()"
     },
     {
@@ -6648,7 +6648,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "managedminer_poller_test_newtestpoller",
-      "community": 22,
+      "community": 34,
       "norm_label": "newtestpoller()"
     },
     {
@@ -6658,7 +6658,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "internal_managedminer_poller_test_go_store",
-      "community": 22,
+      "community": 34,
       "norm_label": "store"
     },
     {
@@ -6668,7 +6668,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "minermanager",
-      "community": 22,
+      "community": 34,
       "norm_label": "minermanager"
     },
     {
@@ -6678,7 +6678,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "poller",
-      "community": 22,
+      "community": 34,
       "norm_label": "poller"
     },
     {
@@ -6688,7 +6688,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "managedminer_poller_test_testpoller_newaccountstartsminer",
-      "community": 22,
+      "community": 34,
       "norm_label": "testpoller_newaccountstartsminer()"
     },
     {
@@ -6698,7 +6698,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "internal_managedminer_poller_test_go_t",
-      "community": 22,
+      "community": 34,
       "norm_label": "t"
     },
     {
@@ -6708,7 +6708,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "managedminer_poller_test_testpoller_updatedtimestamprestartsminer",
-      "community": 22,
+      "community": 34,
       "norm_label": "testpoller_updatedtimestamprestartsminer()"
     },
     {
@@ -6718,7 +6718,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "managedminer_poller_test_testpoller_sametimestampnorestart",
-      "community": 22,
+      "community": 34,
       "norm_label": "testpoller_sametimestampnorestart()"
     },
     {
@@ -6728,7 +6728,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "managedminer_poller_test_testpoller_disabledaccountstopsminer",
-      "community": 22,
+      "community": 34,
       "norm_label": "testpoller_disabledaccountstopsminer()"
     },
     {
@@ -6738,7 +6738,7 @@
       "source_location": "L138",
       "_origin": "ast",
       "id": "managedminer_poller_test_testpoller_removedaccountstopsminer",
-      "community": 22,
+      "community": 34,
       "norm_label": "testpoller_removedaccountstopsminer()"
     },
     {
@@ -6748,7 +6748,7 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "managedminer_poller_test_testpoller_invalidconfigskipped",
-      "community": 22,
+      "community": 34,
       "norm_label": "testpoller_invalidconfigskipped()"
     },
     {
@@ -6758,7 +6758,7 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "managedminer_poller_test_testpoller_storeerrorskipssync",
-      "community": 22,
+      "community": 34,
       "norm_label": "testpoller_storeerrorskipssync()"
     },
     {
@@ -6768,7 +6768,7 @@
       "source_location": "L182",
       "_origin": "ast",
       "id": "managedminer_poller_test_testpoller_multipleaccounts",
-      "community": 22,
+      "community": 34,
       "norm_label": "testpoller_multipleaccounts()"
     },
     {
@@ -10437,7 +10437,7 @@
       "source_file": "internal/model/streamer.go",
       "source_location": "L39",
       "_origin": "ast",
-      "id": "stream",
+      "id": "internal_model_streamer_go_stream",
       "community": 29,
       "norm_label": "stream"
     },
@@ -12898,7 +12898,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "internal_server_accounts_api_go_server_analyticsserver",
-      "community": 98,
+      "community": 79,
       "norm_label": "analyticsserver"
     },
     {
@@ -12908,7 +12908,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "server_analyticsserver_setaccountstore",
-      "community": 98,
+      "community": 79,
       "norm_label": ".setaccountstore()"
     },
     {
@@ -12918,7 +12918,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "internal_server_accounts_api_go_store",
-      "community": 98,
+      "community": 79,
       "norm_label": "store"
     },
     {
@@ -12928,7 +12928,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "server_analyticsserver_handlelistaccounts",
-      "community": 98,
+      "community": 79,
       "norm_label": ".handlelistaccounts()"
     },
     {
@@ -12938,7 +12938,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "internal_server_accounts_api_go_responsewriter",
-      "community": 98,
+      "community": 79,
       "norm_label": "responsewriter"
     },
     {
@@ -12948,7 +12948,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "internal_server_accounts_api_go_request",
-      "community": 98,
+      "community": 79,
       "norm_label": "request"
     },
     {
@@ -12958,7 +12958,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "server_analyticsserver_handlegetaccount",
-      "community": 98,
+      "community": 79,
       "norm_label": ".handlegetaccount()"
     },
     {
@@ -12968,7 +12968,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "server_analyticsserver_handlecreateaccount",
-      "community": 98,
+      "community": 79,
       "norm_label": ".handlecreateaccount()"
     },
     {
@@ -12978,7 +12978,7 @@
       "source_location": "L135",
       "_origin": "ast",
       "id": "server_analyticsserver_handleupdateaccount",
-      "community": 98,
+      "community": 79,
       "norm_label": ".handleupdateaccount()"
     },
     {
@@ -12988,7 +12988,7 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "server_analyticsserver_handledeleteaccount",
-      "community": 98,
+      "community": 79,
       "norm_label": ".handledeleteaccount()"
     },
     {
@@ -12998,7 +12998,7 @@
       "source_location": "L200",
       "_origin": "ast",
       "id": "server_analyticsserver_getaccountstore",
-      "community": 98,
+      "community": 79,
       "norm_label": ".getaccountstore()"
     },
     {
@@ -13388,7 +13388,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "internal_server_config_api_go_server_analyticsserver",
-      "community": 132,
+      "community": 18,
       "norm_label": "analyticsserver"
     },
     {
@@ -13398,7 +13398,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "server_analyticsserver_handleconfigschema",
-      "community": 132,
+      "community": 18,
       "norm_label": ".handleconfigschema()"
     },
     {
@@ -13408,7 +13408,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "internal_server_config_api_go_responsewriter",
-      "community": 132,
+      "community": 18,
       "norm_label": "responsewriter"
     },
     {
@@ -13418,7 +13418,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "internal_server_config_api_go_request",
-      "community": 132,
+      "community": 18,
       "norm_label": "request"
     },
     {
@@ -13428,7 +13428,7 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "server_analyticsserver_handleconfigvalidate",
-      "community": 132,
+      "community": 18,
       "norm_label": ".handleconfigvalidate()"
     },
     {
@@ -13438,7 +13438,7 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "server_analyticsserver_handleconfiggenerate",
-      "community": 132,
+      "community": 18,
       "norm_label": ".handleconfiggenerate()"
     },
     {
@@ -13628,7 +13628,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "internal_server_handlers_go_server_analyticsserver",
-      "community": 116,
+      "community": 18,
       "norm_label": "analyticsserver"
     },
     {
@@ -13638,7 +13638,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "server_analyticsserver_handledashboard",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handledashboard()"
     },
     {
@@ -13648,7 +13648,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "internal_server_handlers_go_responsewriter",
-      "community": 116,
+      "community": 18,
       "norm_label": "responsewriter"
     },
     {
@@ -13658,7 +13658,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "internal_server_handlers_go_request",
-      "community": 116,
+      "community": 18,
       "norm_label": "request"
     },
     {
@@ -13668,7 +13668,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "server_analyticsserver_handlelogs",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handlelogs()"
     },
     {
@@ -13678,7 +13678,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "server_analyticsserver_handlehealth",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handlehealth()"
     },
     {
@@ -14508,7 +14508,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "server_streams_api_writejson",
-      "community": 116,
+      "community": 18,
       "norm_label": "writejson()"
     },
     {
@@ -14518,7 +14518,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "internal_server_streams_api_go_responsewriter",
-      "community": 116,
+      "community": 18,
       "norm_label": "responsewriter"
     },
     {
@@ -14528,7 +14528,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "server_streams_api_writeinternalerror",
-      "community": 98,
+      "community": 79,
       "norm_label": "writeinternalerror()"
     },
     {
@@ -14538,7 +14538,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "internal_server_streams_api_go_logger",
-      "community": 98,
+      "community": 79,
       "norm_label": "logger"
     },
     {
@@ -14568,7 +14568,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "internal_server_streams_api_go_request",
-      "community": 116,
+      "community": 18,
       "norm_label": "request"
     },
     {
@@ -14758,7 +14758,7 @@
       "source_location": "L189",
       "_origin": "ast",
       "id": "server_streams_api_sortedkeys",
-      "community": 116,
+      "community": 18,
       "norm_label": "sortedkeys()"
     },
     {
@@ -14768,7 +14768,7 @@
       "source_location": "L199",
       "_origin": "ast",
       "id": "server_streams_api_filterstreamers",
-      "community": 116,
+      "community": 18,
       "norm_label": "filterstreamers()"
     },
     {
@@ -14778,7 +14778,7 @@
       "source_location": "L199",
       "_origin": "ast",
       "id": "internal_server_streams_api_go_streamer",
-      "community": 116,
+      "community": 18,
       "norm_label": "streamer"
     },
     {
@@ -14788,7 +14788,7 @@
       "source_location": "L251",
       "_origin": "ast",
       "id": "internal_server_streams_api_go_server_analyticsserver",
-      "community": 116,
+      "community": 18,
       "norm_label": "analyticsserver"
     },
     {
@@ -14798,7 +14798,7 @@
       "source_location": "L251",
       "_origin": "ast",
       "id": "server_analyticsserver_handledebug",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handledebug()"
     },
     {
@@ -14808,7 +14808,7 @@
       "source_location": "L264",
       "_origin": "ast",
       "id": "server_analyticsserver_handleauthstatus",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handleauthstatus()"
     },
     {
@@ -14818,7 +14818,7 @@
       "source_location": "L289",
       "_origin": "ast",
       "id": "server_analyticsserver_handlestreamers",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handlestreamers()"
     },
     {
@@ -14828,7 +14828,7 @@
       "source_location": "L383",
       "_origin": "ast",
       "id": "server_analyticsserver_handlestreamer",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handlestreamer()"
     },
     {
@@ -14838,7 +14838,7 @@
       "source_location": "L472",
       "_origin": "ast",
       "id": "server_analyticsserver_handlestats",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handlestats()"
     },
     {
@@ -14848,7 +14848,7 @@
       "source_location": "L510",
       "_origin": "ast",
       "id": "server_analyticsserver_handlefilters",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handlefilters()"
     },
     {
@@ -14858,7 +14858,7 @@
       "source_location": "L541",
       "_origin": "ast",
       "id": "server_analyticsserver_handleeventlogs",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handleeventlogs()"
     },
     {
@@ -14868,7 +14868,7 @@
       "source_location": "L606",
       "_origin": "ast",
       "id": "server_analyticsserver_handleeventfilters",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handleeventfilters()"
     },
     {
@@ -14878,7 +14878,7 @@
       "source_location": "L641",
       "_origin": "ast",
       "id": "server_analyticsserver_handletestnotification",
-      "community": 116,
+      "community": 18,
       "norm_label": ".handletestnotification()"
     },
     {
@@ -17528,7 +17528,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "updater_updater_checkwithurl",
-      "community": 107,
+      "community": 35,
       "norm_label": "checkwithurl()"
     },
     {
@@ -17618,7 +17618,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "updater_updater_test",
-      "community": 107,
+      "community": 35,
       "norm_label": "updater_test.go"
     },
     {
@@ -17628,7 +17628,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "updater_updater_test_testcheckforupdate_neweravailable",
-      "community": 107,
+      "community": 35,
       "norm_label": "testcheckforupdate_neweravailable()"
     },
     {
@@ -17638,7 +17638,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "internal_updater_updater_test_go_t",
-      "community": 107,
+      "community": 35,
       "norm_label": "t"
     },
     {
@@ -17648,7 +17648,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "updater_updater_test_testcheckforupdate_uptodate",
-      "community": 107,
+      "community": 35,
       "norm_label": "testcheckforupdate_uptodate()"
     },
     {
@@ -17658,7 +17658,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "updater_updater_test_testcheckforupdate_devversion",
-      "community": 107,
+      "community": 35,
       "norm_label": "testcheckforupdate_devversion()"
     },
     {
@@ -17668,7 +17668,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "updater_updater_test_testcheckforupdate_servererror",
-      "community": 107,
+      "community": 35,
       "norm_label": "testcheckforupdate_servererror()"
     },
     {
@@ -17678,7 +17678,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "updater_updater_test_testcheckforupdate_populatesasseturl",
-      "community": 107,
+      "community": 35,
       "norm_label": "testcheckforupdate_populatesasseturl()"
     },
     {
@@ -17688,7 +17688,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "updater_updater_test_testcheckforupdate_nomatchingasset",
-      "community": 107,
+      "community": 35,
       "norm_label": "testcheckforupdate_nomatchingasset()"
     },
     {
@@ -17698,7 +17698,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "updater_updater_test_testplatformasset",
-      "community": 107,
+      "community": 35,
       "norm_label": "testplatformasset()"
     },
     {
@@ -17708,7 +17708,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "updater_updater_test_testdownloadasset",
-      "community": 107,
+      "community": 35,
       "norm_label": "testdownloadasset()"
     },
     {
@@ -17718,7 +17718,7 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "updater_updater_test_testdownloadasset_servererror",
-      "community": 107,
+      "community": 35,
       "norm_label": "testdownloadasset_servererror()"
     },
     {
@@ -17728,7 +17728,7 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "updater_updater_test_testreplacebinary",
-      "community": 107,
+      "community": 35,
       "norm_label": "testreplacebinary()"
     },
     {
@@ -18138,7 +18138,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "watcher_loop",
-      "community": 113,
+      "community": 114,
       "norm_label": "loop.go"
     },
     {
@@ -18148,7 +18148,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "watcher_loop_pollloop",
-      "community": 113,
+      "community": 114,
       "norm_label": "pollloop()"
     },
     {
@@ -18158,7 +18158,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "internal_watcher_loop_go_context",
-      "community": 113,
+      "community": 114,
       "norm_label": "context"
     },
     {
@@ -18168,7 +18168,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "internal_watcher_loop_go_logger",
-      "community": 113,
+      "community": 114,
       "norm_label": "logger"
     },
     {
@@ -18178,7 +18178,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "internal_watcher_loop_go_duration",
-      "community": 113,
+      "community": 114,
       "norm_label": "duration"
     },
     {
@@ -18310,6 +18310,26 @@
       "id": "watcher_teamwatcher_evaluate",
       "community": 114,
       "norm_label": ".evaluate()"
+    },
+    {
+      "label": ".populateCampaignIDs()",
+      "file_type": "code",
+      "source_file": "internal/watcher/team.go",
+      "source_location": "L261",
+      "_origin": "ast",
+      "id": "watcher_teamwatcher_populatecampaignids",
+      "community": 114,
+      "norm_label": ".populatecampaignids()"
+    },
+    {
+      "label": "Stream",
+      "file_type": "code",
+      "source_file": "internal/watcher/team.go",
+      "source_location": "L261",
+      "_origin": "ast",
+      "id": "internal_watcher_team_go_stream",
+      "community": 114,
+      "norm_label": "stream"
     },
     {
       "label": "pool.go",
@@ -22879,9 +22899,9 @@
       "source_file": "cmd/twitch-miner-go/main.go",
       "source_location": "L264",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_miner_go_main",
-      "target": "twitch_miner_go_main_resolvenobanner",
-      "confidence_score": 1.0
+      "target": "twitch_miner_go_main_resolvenobanner"
     },
     {
       "relation": "contains",
@@ -22909,9 +22929,9 @@
       "source_file": "cmd/twitch-miner-go/main.go",
       "source_location": "L257",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_miner_go_main",
-      "target": "twitch_miner_go_main_resolveskipunauth",
-      "confidence_score": 1.0
+      "target": "twitch_miner_go_main_resolveskipunauth"
     },
     {
       "relation": "contains",
@@ -23191,9 +23211,9 @@
       "source_file": "cmd/twitch-miner-go/main.go",
       "source_location": "L133",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_miner_go_main_main",
-      "target": "twitch_miner_go_main_resolvenobanner",
-      "confidence_score": 1.0
+      "target": "twitch_miner_go_main_resolvenobanner"
     },
     {
       "relation": "calls",
@@ -23224,9 +23244,9 @@
       "source_file": "cmd/twitch-miner-go/main.go",
       "source_location": "L159",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_miner_go_main_main",
-      "target": "twitch_miner_go_main_resolveskipunauth",
-      "confidence_score": 1.0
+      "target": "twitch_miner_go_main_resolveskipunauth"
     },
     {
       "relation": "calls",
@@ -23854,9 +23874,9 @@
       "source_file": "internal/auth/auth.go",
       "source_location": "L111",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_auth_auth_go_auth_authenticator",
-      "target": "auth_authenticator_setskipunauth",
-      "confidence_score": 1.0
+      "target": "auth_authenticator_setskipunauth"
     },
     {
       "relation": "method",
@@ -27918,9 +27938,9 @@
       "source_file": "internal/config/config_test.go",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_config_test",
-      "target": "config_config_test_testvalidateallowszeromaxwatchstreams",
-      "confidence_score": 1.0
+      "target": "config_config_test_testvalidateallowszeromaxwatchstreams"
     },
     {
       "relation": "contains",
@@ -27950,9 +27970,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "config_config_test_testvalidateallowszeromaxwatchstreams",
-      "target": "internal_config_config_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_config_config_test_go_t"
     },
     {
       "relation": "references",
@@ -34097,9 +34117,9 @@
       "source_file": "internal/gql/operations.go",
       "source_location": "L225",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_gql_operations_go_gql_client",
-      "target": "gql_client_getloginfromid",
-      "confidence_score": 1.0
+      "target": "gql_client_getloginfromid"
     },
     {
       "relation": "method",
@@ -34353,9 +34373,9 @@
       "source_location": "L225",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_client_getloginfromid",
-      "target": "internal_gql_operations_go_context",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_go_context"
     },
     {
       "relation": "references",
@@ -34561,9 +34581,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test",
-      "target": "gql_mocktransport",
-      "confidence_score": 1.0
+      "target": "gql_mocktransport"
     },
     {
       "relation": "contains",
@@ -34571,9 +34591,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test",
-      "target": "gql_noopauth",
-      "confidence_score": 1.0
+      "target": "gql_noopauth"
     },
     {
       "relation": "contains",
@@ -34581,9 +34601,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L105",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test",
-      "target": "gql_operations_test_assertvarequals",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_assertvarequals"
     },
     {
       "relation": "contains",
@@ -34591,9 +34611,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L92",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test",
-      "target": "gql_operations_test_assertvarpresent",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_assertvarpresent"
     },
     {
       "relation": "contains",
@@ -34601,9 +34621,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test",
-      "target": "gql_operations_test_init",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_init"
     },
     {
       "relation": "contains",
@@ -34611,9 +34631,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test",
-      "target": "gql_operations_test_newtestgqlclient",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_newtestgqlclient"
     },
     {
       "relation": "contains",
@@ -34621,9 +34641,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L154",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test",
-      "target": "gql_operations_test_testgetchannelpointscontext_sendschannellogin",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_testgetchannelpointscontext_sendschannellogin"
     },
     {
       "relation": "contains",
@@ -34631,9 +34651,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L211",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test",
-      "target": "gql_operations_test_testgetplaybackaccesstoken_platformisnonemptystring",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_testgetplaybackaccesstoken_platformisnonemptystring"
     },
     {
       "relation": "contains",
@@ -34641,9 +34661,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L117",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test",
-      "target": "gql_operations_test_testgetplaybackaccesstoken_sendallrequiredvariables",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_testgetplaybackaccesstoken_sendallrequiredvariables"
     },
     {
       "relation": "contains",
@@ -34651,9 +34671,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L172",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test",
-      "target": "gql_operations_test_testgetstreaminfo_sendschannellogin",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_testgetstreaminfo_sendschannellogin"
     },
     {
       "relation": "contains",
@@ -34661,9 +34681,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L190",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test",
-      "target": "gql_operations_test_testgetuserid_sendslogin",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_testgetuserid_sendslogin"
     },
     {
       "relation": "method",
@@ -34671,9 +34691,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L50",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_mocktransport",
-      "target": "gql_mocktransport_getcapturedvars",
-      "confidence_score": 1.0
+      "target": "gql_mocktransport_getcapturedvars"
     },
     {
       "relation": "method",
@@ -34681,9 +34701,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_mocktransport",
-      "target": "gql_mocktransport_roundtrip",
-      "confidence_score": 1.0
+      "target": "gql_mocktransport_roundtrip"
     },
     {
       "relation": "references",
@@ -34692,9 +34712,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "gql_mocktransport",
-      "target": "internal_gql_operations_test_go_mutex",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_mutex"
     },
     {
       "relation": "references",
@@ -34703,9 +34723,9 @@
       "source_location": "L68",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_operations_test_newtestgqlclient",
-      "target": "gql_mocktransport",
-      "confidence_score": 1.0
+      "target": "gql_mocktransport"
     },
     {
       "relation": "references",
@@ -34714,9 +34734,9 @@
       "source_location": "L26",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_mocktransport_roundtrip",
-      "target": "internal_gql_operations_test_go_request",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_request"
     },
     {
       "relation": "references",
@@ -34725,9 +34745,9 @@
       "source_location": "L26",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "gql_mocktransport_roundtrip",
-      "target": "internal_gql_operations_test_go_response",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_response"
     },
     {
       "relation": "references",
@@ -34736,9 +34756,9 @@
       "source_location": "L50",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_mocktransport_getcapturedvars",
-      "target": "internal_gql_operations_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_t"
     },
     {
       "relation": "calls",
@@ -34747,9 +34767,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L167",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetchannelpointscontext_sendschannellogin",
-      "target": "gql_mocktransport_getcapturedvars",
-      "confidence_score": 1.0
+      "target": "gql_mocktransport_getcapturedvars"
     },
     {
       "relation": "calls",
@@ -34758,9 +34778,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L227",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetplaybackaccesstoken_platformisnonemptystring",
-      "target": "gql_mocktransport_getcapturedvars",
-      "confidence_score": 1.0
+      "target": "gql_mocktransport_getcapturedvars"
     },
     {
       "relation": "calls",
@@ -34769,9 +34789,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L136",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetplaybackaccesstoken_sendallrequiredvariables",
-      "target": "gql_mocktransport_getcapturedvars",
-      "confidence_score": 1.0
+      "target": "gql_mocktransport_getcapturedvars"
     },
     {
       "relation": "calls",
@@ -34780,9 +34800,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L185",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetstreaminfo_sendschannellogin",
-      "target": "gql_mocktransport_getcapturedvars",
-      "confidence_score": 1.0
+      "target": "gql_mocktransport_getcapturedvars"
     },
     {
       "relation": "calls",
@@ -34791,9 +34811,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L206",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetuserid_sendslogin",
-      "target": "gql_mocktransport_getcapturedvars",
-      "confidence_score": 1.0
+      "target": "gql_mocktransport_getcapturedvars"
     },
     {
       "relation": "references",
@@ -34802,9 +34822,9 @@
       "source_location": "L105",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_operations_test_assertvarequals",
-      "target": "internal_gql_operations_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_t"
     },
     {
       "relation": "references",
@@ -34813,9 +34833,9 @@
       "source_location": "L92",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_operations_test_assertvarpresent",
-      "target": "internal_gql_operations_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_t"
     },
     {
       "relation": "references",
@@ -34824,9 +34844,9 @@
       "source_location": "L154",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetchannelpointscontext_sendschannellogin",
-      "target": "internal_gql_operations_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_t"
     },
     {
       "relation": "references",
@@ -34835,9 +34855,9 @@
       "source_location": "L211",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetplaybackaccesstoken_platformisnonemptystring",
-      "target": "internal_gql_operations_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_t"
     },
     {
       "relation": "references",
@@ -34846,9 +34866,9 @@
       "source_location": "L117",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetplaybackaccesstoken_sendallrequiredvariables",
-      "target": "internal_gql_operations_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_t"
     },
     {
       "relation": "references",
@@ -34857,9 +34877,9 @@
       "source_location": "L172",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetstreaminfo_sendschannellogin",
-      "target": "internal_gql_operations_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_t"
     },
     {
       "relation": "references",
@@ -34868,9 +34888,9 @@
       "source_location": "L190",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetuserid_sendslogin",
-      "target": "internal_gql_operations_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_t"
     },
     {
       "relation": "references",
@@ -34879,9 +34899,9 @@
       "source_location": "L68",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "gql_operations_test_newtestgqlclient",
-      "target": "internal_gql_operations_test_go_client",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_client"
     },
     {
       "relation": "calls",
@@ -34901,9 +34921,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L160",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetchannelpointscontext_sendschannellogin",
-      "target": "gql_operations_test_newtestgqlclient",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_newtestgqlclient"
     },
     {
       "relation": "calls",
@@ -34912,9 +34932,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L220",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetplaybackaccesstoken_platformisnonemptystring",
-      "target": "gql_operations_test_newtestgqlclient",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_newtestgqlclient"
     },
     {
       "relation": "calls",
@@ -34923,9 +34943,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L123",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetplaybackaccesstoken_sendallrequiredvariables",
-      "target": "gql_operations_test_newtestgqlclient",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_newtestgqlclient"
     },
     {
       "relation": "calls",
@@ -34934,9 +34954,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L178",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetstreaminfo_sendschannellogin",
-      "target": "gql_operations_test_newtestgqlclient",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_newtestgqlclient"
     },
     {
       "relation": "calls",
@@ -34945,9 +34965,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L196",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetuserid_sendslogin",
-      "target": "gql_operations_test_newtestgqlclient",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_newtestgqlclient"
     },
     {
       "relation": "method",
@@ -34955,9 +34975,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_noopauth",
-      "target": "gql_noopauth_androidclientid",
-      "confidence_score": 1.0
+      "target": "gql_noopauth_androidclientid"
     },
     {
       "relation": "method",
@@ -34965,9 +34985,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_noopauth",
-      "target": "gql_noopauth_authtoken",
-      "confidence_score": 1.0
+      "target": "gql_noopauth_authtoken"
     },
     {
       "relation": "method",
@@ -34975,9 +34995,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_noopauth",
-      "target": "gql_noopauth_clientidsforgql",
-      "confidence_score": 1.0
+      "target": "gql_noopauth_clientidsforgql"
     },
     {
       "relation": "method",
@@ -34985,9 +35005,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_noopauth",
-      "target": "gql_noopauth_clientversion",
-      "confidence_score": 1.0
+      "target": "gql_noopauth_clientversion"
     },
     {
       "relation": "method",
@@ -34995,9 +35015,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L83",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_noopauth",
-      "target": "gql_noopauth_fetchintegritytoken",
-      "confidence_score": 1.0
+      "target": "gql_noopauth_fetchintegritytoken"
     },
     {
       "relation": "method",
@@ -35005,9 +35025,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_noopauth",
-      "target": "gql_noopauth_getauthheaders",
-      "confidence_score": 1.0
+      "target": "gql_noopauth_getauthheaders"
     },
     {
       "relation": "method",
@@ -35015,9 +35035,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L76",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_noopauth",
-      "target": "gql_noopauth_login",
-      "confidence_score": 1.0
+      "target": "gql_noopauth_login"
     },
     {
       "relation": "method",
@@ -35025,9 +35045,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L84",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_noopauth",
-      "target": "gql_noopauth_refreshtoken",
-      "confidence_score": 1.0
+      "target": "gql_noopauth_refreshtoken"
     },
     {
       "relation": "method",
@@ -35035,9 +35055,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_noopauth",
-      "target": "gql_noopauth_userid",
-      "confidence_score": 1.0
+      "target": "gql_noopauth_userid"
     },
     {
       "relation": "references",
@@ -35046,9 +35066,9 @@
       "source_location": "L76",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_noopauth_login",
-      "target": "internal_gql_operations_test_go_context",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_context"
     },
     {
       "relation": "references",
@@ -35057,9 +35077,9 @@
       "source_location": "L83",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_noopauth_fetchintegritytoken",
-      "target": "internal_gql_operations_test_go_context",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_context"
     },
     {
       "relation": "references",
@@ -35068,9 +35088,9 @@
       "source_location": "L84",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "gql_noopauth_refreshtoken",
-      "target": "internal_gql_operations_test_go_context",
-      "confidence_score": 1.0
+      "target": "internal_gql_operations_test_go_context"
     },
     {
       "relation": "calls",
@@ -35079,9 +35099,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L168",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetchannelpointscontext_sendschannellogin",
-      "target": "gql_operations_test_assertvarpresent",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_assertvarpresent"
     },
     {
       "relation": "calls",
@@ -35090,9 +35110,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L139",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetplaybackaccesstoken_sendallrequiredvariables",
-      "target": "gql_operations_test_assertvarpresent",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_assertvarpresent"
     },
     {
       "relation": "calls",
@@ -35101,9 +35121,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetstreaminfo_sendschannellogin",
-      "target": "gql_operations_test_assertvarpresent",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_assertvarpresent"
     },
     {
       "relation": "calls",
@@ -35112,9 +35132,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L207",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetuserid_sendslogin",
-      "target": "gql_operations_test_assertvarpresent",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_assertvarpresent"
     },
     {
       "relation": "calls",
@@ -35123,9 +35143,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L169",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetchannelpointscontext_sendschannellogin",
-      "target": "gql_operations_test_assertvarequals",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_assertvarequals"
     },
     {
       "relation": "calls",
@@ -35134,9 +35154,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L146",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetplaybackaccesstoken_sendallrequiredvariables",
-      "target": "gql_operations_test_assertvarequals",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_assertvarequals"
     },
     {
       "relation": "calls",
@@ -35145,9 +35165,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L187",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetstreaminfo_sendschannellogin",
-      "target": "gql_operations_test_assertvarequals",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_assertvarequals"
     },
     {
       "relation": "calls",
@@ -35156,9 +35176,9 @@
       "source_file": "internal/gql/operations_test.go",
       "source_location": "L208",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "gql_operations_test_testgetuserid_sendslogin",
-      "target": "gql_operations_test_assertvarequals",
-      "confidence_score": 1.0
+      "target": "gql_operations_test_assertvarequals"
     },
     {
       "relation": "contains",
@@ -37070,9 +37090,9 @@
       "source_file": "internal/managedminer/manager.go",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "managedminer_manager",
-      "target": "managedminer_manager_setskipunauth",
-      "confidence_score": 1.0
+      "target": "managedminer_manager_setskipunauth"
     },
     {
       "relation": "method",
@@ -37274,9 +37294,9 @@
       "source_file": "internal/managedminer/manager.go",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "managedminer_manager_newmanager",
-      "target": "managedminer_manager_setskipunauth",
-      "confidence_score": 1.0
+      "target": "managedminer_manager_setskipunauth"
     },
     {
       "relation": "calls",
@@ -37285,9 +37305,9 @@
       "source_file": "internal/managedminer/manager.go",
       "source_location": "L198",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "managedminer_manager_startlocked",
-      "target": "managedminer_manager_setskipunauth",
-      "confidence_score": 1.0
+      "target": "managedminer_manager_setskipunauth"
     },
     {
       "relation": "calls",
@@ -38122,9 +38142,9 @@
       "source_file": "internal/managedminer/poller_test.go",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "managedminer_fakepollerstore",
-      "target": "managedminer_fakepollerstore_ping",
-      "confidence_score": 1.0
+      "target": "managedminer_fakepollerstore_ping"
     },
     {
       "relation": "method",
@@ -39712,9 +39732,9 @@
       "source_file": "internal/miner/handler_test.go",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "miner_mocktwitch",
-      "target": "miner_mocktwitch_resolveloginfromid",
-      "confidence_score": 1.0
+      "target": "miner_mocktwitch_resolveloginfromid"
     },
     {
       "relation": "method",
@@ -39732,9 +39752,9 @@
       "source_file": "internal/miner/handler_test.go",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "miner_mocktwitch",
-      "target": "miner_mocktwitch_setskipunauth",
-      "confidence_score": 1.0
+      "target": "miner_mocktwitch_setskipunauth"
     },
     {
       "relation": "method",
@@ -39885,9 +39905,9 @@
       "source_location": "L42",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "miner_mocktwitch_resolveloginfromid",
-      "target": "internal_miner_handler_test_go_context",
-      "confidence_score": 1.0
+      "target": "internal_miner_handler_test_go_context"
     },
     {
       "relation": "references",
@@ -40521,9 +40541,9 @@
       "source_file": "internal/miner/miner.go",
       "source_location": "L96",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_miner_miner_go_miner_miner",
-      "target": "miner_miner_setskipunauth",
-      "confidence_score": 1.0
+      "target": "miner_miner_setskipunauth"
     },
     {
       "relation": "method",
@@ -40703,9 +40723,9 @@
       "source_file": "internal/miner/miner.go",
       "source_location": "L151",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "miner_miner_run",
-      "target": "miner_miner_setskipunauth",
-      "confidence_score": 1.0
+      "target": "miner_miner_setskipunauth"
     },
     {
       "relation": "references",
@@ -47153,9 +47173,9 @@
       "source_file": "internal/model/stream.go",
       "source_location": "L169",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "model_stream",
-      "target": "model_stream_isminutewatchstalled",
-      "confidence_score": 1.0
+      "target": "model_stream_isminutewatchstalled"
     },
     {
       "relation": "method",
@@ -47322,9 +47342,9 @@
       "source_location": "L169",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "model_stream_isminutewatchstalled",
-      "target": "internal_model_stream_go_duration",
-      "confidence_score": 1.0
+      "target": "internal_model_stream_go_duration"
     },
     {
       "relation": "references",
@@ -47369,6 +47389,17 @@
       "confidence_score": 1.0,
       "source": "model_streamer",
       "target": "internal_model_streamer_go_rwmutex"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/model/streamer.go",
+      "source_location": "L39",
+      "weight": 1.0,
+      "context": "field",
+      "source": "model_streamer",
+      "target": "internal_model_streamer_go_stream",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -47613,17 +47644,6 @@
       "confidence_score": 1.0,
       "source": "model_streamer",
       "target": "raid"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "internal/model/streamer.go",
-      "source_location": "L39",
-      "weight": 1.0,
-      "context": "field",
-      "confidence_score": 1.0,
-      "source": "model_streamer",
-      "target": "stream"
     },
     {
       "relation": "references",
@@ -47905,9 +47925,9 @@
       "source_file": "internal/model/streamer_test.go",
       "source_location": "L119",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "model_streamer_test",
-      "target": "model_streamer_test_testsetonline_alreadyonline_noop",
-      "confidence_score": 1.0
+      "target": "model_streamer_test_testsetonline_alreadyonline_noop"
     },
     {
       "relation": "contains",
@@ -47915,9 +47935,9 @@
       "source_file": "internal/model/streamer_test.go",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "model_streamer_test",
-      "target": "model_streamer_test_testsetonline_carryover_firstonline",
-      "confidence_score": 1.0
+      "target": "model_streamer_test_testsetonline_carryover_firstonline"
     },
     {
       "relation": "contains",
@@ -47925,9 +47945,9 @@
       "source_file": "internal/model/streamer_test.go",
       "source_location": "L70",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "model_streamer_test",
-      "target": "model_streamer_test_testsetonline_carryover_streakresolved_longgap",
-      "confidence_score": 1.0
+      "target": "model_streamer_test_testsetonline_carryover_streakresolved_longgap"
     },
     {
       "relation": "contains",
@@ -47935,9 +47955,9 @@
       "source_file": "internal/model/streamer_test.go",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "model_streamer_test",
-      "target": "model_streamer_test_testsetonline_carryover_streakresolved_shortgap",
-      "confidence_score": 1.0
+      "target": "model_streamer_test_testsetonline_carryover_streakresolved_shortgap"
     },
     {
       "relation": "contains",
@@ -47945,9 +47965,9 @@
       "source_file": "internal/model/streamer_test.go",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "model_streamer_test",
-      "target": "model_streamer_test_testsetonline_carryover_streakunresolved_shortgap",
-      "confidence_score": 1.0
+      "target": "model_streamer_test_testsetonline_carryover_streakunresolved_shortgap"
     },
     {
       "relation": "references",
@@ -47956,9 +47976,9 @@
       "source_location": "L8",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "model_streamer_test_testsetonline_carryover_streakresolved_shortgap",
-      "target": "internal_model_streamer_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_model_streamer_test_go_t"
     },
     {
       "relation": "references",
@@ -47967,9 +47987,9 @@
       "source_location": "L119",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "model_streamer_test_testsetonline_alreadyonline_noop",
-      "target": "internal_model_streamer_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_model_streamer_test_go_t"
     },
     {
       "relation": "references",
@@ -47978,9 +47998,9 @@
       "source_location": "L101",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "model_streamer_test_testsetonline_carryover_firstonline",
-      "target": "internal_model_streamer_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_model_streamer_test_go_t"
     },
     {
       "relation": "references",
@@ -47989,9 +48009,9 @@
       "source_location": "L70",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "model_streamer_test_testsetonline_carryover_streakresolved_longgap",
-      "target": "internal_model_streamer_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_model_streamer_test_go_t"
     },
     {
       "relation": "references",
@@ -48000,9 +48020,9 @@
       "source_location": "L40",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "model_streamer_test_testsetonline_carryover_streakunresolved_shortgap",
-      "target": "internal_model_streamer_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_model_streamer_test_go_t"
     },
     {
       "relation": "contains",
@@ -52359,9 +52379,9 @@
       "source_file": "internal/server/accounts_api_test.go",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_fakestore",
-      "target": "server_fakestore_ping",
-      "confidence_score": 1.0
+      "target": "server_fakestore_ping"
     },
     {
       "relation": "method",
@@ -54451,9 +54471,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_middleware",
-      "target": "server_contextkey",
-      "confidence_score": 1.0
+      "target": "server_contextkey"
     },
     {
       "relation": "contains",
@@ -54471,9 +54491,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_middleware",
-      "target": "server_middleware_generaterequestid",
-      "confidence_score": 1.0
+      "target": "server_middleware_generaterequestid"
     },
     {
       "relation": "contains",
@@ -54481,9 +54501,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_middleware",
-      "target": "server_middleware_newratelimiter",
-      "confidence_score": 1.0
+      "target": "server_middleware_newratelimiter"
     },
     {
       "relation": "contains",
@@ -54491,9 +54511,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_middleware",
-      "target": "server_middleware_requestidfromcontext",
-      "confidence_score": 1.0
+      "target": "server_middleware_requestidfromcontext"
     },
     {
       "relation": "contains",
@@ -54521,9 +54541,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L156",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_middleware",
-      "target": "server_middleware_withratelimit",
-      "confidence_score": 1.0
+      "target": "server_middleware_withratelimit"
     },
     {
       "relation": "contains",
@@ -54531,9 +54551,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_middleware",
-      "target": "server_middleware_withrequestid",
-      "confidence_score": 1.0
+      "target": "server_middleware_withrequestid"
     },
     {
       "relation": "contains",
@@ -54541,9 +54561,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L110",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_middleware",
-      "target": "server_ratelimiter",
-      "confidence_score": 1.0
+      "target": "server_ratelimiter"
     },
     {
       "relation": "contains",
@@ -54561,9 +54581,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L117",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_middleware",
-      "target": "server_tokenbucket",
-      "confidence_score": 1.0
+      "target": "server_tokenbucket"
     },
     {
       "relation": "references",
@@ -54572,9 +54592,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "server_middleware_requestidfromcontext",
-      "target": "internal_server_middleware_go_context",
-      "confidence_score": 1.0
+      "target": "internal_server_middleware_go_context"
     },
     {
       "relation": "calls",
@@ -54583,9 +54603,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_middleware_withrequestid",
-      "target": "internal_server_middleware_go_context",
-      "confidence_score": 1.0
+      "target": "internal_server_middleware_go_context"
     },
     {
       "relation": "references",
@@ -54594,9 +54614,9 @@
       "source_location": "L28",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "server_middleware_withrequestid",
-      "target": "internal_server_middleware_go_handler",
-      "confidence_score": 1.0
+      "target": "internal_server_middleware_go_handler"
     },
     {
       "relation": "calls",
@@ -54605,9 +54625,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_middleware_withrequestid",
-      "target": "server_middleware_generaterequestid",
-      "confidence_score": 1.0
+      "target": "server_middleware_generaterequestid"
     },
     {
       "relation": "calls",
@@ -54649,9 +54669,9 @@
       "source_location": "L156",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "server_middleware_withratelimit",
-      "target": "internal_server_middleware_go_handler",
-      "confidence_score": 1.0
+      "target": "internal_server_middleware_go_handler"
     },
     {
       "relation": "references",
@@ -54736,9 +54756,9 @@
       "source_location": "L122",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "server_middleware_newratelimiter",
-      "target": "server_ratelimiter",
-      "confidence_score": 1.0
+      "target": "server_ratelimiter"
     },
     {
       "relation": "references",
@@ -54747,9 +54767,9 @@
       "source_location": "L156",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "server_middleware_withratelimit",
-      "target": "server_ratelimiter",
-      "confidence_score": 1.0
+      "target": "server_ratelimiter"
     },
     {
       "relation": "references",
@@ -54758,9 +54778,9 @@
       "source_location": "L114",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "server_ratelimiter",
-      "target": "internal_server_middleware_go_duration",
-      "confidence_score": 1.0
+      "target": "internal_server_middleware_go_duration"
     },
     {
       "relation": "references",
@@ -54769,9 +54789,9 @@
       "source_location": "L112",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "server_ratelimiter",
-      "target": "internal_server_middleware_go_mutex",
-      "confidence_score": 1.0
+      "target": "internal_server_middleware_go_mutex"
     },
     {
       "relation": "method",
@@ -54779,9 +54799,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L130",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_ratelimiter",
-      "target": "server_ratelimiter_allow",
-      "confidence_score": 1.0
+      "target": "server_ratelimiter_allow"
     },
     {
       "relation": "references",
@@ -54790,9 +54810,9 @@
       "source_location": "L111",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "server_ratelimiter",
-      "target": "tokenbucket",
-      "confidence_score": 1.0
+      "target": "tokenbucket"
     },
     {
       "relation": "references",
@@ -54801,9 +54821,9 @@
       "source_location": "L122",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "server_middleware_newratelimiter",
-      "target": "internal_server_middleware_go_duration",
-      "confidence_score": 1.0
+      "target": "internal_server_middleware_go_duration"
     },
     {
       "relation": "references",
@@ -54812,9 +54832,9 @@
       "source_location": "L119",
       "weight": 1.0,
       "context": "field",
+      "confidence_score": 1.0,
       "source": "server_tokenbucket",
-      "target": "internal_server_middleware_go_time",
-      "confidence_score": 1.0
+      "target": "internal_server_middleware_go_time"
     },
     {
       "relation": "calls",
@@ -54834,9 +54854,9 @@
       "source_file": "internal/server/middleware.go",
       "source_location": "L168",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_middleware_withratelimit",
-      "target": "server_ratelimiter_allow",
-      "confidence_score": 1.0
+      "target": "server_ratelimiter_allow"
     },
     {
       "relation": "calls",
@@ -56017,9 +56037,9 @@
       "source_file": "internal/server/streams_api.go",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_streams_api",
-      "target": "server_streams_api_writeinternalerror",
-      "confidence_score": 1.0
+      "target": "server_streams_api_writeinternalerror"
     },
     {
       "relation": "contains",
@@ -56137,9 +56157,9 @@
       "source_file": "internal/server/streams_api.go",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "server_streams_api_writeinternalerror",
-      "target": "server_streams_api_writejson",
-      "confidence_score": 1.0
+      "target": "server_streams_api_writejson"
     },
     {
       "relation": "references",
@@ -56258,9 +56278,9 @@
       "source_location": "L32",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "server_streams_api_writeinternalerror",
-      "target": "internal_server_streams_api_go_responsewriter",
-      "confidence_score": 1.0
+      "target": "internal_server_streams_api_go_responsewriter"
     },
     {
       "relation": "references",
@@ -56269,9 +56289,9 @@
       "source_location": "L32",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "server_streams_api_writeinternalerror",
-      "target": "internal_server_streams_api_go_logger",
-      "confidence_score": 1.0
+      "target": "internal_server_streams_api_go_logger"
     },
     {
       "relation": "references",
@@ -56759,9 +56779,9 @@
       "source_file": "internal/store/noop.go",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "store_noopstore",
-      "target": "store_noopstore_ping",
-      "confidence_score": 1.0
+      "target": "store_noopstore_ping"
     },
     {
       "relation": "method",
@@ -56955,9 +56975,9 @@
       "source_file": "internal/store/postgres.go",
       "source_location": "L201",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "store_postgresstore",
-      "target": "store_postgresstore_ping",
-      "confidence_score": 1.0
+      "target": "store_postgresstore_ping"
     },
     {
       "relation": "method",
@@ -57008,9 +57028,9 @@
       "source_file": "internal/store/postgres.go",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "store_postgres_openpostgres",
-      "target": "store_postgresstore_ping",
-      "confidence_score": 1.0
+      "target": "store_postgresstore_ping"
     },
     {
       "relation": "calls",
@@ -57749,9 +57769,9 @@
       "source_file": "internal/twitch/client.go",
       "source_location": "L581",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_twitch_client_go_twitch_client",
-      "target": "twitch_client_isstaleusernameerror",
-      "confidence_score": 1.0
+      "target": "twitch_client_isstaleusernameerror"
     },
     {
       "relation": "method",
@@ -57810,9 +57830,9 @@
       "source_file": "internal/twitch/client.go",
       "source_location": "L590",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_twitch_client_go_twitch_client",
-      "target": "twitch_client_resolveloginfromid",
-      "confidence_score": 1.0
+      "target": "twitch_client_resolveloginfromid"
     },
     {
       "relation": "method",
@@ -57820,9 +57840,9 @@
       "source_file": "internal/twitch/client.go",
       "source_location": "L136",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_twitch_client_go_twitch_client",
-      "target": "twitch_client_setskipunauth",
-      "confidence_score": 1.0
+      "target": "twitch_client_setskipunauth"
     },
     {
       "relation": "method",
@@ -58111,9 +58131,9 @@
       "source_location": "L590",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_client_resolveloginfromid",
-      "target": "internal_twitch_client_go_context",
-      "confidence_score": 1.0
+      "target": "internal_twitch_client_go_context"
     },
     {
       "relation": "references",
@@ -58155,9 +58175,9 @@
       "source_file": "internal/twitch/client.go",
       "source_location": "L169",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_client_checkstreameronline",
-      "target": "twitch_client_isstaleusernameerror",
-      "confidence_score": 1.0
+      "target": "twitch_client_isstaleusernameerror"
     },
     {
       "relation": "calls",
@@ -58166,9 +58186,9 @@
       "source_file": "internal/twitch/client.go",
       "source_location": "L174",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_client_checkstreameronline",
-      "target": "twitch_client_resolveloginfromid",
-      "confidence_score": 1.0
+      "target": "twitch_client_resolveloginfromid"
     },
     {
       "relation": "calls",
@@ -58329,9 +58349,9 @@
       "source_file": "internal/twitch/drops.go",
       "source_location": "L658",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops",
-      "target": "twitch_drops_isquartermilestone",
-      "confidence_score": 1.0
+      "target": "twitch_drops_isquartermilestone"
     },
     {
       "relation": "contains",
@@ -58369,9 +58389,9 @@
       "source_file": "internal/twitch/drops.go",
       "source_location": "L248",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_twitch_drops_go_twitch_client",
-      "target": "twitch_client_detectsyntheticdrops",
-      "confidence_score": 1.0
+      "target": "twitch_client_detectsyntheticdrops"
     },
     {
       "relation": "method",
@@ -58379,9 +58399,9 @@
       "source_file": "internal/twitch/drops.go",
       "source_location": "L209",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "internal_twitch_drops_go_twitch_client",
-      "target": "twitch_client_detectvanisheddrops",
-      "confidence_score": 1.0
+      "target": "twitch_client_detectvanisheddrops"
     },
     {
       "relation": "method",
@@ -58606,9 +58626,9 @@
       "source_file": "internal/twitch/drops.go",
       "source_location": "L176",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_client_synccampaignswithinventory",
-      "target": "twitch_client_detectsyntheticdrops",
-      "confidence_score": 1.0
+      "target": "twitch_client_detectsyntheticdrops"
     },
     {
       "relation": "calls",
@@ -58617,9 +58637,9 @@
       "source_file": "internal/twitch/drops.go",
       "source_location": "L175",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_client_synccampaignswithinventory",
-      "target": "twitch_client_detectvanisheddrops",
-      "confidence_score": 1.0
+      "target": "twitch_client_detectvanisheddrops"
     },
     {
       "relation": "references",
@@ -58628,9 +58648,9 @@
       "source_location": "L248",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_client_detectsyntheticdrops",
-      "target": "internal_twitch_drops_go_campaign",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_go_campaign"
     },
     {
       "relation": "references",
@@ -58683,9 +58703,9 @@
       "source_file": "internal/twitch/drops.go",
       "source_location": "L625",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_client_logupdateddropprogress",
-      "target": "twitch_drops_isquartermilestone",
-      "confidence_score": 1.0
+      "target": "twitch_drops_isquartermilestone"
     },
     {
       "relation": "contains",
@@ -58713,9 +58733,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L476",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test",
-      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress"
     },
     {
       "relation": "contains",
@@ -58723,9 +58743,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L632",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test",
-      "target": "twitch_drops_notification_test_milestoneeventcount",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_milestoneeventcount"
     },
     {
       "relation": "contains",
@@ -58893,9 +58913,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L581",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test",
-      "target": "twitch_drops_notification_test_testlogupdateddropprogress_milestonededup",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_testlogupdateddropprogress_milestonededup"
     },
     {
       "relation": "contains",
@@ -58903,9 +58923,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L560",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test",
-      "target": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat100",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat100"
     },
     {
       "relation": "contains",
@@ -58913,9 +58933,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L497",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test",
-      "target": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat25",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat25"
     },
     {
       "relation": "contains",
@@ -58923,9 +58943,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L518",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test",
-      "target": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat50",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat50"
     },
     {
       "relation": "contains",
@@ -58933,9 +58953,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L539",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test",
-      "target": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat75",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat75"
     },
     {
       "relation": "contains",
@@ -58943,9 +58963,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L603",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test",
-      "target": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestoneatnonquarter",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestoneatnonquarter"
     },
     {
       "relation": "contains",
@@ -58953,9 +58973,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L617",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test",
-      "target": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestonefornonprintable",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestonefornonprintable"
     },
     {
       "relation": "contains",
@@ -58974,9 +58994,9 @@
       "source_location": "L632",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_milestoneeventcount",
-      "target": "twitch_logcapture",
-      "confidence_score": 1.0
+      "target": "twitch_logcapture"
     },
     {
       "relation": "references",
@@ -59223,9 +59243,9 @@
       "source_location": "L632",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_milestoneeventcount",
-      "target": "internal_twitch_drops_notification_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_notification_test_go_t"
     },
     {
       "relation": "references",
@@ -59399,9 +59419,9 @@
       "source_location": "L581",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonededup",
-      "target": "internal_twitch_drops_notification_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_notification_test_go_t"
     },
     {
       "relation": "references",
@@ -59410,9 +59430,9 @@
       "source_location": "L560",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat100",
-      "target": "internal_twitch_drops_notification_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_notification_test_go_t"
     },
     {
       "relation": "references",
@@ -59421,9 +59441,9 @@
       "source_location": "L497",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat25",
-      "target": "internal_twitch_drops_notification_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_notification_test_go_t"
     },
     {
       "relation": "references",
@@ -59432,9 +59452,9 @@
       "source_location": "L518",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat50",
-      "target": "internal_twitch_drops_notification_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_notification_test_go_t"
     },
     {
       "relation": "references",
@@ -59443,9 +59463,9 @@
       "source_location": "L539",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat75",
-      "target": "internal_twitch_drops_notification_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_notification_test_go_t"
     },
     {
       "relation": "references",
@@ -59454,9 +59474,9 @@
       "source_location": "L603",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestoneatnonquarter",
-      "target": "internal_twitch_drops_notification_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_notification_test_go_t"
     },
     {
       "relation": "references",
@@ -59465,9 +59485,9 @@
       "source_location": "L617",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestonefornonprintable",
-      "target": "internal_twitch_drops_notification_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_notification_test_go_t"
     },
     {
       "relation": "references",
@@ -59487,9 +59507,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L635",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_milestoneeventcount",
-      "target": "twitch_logcapture_infoentries",
-      "confidence_score": 1.0
+      "target": "twitch_logcapture_infoentries"
     },
     {
       "relation": "calls",
@@ -59575,9 +59595,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L568",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat100",
-      "target": "twitch_logcapture_infoentries",
-      "confidence_score": 1.0
+      "target": "twitch_logcapture_infoentries"
     },
     {
       "relation": "calls",
@@ -59586,9 +59606,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L505",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat25",
-      "target": "twitch_logcapture_infoentries",
-      "confidence_score": 1.0
+      "target": "twitch_logcapture_infoentries"
     },
     {
       "relation": "calls",
@@ -59597,9 +59617,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L526",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat50",
-      "target": "twitch_logcapture_infoentries",
-      "confidence_score": 1.0
+      "target": "twitch_logcapture_infoentries"
     },
     {
       "relation": "calls",
@@ -59608,9 +59628,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L547",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat75",
-      "target": "twitch_logcapture_infoentries",
-      "confidence_score": 1.0
+      "target": "twitch_logcapture_infoentries"
     },
     {
       "relation": "calls",
@@ -59630,9 +59650,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L594",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonededup",
-      "target": "twitch_logcapture_reset",
-      "confidence_score": 1.0
+      "target": "twitch_logcapture_reset"
     },
     {
       "relation": "references",
@@ -59817,9 +59837,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L584",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonededup",
-      "target": "twitch_drops_notification_test_newtestclientwithcapture",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_newtestclientwithcapture"
     },
     {
       "relation": "calls",
@@ -59828,9 +59848,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L563",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat100",
-      "target": "twitch_drops_notification_test_newtestclientwithcapture",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_newtestclientwithcapture"
     },
     {
       "relation": "calls",
@@ -59839,9 +59859,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L500",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat25",
-      "target": "twitch_drops_notification_test_newtestclientwithcapture",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_newtestclientwithcapture"
     },
     {
       "relation": "calls",
@@ -59850,9 +59870,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L521",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat50",
-      "target": "twitch_drops_notification_test_newtestclientwithcapture",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_newtestclientwithcapture"
     },
     {
       "relation": "calls",
@@ -59861,9 +59881,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L542",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat75",
-      "target": "twitch_drops_notification_test_newtestclientwithcapture",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_newtestclientwithcapture"
     },
     {
       "relation": "calls",
@@ -59872,9 +59892,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L606",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestoneatnonquarter",
-      "target": "twitch_drops_notification_test_newtestclientwithcapture",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_newtestclientwithcapture"
     },
     {
       "relation": "calls",
@@ -59883,9 +59903,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L620",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestonefornonprintable",
-      "target": "twitch_drops_notification_test_newtestclientwithcapture",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_newtestclientwithcapture"
     },
     {
       "relation": "calls",
@@ -60114,9 +60134,9 @@
       "source_location": "L476",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_makestreamerwithdropatprogress",
-      "target": "internal_twitch_drops_notification_test_go_streamer",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_notification_test_go_streamer"
     },
     {
       "relation": "calls",
@@ -60235,9 +60255,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L585",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonededup",
-      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress"
     },
     {
       "relation": "calls",
@@ -60246,9 +60266,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L564",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat100",
-      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress"
     },
     {
       "relation": "calls",
@@ -60257,9 +60277,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L501",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat25",
-      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress"
     },
     {
       "relation": "calls",
@@ -60268,9 +60288,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L522",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat50",
-      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress"
     },
     {
       "relation": "calls",
@@ -60279,9 +60299,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L543",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonefiresat75",
-      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress"
     },
     {
       "relation": "calls",
@@ -60290,9 +60310,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L607",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestoneatnonquarter",
-      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress"
     },
     {
       "relation": "calls",
@@ -60301,9 +60321,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L621",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestonefornonprintable",
-      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_makestreamerwithdropatprogress"
     },
     {
       "relation": "calls",
@@ -60356,9 +60376,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L589",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_milestonededup",
-      "target": "twitch_drops_notification_test_milestoneeventcount",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_milestoneeventcount"
     },
     {
       "relation": "calls",
@@ -60378,9 +60398,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L611",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestoneatnonquarter",
-      "target": "twitch_drops_notification_test_milestoneeventcount",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_milestoneeventcount"
     },
     {
       "relation": "calls",
@@ -60400,9 +60420,9 @@
       "source_file": "internal/twitch/drops_notification_test.go",
       "source_location": "L626",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_notification_test_testlogupdateddropprogress_nomilestonefornonprintable",
-      "target": "twitch_drops_notification_test_milestoneeventcount",
-      "confidence_score": 1.0
+      "target": "twitch_drops_notification_test_milestoneeventcount"
     },
     {
       "relation": "calls",
@@ -60471,9 +60491,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L458",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_setvanishmocks",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_setvanishmocks"
     },
     {
       "relation": "contains",
@@ -60481,9 +60501,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L817",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testclaimalldrops_accountlinknotfalsepositive",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testclaimalldrops_accountlinknotfalsepositive"
     },
     {
       "relation": "contains",
@@ -60491,9 +60511,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L751",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testclaimalldrops_accountlinkwarninglogged",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testclaimalldrops_accountlinkwarninglogged"
     },
     {
       "relation": "contains",
@@ -60521,9 +60541,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L728",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testclaimalldrops_detectsaccountlinkrequired",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testclaimalldrops_detectsaccountlinkrequired"
     },
     {
       "relation": "contains",
@@ -60551,9 +60571,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L795",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testclaimalldrops_normalclaimingunaffected",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testclaimalldrops_normalclaimingunaffected"
     },
     {
       "relation": "contains",
@@ -60581,9 +60601,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L682",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testlogupdateddropprogress_whenclaimdropsfalse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testlogupdateddropprogress_whenclaimdropsfalse"
     },
     {
       "relation": "contains",
@@ -60591,9 +60611,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L597",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testsynthskip_dropappearsininventorynotsynthetic",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testsynthskip_dropappearsininventorynotsynthetic"
     },
     {
       "relation": "contains",
@@ -60601,9 +60621,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L618",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testsynthskip_dropappearslatenotsynthetic",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testsynthskip_dropappearslatenotsynthetic"
     },
     {
       "relation": "contains",
@@ -60611,9 +60631,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L576",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testsynthskip_dropneverininventorymarkedsynthetic",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testsynthskip_dropneverininventorymarkedsynthetic"
     },
     {
       "relation": "contains",
@@ -60621,9 +60641,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L649",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testsynthskip_dropresetswhenappears",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testsynthskip_dropresetswhenappears"
     },
     {
       "relation": "contains",
@@ -60631,9 +60651,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L554",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testvanishdetection_dropneverseennottracked",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testvanishdetection_dropneverseennottracked"
     },
     {
       "relation": "contains",
@@ -60641,9 +60661,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L521",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testvanishdetection_dropreappears",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testvanishdetection_dropreappears"
     },
     {
       "relation": "contains",
@@ -60651,9 +60671,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L500",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testvanishdetection_dropstillpresent",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testvanishdetection_dropstillpresent"
     },
     {
       "relation": "contains",
@@ -60661,9 +60681,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L468",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_testvanishdetection_dropvanishedafterthreepolls",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_testvanishdetection_dropvanishedafterthreepolls"
     },
     {
       "relation": "contains",
@@ -60671,9 +60691,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L413",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test",
-      "target": "twitch_drops_test_vanishinventorygqlresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_vanishinventorygqlresponse"
     },
     {
       "relation": "contains",
@@ -60734,9 +60754,9 @@
       "source_location": "L458",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_setvanishmocks",
-      "target": "twitch_mocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_mocktransport"
     },
     {
       "relation": "references",
@@ -60775,9 +60795,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L103",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_mocktransport",
-      "target": "twitch_mocktransport_setresponsefunc",
-      "confidence_score": 1.0
+      "target": "twitch_mocktransport_setresponsefunc"
     },
     {
       "relation": "method",
@@ -60785,9 +60805,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L112",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_mocktransport",
-      "target": "twitch_mocktransport_setstatusfunc",
-      "confidence_score": 1.0
+      "target": "twitch_mocktransport_setstatusfunc"
     },
     {
       "relation": "calls",
@@ -60796,9 +60816,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L820",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_accountlinknotfalsepositive",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60807,9 +60827,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L754",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_accountlinkwarninglogged",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60840,9 +60860,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L731",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_detectsaccountlinkrequired",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60873,9 +60893,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L798",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_normalclaimingunaffected",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60906,9 +60926,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L685",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testlogupdateddropprogress_whenclaimdropsfalse",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60917,9 +60937,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L600",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropappearsininventorynotsynthetic",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60928,9 +60948,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L621",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropappearslatenotsynthetic",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60939,9 +60959,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L579",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropneverininventorymarkedsynthetic",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60950,9 +60970,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L652",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropresetswhenappears",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60961,9 +60981,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L557",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropneverseennottracked",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60972,9 +60992,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L524",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropreappears",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60983,9 +61003,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L503",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropstillpresent",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -60994,9 +61014,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L471",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropvanishedafterthreepolls",
-      "target": "twitch_drops_test_newmocktransport",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newmocktransport"
     },
     {
       "relation": "calls",
@@ -61049,9 +61069,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L460",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_setvanishmocks",
-      "target": "twitch_mocktransport_setresponsefunc",
-      "confidence_score": 1.0
+      "target": "twitch_mocktransport_setresponsefunc"
     },
     {
       "relation": "calls",
@@ -61082,9 +61102,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L746",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_detectsaccountlinkrequired",
-      "target": "twitch_mocktransport_callcount",
-      "confidence_score": 1.0
+      "target": "twitch_mocktransport_callcount"
     },
     {
       "relation": "calls",
@@ -61115,9 +61135,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L812",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_normalclaimingunaffected",
-      "target": "twitch_mocktransport_callcount",
-      "confidence_score": 1.0
+      "target": "twitch_mocktransport_callcount"
     },
     {
       "relation": "calls",
@@ -61337,9 +61357,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L805",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_normalclaimingunaffected",
-      "target": "twitch_drops_test_newtestclient",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newtestclient"
     },
     {
       "relation": "calls",
@@ -61370,9 +61390,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L686",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testlogupdateddropprogress_whenclaimdropsfalse",
-      "target": "twitch_drops_test_newtestclient",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newtestclient"
     },
     {
       "relation": "calls",
@@ -61381,9 +61401,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L601",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropappearsininventorynotsynthetic",
-      "target": "twitch_drops_test_newtestclient",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newtestclient"
     },
     {
       "relation": "calls",
@@ -61392,9 +61412,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L622",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropappearslatenotsynthetic",
-      "target": "twitch_drops_test_newtestclient",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newtestclient"
     },
     {
       "relation": "calls",
@@ -61403,9 +61423,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L580",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropneverininventorymarkedsynthetic",
-      "target": "twitch_drops_test_newtestclient",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newtestclient"
     },
     {
       "relation": "calls",
@@ -61414,9 +61434,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L653",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropresetswhenappears",
-      "target": "twitch_drops_test_newtestclient",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newtestclient"
     },
     {
       "relation": "calls",
@@ -61425,9 +61445,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L558",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropneverseennottracked",
-      "target": "twitch_drops_test_newtestclient",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newtestclient"
     },
     {
       "relation": "calls",
@@ -61436,9 +61456,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L525",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropreappears",
-      "target": "twitch_drops_test_newtestclient",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newtestclient"
     },
     {
       "relation": "calls",
@@ -61447,9 +61467,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L504",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropstillpresent",
-      "target": "twitch_drops_test_newtestclient",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newtestclient"
     },
     {
       "relation": "calls",
@@ -61458,9 +61478,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L472",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropvanishedafterthreepolls",
-      "target": "twitch_drops_test_newtestclient",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_newtestclient"
     },
     {
       "relation": "calls",
@@ -61491,9 +61511,9 @@
       "source_location": "L817",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_accountlinknotfalsepositive",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61502,9 +61522,9 @@
       "source_location": "L751",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_accountlinkwarninglogged",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61535,9 +61555,9 @@
       "source_location": "L728",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_detectsaccountlinkrequired",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61568,9 +61588,9 @@
       "source_location": "L795",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_normalclaimingunaffected",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61601,9 +61621,9 @@
       "source_location": "L682",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testlogupdateddropprogress_whenclaimdropsfalse",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61612,9 +61632,9 @@
       "source_location": "L597",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropappearsininventorynotsynthetic",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61623,9 +61643,9 @@
       "source_location": "L618",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropappearslatenotsynthetic",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61634,9 +61654,9 @@
       "source_location": "L576",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropneverininventorymarkedsynthetic",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61645,9 +61665,9 @@
       "source_location": "L649",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropresetswhenappears",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61656,9 +61676,9 @@
       "source_location": "L554",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropneverseennottracked",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61667,9 +61687,9 @@
       "source_location": "L521",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropreappears",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61678,9 +61698,9 @@
       "source_location": "L500",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropstillpresent",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61689,9 +61709,9 @@
       "source_location": "L468",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropvanishedafterthreepolls",
-      "target": "internal_twitch_drops_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_drops_test_go_t"
     },
     {
       "relation": "references",
@@ -61711,9 +61731,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L821",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_accountlinknotfalsepositive",
-      "target": "twitch_drops_test_inventoryjson",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_inventoryjson"
     },
     {
       "relation": "calls",
@@ -61722,9 +61742,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L755",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_accountlinkwarninglogged",
-      "target": "twitch_drops_test_inventoryjson",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_inventoryjson"
     },
     {
       "relation": "calls",
@@ -61755,9 +61775,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L732",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_detectsaccountlinkrequired",
-      "target": "twitch_drops_test_inventoryjson",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_inventoryjson"
     },
     {
       "relation": "calls",
@@ -61777,9 +61797,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L799",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_normalclaimingunaffected",
-      "target": "twitch_drops_test_inventoryjson",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_inventoryjson"
     },
     {
       "relation": "calls",
@@ -61810,9 +61830,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L824",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_accountlinknotfalsepositive",
-      "target": "twitch_drops_test_claimsuccessresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_claimsuccessresponse"
     },
     {
       "relation": "calls",
@@ -61843,9 +61863,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L803",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_normalclaimingunaffected",
-      "target": "twitch_drops_test_claimsuccessresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_claimsuccessresponse"
     },
     {
       "relation": "calls",
@@ -61876,9 +61896,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L758",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_accountlinkwarninglogged",
-      "target": "twitch_drops_test_claimfailedresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_claimfailedresponse"
     },
     {
       "relation": "calls",
@@ -61887,9 +61907,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L735",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testclaimalldrops_detectsaccountlinkrequired",
-      "target": "twitch_drops_test_claimfailedresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_claimfailedresponse"
     },
     {
       "relation": "calls",
@@ -61909,9 +61929,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L604",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropappearsininventorynotsynthetic",
-      "target": "twitch_drops_test_vanishinventorygqlresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_vanishinventorygqlresponse"
     },
     {
       "relation": "calls",
@@ -61920,9 +61940,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L627",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropappearslatenotsynthetic",
-      "target": "twitch_drops_test_vanishinventorygqlresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_vanishinventorygqlresponse"
     },
     {
       "relation": "calls",
@@ -61931,9 +61951,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L583",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropneverininventorymarkedsynthetic",
-      "target": "twitch_drops_test_vanishinventorygqlresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_vanishinventorygqlresponse"
     },
     {
       "relation": "calls",
@@ -61942,9 +61962,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L658",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropresetswhenappears",
-      "target": "twitch_drops_test_vanishinventorygqlresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_vanishinventorygqlresponse"
     },
     {
       "relation": "calls",
@@ -61953,9 +61973,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L561",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropneverseennottracked",
-      "target": "twitch_drops_test_vanishinventorygqlresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_vanishinventorygqlresponse"
     },
     {
       "relation": "calls",
@@ -61964,9 +61984,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L530",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropreappears",
-      "target": "twitch_drops_test_vanishinventorygqlresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_vanishinventorygqlresponse"
     },
     {
       "relation": "calls",
@@ -61975,9 +61995,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L507",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropstillpresent",
-      "target": "twitch_drops_test_vanishinventorygqlresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_vanishinventorygqlresponse"
     },
     {
       "relation": "calls",
@@ -61986,9 +62006,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L477",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropvanishedafterthreepolls",
-      "target": "twitch_drops_test_vanishinventorygqlresponse",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_vanishinventorygqlresponse"
     },
     {
       "relation": "calls",
@@ -61997,9 +62017,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L603",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropappearsininventorynotsynthetic",
-      "target": "twitch_drops_test_setvanishmocks",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_setvanishmocks"
     },
     {
       "relation": "calls",
@@ -62008,9 +62028,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L625",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropappearslatenotsynthetic",
-      "target": "twitch_drops_test_setvanishmocks",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_setvanishmocks"
     },
     {
       "relation": "calls",
@@ -62019,9 +62039,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L582",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropneverininventorymarkedsynthetic",
-      "target": "twitch_drops_test_setvanishmocks",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_setvanishmocks"
     },
     {
       "relation": "calls",
@@ -62030,9 +62050,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L656",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testsynthskip_dropresetswhenappears",
-      "target": "twitch_drops_test_setvanishmocks",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_setvanishmocks"
     },
     {
       "relation": "calls",
@@ -62041,9 +62061,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L560",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropneverseennottracked",
-      "target": "twitch_drops_test_setvanishmocks",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_setvanishmocks"
     },
     {
       "relation": "calls",
@@ -62052,9 +62072,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L528",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropreappears",
-      "target": "twitch_drops_test_setvanishmocks",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_setvanishmocks"
     },
     {
       "relation": "calls",
@@ -62063,9 +62083,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L506",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropstillpresent",
-      "target": "twitch_drops_test_setvanishmocks",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_setvanishmocks"
     },
     {
       "relation": "calls",
@@ -62074,9 +62094,9 @@
       "source_file": "internal/twitch/drops_test.go",
       "source_location": "L475",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_drops_test_testvanishdetection_dropvanishedafterthreepolls",
-      "target": "twitch_drops_test_setvanishmocks",
-      "confidence_score": 1.0
+      "target": "twitch_drops_test_setvanishmocks"
     },
     {
       "relation": "contains",
@@ -62114,9 +62134,9 @@
       "source_file": "internal/twitch/minute_watched.go",
       "source_location": "L478",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched",
-      "target": "twitch_minute_watched_applypriorityendingsoonest",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_applypriorityendingsoonest"
     },
     {
       "relation": "contains",
@@ -62124,9 +62144,9 @@
       "source_file": "internal/twitch/minute_watched.go",
       "source_location": "L518",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched",
-      "target": "twitch_minute_watched_applyprioritylowavailability",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_applyprioritylowavailability"
     },
     {
       "relation": "contains",
@@ -62355,9 +62375,9 @@
       "source_location": "L478",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_applypriorityendingsoonest",
-      "target": "internal_twitch_minute_watched_go_streamer",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_go_streamer"
     },
     {
       "relation": "references",
@@ -62366,9 +62386,9 @@
       "source_location": "L518",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_applyprioritylowavailability",
-      "target": "internal_twitch_minute_watched_go_streamer",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_go_streamer"
     },
     {
       "relation": "references",
@@ -62795,9 +62815,9 @@
       "source_file": "internal/twitch/minute_watched.go",
       "source_location": "L359",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_applypriority",
-      "target": "twitch_minute_watched_applypriorityendingsoonest",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_applypriorityendingsoonest"
     },
     {
       "relation": "calls",
@@ -62806,9 +62826,9 @@
       "source_file": "internal/twitch/minute_watched.go",
       "source_location": "L361",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_applypriority",
-      "target": "twitch_minute_watched_applyprioritylowavailability",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_applyprioritylowavailability"
     },
     {
       "relation": "calls",
@@ -62870,9 +62890,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_dropsonly_includedwhenhascampaignids",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_dropsonly_includedwhenhascampaignids"
     },
     {
       "relation": "contains",
@@ -62880,9 +62900,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_dropsonly_skippedwhennocampaignids",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_dropsonly_skippedwhennocampaignids"
     },
     {
       "relation": "contains",
@@ -62890,9 +62910,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L291",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest"
     },
     {
       "relation": "contains",
@@ -62900,9 +62920,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L387",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest_picksfirstend",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest_picksfirstend"
     },
     {
       "relation": "contains",
@@ -62910,9 +62930,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L318",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest_skipsnocampaigns",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest_skipsnocampaigns"
     },
     {
       "relation": "contains",
@@ -62920,9 +62940,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L254",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_allfrozenreturnsnone",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_allfrozenreturnsnone"
     },
     {
       "relation": "contains",
@@ -62930,9 +62950,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L274",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_belowthresholdnotfrozen",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_belowthresholdnotfrozen"
     },
     {
       "relation": "contains",
@@ -62940,9 +62960,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L217",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_frozenstreamerskipped",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_frozenstreamerskipped"
     },
     {
       "relation": "contains",
@@ -62950,9 +62970,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L237",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_nevercreditednotfrozen",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_nevercreditednotfrozen"
     },
     {
       "relation": "contains",
@@ -62960,9 +62980,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L339",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_lowavailabilityfirst",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_lowavailabilityfirst"
     },
     {
       "relation": "contains",
@@ -62970,9 +62990,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L366",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_lowavailabilityfirst_skipsnocampaigns",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_lowavailabilityfirst_skipsnocampaigns"
     },
     {
       "relation": "contains",
@@ -62980,9 +63000,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L188",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_streak_longgapresolvedresets",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_streak_longgapresolvedresets"
     },
     {
       "relation": "contains",
@@ -62990,9 +63010,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L103",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_streak_shortgapresolvednotprioritized",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_streak_shortgapresolvednotprioritized"
     },
     {
       "relation": "contains",
@@ -63000,9 +63020,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L146",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_testselectstreamerstowatch_streak_shortgapunresolvedstillprioritized",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_testselectstreamerstowatch_streak_shortgapunresolvedstillprioritized"
     },
     {
       "relation": "contains",
@@ -63030,9 +63050,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L472",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_teststalledcooldown_allincooldownreturnsnone",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_teststalledcooldown_allincooldownreturnsnone"
     },
     {
       "relation": "contains",
@@ -63040,9 +63060,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L454",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_teststalledcooldown_expiredcooldownallowed",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_teststalledcooldown_expiredcooldownallowed"
     },
     {
       "relation": "contains",
@@ -63050,9 +63070,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L412",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_teststalledcooldown_frozenstreamergetscooldown",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_teststalledcooldown_frozenstreamergetscooldown"
     },
     {
       "relation": "contains",
@@ -63060,9 +63080,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L433",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test",
-      "target": "twitch_minute_watched_test_teststalledcooldown_incooldownskipped",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_teststalledcooldown_incooldownskipped"
     },
     {
       "relation": "references",
@@ -63082,9 +63102,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_dropsonly_includedwhenhascampaignids",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63093,9 +63113,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_dropsonly_skippedwhennocampaignids",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63104,9 +63124,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L294",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63115,9 +63135,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L390",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest_picksfirstend",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63126,9 +63146,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L321",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest_skipsnocampaigns",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63137,9 +63157,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L257",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_allfrozenreturnsnone",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63148,9 +63168,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L277",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_belowthresholdnotfrozen",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63159,9 +63179,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L220",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_frozenstreamerskipped",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63170,9 +63190,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L240",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_nevercreditednotfrozen",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63181,9 +63201,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L342",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_lowavailabilityfirst",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63192,9 +63212,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L369",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_lowavailabilityfirst_skipsnocampaigns",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63203,9 +63223,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L191",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_streak_longgapresolvedresets",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63214,9 +63234,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L106",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_streak_shortgapresolvednotprioritized",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63225,9 +63245,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L149",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_streak_shortgapunresolvedstillprioritized",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63258,9 +63278,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L475",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_teststalledcooldown_allincooldownreturnsnone",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63269,9 +63289,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L457",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_teststalledcooldown_expiredcooldownallowed",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63280,9 +63300,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L415",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_teststalledcooldown_frozenstreamergetscooldown",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "calls",
@@ -63291,9 +63311,9 @@
       "source_file": "internal/twitch/minute_watched_test.go",
       "source_location": "L436",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_teststalledcooldown_incooldownskipped",
-      "target": "twitch_minute_watched_test_makeonlinestreamer",
-      "confidence_score": 1.0
+      "target": "twitch_minute_watched_test_makeonlinestreamer"
     },
     {
       "relation": "references",
@@ -63313,9 +63333,9 @@
       "source_location": "L60",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_dropsonly_includedwhenhascampaignids",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63324,9 +63344,9 @@
       "source_location": "L39",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_dropsonly_skippedwhennocampaignids",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63335,9 +63355,9 @@
       "source_location": "L291",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63346,9 +63366,9 @@
       "source_location": "L387",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest_picksfirstend",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63357,9 +63377,9 @@
       "source_location": "L318",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_endingsoonest_skipsnocampaigns",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63368,9 +63388,9 @@
       "source_location": "L254",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_allfrozenreturnsnone",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63379,9 +63399,9 @@
       "source_location": "L274",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_belowthresholdnotfrozen",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63390,9 +63410,9 @@
       "source_location": "L217",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_frozenstreamerskipped",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63401,9 +63421,9 @@
       "source_location": "L237",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_freeze_nevercreditednotfrozen",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63412,9 +63432,9 @@
       "source_location": "L339",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_lowavailabilityfirst",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63423,9 +63443,9 @@
       "source_location": "L366",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_lowavailabilityfirst_skipsnocampaigns",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63434,9 +63454,9 @@
       "source_location": "L188",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_streak_longgapresolvedresets",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63445,9 +63465,9 @@
       "source_location": "L103",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_streak_shortgapresolvednotprioritized",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63456,9 +63476,9 @@
       "source_location": "L146",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_testselectstreamerstowatch_streak_shortgapunresolvedstillprioritized",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63478,9 +63498,9 @@
       "source_location": "L472",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_teststalledcooldown_allincooldownreturnsnone",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63489,9 +63509,9 @@
       "source_location": "L454",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_teststalledcooldown_expiredcooldownallowed",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63500,9 +63520,9 @@
       "source_location": "L412",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_teststalledcooldown_frozenstreamergetscooldown",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "references",
@@ -63511,9 +63531,9 @@
       "source_location": "L433",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_minute_watched_test_teststalledcooldown_incooldownskipped",
-      "target": "internal_twitch_minute_watched_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_minute_watched_test_go_t"
     },
     {
       "relation": "method",
@@ -63575,9 +63595,9 @@
       "source_file": "internal/twitch/rename_test.go",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_rename_test",
-      "target": "twitch_rename_test_testcheckstreameronline_updatesusernameonrename",
-      "confidence_score": 1.0
+      "target": "twitch_rename_test_testcheckstreameronline_updatesusernameonrename"
     },
     {
       "relation": "contains",
@@ -63585,9 +63605,9 @@
       "source_file": "internal/twitch/rename_test.go",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_rename_test",
-      "target": "twitch_rename_test_testisstaleusernameerror",
-      "confidence_score": 1.0
+      "target": "twitch_rename_test_testisstaleusernameerror"
     },
     {
       "relation": "contains",
@@ -63595,9 +63615,9 @@
       "source_file": "internal/twitch/rename_test.go",
       "source_location": "L110",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "twitch_rename_test",
-      "target": "twitch_rename_test_testresolveloginfromid",
-      "confidence_score": 1.0
+      "target": "twitch_rename_test_testresolveloginfromid"
     },
     {
       "relation": "references",
@@ -63606,9 +63626,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_rename_test_testcheckstreameronline_updatesusernameonrename",
-      "target": "internal_twitch_rename_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_rename_test_go_t"
     },
     {
       "relation": "references",
@@ -63617,9 +63637,9 @@
       "source_location": "L87",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_rename_test_testisstaleusernameerror",
-      "target": "internal_twitch_rename_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_rename_test_go_t"
     },
     {
       "relation": "references",
@@ -63628,9 +63648,9 @@
       "source_location": "L110",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "twitch_rename_test_testresolveloginfromid",
-      "target": "internal_twitch_rename_test_go_t",
-      "confidence_score": 1.0
+      "target": "internal_twitch_rename_test_go_t"
     },
     {
       "relation": "contains",
@@ -65137,6 +65157,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "internal/watcher/team.go",
+      "source_location": "L261",
+      "weight": 1.0,
+      "source": "watcher_teamwatcher",
+      "target": "watcher_teamwatcher_populatecampaignids",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/watcher/team.go",
       "source_location": "L73",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -65235,12 +65265,45 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "internal/watcher/team.go",
+      "source_location": "L261",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "watcher_teamwatcher_populatecampaignids",
+      "target": "internal_watcher_team_go_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/watcher/team.go",
       "source_location": "L99",
       "weight": 1.0,
       "context": "parameter_type",
       "confidence_score": 1.0,
       "source": "watcher_teamwatcher_evaluate",
       "target": "internal_watcher_team_go_streamer"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/watcher/team.go",
+      "source_location": "L229",
+      "weight": 1.0,
+      "source": "watcher_teamwatcher_evaluate",
+      "target": "watcher_teamwatcher_populatecampaignids",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "internal/watcher/team.go",
+      "source_location": "L261",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "watcher_teamwatcher_populatecampaignids",
+      "target": "internal_watcher_team_go_stream",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -69290,9 +69353,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product",
-      "target": "product_product",
-      "confidence_score": 1.0
+      "target": "product_product"
     },
     {
       "relation": "contains",
@@ -69300,9 +69363,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_product",
-      "target": "product_accessibility_inclusion",
-      "confidence_score": 1.0
+      "target": "product_accessibility_inclusion"
     },
     {
       "relation": "contains",
@@ -69310,9 +69373,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_product",
-      "target": "product_brand_commitments",
-      "confidence_score": 1.0
+      "target": "product_brand_commitments"
     },
     {
       "relation": "contains",
@@ -69320,9 +69383,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_product",
-      "target": "product_capabilities_and_constraints",
-      "confidence_score": 1.0
+      "target": "product_capabilities_and_constraints"
     },
     {
       "relation": "contains",
@@ -69330,9 +69393,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_product",
-      "target": "product_evidence_on_hand",
-      "confidence_score": 1.0
+      "target": "product_evidence_on_hand"
     },
     {
       "relation": "contains",
@@ -69340,9 +69403,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_product",
-      "target": "product_operating_context",
-      "confidence_score": 1.0
+      "target": "product_operating_context"
     },
     {
       "relation": "contains",
@@ -69350,9 +69413,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_product",
-      "target": "product_platform",
-      "confidence_score": 1.0
+      "target": "product_platform"
     },
     {
       "relation": "contains",
@@ -69360,9 +69423,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_product",
-      "target": "product_positioning",
-      "confidence_score": 1.0
+      "target": "product_positioning"
     },
     {
       "relation": "contains",
@@ -69370,9 +69433,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_product",
-      "target": "product_product_principles",
-      "confidence_score": 1.0
+      "target": "product_product_principles"
     },
     {
       "relation": "contains",
@@ -69380,9 +69443,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_product",
-      "target": "product_product_purpose",
-      "confidence_score": 1.0
+      "target": "product_product_purpose"
     },
     {
       "relation": "contains",
@@ -69390,9 +69453,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_product",
-      "target": "product_users",
-      "confidence_score": 1.0
+      "target": "product_users"
     },
     {
       "relation": "contains",
@@ -69876,5 +69939,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b45991b4882e0ceae5e5c245562be7ae191f9853"
+  "built_at_commit": "51e86bec227a032e05676ab2db567d8e53b61d3c"
 }
