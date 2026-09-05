@@ -84,7 +84,14 @@ jobs:
             RAW=$(grep "^${NAME}-" bench_raw.txt | awk '{print $3}' | sort -n | awk '{a[NR]=$1} END {print (NR%2)? a[(NR+1)/2] : (a[NR/2]+a[NR/2+1])/2}' || true)
 
             if [ -z "$BASE" ]; then
-              echo "| ${NAME} | n/a | n/a | — |" >> bench_comment.md
+              # New benchmark: PR run measured, main baseline missing.
+              RFMT=$(awk -v r="$RAW" 'BEGIN {
+                if (r >= 1000000) rf = sprintf("%.3f ms", r/1000000)
+                else if (r >= 1000) rf = sprintf("%.2f µs", r/1000)
+                else rf = sprintf("%.1f ns", r)
+                print rf
+              }')
+              echo "| ${NAME} | n/a | ${RFMT} | — |" >> bench_comment.md
               continue
             fi
 
