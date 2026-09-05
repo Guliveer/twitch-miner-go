@@ -139,13 +139,17 @@ jobs:
             -F "body=@bench_comment.md" \
             --jq .id)
 
+          # The REST minimize endpoint was retired from the GitHub API, so the
+          # GraphQL minimizeComment mutation is the only supported way to hide
+          # old comments. It addresses comments by node_id, not database id.
           gh api "repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" \
-            --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" | while read -r COMMENT_ID; do
+            --jq ".[] | select(.body | contains(\"${MARKER}\")) | \"\\(.id) \\(.node_id)\"" | while read -r COMMENT_ID COMMENT_NODE; do
             if [ "$COMMENT_ID" = "$NEW_ID" ]; then
               continue
             fi
-            gh api -X POST "repos/${{ github.repository }}/issues/comments/${COMMENT_ID}/minimize" \
-              -f minimize_reason=outdated > /dev/null
+            gh api graphql \
+              -f query='mutation($id: ID!) { minimizeComment(input: {subjectId: $id, classifier: OUTDATED}) { minimizedComment { isMinimized } } }' \
+              -F id="$COMMENT_NODE" > /dev/null
             echo "Minimized previous benchmark comment ${COMMENT_ID}"
           done
 
