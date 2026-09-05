@@ -87,3 +87,13 @@ func BenchmarkUpdateOutcomes(b *testing.B) {
 		bet.UpdateOutcomes(outcomes)
 	}
 }
+
+// BenchmarkUpdateHistory benchmarks recording earned points for a reason code,
+// which runs for every points-earned event while watching streams.
+func BenchmarkUpdateHistory(b *testing.B) {
+	s := NewStreamer("bench")
+
+	for b.Loop() {
+		s.UpdateHistory(string(MsgTypePointsEarned), 50, 1)
+	}
+}
