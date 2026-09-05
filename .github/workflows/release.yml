@@ -41,7 +41,9 @@ permissions:
   contents: write
 
 concurrency:
-  group: release
+  # Main pushes share one group so version bump/tag/release never race;
+  # PR dry-runs get their own group per ref and run in parallel.
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -72,6 +74,8 @@ jobs:
 
       - name: Determine version bump
         id: bump
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           if [ -n "${{ inputs.version }}" ]; then
             echo "Explicit version provided: ${{ inputs.version }}"
@@ -81,8 +85,8 @@ jobs:
 
           # On PRs, use the PR title (will become the squash-merge commit message on main).
           # On pushes to main, scan actual commit messages since last tag.
-          if [ "${{ inputs.dry_run }}" = "true" ] && [ -n "${{ github.event.pull_request.title }}" ]; then
-            COMMITS="${{ github.event.pull_request.title }}"
+          if [ "${{ inputs.dry_run }}" = "true" ] && [ -n "$PR_TITLE" ]; then
+            COMMITS="$PR_TITLE"
             echo "Using PR title for bump detection:"
           else
             LAST_TAG=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1)
@@ -208,7 +212,6 @@ jobs:
 
   build-binaries:
     needs: [bump-version]
-    if: ${{ !inputs.dry_run }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -293,7 +296,6 @@ jobs:
 
   build-darwin-binaries:
     needs: [bump-version]
-    if: ${{ !inputs.dry_run }}
     runs-on: macos-26
     strategy:
       matrix:
