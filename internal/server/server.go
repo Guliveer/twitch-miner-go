@@ -33,6 +33,9 @@ type DebugSnapshotFunc func() any
 // username, or nil if the miner is not found or has no pending flow.
 type AuthStatusFunc func(username string) any
 
+// MinerCountFunc returns the number of miners the manager currently runs.
+type MinerCountFunc func() int
+
 // DashboardAuth holds credentials for HTTP Basic Auth on the dashboard.
 // The password is stored as a SHA-256 hex digest for constant-time comparison.
 type DashboardAuth struct {
@@ -54,6 +57,7 @@ type AnalyticsServer struct {
 	notifyTestFunc NotifyTestFunc
 	debugFunc      DebugSnapshotFunc
 	authStatusFunc AuthStatusFunc
+	minerCountFunc MinerCountFunc
 	accountStore   store.Store
 }
 
@@ -96,17 +100,27 @@ func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth, ap
 
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(staticFS)))
 
-	mux.HandleFunc("GET /debug/pprof/", pprof.Index)
-	mux.HandleFunc("GET /debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc("GET /debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("GET /debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("GET /debug/pprof/trace", pprof.Trace)
-	mux.Handle("GET /debug/pprof/heap", pprof.Handler("heap"))
-	mux.Handle("GET /debug/pprof/goroutine", pprof.Handler("goroutine"))
-	mux.Handle("GET /debug/pprof/allocs", pprof.Handler("allocs"))
+	// Heap and goroutine dumps expose live Twitch auth tokens held in process
+	// memory, so the profiling endpoints only exist once the server is actually
+	// protected. Registering them unconditionally leaked those tokens to anyone
+	// who could reach the published port.
+	authConfigured := auth != nil || apiKey != ""
+	if authConfigured {
+		mux.HandleFunc("GET /debug/pprof/", pprof.Index)
+		mux.HandleFunc("GET /debug/pprof/cmdline", pprof.Cmdline)
+		mux.HandleFunc("GET /debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("GET /debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("GET /debug/pprof/trace", pprof.Trace)
+		mux.Handle("GET /debug/pprof/heap", pprof.Handler("heap"))
+		mux.Handle("GET /debug/pprof/goroutine", pprof.Handler("goroutine"))
+		mux.Handle("GET /debug/pprof/allocs", pprof.Handler("allocs"))
+	} else {
+		log.Warn("Dashboard auth is not configured — profiling endpoints disabled and all endpoints are public",
+			"hint", "set DASHBOARD_USER + DASHBOARD_PASSWORD_SHA256, or DASHBOARD_API_KEY")
+	}
 
 	var handler http.Handler = mux
-	if auth != nil || apiKey != "" {
+	if authConfigured {
 		handler = withAuth(auth, apiKey, mux)
 	}
 
@@ -156,6 +170,15 @@ func (s *AnalyticsServer) SetDebugFunc(fn DebugSnapshotFunc) {
 func (s *AnalyticsServer) SetAuthStatusFunc(fn AuthStatusFunc) {
 	s.mu.Lock()
 	s.authStatusFunc = fn
+	s.mu.Unlock()
+}
+
+// SetMinerCountFunc sets a function returning how many miners are running.
+// When set, /health reports "degraded" while the count is zero, so a container
+// that loaded no usable config is not reported as healthy. Thread-safe.
+func (s *AnalyticsServer) SetMinerCountFunc(fn MinerCountFunc) {
+	s.mu.Lock()
+	s.minerCountFunc = fn
 	s.mu.Unlock()
 }
 
