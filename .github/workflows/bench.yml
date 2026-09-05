@@ -3,10 +3,6 @@ name: Benchmarks
 on:
   push:
     branches: [main]
-    paths:
-      - '**/*.go'
-      - 'go.mod'
-      - 'go.sum'
   pull_request:
     branches: [main]
     paths:
@@ -33,6 +29,30 @@ jobs:
         with:
           fetch-depth: 0
 
+      # on.pull_request.paths filters against the full PR diff, so a push that
+      # only touches docs/scripts/pipelines would still re-run the benchmarks.
+      # Filter per push instead: compare the commit range of this sync event.
+      - name: Check for Go changes in this push
+        id: go-changes
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.event.after }}"
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            # First push of the PR (opened event): no previous commit to diff.
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          FILES=$(git diff --name-only "$BEFORE" "$AFTER")
+          if echo "$FILES" | grep -E '\.go$|^go\.(mod|sum)$' > /dev/null; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -46,10 +66,11 @@ jobs:
 
       - name: Run benchmarks
         id: bench
+        if: steps.go-changes.outputs.changed == 'true'
         run: go test -bench=. -benchmem -count=5 -timeout=300s ./... | tee bench_raw.txt
 
       - name: Generate summary (main)
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && steps.go-changes.outputs.changed == 'true'
         run: |
           {
             echo "## 🏃 Benchmarks — main"
@@ -60,7 +81,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Compare with baseline (PR only)
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && steps.go-changes.outputs.changed == 'true'
         run: |
           git fetch origin main --depth=1
           git stash --include-untracked
@@ -130,6 +151,7 @@ jobs:
       - name: Post benchmark comment on PR (PR only)
         if: >-
           github.event_name == 'pull_request' &&
+          steps.go-changes.outputs.changed == 'true' &&
           github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
