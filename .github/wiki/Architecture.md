@@ -96,6 +96,14 @@ internal/
 ├── updater/             GitHub release version check (non-blocking, on startup)
 ├── version/             Version string embedding (from VERSION file + git commit)
 ├── workerpool/          Generic concurrent task executor
+├── configeditor/        Embedded web config editor server
+│   └── server.go        HTTP handlers to read/write YAML account configs via the
+│                        browser at 127.0.0.1:8070; the same package powers the
+│                        standalone cmd/config-editor binary
+├── tray/                System tray icon (fyne.io/systray)
+│   ├── tray.go          Logic + icon selection (ICO on Windows, PNG elsewhere)
+│   ├── session_windows.go  Session detection: no tray in Windows session 0 (service)
+│   └── session_other.go    Tray available on interactive Linux/macOS/BSD desktops
 └── jsonutil/            JSON parsing helpers
 ```
 
@@ -106,8 +114,11 @@ internal/
 ```
 main.go
   ├─ Load .env
-  ├─ Parse flags (config dir, port, log level, --no-lifecycle-notify, …)
-  ├─ Start HTTP analytics server (server/)
+  ├─ Parse flags (config dir, port, config-editor-port, no-tray, log level, …)
+  ├─ Start HTTP analytics server (server/)                     [port 8080]
+  ├─ Start embedded config editor (configeditor/)              [127.0.0.1:8070]
+  ├─ Start system tray (tray/) — when enabled and in an interactive session
+  │    └─ left-click: dashboard; menu: Dashboard / Config Editor / Exit
   ├─ Start update checker background goroutine (updater/)
   ├─ Create Manager (managedminer/)
   └─ Choose account source:
@@ -121,6 +132,42 @@ main.go
             └─ Start FileWatcher goroutine (FILE_POLL_INTERVAL, default 5s)
                  └─ On mtime change → Manager.Start/RestartChanged/Stop
 ```
+
+### Config editor & tray runtime
+
+The embedded config editor and the system tray are responsible for making the
+miner manageable without a terminal:
+
+```
+tray.Run()                    (desktops only)
+  ├─ Show icon in tray/menu bar
+  ├─ Left-click link  →  open analytics dashboard URL
+  ├─ Menu "Dashboard" →  open analytics dashboard URL
+  ├─ Menu "Config Editor" →  open embedded editor 127.0.0.1:8070
+  └─ Menu "Exit" →  cancel the root context → graceful shutdown
+```
+
+```
+configeditor server           (bound to 127.0.0.1 only)
+  ├─ Serve web UI at http://127.0.0.1:8070
+  ├─ List account configs from the config dir / store
+  ├─ Save edits back to disk → FileWatcher detects the change
+  └─ Hot-reload: the account's miner is restarted automatically
+```
+
+Two runtime gates decide whether the tray runs at all:
+
+- **Interactive session.** On Windows, a process running as a service lives in
+  session 0, which has no desktop — the tray is skipped there. Detection is in
+  `tray/session_windows.go` (`ProcessIdToSessionId`). Linux/macOS/BSD are
+  treated as always interactive (`session_other.go`).
+- **Opt-out.** `-no-tray` flag or `NO_TRAY=true` env var disables the tray
+  (containers, Fly.io).
+
+macOS note: the tray uses `fyne.io/systray`, which requires cgo on macOS
+(Objective-C/Cocoa). Released darwin binaries are built on a macOS CI runner
+with `CGO_ENABLED=1`. Linux and Windows trays are pure Go — they build with
+`CGO_ENABLED=0`.
 
 ### Per-account miner lifecycle
 
@@ -194,3 +241,7 @@ Event fires in miner/
 **Store interface abstracts the persistence layer.** Both `PostgresStore` and `NoopStore` implement the same `Store` interface. The `Poller` (DB mode) and `FileWatcher` (file mode) both drive the same `Manager` interface, keeping the miner core agnostic to where configs come from.
 
 **Miners auto-restart on crash.** The `Manager.launchFn` wraps `miner.Run()` in a retry loop with exponential backoff (10 s initial, 5 min cap). A cancelled context (graceful shutdown) exits the loop immediately without retrying.
+
+**One config-editor package serves both entry points.** `internal/configeditor` is imported by the main binary to embed the editor on `127.0.0.1:8070`, and by the standalone `cmd/config-editor` binary. This keeps the editor UI and save/validation logic in a single place, so the embedded and standalone variants never drift apart.
+
+**The tray is a thin launcher, not a feature dependency.** `internal/tray` only opens URLs and triggers graceful shutdown through the root context. The miner core does not import `tray`, and the tray can be compiled out via `-no-tray` / `NO_TRAY` without affecting any mining logic.

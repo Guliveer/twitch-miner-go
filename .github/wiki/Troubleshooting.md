@@ -84,9 +84,42 @@ _edit-config.bat    # Windows
 
 ### Config changes not taking effect
 
-**Cause:** The miner does not hot-reload config files. Changes require a restart.
+**Cause:** The miner does **auto-reload** configs: the FileWatcher polls the `configs/` folder (default every 5s) and restarts the affected account's miner when a file's modification time changes. But it deliberately **skips** a file if it:
+- has a validation error (`File watcher: invalid config, skipping`), or
+- belongs to a **disabled** account (`enabled: false` — the miner stops it), or
+- is skipped as an owner account (needs `RUN_OWNER_ACCOUNTS=true`).
 
-**Fix:** Restart the miner after editing any config file.
+**Fix:** Fix the YAML (a syntax/validation error blocks that account), or enable the account. Look for reload/restart log lines (`config changed, restarting miner`). Editing via the embedded config editor at `http://localhost:8070` saves valid YAML for you, so it is the most reliable path.
+
+---
+
+## Config editor & tray issues
+
+### `localhost:8070` won't open
+
+**Cause 1:** The miner isn't running. The embedded editor only exists while the main binary is on.
+
+**Cause 2:** A different port. Default is `8070`, but `-config-editor-port <port>` changes it.
+
+**Cause 3:** You're on a different machine. The editor is bound to `127.0.0.1` **only** — it is intentionally not reachable from other devices on your network. Access it from the same machine.
+
+**Cause 4:** In Docker/Fly the editor binds to `127.0.0.1` **inside the container**, so it is only reachable from within that container's network namespace — publishing `-p 8070:8070` from Docker will **not** make it reachable from your host, because loopback is not forwarded.
+
+**Fix:** Confirm the miner process is up, use the correct port, and access it from the same machine. For a container, reach it from inside the container (`docker exec -it <id> curl http://127.0.0.1:8070`) or run with `--network host`.
+
+---
+
+### Tray icon isn't showing
+
+**Cause 1 (most common):** The miner is running as a **Windows service**. Services run in session 0, which has no desktop or tray — the icon is intentionally skipped there. This is expected.
+
+**Cause 2:** It's a container / server / Fly.io deployment — no desktop environment exists.
+
+**Cause 3:** `-no-tray` flag or `NO_TRAY=true` is set, so the tray was disabled on purpose.
+
+**Cause 4 (macOS):** The tray needs cgo. Your build is tray-less if it was compiled without cgo (the official releases include it; locally you need Xcode Command Line Tools via `xcode-select --install`, then `CGO_ENABLED=1 go build ./cmd/twitch-miner-go`).
+
+**Fix:** For interactive desktop use with the standard release binary, the icon should appear automatically. If you're operating a service or container, the tray simply isn't applicable — use the dashboard (port 8080) and embedded editor (port 8070) instead.
 
 ---
 

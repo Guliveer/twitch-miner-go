@@ -92,7 +92,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 | Memory          | >250 MB *(spikes)*      | **~80 MB** *(stable)*                    | **3× less**            |
 | Docker image    | 200–500 MB              | **~12 MB**                               | **20–40× smaller**     |
 | Startup time    | 5–10 s                  | **~2–3 s**                               | **2–4× faster**        |
-| Streamer loading| ~4 500 ms / 5 streamers | **~260 ms / 5 streamers** *(concurrent)* | **3.5× faster**        |
+| Streamer loading| ~4 500 ms / 5 streamers | **~260 ms / 5 streamers** *(concurrent)* | **~17× faster**        |
 | OS threads      | 60+                     | **~4–5** / ~25 goroutines                | **12× fewer**          |
 
 > Impressed by the difference? A [⭐ star](https://github.com/Guliveer/twitch-miner-go/stargazers) helps the next person find this instead of running the bloated Python image. Already using the miner? That one click keeps you in the loop for what ships next.

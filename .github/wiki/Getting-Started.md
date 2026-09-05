@@ -1,6 +1,23 @@
 # Getting Started
 
-This page walks you from a fresh clone to a running miner in under 5 minutes.
+This page walks you from a fresh clone to a running miner in under 5 minutes. It starts with the simplest explanations and gets more technical toward the end.
+
+## What are you actually running?
+
+Twitch gives you **channel points** as you watch a channel, and periodically runs **Drops** and **prediction events**. Watching streams manually to collect those adds up to a lot of idle time. This miner automates it: it keeps tabs open on your chosen channels in the background, collects the points, claims Drops, joins raids when they trigger, and places prediction bets according to your settings.
+
+The important part for a first-time user: **you do not need to touch any code.** You write neither code nor configuration by hand unless you want to.
+
+## The two easiest ways to manage your accounts
+
+There are two built-in, graphical ways to control the miner once it is running:
+
+- **Embedded config editor.** The miner opens a small web page at `http://localhost:8070` (only reachable from your own machine). In your browser you can edit your account settings and they take effect immediately — no restart, no command line.
+- **System tray icon.** On **Windows, Linux and macOS** desktops, a small icon appears in your system tray / menu bar. Left-click opens the live dashboard. Right-click shows a menu with **Dashboard**, **Config Editor**, and **Exit**. `Exit` stops the miner gracefully.
+
+> If the tray icon does not appear, the most common reasons are: the miner is running as a background service (a Windows service runs in "session 0", which has no desktop — the tray is intentionally skipped there), it is running in a container (Docker/Fly), or `-no-tray` / `NO_TRAY=true` is set. See [Troubleshooting](Troubleshooting).
+
+If you would rather run without any GUI — for example on a server — everything below still works exactly the same; you just configure via the `configs/` folder and environment variables instead.
 
 ## Prerequisites
 
@@ -106,7 +123,17 @@ For a **Windows NSSM** service, add `-auto-update` to the service arguments (re-
 
 ## Next steps
 
+- Open `http://localhost:8070` while the miner runs to visually edit account settings — changes hot-reload without a restart.
 - Add more streamers or enable [category/team watchers](Configuration-Reference#watcher-options)
 - Configure [notifications](Notifications)
 - Set up a [prediction strategy](Prediction-Strategies)
 - Deploy as a persistent service — see [Docker/Fly.io/systemd/Windows service in the README](https://github.com/Guliveer/twitch-miner-go#19-docker)
+
+## Going deeper
+
+When you are comfortable running the miner, the pages below get progressively more detailed:
+
+1. [Configuration Reference](Configuration-Reference) — every setting you can change.
+2. [Authentication](Authentication) — how logins work and how to automate them.
+3. [Prediction Strategies](Prediction-Strategies) and [Notifications](Notifications) — the two most complex feature areas.
+4. [Architecture](Architecture) — how the internal packages fit together, for contributors and technical evaluators.
