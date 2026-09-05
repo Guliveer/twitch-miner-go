@@ -80,8 +80,8 @@ jobs:
 
           REGRESSED=0
           for NAME in $(grep '^Benchmark' bench_raw.txt | awk '{print $1}' | sed 's/-[0-9]*$//' | sort -u); do
-            BASE=$(grep "^${NAME}-" bench_base.txt | awk '{print $3}' | sort -n | awk '{a[NR]=$1} END {print (NR%2)? a[(NR+1)/2] : (a[NR/2]+a[NR/2+1])/2}' || true)
-            RAW=$(grep "^${NAME}-" bench_raw.txt | awk '{print $3}' | sort -n | awk '{a[NR]=$1} END {print (NR%2)? a[(NR+1)/2] : (a[NR/2]+a[NR/2+1])/2}' || true)
+            BASE=$(grep "^${NAME}-" bench_base.txt | awk '{print $3}' | sort -n | awk '{a[NR]=$1} END {if (NR) print (NR%2)? a[(NR+1)/2] : (a[NR/2]+a[NR/2+1])/2}' || true)
+            RAW=$(grep "^${NAME}-" bench_raw.txt | awk '{print $3}' | sort -n | awk '{a[NR]=$1} END {if (NR) print (NR%2)? a[(NR+1)/2] : (a[NR/2]+a[NR/2+1])/2}' || true)
 
             if [ -z "$BASE" ]; then
               # New benchmark: PR run measured, main baseline missing.
