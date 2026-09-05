@@ -6,10 +6,10 @@ primary_region = 'iad'
   DATA_DIR = '/data'
   GOMEMLIMIT = "400MiB"
   GOGC = "50"
-  # Required Twitch runtime identifiers - set via: fly secrets set
-  # TWITCH_CLIENT_ID_TV = "..."
-  # TWITCH_CLIENT_ID_BROWSER = "..."
-  # TWITCH_CLIENT_VERSION = "..."
+  # Headless/miner-daemon tuning for the Fly.io VM
+  NO_BANNER = "true"
+  NO_TRAY = "true"
+  LOG_NO_TIME = "true"
 
 [mounts]
   source = "miner_data"

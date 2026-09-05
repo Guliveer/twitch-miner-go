@@ -231,11 +231,12 @@ jobs:
 
           mkdir -p dist
 
+          # Linux and Windows: tray is pure Go there, so CGO_ENABLED=0 keeps
+          # the binaries fully static. macOS is built in build-darwin-binaries
+          # (fyne.io/systray requires cgo on darwin) on a macOS runner.
           targets=(
             "linux/amd64"
             "linux/arm64"
-            "darwin/amd64"
-            "darwin/arm64"
             "windows/amd64"
             "windows/arm64"
           )
@@ -290,8 +291,67 @@ jobs:
             echo "| $(basename $f) | ${SIZE} |" >> "$GITHUB_STEP_SUMMARY"
           done
 
+  build-darwin-binaries:
+    needs: [bump-version]
+    if: ${{ !inputs.dry_run }}
+    runs-on: macos-26
+    strategy:
+      matrix:
+        # darwin/arm64 is native on this arm64 runner; darwin/amd64 is a
+        # cross-cgo build. fyne.io/systray needs cgo (Objective-C/Cocoa) on
+        # macOS, hence CGO_ENABLED=1. Cross-cgo between darwin arches works on
+        # modern Xcode (12.2+) with SDKROOT pointing at the macOS SDK — see
+        # golang/go#44112.
+        include:
+          - { goos: darwin, goarch: arm64 }
+          - { goos: darwin, goarch: amd64 }
+    env:
+      CGO_ENABLED: "1"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ !inputs.dry_run && format('v{0}', needs.bump-version.outputs.new_version) || '' }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      - name: Build macOS binaries
+        env:
+          NEW_VERSION: ${{ needs.bump-version.outputs.new_version }}
+        run: |
+          SDKDIR=$(xcrun --sdk macosx --show-sdk-path)
+          export SDKROOT="${SDKDIR}"
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          LDFLAGS="-s -w -X github.com/Guliveer/twitch-miner-go/internal/version.Number=${NEW_VERSION} -X github.com/Guliveer/twitch-miner-go/internal/version.GitCommit=${GIT_COMMIT}"
+
+          mkdir -p dist
+
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build \
+            -ldflags "$LDFLAGS" \
+            -o "dist/twitch-miner-go-${GOOS}-${GOARCH}" \
+            ./cmd/twitch-miner-go
+
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build \
+            -ldflags "$LDFLAGS" \
+            -o "dist/config-editor-${GOOS}-${GOARCH}" \
+            ./cmd/config-editor
+
+          echo "Built:"
+          ls -la dist/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-darwin
+          path: dist/
+          retention-days: 1
+
   create-release:
-    needs: [bump-version, build-binaries]
+    needs: [bump-version, build-binaries, build-darwin-binaries]
     if: ${{ !inputs.dry_run }}
     runs-on: ubuntu-latest
     steps:
@@ -299,6 +359,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: binaries
+          path: dist/
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries-darwin
           path: dist/
 
       - name: Create GitHub Release

@@ -154,7 +154,7 @@ if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 > "%WRAPPER_SCRIPT%" echo @echo off
 >> "%WRAPPER_SCRIPT%" echo setlocal
 >> "%WRAPPER_SCRIPT%" echo cd /d "%PROJECT_DIR%"
->> "%WRAPPER_SCRIPT%" echo call _run.bat -config "!SVC_CONFIG!" -port !SVC_PORT! -log-level !SVC_LOG_LEVEL!
+>> "%WRAPPER_SCRIPT%" echo call _run.bat -config "!SVC_CONFIG!" -port !SVC_PORT! -log-level !SVC_LOG_LEVEL! -no-tray
 
 REM -- Install via NSSM --------------------------------------------
 echo [+] Installing service via NSSM...

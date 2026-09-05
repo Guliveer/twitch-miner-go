@@ -1,13 +1,15 @@
-max_watch_streams: 10
+enabled: true
+features:
+  claim_drops_startup: true
+  enable_analytics: true
+max_watch_streams: 999
 priority:
   - DROPS
   - ORDER
   - STREAK
-features:
-  claim_drops_startup: true
 category_watcher:
   enabled: true
-  poll_interval: 180s
+  poll_interval: 3m0s
   drops_only: true
   categories:
     - slug: tom-clancys-rainbow-six-siege
@@ -16,27 +18,31 @@ category_watcher:
     - slug: valorant
     - slug: star-citizen
     - slug: the-finals
-    - slug: arc-raiders
     - slug: destiny-2
+    - slug: arc-raiders
     - slug: call-of-duty-warzone
-    - slug: trove
     - slug: delta-force-hawk-ops
+    - slug: trove
     - slug: pubg-battlegrounds
     - slug: war-thunder
     - slug: minecraft
     - slug: rocket-league
     - slug: special-events
+    - slug: world-of-tanks
+    - slug: world-of-warships
 team_watcher:
   enabled: true
-  poll_interval: 180s
+  poll_interval: 3m0s
   teams:
     - name: rainbow6
 streamer_defaults:
-  make_predictions: true
+  make_predictions: false
   follow_raid: true
   claim_drops: true
   claim_moments: true
   watch_streak: true
+  community_goals: false
+  drops_only: false
   chat: ONLINE
   bet:
     strategy: SMART
@@ -47,30 +53,19 @@ streamer_defaults:
     stealth_mode: true
     delay: 6
     delay_mode: FROM_END
+    filter_condition:
+      by: total_users
+      where: GTE
+      value: 0
 streamers:
   - username: Guliveer_
+    settings:
+      drops_only: false
   - username: Battlefield
   - username: Valorant
   - username: rainbow6
-  - username: rainbow6bravo
   - username: BungieFoundation
   - username: StarCitizen
-  - username: rainbow6bnl
-  - username: rainbow6CNTwitch
-  - username: rainbow6de
-  - username: rainbow6es
-  - username: rainbow6fr
-  - username: rainbow6hk
-  - username: rainbow6hu
-  - username: rainbow6it
-  - username: rainbow6jp
-  - username: rainbow6kr
-  - username: rainbow6LATAM
-  - username: rainbow6pl
-  - username: rainbow6ru
-  - username: rainbow6th
-  - username: rainbow6tw
-  - username: rainbow6sea
   - username: Pengu
   - username: KingGeorge
   - username: AnneMunition
@@ -86,7 +81,6 @@ streamers:
   - username: Leh_TV
   - username: Ubisoft
   - username: Xbox
-  - username: Tabwire
   - username: Intel
   - username: eSportsReadyWT
   - username: PaladinsGame
@@ -94,16 +88,11 @@ streamers:
   - username: xQc
   - username: draegast
   - username: beingesports
-  - username: RocketLeague
-  - username: RocketLeagueSAM
-  - username: RocketLeagueAPAC
-  - username: WarThunder_Esports
-  - username: WorldofWarships
+  - username: Jynxzi
+followers:
+  enabled: false
+  order: ASC
 notifications:
-  batch:
-    enabled: true
-    interval: 4h
-    max_entries: 15
   telegram:
     enabled: true
     events:
@@ -114,5 +103,34 @@ notifications:
       - MINER_CRASHED
       - ACCOUNT_CONFIG_RELOADED
     disable_notification: true
+    batch:
+      enabled: false
+      max_entries: 5
+      immediate_events:
+        - GIFTED_SUB
+        - MINER_STARTED
+        - MINER_STOPPED
+        - MINER_CRASHED
+        - ACCOUNT_CONFIG_RELOADED
+        - TEST
+  discord:
+    enabled: false
   webhook:
+    enabled: false
     method: POST
+  matrix:
+    enabled: false
+  pushover:
+    enabled: false
+  gotify:
+    enabled: false
+  batch:
+    enabled: true
+    interval: 4h0m0s
+    max_entries: 15
+    immediate_events:
+      - GIFTED_SUB
+      - MINER_STARTED
+      - MINER_STOPPED
+      - MINER_CRASHED
+      - ACCOUNT_CONFIG_RELOADED

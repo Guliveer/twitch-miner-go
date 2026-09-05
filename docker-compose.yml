@@ -10,7 +10,7 @@ services:
     environment:
       DATA_DIR: /data
       PORT: 8080
-      # Required: Set TWITCH_CLIENT_ID_TV, TWITCH_CLIENT_ID_BROWSER, TWITCH_CLIENT_VERSION in .env
+      NO_TRAY: "true"
       # Optional: Set COOKIE_ENCRYPTION_KEY in .env to encrypt cookies at rest (./tools/gen-cookie-key.sh)
     volumes:
       - ./configs:/configs:ro

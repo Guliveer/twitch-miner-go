@@ -6,10 +6,32 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"os/exec"
 	"regexp"
+	"runtime"
 	"runtime/debug"
 	"strings"
 )
+
+// OpenBrowser opens the given URL in the user's default browser, using the
+// platform-native command. It is best-effort: errors are returned but the
+// caller usually logs and continues.
+func OpenBrowser(url string) error {
+	var cmd string
+	var args []string
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start", "", url}
+	case "darwin":
+		cmd = "open"
+		args = []string{url}
+	default:
+		cmd = "xdg-open"
+		args = []string{url}
+	}
+	return exec.Command(cmd, args...).Start()
+}
 
 // SafeGo launches a goroutine with panic recovery. If the goroutine panics,
 // the panic is caught, a stack trace is printed to stderr, and execution
