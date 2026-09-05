@@ -352,6 +352,22 @@ jobs:
           path: dist/
           retention-days: 1
 
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Build Darwin Binaries (${{ matrix.goos }}/${{ matrix.goarch }})" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "**DRY RUN** — binaries built but not uploaded to a release" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "| Binary | Size |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|------|" >> "$GITHUB_STEP_SUMMARY"
+          for f in dist/*; do
+            SIZE=$(du -h "$f" | cut -f1)
+            echo "| $(basename $f) | ${SIZE} |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
   create-release:
     needs: [bump-version, build-binaries, build-darwin-binaries]
     if: ${{ !inputs.dry_run }}
