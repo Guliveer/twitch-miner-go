@@ -40,6 +40,21 @@ type AccountConfig struct {
 
 	MaxWatchStreams *int `yaml:"max_watch_streams,omitempty" json:"max_watch_streams,omitempty"`
 
+	// StreakWatchStreams narrows the watch set while any channel still has a
+	// watch streak pending. Twitch only credits about two concurrent streams,
+	// so spreading minute-watched events across every live channel leaves the
+	// choice to Twitch and no streak reliably lands. Once nothing is pending,
+	// the set widens back to MaxWatchStreams. Zero disables the narrowing.
+	StreakWatchStreams *int `yaml:"streak_watch_streams,omitempty" json:"streak_watch_streams,omitempty"`
+
+	// WatchStreakMinutes is how long a channel may hold a streak slot before
+	// it gives way to the next one, whether or not the streak arrived.
+	WatchStreakMinutes *float64 `yaml:"watch_streak_minutes,omitempty" json:"watch_streak_minutes,omitempty"`
+
+	// PreferredStreamers lists channel logins that the PREFERRED priority
+	// picks first, in the order given.
+	PreferredStreamers []string `yaml:"preferred_streamers,omitempty" json:"preferred_streamers,omitempty"`
+
 	Priority []string `yaml:"priority" json:"priority"`
 
 	Proxy string `yaml:"proxy,omitempty" json:"proxy,omitempty"`
