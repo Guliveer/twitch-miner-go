@@ -208,15 +208,19 @@ func (d *Dispatcher) DispatchSync(ctx context.Context, event model.Event, title,
 }
 
 // NotifyFunc returns a logger.NotifyFunc that dispatches notifications via this Dispatcher.
-// The title is constructed dynamically from the account name and metadata map:
+// The title is constructed dynamically from the account name and the event fields:
 //   - "accountName | 📺 streamer" when a streamer context exists
 //   - "accountName | 🎮 category" when only a category context exists (e.g. drop claims)
 //   - "accountName" as a plain fallback
 //   - "Twitch Miner" when no account name is available
+//
+// The body is rendered by buildBody, which gives prediction events a labelled
+// multi-line layout naming the channel outright — the title alone is not
+// enough, because not every provider displays it.
 func (d *Dispatcher) NotifyFunc(accountName string) logger.NotifyFunc {
-	return func(ctx context.Context, message string, event model.Event, meta map[string]string) {
-		streamer := meta["streamer"]
-		category := meta["category"]
+	return func(ctx context.Context, event model.Event, message string, fields []logger.Field) {
+		streamer := fieldValue(fields, "streamer")
+		category := fieldValue(fields, "category")
 
 		var title string
 		switch {
@@ -229,7 +233,7 @@ func (d *Dispatcher) NotifyFunc(accountName string) logger.NotifyFunc {
 		default:
 			title = "Twitch Miner"
 		}
-		d.Dispatch(ctx, event, title, message)
+		d.Dispatch(ctx, event, title, buildBody(event, message, fields))
 	}
 }
 

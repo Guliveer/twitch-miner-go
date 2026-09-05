@@ -65,11 +65,19 @@ var coloredAttrKeys = map[string]string{
 	"target":   colorMagenta,
 }
 
+// Field is a single structured key-value pair extracted from an event's log
+// args. Fields keep the order they were logged in, which lets notification
+// providers lay out a message deterministically.
+type Field struct {
+	Key   string
+	Value string
+}
+
 // NotifyFunc is a callback invoked when a log event matches notification criteria.
-// The meta map carries structured key-value metadata (e.g. "streamer", "category")
-// extracted from the log args so that notification titles can be constructed dynamically.
+// It receives the bare event message (emoji included, no key-value suffix) plus
+// the ordered fields, so the notify package owns all message formatting.
 // Implementations should be non-blocking.
-type NotifyFunc func(ctx context.Context, message string, event model.Event, meta map[string]string)
+type NotifyFunc func(ctx context.Context, event model.Event, message string, fields []Field)
 
 // Config holds logger configuration options.
 type Config struct {
@@ -97,12 +105,17 @@ type Logger struct {
 	*slog.Logger
 	cfg      Config
 	notifyFn atomic.Value // stores NotifyFunc
+	file     *os.File    // log file when LogDir is set, nil otherwise
 }
 
 // Setup creates a new Logger based on the provided configuration.
 // It sets up console and optional file handlers.
 func Setup(cfg Config) (*Logger, error) {
 	var handlers []slog.Handler
+	var (
+		logFile *os.File
+		err     error
+	)
 
 	var consoleHandler slog.Handler
 	if cfg.Format == "json" {
@@ -126,7 +139,7 @@ func Setup(cfg Config) (*Logger, error) {
 			filename = timestamp + "_" + cfg.AccountName + ".log"
 		}
 
-		logFile, err := os.OpenFile(
+		logFile, err = os.OpenFile(
 			filepath.Join(cfg.LogDir, filename),
 			os.O_CREATE|os.O_WRONLY|os.O_APPEND,
 			0o644,
@@ -158,6 +171,7 @@ func Setup(cfg Config) (*Logger, error) {
 	logger := &Logger{
 		Logger: slog.New(handler),
 		cfg:    cfg,
+		file:   logFile,
 	}
 
 	if cfg.NotifyFn != nil {
@@ -175,10 +189,20 @@ func (l *Logger) WithAccount(name string) *Logger {
 	return newLogger
 }
 
+// Close releases the underlying log file, if any. Safe to call multiple times.
+func (l *Logger) Close() error {
+	if l.file != nil {
+		err := l.file.Close()
+		l.file = nil
+		return err
+	}
+	return nil
+}
+
 // Event logs a message at INFO level and dispatches a notification if configured.
 // If the event has a mapped emoji, it is prepended to the log message.
-// The alternating key-value args are parsed into a map[string]string and forwarded
-// to the NotifyFunc so notification providers can build dynamic titles.
+// The alternating key-value args are forwarded to the NotifyFunc as ordered
+// Fields; the notify package decides how to render them.
 func (l *Logger) Event(ctx context.Context, event model.Event, msg string, args ...any) {
 	if emoji, ok := eventEmoji[string(event)]; ok {
 		msg = emoji + " " + msg
@@ -186,29 +210,16 @@ func (l *Logger) Event(ctx context.Context, event model.Event, msg string, args 
 	l.Info(msg, append(args, "event", string(event))...)
 
 	if fn, ok := l.notifyFn.Load().(NotifyFunc); ok && fn != nil {
-		// Build clean args string, excluding streamer and category (shown in title)
-		var parts []string
+		fields := make([]Field, 0, len(args)/2)
 		for i := 0; i+1 < len(args); i += 2 {
-			key := fmt.Sprintf("%v", args[i])
-			if key == "streamer" || key == "category" {
-				continue // skip, already in title
+			key, ok := args[i].(string)
+			if !ok {
+				continue
 			}
-			parts = append(parts, fmt.Sprintf("%s={%v}", key, args[i+1]))
+			fields = append(fields, Field{Key: key, Value: fmt.Sprintf("%v", args[i+1])})
 		}
 
-		formattedMsg := msg
-		if len(parts) > 0 {
-			formattedMsg = fmt.Sprintf("%s (%s)", msg, strings.Join(parts, ", "))
-		}
-
-		meta := make(map[string]string, len(args)/2)
-		for i := 0; i+1 < len(args); i += 2 {
-			if key, ok := args[i].(string); ok {
-				meta[key] = fmt.Sprintf("%v", args[i+1])
-			}
-		}
-
-		fn(ctx, formattedMsg, event, meta)
+		fn(ctx, event, msg, fields)
 	}
 }
 
