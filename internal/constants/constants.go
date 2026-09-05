@@ -82,6 +82,14 @@ const (
 	MaxPubSubConns = 10
 	// MaxWatchStreams is the maximum number of streams to send minute-watched events for.
 	MaxWatchStreams = 2
+	// StreakWatchStreams is how many streams are watched while a watch streak
+	// is still pending somewhere. Twitch credits roughly two concurrent
+	// streams, so a wider set hands the choice to Twitch and streaks stop
+	// landing predictably.
+	StreakWatchStreams = 2
+	// WatchStreakMinutes is how long a channel holds a streak slot before the
+	// next pending channel takes over.
+	WatchStreakMinutes = 10.0
 )
 
 const (
