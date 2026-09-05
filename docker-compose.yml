@@ -11,6 +11,9 @@ services:
       DATA_DIR: /data
       PORT: 8080
       NO_TRAY: "true"
+      NO_BANNER: "true"
+      LOG_FORMAT: json
+      LOG_NO_TIME: "true"
       # Optional: Set COOKIE_ENCRYPTION_KEY in .env to encrypt cookies at rest (./tools/gen-cookie-key.sh)
     volumes:
       - ./configs:/configs:ro
