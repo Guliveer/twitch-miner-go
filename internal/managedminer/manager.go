@@ -157,7 +157,28 @@ func (m *Manager) Restart(cfg *config.AccountConfig) {
 	m.startLocked(cfg, "")
 }
 
-// Entries returns a snapshot of all currently running miners.
+// LiveCount returns how many managed miners have not permanently exited.
+// A miner counts as live while it is starting up, authenticating, running, or
+// backing off before a restart, so the value does not flap during startup the
+// way Miner.IsRunning does. It drops to zero once every miner has given up,
+// which is what distinguishes an idle container from a working one.
+func (m *Manager) LiveCount() int {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	var live int
+	for _, e := range m.entries {
+		select {
+		case <-e.done:
+		default:
+			live++
+		}
+	}
+	return live
+}
+
+// Entries returns a snapshot of all managed miners, including any that have
+// already exited. Use LiveCount to ask whether work is actually happening.
 func (m *Manager) Entries() []Entry {
 	m.mu.RLock()
 	defer m.mu.RUnlock()

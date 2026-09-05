@@ -107,3 +107,46 @@ func TestManager_EntriesReturnsSnapshot(t *testing.T) {
 		t.Fatalf("expected 2 entries, got %d", len(got))
 	}
 }
+
+// ── LiveCount ─────────────────────────────────────────────────────────────────
+
+// newLiveManager keeps the launch goroutine "running" by never closing e.done,
+// which is what an authenticating or actively mining account looks like.
+func newLiveManager(t *testing.T) *Manager {
+	t.Helper()
+	m := NewManager(context.Background(), discardLogger(), nil)
+	m.launchFn = func(_ *entry, _ context.Context, _ *logger.Logger) {}
+	return m
+}
+
+func TestManager_LiveCountZeroWithoutEntries(t *testing.T) {
+	if got := newLiveManager(t).LiveCount(); got != 0 {
+		t.Fatalf("expected 0, got %d", got)
+	}
+}
+
+func TestManager_LiveCountCountsStartingMiners(t *testing.T) {
+	m := newLiveManager(t)
+	m.Start(testConfig("alice"))
+	m.Start(testConfig("bob"))
+
+	// Neither miner is "running" yet — they are still authenticating — but the
+	// container is working, so health must not report it idle.
+	if got := m.LiveCount(); got != 2 {
+		t.Fatalf("expected 2 live miners, got %d", got)
+	}
+}
+
+func TestManager_LiveCountExcludesExitedMiners(t *testing.T) {
+	// The default test launchFn closes e.done immediately, i.e. the miner gave
+	// up (skipped for missing credentials, or Run returned nil).
+	m := newTestManager(t)
+	m.Start(testConfig("alice"))
+
+	if got := len(m.Entries()); got != 1 {
+		t.Fatalf("expected the entry to remain, got %d", got)
+	}
+	if got := m.LiveCount(); got != 0 {
+		t.Fatalf("expected 0 live miners for an exited entry, got %d", got)
+	}
+}
