@@ -3,10 +3,6 @@ name: Benchmarks
 on:
   push:
     branches: [main]
-    paths:
-      - '**/*.go'
-      - 'go.mod'
-      - 'go.sum'
   pull_request:
     branches: [main]
     paths:
@@ -17,6 +13,8 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
+  issues: write
 
 concurrency:
   group: bench-${{ github.ref }}
@@ -31,6 +29,30 @@ jobs:
         with:
           fetch-depth: 0
 
+      # on.pull_request.paths filters against the full PR diff, so a push that
+      # only touches docs/scripts/pipelines would still re-run the benchmarks.
+      # Filter per push instead: compare the commit range of this sync event.
+      - name: Check for Go changes in this push
+        id: go-changes
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.event.after }}"
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            # First push of the PR (opened event): no previous commit to diff.
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          FILES=$(git diff --name-only "$BEFORE" "$AFTER")
+          if echo "$FILES" | grep -E '\.go$|^go\.(mod|sum)$' > /dev/null; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -44,10 +66,11 @@ jobs:
 
       - name: Run benchmarks
         id: bench
+        if: steps.go-changes.outputs.changed == 'true'
         run: go test -bench=. -benchmem -count=5 -timeout=300s ./... | tee bench_raw.txt
 
       - name: Generate summary (main)
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && steps.go-changes.outputs.changed == 'true'
         run: |
           {
             echo "## 🏃 Benchmarks — main"
@@ -58,7 +81,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Compare with baseline (PR only)
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && steps.go-changes.outputs.changed == 'true'
         run: |
           git fetch origin main --depth=1
           git stash --include-untracked
@@ -67,21 +90,96 @@ jobs:
           git checkout -
           git stash pop || true
 
-          benchstat bench_base.txt bench_raw.txt 2>&1 | tee benchstat.txt || true
-
-          REGRESSED=$(benchstat -alpha 0.05 bench_base.txt bench_raw.txt 2>&1 | grep -c "slower" || true)
-
           {
             echo "## 🏃 Benchmarks — PR vs main"
             echo ""
+            echo "Median of 5 runs; Δ < 0 = gain (faster), Δ > 0 = loss (slower)."
+            echo ""
+            echo "| Benchmark | main | PR | Δ |"
+            echo "|---|---|---|---|"
+          } > bench_comment.md
+
+          REGRESSED=0
+          for NAME in $(grep '^Benchmark' bench_raw.txt | awk '{print $1}' | sed 's/-[0-9]*$//' | sort -u); do
+            BASE=$(grep "^${NAME}-" bench_base.txt | awk '{print $3}' | sort -n | awk '{a[NR]=$1} END {if (NR) print (NR%2)? a[(NR+1)/2] : (a[NR/2]+a[NR/2+1])/2}' || true)
+            RAW=$(grep "^${NAME}-" bench_raw.txt | awk '{print $3}' | sort -n | awk '{a[NR]=$1} END {if (NR) print (NR%2)? a[(NR+1)/2] : (a[NR/2]+a[NR/2+1])/2}' || true)
+
+            if [ -z "$BASE" ]; then
+              # New benchmark: PR run measured, main baseline missing.
+              RFMT=$(awk -v r="$RAW" 'BEGIN {
+                if (r >= 1000000) rf = sprintf("%.3f ms", r/1000000)
+                else if (r >= 1000) rf = sprintf("%.2f µs", r/1000)
+                else rf = sprintf("%.1f ns", r)
+                print rf
+              }')
+              echo "| ${NAME} | n/a | ${RFMT} | — |" >> bench_comment.md
+              continue
+            fi
+
+            ROW=$(awk -v b="$BASE" -v r="$RAW" 'BEGIN {
+              if (b == 0) { printf "n/a | n/a | —"; exit }
+              d = (r - b) / b * 100
+              if (d < -1) v = "⚡ gain"
+              else if (d > 1) v = "🐢 loss"
+              else v = "≈ no change"
+              if (b >= 1000000) bf = sprintf("%.3f ms", b/1000000)
+              else if (b >= 1000) bf = sprintf("%.2f µs", b/1000)
+              else bf = sprintf("%.1f ns", b)
+              if (r >= 1000000) rf = sprintf("%.3f ms", r/1000000)
+              else if (r >= 1000) rf = sprintf("%.2f µs", r/1000)
+              else rf = sprintf("%.1f ns", r)
+              printf "%s | %s | %s %+.2f%%", bf, rf, v, d
+            }')
+            case "$ROW" in *"🐢 loss"*) REGRESSED=$((REGRESSED + 1)) ;; esac
+
+            printf "| %s | %s |\n" "$NAME" "$ROW" >> bench_comment.md
+          done
+
+          {
+            echo ""
             if [ "$REGRESSED" -gt 0 ]; then
-              echo "> ⚠️ **Performance regressions detected**"
+              echo "> ⚠️ **Performance regressions detected** in $REGRESSED benchmark(s)"
             else
               echo "> ✅ **No performance regressions**"
             fi
             echo ""
-            echo "### benchstat comparison"
-            echo '```'
-            cat benchstat.txt
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+            echo "<!-- bench-comment -->"
+          } >> bench_comment.md
+
+          cat bench_comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post benchmark comment on PR (PR only)
+        if: >-
+          github.event_name == 'pull_request' &&
+          steps.go-changes.outputs.changed == 'true' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          MARKER="<!-- bench-comment -->"
+
+          # Post the new results first so a failure below never leaves the PR
+          # without visible benchmark data, then minimize the previous runs as
+          # "outdated" so each push yields a fresh comment while history stays
+          # one click away (same pattern renovate/dependabot use).
+          NEW_ID=$(gh api --method POST \
+            "repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" \
+            -F "body=@bench_comment.md" \
+            --jq .id)
+
+          # The REST minimize endpoint was retired from the GitHub API, so the
+          # GraphQL minimizeComment mutation is the only supported way to hide
+          # old comments. It addresses comments by node_id, not database id.
+          gh api "repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" \
+            --jq ".[] | select(.body | contains(\"${MARKER}\")) | \"\\(.id) \\(.node_id)\"" | while read -r COMMENT_ID COMMENT_NODE; do
+            if [ "$COMMENT_ID" = "$NEW_ID" ]; then
+              continue
+            fi
+            gh api graphql \
+              -f query='mutation($id: ID!) { minimizeComment(input: {subjectId: $id, classifier: OUTDATED}) { minimizedComment { isMinimized } } }' \
+              -F id="$COMMENT_NODE" > /dev/null
+            echo "Minimized previous benchmark comment ${COMMENT_ID}"
+          done
+
+          echo "Posted benchmark comment ${NEW_ID} on PR ${PR_NUMBER}"

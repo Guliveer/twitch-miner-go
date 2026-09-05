@@ -1,28 +1,32 @@
-max_watch_streams: 15
+enabled: true
+features:
+  claim_drops_startup: true
+  enable_analytics: true
+max_watch_streams: 50
 priority:
   - DROPS
   - ORDER
   - STREAK
-features:
-  claim_drops_startup: true
 category_watcher:
   enabled: true
-  poll_interval: 60s
+  poll_interval: 1m0s
   drops_only: true
   categories:
     - slug: tom-clancys-rainbow-six-siege
       drops_only: false
 team_watcher:
   enabled: true
-  poll_interval: 180s
+  poll_interval: 3m0s
   teams:
     - name: rainbow6
 streamer_defaults:
-  make_predictions: true
+  make_predictions: false
   follow_raid: false
   claim_drops: true
   claim_moments: true
   watch_streak: true
+  community_goals: false
+  drops_only: false
   chat: ALWAYS
   bet:
     strategy: SMART
@@ -33,11 +37,13 @@ streamer_defaults:
     stealth_mode: true
     delay: 6
     delay_mode: FROM_END
+    filter_condition:
+      by: total_users
+      where: GTE
+      value: 0
 streamers:
   - username: Guliveer_
   - username: rainbow6
-  - username: rainbow6bravo
-  - username: rainbow6LATAM
   - username: rainbow6pl
   - username: Pengu
   - username: Skittlz
@@ -49,13 +55,11 @@ streamers:
   - username: Interro
   - username: zironicdk
   - username: Athieno
+  - username: Jynxzi
 followers:
   enabled: true
+  order: ASC
 notifications:
-  batch:
-    enabled: true
-    interval: 3h
-    max_entries: 15
   telegram:
     enabled: true
     events:
@@ -67,5 +71,24 @@ notifications:
       - ACCOUNT_CONFIG_RELOADED
       - DROP_STATUS
     disable_notification: true
+  discord:
+    enabled: false
   webhook:
+    enabled: false
     method: POST
+  matrix:
+    enabled: false
+  pushover:
+    enabled: false
+  gotify:
+    enabled: false
+  batch:
+    enabled: true
+    interval: 3h0m0s
+    max_entries: 15
+    immediate_events:
+      - ACCOUNT_CONFIG_RELOADED
+      - MINER_CRASHED
+      - MINER_STOPPED
+      - MINER_STARTED
+      - GIFTED_SUB

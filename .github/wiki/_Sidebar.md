@@ -11,6 +11,8 @@
 
 **Reference**
 - [Troubleshooting](Troubleshooting)
+- [FAQ](FAQ)
+- [Advanced Guide](Advanced-Guide)
 - [Architecture](Architecture)
 
 ---

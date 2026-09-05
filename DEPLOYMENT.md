@@ -102,6 +102,18 @@ The installer uses NSSM to wrap the application as a native Windows service. On 
 1. Rebuilds the binary from source (`go build`)
 2. Launches the freshly built binary
 
+### Config Editor & Tray in Service Mode
+
+When running as a Windows service, the embedded config editor is still available
+at **http://localhost:8070** — the service binds it to `127.0.0.1` only, so you
+can open it in a browser on the machine to manage account configs.
+
+The system tray icon is **not** shown in service mode: Windows services run in a
+non-interactive session (session 0) that has no desktop, so the tray cannot be
+displayed there. This is a Windows platform limitation, not a bug — the miner
+runs normally without it. Running with the `-no-tray` flag (as the service
+installer does) is therefore the typical setup for service deployments.
+
 This ensures config changes and code updates are always picked up without manual rebuilds.
 
 ### Managing the Service
@@ -205,6 +217,14 @@ healthcheck:
   retries: 3
   start_period: 15s
 ```
+
+#### System Tray
+
+Containers are headless — there is no desktop or DBus session for a system tray
+icon to attach to. The image therefore ships with the tray disabled by default
+(`NO_TRAY=true` is set in the `Dockerfile` and `docker-compose.yml`), and the
+miner runs as a pure daemon. The embedded config editor remains available at
+`http://127.0.0.1:8070` inside the container regardless.
 
 #### Updating
 

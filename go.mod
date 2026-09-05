@@ -3,6 +3,7 @@ module github.com/Guliveer/twitch-miner-go
 go 1.25.7
 
 require (
+	fyne.io/systray v1.12.2
 	github.com/charmbracelet/huh v1.0.0
 	github.com/coder/websocket v1.8.15
 	github.com/gempir/go-twitch-irc/v4 v4.4.1
@@ -10,6 +11,7 @@ require (
 	github.com/lib/pq v1.12.3
 	github.com/pressly/goose/v3 v3.27.2
 	golang.org/x/sync v0.21.0
+	golang.org/x/sys v0.47.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -29,6 +31,7 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
+	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
@@ -42,6 +45,5 @@ require (
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
 )

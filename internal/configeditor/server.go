@@ -1,16 +1,21 @@
 package configeditor
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/fs"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
+	"github.com/Guliveer/twitch-miner-go/internal/constants"
+	"github.com/Guliveer/twitch-miner-go/internal/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -70,6 +75,42 @@ func NewServer(configDir string) *Server {
 	s := &Server{configDir: configDir, mux: http.NewServeMux()}
 	s.registerRoutes()
 	return s
+}
+
+// Run serves the config editor on addr, blocking until ctx is cancelled and
+// the server has shut down gracefully. addr must be the full host:port, e.g.
+// "127.0.0.1:8070". It returns an error only if the server fails to start or
+// shutdown; context cancellation returns ctx.Err().
+func (s *Server) Run(ctx context.Context, addr string) error {
+	srv := &http.Server{
+		Addr:              addr,
+		Handler:           s,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       60 * time.Second,
+		WriteTimeout:      0, // config editor responses can be large; no write cap
+		IdleTimeout:       60 * time.Second,
+		BaseContext: func(_ net.Listener) context.Context {
+			return ctx
+		},
+	}
+
+	errCh := make(chan error, 1)
+	utils.SafeGo(func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			errCh <- err
+		}
+		close(errCh)
+	})
+
+	select {
+	case <-ctx.Done():
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), constants.DefaultGracefulShutdownTimeout)
+		defer cancel()
+		_ = srv.Shutdown(shutdownCtx)
+		return ctx.Err()
+	case err := <-errCh:
+		return err
+	}
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

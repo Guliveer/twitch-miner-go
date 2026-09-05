@@ -264,8 +264,14 @@ func loadOrGenerateInstanceID(dataDir string) (string, error) {
 		return "", fmt.Errorf("create data dir %q: %w", dataDir, err)
 	}
 
-	if err := os.WriteFile(path, []byte(uuid+"\n"), 0o644); err != nil {
+	// 0o444 keeps the file read-only from the moment it is created. The
+	// leading dot in the filename already hides it on Unix; on Windows the
+	// HIDDEN attribute is applied explicitly (see applyInstanceFileAttrs).
+	if err := os.WriteFile(path, []byte(uuid+"\n"), 0o444); err != nil {
 		return "", fmt.Errorf("write instance id: %w", err)
+	}
+	if err := applyInstanceFileAttrs(path); err != nil {
+		return "", fmt.Errorf("apply instance id attributes: %w", err)
 	}
 
 	return uuid, nil
