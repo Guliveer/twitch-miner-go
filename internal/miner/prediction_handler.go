@@ -124,11 +124,14 @@ func (m *Miner) handlePredictionCreated(
 		return
 	}
 
+	// The countdown is a field rather than part of the message so notification
+	// bodies can lay it out as its own line.
 	m.log.Event(ctx, model.EventBetStart,
-		fmt.Sprintf("Placing bet in %.0fs", secondsUntilClose),
+		"Placing bet",
 		"streamer", username,
 		"category", category,
-		"title", event.Title)
+		"title", event.Title,
+		"in_seconds", fmt.Sprintf("%.0f", secondsUntilClose))
 
 	m.schedulePredictionAttempt(ctx, streamer, event, secondsUntilClose)
 }
@@ -151,7 +154,6 @@ func (m *Miner) handlePredictionUpdated(
 	}
 
 	event.Mu.Lock()
-	defer event.Mu.Unlock()
 
 	event.Status = eventStatus
 
@@ -161,6 +163,22 @@ func (m *Miner) handlePredictionUpdated(
 			event.Bet.UpdateOutcomes(outcomes)
 		}
 	}
+
+	// Only a prediction we actually staked points on will produce a
+	// "prediction-result" on the user topic, and that handler is the sole
+	// place an event is removed from the map. Without a stake, a CANCELED or
+	// RESOLVED event would sit there for the lifetime of the process.
+	abandoned := isTerminalPredictionStatus(eventStatus) &&
+		!event.BetPlaced && !event.BetConfirmed && !event.PlacementInFlight
+	event.Mu.Unlock()
+
+	if abandoned {
+		m.forgetPrediction(eventID)
+		return
+	}
+
+	event.Mu.Lock()
+	defer event.Mu.Unlock()
 
 	m.pendingTimersMu.Lock()
 	_, hasTimer := m.pendingTimers[eventID]
@@ -172,6 +190,29 @@ func (m *Miner) handlePredictionUpdated(
 		}
 		go m.schedulePredictionAttempt(ctx, streamer, event, delay)
 	}
+}
+
+// isTerminalPredictionStatus reports whether a prediction can no longer change.
+// LOCKED is deliberately excluded: the outcome still follows.
+func isTerminalPredictionStatus(status string) bool {
+	return status == "CANCELED" || status == "RESOLVED"
+}
+
+// forgetPrediction drops a tracked prediction and stops any pending placement
+// timer for it.
+func (m *Miner) forgetPrediction(eventID string) {
+	m.pendingTimersMu.Lock()
+	if t, ok := m.pendingTimers[eventID]; ok {
+		t.Stop()
+		delete(m.pendingTimers, eventID)
+	}
+	m.pendingTimersMu.Unlock()
+
+	m.eventsPredictionsMu.Lock()
+	delete(m.eventsPredictions, eventID)
+	m.eventsPredictionsMu.Unlock()
+
+	m.log.Debug("Dropped prediction with no stake", "event_id", eventID)
 }
 
 func (m *Miner) handlePredictionLocked(eventID, eventStatus string) {
@@ -256,6 +297,7 @@ func (m *Miner) handlePredictionResult(ctx context.Context, event *model.EventPr
 	}
 	eventTitle := event.Title
 	resultString := event.Result.ResultString
+	stakedAmount := event.Bet.Decision.Amount
 	event.Mu.Unlock()
 
 	m.pendingTimersMu.Lock()
@@ -280,6 +322,7 @@ func (m *Miner) handlePredictionResult(ctx context.Context, event *model.EventPr
 		"category", streamerCategory,
 		"title", eventTitle,
 		"choice", choiceStr,
+		"amount", stakedAmount,
 		"result", resultString)
 
 	if streamer != nil {

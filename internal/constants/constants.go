@@ -138,6 +138,13 @@ const (
 	DefaultCampaignSyncInterval = 10 * time.Minute
 	// DefaultCategoryWatcherInterval is the default interval for category watcher polling.
 	DefaultCategoryWatcherInterval = 120 * time.Second
+	// PredictionSweepInterval is how often tracked predictions are checked for
+	// results that never arrived.
+	PredictionSweepInterval = 30 * time.Minute
+	// PredictionRetention is how long a prediction may stay tracked after it
+	// was created before the sweeper discards it. Twitch prediction windows
+	// are minutes, not hours, so anything this old is never resolving.
+	PredictionRetention = 6 * time.Hour
 	// DefaultStreamUpdateInterval is the interval for refreshing stream info.
 	DefaultStreamUpdateInterval = 120 * time.Second
 	// DefaultStreamUpDebounce is the debounce duration after a stream-up event.

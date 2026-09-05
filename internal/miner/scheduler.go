@@ -137,6 +137,50 @@ func (m *Miner) runContextRefresh(ctx context.Context) error {
 	}
 }
 
+// runPredictionSweeper discards tracked predictions whose outcome never
+// arrived. handlePredictionResult is the normal exit, but a "prediction-result"
+// that Twitch never sends — a dropped PubSub message, a bet placed just as the
+// event was cancelled — would otherwise pin the entry for the process lifetime.
+func (m *Miner) runPredictionSweeper(ctx context.Context) error {
+	ticker := time.NewTicker(constants.PredictionSweepInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			m.sweepStalePredictions(time.Now())
+		}
+	}
+}
+
+// sweepStalePredictions removes predictions older than the retention window.
+// It is separate from runPredictionSweeper so tests can drive it directly.
+func (m *Miner) sweepStalePredictions(now time.Time) int {
+	var stale []string
+
+	m.eventsPredictionsMu.RLock()
+	for id, event := range m.eventsPredictions {
+		event.Mu.Lock()
+		age := now.Sub(event.CreatedAt)
+		inFlight := event.PlacementInFlight
+		event.Mu.Unlock()
+
+		if !inFlight && age > constants.PredictionRetention {
+			stale = append(stale, id)
+		}
+	}
+	m.eventsPredictionsMu.RUnlock()
+
+	for _, id := range stale {
+		m.log.Debug("Sweeping prediction whose result never arrived", "event_id", id)
+		m.forgetPrediction(id)
+	}
+
+	return len(stale)
+}
+
 func (m *Miner) runMonitorLoop(ctx context.Context) error {
 	ticker := time.NewTicker(time.Duration(20+rand.IntN(40)) * time.Second)
 	defer ticker.Stop()

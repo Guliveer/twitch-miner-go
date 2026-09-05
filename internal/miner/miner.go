@@ -30,11 +30,11 @@ import (
 // It implements the [pubsub.MessageHandler] interface so the PubSub pool
 // can route messages directly to it.
 type Miner struct {
-	cfg    *config.AccountConfig
-	log    *logger.Logger
-	twitch twitch.API
-	pubsub *pubsub.Pool
-	chat   *chat.Manager
+	cfg               *config.AccountConfig
+	log               *logger.Logger
+	twitch            twitch.API
+	pubsub            *pubsub.Pool
+	chat              *chat.Manager
 	notify            *notify.Dispatcher
 	suppressLifecycle bool
 	skipUnauth        bool
@@ -219,6 +219,10 @@ func (m *Miner) Run(ctx context.Context) error {
 
 	g.Go(func() error {
 		return m.runContextRefresh(ctx)
+	})
+
+	g.Go(func() error {
+		return m.runPredictionSweeper(ctx)
 	})
 
 	if m.cfg.CategoryWatcher.Enabled && len(m.cfg.CategoryWatcher.Categories) > 0 {
