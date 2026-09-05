@@ -133,7 +133,7 @@ func Setup(cfg Config) (*Logger, error) {
 			return nil, fmt.Errorf("creating log directory %s: %w", cfg.LogDir, err)
 		}
 
-		timestamp := startupTime.Format("2003-12-31_13-10-00")
+		timestamp := startupTime.Format("2006-01-02_15-04-05")
 		filename := timestamp + ".log"
 		if cfg.AccountName != "" {
 			filename = timestamp + "_" + cfg.AccountName + ".log"
