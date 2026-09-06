@@ -1,21 +1,21 @@
 # Graph Report - twitch-miner-go  (2026-09-06)
 
 ## Corpus Check
-- 200 files · ~177,167 words
+- 200 files · ~177,401 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2175 nodes · 5026 edges · 152 communities (112 shown, 24 thin omitted)
-- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 373 edges (avg confidence: 0.85)
+- 2176 nodes · 5029 edges · 146 communities (107 shown, 23 thin omitted)
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 374 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `44222b6a`
+- Built from commit: `1f1c93ea`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- Stream
+- NewDrop
 - web/app.js
 - prediction.go
 - Deployment Guide
@@ -30,7 +30,7 @@
 - What You Must Do When Invoked
 - context.Context
 - Client
-- Batcher
+- Event
 - install-service.sh
 - Message
 - net/http.ResponseWriter
@@ -49,8 +49,8 @@
 - middleware.go
 - newTestConfigServer
 - AnalyticsServer
-- CategoryWatcherConfig
-- EventPrediction
+- time.Duration
+- .handlePredictionCreated
 - static/app.js
 - logs.js
 - buildBody
@@ -67,11 +67,11 @@
 - Miner
 - manager_test.go
 - poller_test.go
-- Event
+- settings.go
 - Contributing
 - baseNotifier
 - Poller
-- newTestMiner
+- time.Time
 - tokenChangingMock
 - graphify reference: extra exports and benchmark
 - Data flow
@@ -82,8 +82,8 @@
 - ResolveBatchConfig
 - Authentication
 - FAQ
-- DebugSnapshot
-- time.Time
+- server_test.go
+- Stream
 - Raid
 - graphify reference: query, path, explain
 - autostart_windows.go
@@ -117,7 +117,6 @@
 - pre-commit
 - mockAuthProvider
 - pre-push
-- NewStream
 - Code of Conduct
 - _run-localdev.sh
 - edit-config.sh
@@ -134,23 +133,18 @@
 - NewAnalyticsServer
 - SelectWatchSet
 - Linux Service (systemd / OpenRC)
-- NewStreamer
 - AccountConfig
-- utils.go
 - clientWithStreaks
-- TeamWatcher
-- newTestConnection
+- NewStreamer
 - Miner
 - Open
 - 1.6. Environment Variables
 - capturingNotifier
 - 1.7. Notifications
-- StreamerSettings
-- LoadTwitchFromEnv
+- Twitch
 - 1.12. Deploy to Fly.io
 - 1.5. Configuration
 - 1.11. Windows Service
-- .sendMinuteWatchedForStreamer
 
 ## God Nodes (most connected - your core abstractions)
 1. `Streamer` - 110 edges
@@ -165,25 +159,25 @@
 10. `main()` - 29 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `main()` --calls--> `RunTUI()`  [EXTRACTED]
-  cmd/config-editor/main.go → internal/configeditor/tui.go
-- `main()` --calls--> `AccountConfigToJSON()`  [EXTRACTED]
-  cmd/db-seed/main.go → internal/config/config.go
-- `main()` --calls--> `LoadAllAccountConfigs()`  [EXTRACTED]
-  cmd/db-seed/main.go → internal/config/config.go
+- `main()` --calls--> `NewServer()`  [EXTRACTED]
+  cmd/config-editor/main.go → internal/configeditor/server.go
 - `main()` --calls--> `Validate()`  [EXTRACTED]
   cmd/db-seed/main.go → internal/config/config.go
+- `main()` --calls--> `OpenPostgres()`  [EXTRACTED]
+  cmd/db-seed/main.go → internal/store/postgres.go
 - `main()` --calls--> `applyNoConsole()`  [INFERRED]
   cmd/twitch-miner-go/main.go → cmd/twitch-miner-go/tray_enabled.go
+- `main()` --calls--> `ParseKey()`  [EXTRACTED]
+  cmd/twitch-miner-go/main.go → internal/encryption/encryption.go
 
 ## Import Cycles
 - None detected.
 
-## Communities (152 total, 24 thin omitted)
+## Communities (146 total, 23 thin omitted)
 
-### Community 0 - "Stream"
-Cohesion: 0.15
-Nodes (4): time.Duration, GameInfo, Stream, Tag
+### Community 0 - "NewDrop"
+Cohesion: 0.27
+Nodes (19): NewDrop(), refTime(), TestDropUpdate_FieldUpdate_DropInstanceID(), TestDropUpdate_FieldUpdate_HasPreconditionsMet(), TestDropUpdate_FieldUpdate_IsClaimed(), TestDropUpdate_IsClaimable_Claimed(), TestDropUpdate_IsClaimable_EmptyInstanceID(), TestDropUpdate_IsClaimable_WithInstanceID() (+11 more)
 
 ### Community 1 - "web/app.js"
 Cohesion: 0.08
@@ -198,8 +192,8 @@ Cohesion: 0.18
 Nodes (9): Comparison Matrix, Deployment Guide, Deployment Options, Next Steps, Security Best Practices, Table of Contents, Troubleshooting, Troubleshooting: Docker Compose (+1 more)
 
 ### Community 4 - "testing.T"
-Cohesion: 0.13
-Nodes (30): testing.T, ParseMessage(), splitTopic(), TestMessage_String(), TestParseMessage_ChannelIDFallbackToTopicUser(), TestParseMessage_ChannelIDFromDataChannelID(), TestParseMessage_ClaimAvailable(), TestParseMessage_EmptyObject() (+22 more)
+Cohesion: 0.10
+Nodes (37): testing.T, ParseMessage(), splitTopic(), TestMessage_String(), TestParseMessage_ChannelIDFallbackToTopicUser(), TestParseMessage_ChannelIDFromDataChannelID(), TestParseMessage_ClaimAvailable(), TestParseMessage_EmptyObject() (+29 more)
 
 ### Community 5 - "DefaultBetSettings"
 Cohesion: 0.14
@@ -235,35 +229,35 @@ Nodes (26): For /graphify add and --watch, For /graphify query, For the commit h
 
 ### Community 13 - "context.Context"
 Cohesion: 0.07
-Nodes (13): context.Context, encoding/json.RawMessage, ChannelPointsContext, GameResp, GoalContribution, PlaybackAccessToken, StreamInfoResponse, TeamMember (+5 more)
+Nodes (10): context.Context, encoding/json.RawMessage, GameResp, GoalContribution, PlaybackAccessToken, TeamMember, TopStream, Client (+2 more)
 
 ### Community 14 - "Client"
-Cohesion: 0.08
-Nodes (12): sync.Map, sync.RWMutex, NewClient(), LookupGameSlug(), RegisterGameSlug(), Client, isStaleUsernameError(), NewClient() (+4 more)
+Cohesion: 0.09
+Nodes (10): sync.Map, sync.RWMutex, NewClient(), LookupGameSlug(), RegisterGameSlug(), Client, NewClient(), spadeCache (+2 more)
 
-### Community 15 - "Batcher"
-Cohesion: 0.36
-Nodes (3): batchKey, batchEntry, Batcher
+### Community 15 - "Event"
+Cohesion: 0.28
+Nodes (4): batchKey, Event, batchEntry, Batcher
 
 ### Community 16 - "install-service.sh"
 Cohesion: 0.18
 Nodes (28): ask(), banner(), confirm(), DEFAULT_CONFIG_DIR, DEFAULT_DATA_DIR, DEFAULT_ENV_FILE, DEFAULT_INSTALL_DIR, DEFAULT_LOG_LEVEL (+20 more)
 
 ### Community 17 - "Message"
-Cohesion: 0.20
-Nodes (4): extractNestedInt(), Miner, mapReasonToEvent(), Message
+Cohesion: 0.23
+Nodes (3): Miner, parseCommunityGoal(), Message
 
 ### Community 18 - "net/http.ResponseWriter"
-Cohesion: 0.05
-Nodes (67): main(), openBrowser(), accountMeta, Server, io.Reader, net/http.HandlerFunc, net/http.Request, net/http.Response (+59 more)
+Cohesion: 0.06
+Nodes (47): accountMeta, Server, io.Reader, net/http.HandlerFunc, net/http.Request, net/http.Response, net/http.ResponseWriter, net/http.ServeMux (+39 more)
 
 ### Community 19 - "CommunityGoal"
-Cohesion: 0.14
-Nodes (16): BoolFromMap(), FloatFromAny(), IntFromAny(), IntFromMap(), StringFromMap(), TestBoolFromMap(), TestFloatFromAny(), TestIntFromAny() (+8 more)
+Cohesion: 0.20
+Nodes (8): ChannelPointsContext, BoolFromMap(), TestBoolFromMap(), CommunityGoalFromGQL(), CommunityGoalFromPubSub(), CommunityGoal, NewCommunityGoal(), PointsMultiplier
 
 ### Community 20 - "newMockTransport"
 Cohesion: 0.09
-Nodes (65): bytes.Buffer, NewForTest(), NewClientForTest(), NewCampaign(), boolPtr(), Client, makeStreamerWithDrop(), makeStreamerWithDropAtProgress() (+57 more)
+Nodes (67): bytes.Buffer, NewForTest(), NewClientForTest(), NewCampaign(), isStaleUsernameError(), boolPtr(), Client, makeStreamerWithDrop() (+59 more)
 
 ### Community 22 - "colorHandler"
 Cohesion: 0.18
@@ -313,13 +307,13 @@ Nodes (15): net/http/httptest.ResponseRecorder, configRequest(), AnalyticsServer
 Cohesion: 0.23
 Nodes (7): net/http.Server, AnalyticsServer, AuthStatusFunc, DebugSnapshotFunc, MinerCountFunc, NotifyTestFunc, StreamerFunc
 
-### Community 34 - "CategoryWatcherConfig"
-Cohesion: 0.17
-Nodes (5): CategoryConfig, jsonDuration, TeamConfig, CategoryWatcherConfig, TeamWatcherConfig
+### Community 34 - "time.Duration"
+Cohesion: 0.14
+Nodes (6): CategoryConfig, jsonDuration, TeamConfig, time.Duration, CategoryWatcherConfig, TeamWatcherConfig
 
-### Community 35 - "EventPrediction"
-Cohesion: 0.18
-Nodes (7): StringFromAny(), parseOutcomes(), Miner, isTerminalPredictionStatus(), isTransientPredictionError(), EventPrediction, PredictionResult
+### Community 35 - ".handlePredictionCreated"
+Cohesion: 0.12
+Nodes (16): FloatFromAny(), IntFromAny(), IntFromMap(), StringFromAny(), StringFromMap(), TestFloatFromAny(), TestIntFromAny(), TestIntFromMap() (+8 more)
 
 ### Community 36 - "static/app.js"
 Cohesion: 0.30
@@ -346,16 +340,16 @@ Cohesion: 0.49
 Nodes (10): NewBatcher(), boolPtr(), newTestLogger(), TestBatcher_BuffersAndFlushes(), TestBatcher_ImmediateEventsBypassBuffer(), TestBatcher_MaxEntriesSplitsMessages(), TestBatcher_SingleEntryNotBatched(), TestBatcher_StopFlushesRemaining() (+2 more)
 
 ### Community 44 - "AccountRow"
-Cohesion: 0.06
-Nodes (11): fatalf(), main(), database/sql.DB, sync.Once, OpenPostgres(), scanRow(), AccountRow, fakePollerStore (+3 more)
+Cohesion: 0.07
+Nodes (9): database/sql.DB, sync.Once, OpenPostgres(), scanRow(), AccountRow, fakePollerStore, fakeStore, NoopStore (+1 more)
 
 ### Community 45 - ".handle2FA"
 Cohesion: 0.42
 Nodes (3): loginResponse, Authenticator, promptLine()
 
 ### Community 46 - "Manager"
-Cohesion: 0.22
-Nodes (6): context.CancelFunc, Manager, NewManager(), NewMiner(), Twitch, entry
+Cohesion: 0.26
+Nodes (4): context.CancelFunc, Manager, NewManager(), entry
 
 ### Community 47 - "Provider setup"
 Cohesion: 0.17
@@ -370,8 +364,8 @@ Cohesion: 0.24
 Nodes (9): os.File, sync/atomic.Value, DefaultConfig(), Logger, NotifyFunc, Setup(), TestLogFileNameEncodesFullStartupTimestamp(), discardLogger() (+1 more)
 
 ### Community 50 - "Miner"
-Cohesion: 0.14
-Nodes (5): time.Timer, Miner, oneTimeEventMessage(), streakDir(), API
+Cohesion: 0.13
+Nodes (6): time.Timer, Miner, NewMiner(), oneTimeEventMessage(), streakDir(), API
 
 ### Community 51 - "manager_test.go"
 Cohesion: 0.31
@@ -381,9 +375,9 @@ Nodes (14): newLiveManager(), newTestManager(), testConfig(), TestManager_Entrie
 Cohesion: 0.44
 Nodes (10): minimalConfigJSON(), newTestPoller(), TestPoller_DisabledAccountStopsMiner(), TestPoller_InvalidConfigSkipped(), TestPoller_MultipleAccounts(), TestPoller_NewAccountStartsMiner(), TestPoller_RemovedAccountStopsMiner(), TestPoller_SameTimestampNoRestart() (+2 more)
 
-### Community 53 - "Event"
-Cohesion: 0.29
-Nodes (5): AllEvents(), Event, ParseEvent(), ParseFollowersOrder(), FollowersOrder
+### Community 53 - "settings.go"
+Cohesion: 0.47
+Nodes (4): AllEvents(), ParseEvent(), ParseFollowersOrder(), FollowersOrder
 
 ### Community 54 - "Contributing"
 Cohesion: 0.33
@@ -397,9 +391,13 @@ Nodes (9): net/http.Client, sync/atomic.Int64, baseNotifier, Discord, Gotify, Ma
 Cohesion: 0.33
 Nodes (4): NewPoller(), Store, minerManager, Poller
 
-### Community 57 - "newTestMiner"
+### Community 57 - "time.Time"
+Cohesion: 0.05
+Nodes (49): time.Time, Miner, Miner, newTestMiner(), raidMessage(), TestHandleRaid_Dedup(), TestHandleRaid_EmptyRaidID(), TestHandleRaid_FollowRaidDisabled() (+41 more)
+
+### Community 58 - "tokenChangingMock"
 Cohesion: 0.14
-Nodes (29): Miner, newTestMiner(), raidMessage(), TestHandleRaid_Dedup(), TestHandleRaid_EmptyRaidID(), TestHandleRaid_FollowRaidDisabled(), TestHandleRaid_MissingRaidData(), TestHandleRaid_NoStreamer() (+21 more)
+Nodes (8): Connection, newTestConnection(), TestHandleResponse_ERR_BADAUTH_AlreadyRefreshedByAnother(), TestHandleResponse_ERR_BADAUTH_RefreshesAndResubscribes(), TestHandleResponse_ERR_BADAUTH_RefreshFailsNoResubscribe(), TestHandleResponse_OtherErrors_NoRefresh(), TestHandleResponse_ReconnectClosesConnection(), tokenChangingMock
 
 ### Community 59 - "graphify reference: extra exports and benchmark"
 Cohesion: 0.22
@@ -437,13 +435,13 @@ Nodes (7): Authentication, Cookie persistence, Obtaining an OAuth token, Priorit
 Cohesion: 0.29
 Nodes (7): Accounts & configuration, Behaviour & resources, Config editor & tray, Docker & Fly.io, FAQ, Running, Telemetry & data
 
-### Community 68 - "DebugSnapshot"
-Cohesion: 0.21
-Nodes (7): Miner, Connection, ConnectionSnapshot, Pool, DebugPredictionEntry, DebugSnapshot, DebugWatchingEntry
+### Community 68 - "server_test.go"
+Cohesion: 0.30
+Nodes (18): apiRequest(), newTestServer(), TestCleanConfig(), TestCreateAccount(), TestCreateAccountConflict(), TestCreateAccountInvalidName(), TestCreateAccountValidationFail(), TestDeleteAccount() (+10 more)
 
-### Community 69 - "time.Time"
+### Community 69 - "Stream"
 Cohesion: 0.06
-Nodes (33): time.Time, Campaign, NewDrop(), Percentage(), refTime(), TestDropUpdate_FieldUpdate_DropInstanceID(), TestDropUpdate_FieldUpdate_HasPreconditionsMet(), TestDropUpdate_FieldUpdate_IsClaimed() (+25 more)
+Nodes (22): StreamInfoResponse, Campaign, Percentage(), GameInfo, Stream, Tag, NewStream(), TestHealthyChannelIsNotStalled() (+14 more)
 
 ### Community 71 - "graphify reference: query, path, explain"
 Cohesion: 0.33
@@ -466,8 +464,8 @@ Cohesion: 0.40
 Nodes (3): os/exec.Cmd, detach(), detach()
 
 ### Community 76 - "tui.go"
-Cohesion: 0.22
-Nodes (20): editAccountFields, applyCategoryWatcherSection(), applyEditFields(), applyFeaturesSection(), applyStreamersSection(), applyTeamWatcherSection(), boolVal(), intVal() (+12 more)
+Cohesion: 0.18
+Nodes (22): main(), openBrowser(), editAccountFields, applyCategoryWatcherSection(), applyEditFields(), applyFeaturesSection(), applyStreamersSection(), applyTeamWatcherSection() (+14 more)
 
 ### Community 78 - "CategoryWatcher"
 Cohesion: 0.50
@@ -475,7 +473,7 @@ Nodes (3): CategoryWatcher, NewCategoryWatcher(), categoryEntry
 
 ### Community 79 - "testing.B"
 Cohesion: 0.07
-Nodes (43): AccountConfig, net/url.URL, testing.B, AccountConfigFromJSON(), AccountConfigToJSON(), applyDefaults(), applyEnvOverrides(), benchConfig() (+35 more)
+Nodes (45): AccountConfig, fatalf(), main(), net/url.URL, testing.B, AccountConfigFromJSON(), AccountConfigToJSON(), applyDefaults() (+37 more)
 
 ### Community 80 - "CLAUDE.md"
 Cohesion: 0.15
@@ -506,12 +504,12 @@ Cohesion: 0.50
 Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphify reference: incremental update and cluster-only
 
 ### Community 89 - "Authenticator"
-Cohesion: 0.10
-Nodes (6): generateDeviceID(), GenerateHex(), Authenticator, NewAuthenticator(), AuthConfig, Client
+Cohesion: 0.12
+Nodes (4): generateDeviceID(), GenerateHex(), Authenticator, NewAuthenticator()
 
 ### Community 104 - "findProc"
-Cohesion: 0.38
-Nodes (5): golang.org/x/sys/windows.LazyProc, findProc(), HideConsole(), TestGetConsoleWindowResolves(), TestShowWindowResolves()
+Cohesion: 0.36
+Nodes (6): golang.org/x/sys/windows.LazyProc, findProc(), HideConsole(), TestGetConsoleWindowResolves(), TestShowWindowResolves(), TestWindowResolutionProcsResolve()
 
 ### Community 106 - "Sender"
 Cohesion: 0.26
@@ -520,10 +518,6 @@ Nodes (9): log/slog.Logger, detectDeployment(), LoadConfigFromEnv(), loadOrGener
 ### Community 107 - "checkWithURL"
 Cohesion: 0.11
 Nodes (29): runAutoUpdate(), CheckForUpdate(), checkWithURL(), DownloadAsset(), ExitForRestart(), findAssetURL(), FormatNotification(), isGitRepo() (+21 more)
-
-### Community 111 - "NewStream"
-Cohesion: 0.33
-Nodes (10): NewStream(), TestHealthyChannelIsNotStalled(), TestMarkMinuteWatchAttemptStamps(), TestMinuteWatchedAccumulatesAcrossSegments(), TestMinuteWatchedCountsContinuousWatching(), TestMinuteWatchedIgnoresUnwatchedGaps(), TestNeverAttemptedIsNotStalled(), TestNeverCreditedIsNotStalled() (+2 more)
 
 ### Community 112 - "Code of Conduct"
 Cohesion: 0.22
@@ -542,8 +536,8 @@ Cohesion: 0.25
 Nodes (8): Config Editor & Tray in Service Mode, File Locations (defaults), How It Works, Managing the Service, Prerequisites, Quick Start, Uninstalling, Windows Service
 
 ### Community 129 - "Streamer"
-Cohesion: 0.11
-Nodes (17): Priority, ParsePriority(), Streamer, anyStreakPending(), applyPriority(), applyPriorityDrops(), applyPriorityEndingSoonest(), applyPriorityLowAvailability() (+9 more)
+Cohesion: 0.10
+Nodes (20): Priority, ParsePriority(), Streamer, anyStreakPending(), applyPriority(), applyPriorityDrops(), applyPriorityEndingSoonest(), applyPriorityLowAvailability() (+12 more)
 
 ### Community 130 - "Required Configuration"
 Cohesion: 0.33
@@ -565,29 +559,17 @@ Nodes (15): WatchSet, SelectWatchSet(), rotationOptions(), streakPending(), stre
 Cohesion: 0.40
 Nodes (5): File Locations (defaults), Linux Service (systemd / OpenRC), Managing the Service, Quick Start, Uninstalling
 
-### Community 135 - "NewStreamer"
-Cohesion: 0.54
-Nodes (7): DefaultStreamerSettings(), NewStreamer(), TestSetOnline_AlreadyOnline_NoOp(), TestSetOnline_Carryover_FirstOnline(), TestSetOnline_Carryover_StreakResolved_LongGap(), TestSetOnline_Carryover_StreakResolved_ShortGap(), TestSetOnline_Carryover_StreakUnresolved_ShortGap()
-
 ### Community 136 - "AccountConfig"
-Cohesion: 0.29
-Nodes (4): FeaturesConfig, FollowersConfig, AccountConfig, fakeMgr
-
-### Community 137 - "utils.go"
-Cohesion: 0.21
-Nodes (10): formatFloat(), Millify(), OpenBrowser(), Percentage(), Slugify(), TestFloatRound(), TestMillify(), TestPercentage() (+2 more)
+Cohesion: 0.25
+Nodes (5): FeaturesConfig, FollowersConfig, AccountConfig, AuthConfig, fakeMgr
 
 ### Community 138 - "clientWithStreaks"
 Cohesion: 0.35
 Nodes (9): clientWithStreaks(), Client, streamerWithBroadcast(), TestRestoreClearsFlagForKnownBroadcast(), TestRestoreDoesNotQueryWhenStreakAlreadySettled(), TestRestoreIsNoOpWithoutAStore(), TestRestoreKeepsChasingNewBroadcast(), TestRestoreKeepsChasingUnknownChannel() (+1 more)
 
-### Community 139 - "TeamWatcher"
-Cohesion: 0.18
-Nodes (4): Miner, pollLoop(), TeamWatcher, NewTeamWatcher()
-
-### Community 140 - "newTestConnection"
-Cohesion: 0.43
-Nodes (7): Connection, newTestConnection(), TestHandleResponse_ERR_BADAUTH_AlreadyRefreshedByAnother(), TestHandleResponse_ERR_BADAUTH_RefreshesAndResubscribes(), TestHandleResponse_ERR_BADAUTH_RefreshFailsNoResubscribe(), TestHandleResponse_OtherErrors_NoRefresh(), TestHandleResponse_ReconnectClosesConnection()
+### Community 139 - "NewStreamer"
+Cohesion: 0.12
+Nodes (15): Miner, DefaultStreamerSettings(), StreamerSettings, NewStreamer(), ParseChatPresence(), ShouldJoinChat(), TestSetOnline_AlreadyOnline_NoOp(), TestSetOnline_Carryover_FirstOnline() (+7 more)
 
 ### Community 142 - "Open"
 Cohesion: 0.33
@@ -605,13 +587,9 @@ Nodes (3): newCapturingNotifier(), TestNotifyFuncDeliversChannelInBetBody(), cap
 Cohesion: 0.33
 Nodes (6): 1.7.1. Supported Providers, 1.7.2. Example: Telegram, 1.7.3. Event Filtering, 1.7.4. Notification Batching, 1.7.5. Testing Notifications, 1.7. Notifications
 
-### Community 146 - "StreamerSettings"
-Cohesion: 0.48
-Nodes (4): StreamerSettings, ParseChatPresence(), ShouldJoinChat(), ChatPresence
-
-### Community 147 - "LoadTwitchFromEnv"
-Cohesion: 0.38
-Nodes (5): envOrDefault(), LoadTwitchFromEnv(), TestClientIDsForGQL_Dedup(), TestLoadTwitchFromEnv_Defaults(), TestLoadTwitchFromEnv_EnvOverride()
+### Community 147 - "Twitch"
+Cohesion: 0.31
+Nodes (6): envOrDefault(), Twitch, LoadTwitchFromEnv(), TestClientIDsForGQL_Dedup(), TestLoadTwitchFromEnv_Defaults(), TestLoadTwitchFromEnv_EnvOverride()
 
 ### Community 148 - "1.12. Deploy to Fly.io"
 Cohesion: 0.40
@@ -625,24 +603,20 @@ Nodes (4): 1.5.1. Quick Start, 1.5.2. Config Editor, 1.5.3. Database Mode (optio
 Cohesion: 0.67
 Nodes (3): 1.11.1. Managing the Service, 1.11.2. Uninstalling, 1.11. Windows Service
 
-### Community 151 - ".sendMinuteWatchedForStreamer"
-Cohesion: 0.43
-Nodes (4): encodePayload(), getLastURL(), getSecondLastURL(), Client
-
 ## Knowledge Gaps
 - **316 isolated node(s):** `_run-localdev.sh script`, `_run.sh script`, `github.com/Guliveer/twitch-miner-go`, `TokenErrorResponse`, `operationBehavior` (+311 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 571 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **24 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **23 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Streamer` connect `Streamer` to `Stream`, `DefaultBetSettings`, `SelectWatchSet`, `NewStreamer`, `clientWithStreaks`, `TeamWatcher`, `context.Context`, `Client`, `Miner`, `Message`, `StreamerSettings`, `CommunityGoal`, `net/http.ResponseWriter`, `newMockTransport`, `.sendMinuteWatchedForStreamer`, `SelectStreamersToWatch`, `Connection`, `Pool`, `AnalyticsServer`, `EventPrediction`, `Miner`, `newTestMiner`, `time.Time`, `Raid`, `CategoryWatcher`, `Authenticator`?**
-  _High betweenness centrality (0.098) - this node is a cross-community bridge._
-- **Why does `Logger` connect `Logger` to `NewAnalyticsServer`, `Client`, `Dispatcher`, `sync.Mutex`, `TeamWatcher`, `Client`, `Batcher`, `net/http.ResponseWriter`, `newMockTransport`, `Connection`, `main`, `Pool`, `autostart_unix.go`, `middleware.go`, `AnalyticsServer`, `NewBatcher`, `Manager`, `Miner`, `Event`, `Poller`, `CategoryWatcher`, `testing.B`, `Authenticator`, `Sender`, `checkWithURL`?**
-  _High betweenness centrality (0.076) - this node is a cross-community bridge._
-- **Why does `Miner` connect `Miner` to `Streamer`, `EventPrediction`, `time.Time`, `AccountConfig`, `Dispatcher`, `.pollForToken`, `sync.Mutex`, `TeamWatcher`, `Client`, `Manager`, `CategoryWatcher`, `Logger`, `Message`, `Event`, `Connection`, `Pool`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+- **Why does `Streamer` connect `Streamer` to `DefaultBetSettings`, `SelectWatchSet`, `clientWithStreaks`, `NewStreamer`, `Miner`, `Client`, `context.Context`, `Message`, `net/http.ResponseWriter`, `CommunityGoal`, `newMockTransport`, `SelectStreamersToWatch`, `Connection`, `Pool`, `AnalyticsServer`, `.handlePredictionCreated`, `Miner`, `time.Time`, `Stream`, `Raid`, `CategoryWatcher`?**
+  _High betweenness centrality (0.104) - this node is a cross-community bridge._
+- **Why does `Logger` connect `Logger` to `NewAnalyticsServer`, `Client`, `Dispatcher`, `sync.Mutex`, `NewStreamer`, `Client`, `Event`, `net/http.ResponseWriter`, `newMockTransport`, `Connection`, `main`, `Pool`, `autostart_unix.go`, `middleware.go`, `AnalyticsServer`, `NewBatcher`, `Manager`, `Miner`, `Poller`, `CategoryWatcher`, `testing.B`, `Authenticator`, `Sender`, `checkWithURL`?**
+  _High betweenness centrality (0.075) - this node is a cross-community bridge._
+- **Why does `Miner` connect `Miner` to `Streamer`, `AccountConfig`, `Dispatcher`, `.pollForToken`, `sync.Mutex`, `NewStreamer`, `Client`, `Event`, `CategoryWatcher`, `Logger`, `Message`, `Twitch`, `Manager`, `time.Time`, `Pool`, `Connection`?**
+  _High betweenness centrality (0.054) - this node is a cross-community bridge._
 - **Are the 23 inferred relationships involving `newMockTransport()` (e.g. with `TestLogDropProgress_MixedPrintable()` and `TestLogDropProgress_NilPreconditions()`) actually correct?**
   _`newMockTransport()` has 23 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `_run-localdev.sh script`, `_run.sh script`, `github.com/Guliveer/twitch-miner-go` to the rest of the system?**
@@ -650,4 +624,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `web/app.js` be split into smaller, more focused modules?**
   _Cohesion score 0.0825508607198748 - nodes in this community are weakly interconnected._
 - **Should `testing.T` be split into smaller, more focused modules?**
-  _Cohesion score 0.13446969696969696 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10121951219512196 - nodes in this community are weakly interconnected._

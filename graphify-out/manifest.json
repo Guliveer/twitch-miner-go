@@ -1251,9 +1251,9 @@
     "semantic_hash": ""
   },
   "internal/tray/tray_console_windows.go": {
-    "mtime": 1788689330.2043035,
-    "seen": 1788689395.1113307,
-    "ast_hash": "2b2ebc6f76aad5fcf73157971b0b7aae",
+    "mtime": 1788691298.9015417,
+    "seen": 1788691361.5793293,
+    "ast_hash": "49a9e164f315cccd5fe70c485a9cbd0e",
     "semantic_hash": ""
   },
   ".github/wiki/Advanced-Guide.md": {
@@ -1371,9 +1371,9 @@
     "semantic_hash": ""
   },
   "internal/tray/tray_console_windows_test.go": {
-    "mtime": 1788689330.2043035,
-    "seen": 1788689395.1113331,
-    "ast_hash": "c83cc76345754cbc5fcc7f04672f82e2",
+    "mtime": 1788691311.7752025,
+    "seen": 1788691361.579331,
+    "ast_hash": "047d1cde1a571d0163b1f9e193b215d6",
     "semantic_hash": ""
   }
 }
