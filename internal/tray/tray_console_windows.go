@@ -24,9 +24,37 @@ func HideConsole() {
 		// No console attached; nothing to hide.
 		return
 	}
-	// SW_HIDE = 0.
+
+	// On Windows 11, GetConsoleWindow returns the PseudoConsoleWindow host
+	// that Windows Terminal attaches to, not the CASCADIA window the user
+	// sees. Hiding the pseudo window only minimizes the terminal, and
+	// hiding its owner directly does not stick unless the terminal is the
+	// foreground window first. Resolve the owner, focus it, then hide the
+	// window that actually took the focus.
+	owner := console
+	if getWindow := findProc("GetWindow", "user32.dll"); getWindow != nil {
+		// GW_OWNER = 4.
+		if w, _, _ := getWindow.Call(console, 4); w != 0 {
+			owner = w
+		}
+	}
+
+	if setForeground := findProc("SetForegroundWindow", "user32.dll"); setForeground != nil {
+		_, _, _ = setForeground.Call(owner)
+	}
+
+	target := owner
+	if getForeground := findProc("GetForegroundWindow", "user32.dll"); getForeground != nil {
+		if fg, _, _ := getForeground.Call(); fg != 0 && (fg == owner || fg == console) {
+			target = fg
+		}
+	}
+
+	// SW_HIDE = 0. Only windows related to this console are hidden; the
+	// foreground guard above prevents hiding another app's window when
+	// SetForegroundWindow was denied by the foreground lock.
 	if showWindow := findProc("ShowWindow", "user32.dll"); showWindow != nil {
-		_, _, _ = showWindow.Call(console, 0)
+		_, _, _ = showWindow.Call(target, 0)
 	}
 }
 
