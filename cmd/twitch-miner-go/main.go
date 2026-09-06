@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/Guliveer/twitch-miner-go/internal/configeditor"
+	"github.com/Guliveer/twitch-miner-go/internal/encryption"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
 	"github.com/Guliveer/twitch-miner-go/internal/managedminer"
 	"github.com/Guliveer/twitch-miner-go/internal/miner"
@@ -140,6 +141,17 @@ func main() {
 		playStartupAnimation(colored)
 	}
 	rootLog.Info("Starting twitch-miner-go", "version", version.String())
+
+	// Validate before any account is constructed: an unparseable key used to be
+	// logged per account and then downgraded to a plaintext cookie jar, so Twitch
+	// tokens were stored in cleartext while the operator believed otherwise.
+	if envKey := os.Getenv("COOKIE_ENCRYPTION_KEY"); envKey != "" {
+		if _, err := encryption.ParseKey(envKey); err != nil {
+			rootLog.Error("Invalid COOKIE_ENCRYPTION_KEY — refusing to start with cookies unencrypted",
+				"error", err, "hint", "generate a key with ./tools/gen-cookie-key.sh")
+			os.Exit(1)
+		}
+	}
 
 	twitchRuntime := runtimecfg.LoadTwitchFromEnv(rootLog.Logger)
 
@@ -319,13 +331,32 @@ func startConfigEditor(ctx context.Context, rootLog *logger.Logger, configDir st
 
 func setupAnalyticsServer(addr string, rootLog *logger.Logger, mgr *managedminer.Manager, accountStore store.Store) *server.AnalyticsServer {
 	var dashboardAuth *server.DashboardAuth
-	if user := os.Getenv("DASHBOARD_USER"); user != "" {
-		dashboardAuth = &server.DashboardAuth{
-			Username:     user,
-			PasswordHash: os.Getenv("DASHBOARD_PASSWORD_SHA256"),
+	user := os.Getenv("DASHBOARD_USER")
+	passwordHash := os.Getenv("DASHBOARD_PASSWORD_SHA256")
+	dashboardAPIKey := os.Getenv("DASHBOARD_API_KEY")
+
+	// An API key alone already protects every route, so a half-filled Basic Auth
+	// pair is harmless next to it. Without one, only a hash without a username
+	// actually leaves the dashboard open: the server skips its auth wrapper when
+	// neither credentials nor a key are configured. A username without a hash is
+	// the opposite failure — nothing can ever authenticate — so it only warns.
+	if dashboardAPIKey == "" {
+		if user == "" && passwordHash != "" {
+			rootLog.Error("DASHBOARD_PASSWORD_SHA256 is set but DASHBOARD_USER is empty — the dashboard would be served with no authentication at all")
+			os.Exit(1)
+		}
+		if user != "" && passwordHash == "" {
+			rootLog.Warn("DASHBOARD_USER is set but DASHBOARD_PASSWORD_SHA256 is empty — every dashboard request will be rejected",
+				"hint", "generate the hash with ./tools/gen-dashboard-auth.sh")
 		}
 	}
-	dashboardAPIKey := os.Getenv("DASHBOARD_API_KEY")
+
+	if user != "" {
+		dashboardAuth = &server.DashboardAuth{
+			Username:     user,
+			PasswordHash: passwordHash,
+		}
+	}
 	srv := server.NewAnalyticsServer(addr, rootLog, dashboardAuth, dashboardAPIKey)
 
 	srv.SetStreamerFunc(func() []*model.Streamer {
@@ -338,6 +369,8 @@ func setupAnalyticsServer(addr string, rootLog *logger.Logger, mgr *managedminer
 		}
 		return all
 	})
+
+	srv.SetMinerCountFunc(mgr.LiveCount)
 
 	srv.SetNotifyTestFunc(func(ctx context.Context) []error {
 		return testNotifiers(ctx, mgr)
