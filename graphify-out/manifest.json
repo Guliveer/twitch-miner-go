@@ -12,9 +12,9 @@
     "semantic_hash": ""
   },
   "cmd/twitch-miner-go/main.go": {
-    "mtime": 1788687057.3574345,
-    "seen": 1788688010.113646,
-    "ast_hash": "4a3c1d17f6bfcfae186d51c8e1508bdb",
+    "mtime": 1788696985.8240871,
+    "seen": 1788697115.27203,
+    "ast_hash": "2c101926c442ef62cc7f01b016db20b8",
     "semantic_hash": ""
   },
   "go.mod": {
@@ -762,9 +762,9 @@
     "semantic_hash": ""
   },
   "DEPLOYMENT.md": {
-    "mtime": 1788626314.703396,
-    "seen": 1788686728.2148063,
-    "ast_hash": "12425435d125bf167edc9b6f97b17789",
+    "mtime": 1788697044.803586,
+    "seen": 1788697115.285659,
+    "ast_hash": "37b92dba51828599768da72bced9852e",
     "semantic_hash": ""
   },
   "GEMINI.md": {
@@ -780,9 +780,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1788695120.8591073,
-    "seen": 1788695444.3790932,
-    "ast_hash": "d738ec7fb2ae91099f4480e7c5a4c14c",
+    "mtime": 1788697042.610818,
+    "seen": 1788697115.2858653,
+    "ast_hash": "b75715199ec4772c776e7ef87a4f165b",
     "semantic_hash": ""
   },
   "SECURITY.md": {
@@ -834,9 +834,9 @@
     "semantic_hash": ""
   },
   "_run.sh": {
-    "mtime": 1788211796.545918,
-    "seen": 1788555176.5097423,
-    "ast_hash": "bc38618e634f955bdd8536b1cfb79a95",
+    "mtime": 1788696335.717705,
+    "seen": 1788696500.9992666,
+    "ast_hash": "b1c669c7171928979e0a3cd5de751c17",
     "semantic_hash": ""
   },
   "internal/configeditor/server_test.go": {
@@ -1047,9 +1047,9 @@
     "semantic_hash": ""
   },
   "_run-localdev.sh": {
-    "mtime": 1788211796.545918,
-    "seen": 1788555176.5097415,
-    "ast_hash": "7405b813e7f688bda096ec60a9a4a264",
+    "mtime": 1788696337.2352562,
+    "seen": 1788696500.999265,
+    "ast_hash": "7cf031983f297dcd2076798a07f340d2",
     "semantic_hash": ""
   },
   "internal/auth/cookies_test.go": {
@@ -1173,9 +1173,9 @@
     "semantic_hash": ""
   },
   "cmd/twitch-miner-go/tray_enabled.go": {
-    "mtime": 1788626314.705396,
-    "seen": 1788686728.2061927,
-    "ast_hash": "264dff0f81a2ebdb01ce32dd0e42cfb0",
+    "mtime": 1788697088.1372743,
+    "seen": 1788697115.272032,
+    "ast_hash": "f4abc609ca93cd25b9b35f342c2014a4",
     "semantic_hash": ""
   },
   "internal/telemetry/instancefile_unix.go": {
@@ -1239,9 +1239,9 @@
     "semantic_hash": ""
   },
   "internal/tray/tray.go": {
-    "mtime": 1788695088.6843145,
-    "seen": 1788695444.3733222,
-    "ast_hash": "b3764e432db37437ad64504993dd234f",
+    "mtime": 1788697009.9066882,
+    "seen": 1788697115.2799387,
+    "ast_hash": "1909e8ba3748bd1a9409018a4953b610",
     "semantic_hash": ""
   },
   "internal/tray/tray_console_other.go": {
