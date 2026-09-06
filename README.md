@@ -120,6 +120,8 @@ _run.bat
 ```
 
 > The scripts build the binary and run it in one step. You can also build manually with `go build -o twitch-miner-go ./cmd/twitch-miner-go`.
+>
+> **Console window:** `_run.sh` / `_run.bat` pass `-no-console`, so on Windows the terminal window hides once the miner is running (bring it back with tray menu **Show Terminal**). Use `_run-localdev.sh` / `_run-localdev.bat` for local development — they keep the console visible and add dev-friendly flags (`-no-lifecycle-notify -skip-unauth -no-banner`).
 
 ### 1.4.1. Flags
 
@@ -139,7 +141,7 @@ _run.bat
 | `-log-no-time`           | `false`   | Omit timestamps in console logs (useful when the platform adds its own, e.g. Fly.io)   |
 | `-config-editor-port`    | `8070`    | Port for the embedded config editor (bound to `localhost` only)                        |
 | `-no-tray`               | `false`   | Disable the system tray icon (e.g. headless/service environments)                       |
-| `-no-console`            | `false`   | Hide the console window on startup (Windows only; used by autostart entries)            |
+| `-no-console`            | `false`   | Hide the console window on startup (Windows only; used by autostart entries and the `_run` scripts, which pass it by default)            |
 
 ## 1.5. Configuration
 

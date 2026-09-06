@@ -8,4 +8,5 @@ REM Usage: _run-localdev.bat [flags]
 REM Example: _run-localdev.bat -config configs -port 9090 -log-level debug
 
 cd /d "%~dp0"
+set TWITCH_MINER_RUN_LOCALDEV=1
 _run.bat -no-lifecycle-notify -skip-unauth -no-banner %*

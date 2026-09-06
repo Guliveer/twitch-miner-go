@@ -100,7 +100,7 @@ func main() {
 	noBanner := flag.Bool("no-banner", false, "Suppress the startup banner animation")
 	configEditorPort := flag.Int("config-editor-port", 8070, "Port for the embedded config editor (bound to localhost only)")
 	noTray := flag.Bool("no-tray", false, "Disable the system tray icon (e.g. headless/service environments)")
-	noConsole := flag.Bool("no-console", false, "Hide the console window on startup (Windows only; used by autostart entries)")
+	noConsole := flag.Bool("no-console", false, "Hide the console window on startup (Windows only; used by autostart entries and the _run scripts)")
 	flag.Parse()
 
 	if *showVersion {
