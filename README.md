@@ -120,6 +120,8 @@ _run.bat
 ```
 
 > The scripts build the binary and run it in one step. You can also build manually with `go build -o twitch-miner-go ./cmd/twitch-miner-go`.
+>
+> **Console window:** `_run.sh` / `_run.bat` pass `-no-console`, so on Windows the terminal window hides once the miner is running (bring it back with tray menu **Show Terminal**). Use `_run-localdev.sh` / `_run-localdev.bat` for local development — they keep the console visible and add dev-friendly flags (`-no-lifecycle-notify -skip-unauth -no-banner`).
 
 ### 1.4.1. Flags
 
@@ -139,7 +141,7 @@ _run.bat
 | `-log-no-time`           | `false`   | Omit timestamps in console logs (useful when the platform adds its own, e.g. Fly.io)   |
 | `-config-editor-port`    | `8070`    | Port for the embedded config editor (bound to `localhost` only)                        |
 | `-no-tray`               | `false`   | Disable the system tray icon (e.g. headless/service environments)                       |
-| `-no-console`            | `false`   | Hide the console window on startup (Windows only; used by autostart entries)            |
+| `-no-console`            | `false`   | Hide the console window on startup (Windows only; used by autostart entries and the `_run` scripts, which pass it by default)            |
 
 ## 1.5. Configuration
 
@@ -173,8 +175,26 @@ features:
 
 max_watch_streams: 2
 
+# While any live channel still owes a watch streak, the watch set narrows to
+# this many streams so the streak actually lands (Twitch only credits about two
+# concurrent streams; a wider set lets Twitch pick and no streak sticks).
+# Each channel holds its slot until the streak arrives or watch_streak_minutes
+# elapse, then the next pending channel takes over. Set to 0 to disable.
+#
+# Collected streaks are persisted to {DATA_DIR}/streaks/{account}.json, keyed by
+# broadcast ID, so a restart does not spend slot time chasing streaks Twitch has
+# already paid out. A channel that starts a new broadcast is chased again.
+streak_watch_streams: 2
+watch_streak_minutes: 10
+
+# Channels the PREFERRED priority picks first, in this order.
+preferred_streamers:
+  - jimpanse
+  - insym
+
 priority:
   - STREAK
+  - PREFERRED
   - DROPS
   - ORDER
 
@@ -212,16 +232,19 @@ followers:
 ### 1.5.2. Config Editor
 
 The `twitch-miner-go` binary itself embeds the config editor. When the miner is
-running, the editor is always available at **http://localhost:8070** (bound to
-`localhost` only — no other device on your network can reach it), so you can
-manage account configs while the miner is running without a separate program.
+running in **file mode**, the editor is always available at
+**http://localhost:8070** (bound to `localhost` only — no other device on your
+network can reach it), so you can manage account configs while the miner is
+running without a separate program. In **DB mode** the editor is not started
+(port 8070 stays closed) — account configs are managed via the REST API and
+[twitch-miner-go-dashboard](#153-database-mode-optional) instead.
 
 On Windows, Linux and macOS desktops a **system tray icon** is shown with
 quick links: left-click opens the dashboard, right-click shows a menu with
-**Dashboard**, **Config Editor**, a **Service** submenu (install/start/stop/
+**Dashboard**, **Config Editor** (hidden in DB mode), a **Service** submenu (install/start/stop/
 restart/status/uninstall, delegating to the platform installer script), a
 **Startup** submenu (start on logon, start at boot via the service installer),
-**Hide Console** (Windows only), and **Exit** (to stop the miner gracefully).
+**Hide/Show Terminal** (Windows only, toggles the terminal window), and **Exit** (to stop the miner gracefully).
 The tray is skipped automatically when running as a Windows service (session 0
 has no desktop) or when `-no-tray` is set. The embedded editor's port can be
 changed with `-config-editor-port`. Note that on macOS the tray requires cgo,
@@ -277,6 +300,10 @@ DB_DSN=postgresql://user:password@host:5432/dbname?sslmode=require
 ```
 
 The schema and migrations run automatically on first connection (via [goose](https://github.com/pressly/goose)).
+
+> **Note:** In DB mode the embedded config editor is **not** started (port 8070
+> stays closed) and the tray menu does not offer **Config Editor** — account
+> configs are managed exclusively through the database.
 
 **Migrate existing YAML configs to DB:**
 
@@ -345,7 +372,7 @@ For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN
 | `SKIP_UNAUTH`               | Set to `true` to skip accounts with no valid credentials instead of prompting for device code login | `false`          |
 | `NO_BANNER`                 | Set to `true` to suppress the startup banner animation                                        | `false`          |
 | `NO_TRAY`                   | Set to `true` to disable the system tray icon (headless/service/container environments)       | `false`          |
-| `LOG_DIR`                   | Enable file logging; directory for `.log` files named with startup timestamp                  | _(disabled)_     |
+| `LOG_DIR`                   | Enable file logging; directory for `.log` files named with startup timestamp. In Docker use a path under the `/data` volume (e.g. `/data/logs`) — a relative path lands in the container layer and is lost on redeploy. Files are not rotated. | _(disabled)_     |
 | `PORT`                      | HTTP server port for health/analytics                                                         | `8080`           |
 | `DATA_DIR`                  | Persistent data directory (cookies, state)                                                    | `.`              |
 | `TWITCH_CLIENT_ID_TV`       | Twitch TV client ID (falls back to built-in default if unset; override recommended)           | built-in default |
@@ -991,10 +1018,10 @@ won't restart; keep the file for later.
 <details>
 <summary>How do I open the editor without the terminal?</summary>
 
-While the miner is running, the editor is always at **http://localhost:8070**
-(localhost only). Or right-click the **system tray icon** → *Config Editor*. A
-standalone editor also exists: `tools/edit-config.sh` / `.bat` (web on `:3000`,
-or `--tui`).
+While the miner is running in file mode, the editor is always at
+**http://localhost:8070** (localhost only; not started in DB mode). Or right-click
+the **system tray icon** → *Config Editor* (hidden in DB mode). A standalone
+editor also exists: `tools/edit-config.sh` / `.bat` (web on `:3000`, or `--tui`).
 
 </details>
 

@@ -27,8 +27,14 @@ if %errorlevel% neq 0 (
 )
 
 echo Starting twitch-miner-go...
-twitch-miner-go.exe %*
+set EXTRA_ARGS=-no-console
+if defined TWITCH_MINER_RUN_LOCALDEV set EXTRA_ARGS=
+twitch-miner-go.exe %EXTRA_ARGS% %*
 
+if defined TWITCH_MINER_RUN_LOCALDEV goto :show_exit
+exit /b %errorlevel%
+
+:show_exit
 echo.
 echo twitch-miner-go exited with code %errorlevel%.
 pause

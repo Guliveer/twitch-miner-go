@@ -23,8 +23,9 @@ FROM gcr.io/distroless/static-debian12
 LABEL org.opencontainers.image.description="Efficient auto drops and points claim for Twitch"
 
 COPY --from=builder /twitch-miner-go /twitch-miner-go
-# Only example configs are copied; real configs should be mounted via volume or created at runtime
-COPY --from=builder /app/configs /configs
+# Only the example config is copied; real configs are mounted via volume or
+# created at runtime. .dockerignore already keeps them out of the build context.
+COPY --from=builder /app/configs/example.yaml.example /configs/example.yaml.example
 
 EXPOSE 8080
 

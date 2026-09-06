@@ -6,6 +6,8 @@ package miner
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -21,6 +23,7 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/notify"
 	"github.com/Guliveer/twitch-miner-go/internal/pubsub"
 	"github.com/Guliveer/twitch-miner-go/internal/runtimecfg"
+	"github.com/Guliveer/twitch-miner-go/internal/streakstore"
 	"github.com/Guliveer/twitch-miner-go/internal/twitch"
 	"github.com/Guliveer/twitch-miner-go/internal/version"
 	"github.com/Guliveer/twitch-miner-go/internal/watcher"
@@ -30,11 +33,11 @@ import (
 // It implements the [pubsub.MessageHandler] interface so the PubSub pool
 // can route messages directly to it.
 type Miner struct {
-	cfg    *config.AccountConfig
-	log    *logger.Logger
-	twitch twitch.API
-	pubsub *pubsub.Pool
-	chat   *chat.Manager
+	cfg               *config.AccountConfig
+	log               *logger.Logger
+	twitch            twitch.API
+	pubsub            *pubsub.Pool
+	chat              *chat.Manager
 	notify            *notify.Dispatcher
 	suppressLifecycle bool
 	skipUnauth        bool
@@ -58,13 +61,21 @@ type Miner struct {
 
 	lastWatching   map[string]bool
 	lastWatchingMu sync.Mutex
+	// lastStreakHarvest is nil until the first selection pass, so the initial
+	// mode is announced once rather than silently assumed.
+	lastStreakHarvest *bool
+
+	// streaks survives restarts so already-collected watch streaks are not
+	// chased a second time. Nil when the store could not be opened; every use
+	// is nil-safe, because losing the record only costs one harvest cycle.
+	streaks *streakstore.Store
 
 	runtime *runtimecfg.Twitch
 }
 
 // NewMiner creates a new Miner from account configuration.
 func NewMiner(cfg *config.AccountConfig, log *logger.Logger, runtime *runtimecfg.Twitch) *Miner {
-	return &Miner{
+	m := &Miner{
 		cfg:               cfg,
 		log:               log,
 		eventsPredictions: make(map[string]*model.EventPrediction),
@@ -73,6 +84,46 @@ func NewMiner(cfg *config.AccountConfig, log *logger.Logger, runtime *runtimecfg
 		lastWatching:      make(map[string]bool),
 		runtime:           runtime,
 	}
+
+	store, err := streakstore.Open(streakDir(), cfg.Username)
+	if err != nil {
+		// Open still returns a usable empty store on a read error.
+		log.Warn("Watch streak store unavailable, starting empty", "error", err)
+	}
+	m.streaks = store
+	if store != nil {
+		log.Debug("Watch streak store loaded", "path", store.Path(), "records", store.Len())
+	}
+
+	return m
+}
+
+// streakDir mirrors the cookie convention: alongside the binary by default,
+// on the persistent volume when DATA_DIR is set.
+func streakDir() string {
+	if dataDir := os.Getenv("DATA_DIR"); dataDir != "" {
+		return filepath.Join(dataDir, "streaks")
+	}
+	return "streaks"
+}
+
+// rememberWatchStreak persists that Twitch paid out the streak for this
+// broadcast, so a restart does not spend a slot chasing it again.
+func (m *Miner) rememberWatchStreak(username, broadcastID string) {
+	if m.streaks == nil || broadcastID == "" {
+		return
+	}
+	if err := m.streaks.Record(username, broadcastID, time.Now()); err != nil {
+		m.log.Warn("Failed to persist watch streak", "streamer", username, "error", err)
+		return
+	}
+	m.log.Debug("Watch streak recorded", "streamer", username, "broadcast_id", broadcastID)
+}
+
+// WatchStreakEarned reports whether this channel's current broadcast already
+// paid out its watch streak in an earlier run.
+func (m *Miner) WatchStreakEarned(username, broadcastID string) bool {
+	return m.streaks != nil && m.streaks.Earned(username, broadcastID)
 }
 
 // Streamers returns a snapshot of the current streamer list.
@@ -149,6 +200,9 @@ func (m *Miner) Run(ctx context.Context) error {
 	}
 	m.twitch = tc
 	m.twitch.SetSkipUnauth(m.skipUnauth)
+	if m.streaks != nil {
+		tc.SetStreakLookup(m.streaks)
+	}
 
 	if err := m.twitch.Login(ctx); err != nil {
 		return fmt.Errorf("login failed for %s: %w", m.cfg.Username, err)
@@ -219,6 +273,10 @@ func (m *Miner) Run(ctx context.Context) error {
 
 	g.Go(func() error {
 		return m.runContextRefresh(ctx)
+	})
+
+	g.Go(func() error {
+		return m.runPredictionSweeper(ctx)
 	})
 
 	if m.cfg.CategoryWatcher.Enabled && len(m.cfg.CategoryWatcher.Categories) > 0 {

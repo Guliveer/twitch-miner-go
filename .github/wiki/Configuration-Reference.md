@@ -12,6 +12,9 @@ Example: `configs/my_user.yaml` → account for Twitch user `my_user`.
 |-------|------|---------|-------------|
 | `enabled` | bool | `true` | Set to `false` to disable without deleting the file |
 | `max_watch_streams` | int | `2` | Maximum concurrent streams to simulate watching |
+| `streak_watch_streams` | int | `2` | While any channel still has a watch streak pending, narrow the watch set to this many streams so the streak lands. Twitch only credits about two concurrent streams, so a wider set lets Twitch pick and no streak sticks. `0` disables the narrowing. |
+| `watch_streak_minutes` | float | `10` | How long a channel may hold a streak slot before giving way to the next pending channel, whether or not the streak arrived |
+| `preferred_streamers` | list | — | Channel logins that the `PREFERRED` priority picks first, in this order |
 | `proxy` | string | — | HTTP/SOCKS5 proxy for all Twitch API requests. Format: `socks5://host:port` |
 
 ---
@@ -32,6 +35,7 @@ Ordered list of rules for selecting which streams to watch when more are live th
 | Value | Description |
 |-------|-------------|
 | `STREAK` | Prefer streams where a watch-streak bonus is available |
+| `PREFERRED` | Prefer streams listed in `preferred_streamers`, in that order |
 | `DROPS` | Prefer streams with an active drop campaign |
 | `ORDER` | Use the order of the `streamers` list |
 | `SUBSCRIBED` | Prefer streams where you are subscribed |
@@ -42,6 +46,7 @@ Ordered list of rules for selecting which streams to watch when more are live th
 ```yaml
 priority:
   - STREAK
+  - PREFERRED
   - DROPS
   - ORDER
 ```

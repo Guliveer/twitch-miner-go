@@ -82,6 +82,14 @@ const (
 	MaxPubSubConns = 10
 	// MaxWatchStreams is the maximum number of streams to send minute-watched events for.
 	MaxWatchStreams = 2
+	// StreakWatchStreams is how many streams are watched while a watch streak
+	// is still pending somewhere. Twitch credits roughly two concurrent
+	// streams, so a wider set hands the choice to Twitch and streaks stop
+	// landing predictably.
+	StreakWatchStreams = 2
+	// WatchStreakMinutes is how long a channel holds a streak slot before the
+	// next pending channel takes over.
+	WatchStreakMinutes = 10.0
 )
 
 const (
@@ -138,6 +146,13 @@ const (
 	DefaultCampaignSyncInterval = 10 * time.Minute
 	// DefaultCategoryWatcherInterval is the default interval for category watcher polling.
 	DefaultCategoryWatcherInterval = 120 * time.Second
+	// PredictionSweepInterval is how often tracked predictions are checked for
+	// results that never arrived.
+	PredictionSweepInterval = 30 * time.Minute
+	// PredictionRetention is how long a prediction may stay tracked after it
+	// was created before the sweeper discards it. Twitch prediction windows
+	// are minutes, not hours, so anything this old is never resolving.
+	PredictionRetention = 6 * time.Hour
 	// DefaultStreamUpdateInterval is the interval for refreshing stream info.
 	DefaultStreamUpdateInterval = 120 * time.Second
 	// DefaultStreamUpDebounce is the debounce duration after a stream-up event.

@@ -5,27 +5,27 @@ type Event string
 
 // All supported miner events.
 const (
-	EventStreamerOnline     Event = "STREAMER_ONLINE"
-	EventStreamerOffline    Event = "STREAMER_OFFLINE"
-	EventGainForRaid        Event = "GAIN_FOR_RAID"
-	EventGainForClaim       Event = "GAIN_FOR_CLAIM"
-	EventGainForWatch       Event = "GAIN_FOR_WATCH"
-	EventGainForWatchStreak Event = "GAIN_FOR_WATCH_STREAK"
-	EventBetWin             Event = "BET_WIN"
-	EventBetLose            Event = "BET_LOSE"
-	EventBetRefund          Event = "BET_REFUND"
-	EventBetFilters         Event = "BET_FILTERS"
-	EventBetGeneral         Event = "BET_GENERAL"
-	EventBetFailed          Event = "BET_FAILED"
-	EventBetStart           Event = "BET_START"
-	EventBonusClaim         Event = "BONUS_CLAIM"
-	EventMomentClaim        Event = "MOMENT_CLAIM"
-	EventJoinRaid           Event = "JOIN_RAID"
-	EventDropClaim              Event = "DROP_CLAIM"
-	EventDropClaimAvailable     Event = "DROP_CLAIM_AVAILABLE"
-	EventDropStatus             Event = "DROP_STATUS"
-	EventChatMention        Event = "CHAT_MENTION"
-	EventGiftedSub          Event = "GIFTED_SUB"
+	EventStreamerOnline        Event = "STREAMER_ONLINE"
+	EventStreamerOffline       Event = "STREAMER_OFFLINE"
+	EventGainForRaid           Event = "GAIN_FOR_RAID"
+	EventGainForClaim          Event = "GAIN_FOR_CLAIM"
+	EventGainForWatch          Event = "GAIN_FOR_WATCH"
+	EventGainForWatchStreak    Event = "GAIN_FOR_WATCH_STREAK"
+	EventBetWin                Event = "BET_WIN"
+	EventBetLose               Event = "BET_LOSE"
+	EventBetRefund             Event = "BET_REFUND"
+	EventBetFilters            Event = "BET_FILTERS"
+	EventBetGeneral            Event = "BET_GENERAL"
+	EventBetFailed             Event = "BET_FAILED"
+	EventBetStart              Event = "BET_START"
+	EventBonusClaim            Event = "BONUS_CLAIM"
+	EventMomentClaim           Event = "MOMENT_CLAIM"
+	EventJoinRaid              Event = "JOIN_RAID"
+	EventDropClaim             Event = "DROP_CLAIM"
+	EventDropClaimAvailable    Event = "DROP_CLAIM_AVAILABLE"
+	EventDropStatus            Event = "DROP_STATUS"
+	EventChatMention           Event = "CHAT_MENTION"
+	EventGiftedSub             Event = "GIFTED_SUB"
 	EventMinerStarted          Event = "MINER_STARTED"
 	EventMinerStopped          Event = "MINER_STOPPED"
 	EventMinerCrashed          Event = "MINER_CRASHED"
@@ -102,6 +102,9 @@ const (
 	PriorityEndingSoonest
 	// PriorityLowAvailabilityFirst prioritizes campaigns with the lowest availability.
 	PriorityLowAvailabilityFirst
+	// PriorityPreferred prioritizes the channels listed in preferred_streamers,
+	// in the order they are listed.
+	PriorityPreferred
 )
 
 // String returns the string representation of a Priority.
@@ -123,6 +126,8 @@ func (p Priority) String() string {
 		return "ENDING_SOONEST"
 	case PriorityLowAvailabilityFirst:
 		return "LOW_AVAILABILITY_FIRST"
+	case PriorityPreferred:
+		return "PREFERRED"
 	default:
 		return "ORDER"
 	}
@@ -147,6 +152,8 @@ func ParsePriority(s string) Priority {
 		return PriorityEndingSoonest
 	case "LOW_AVAILABILITY_FIRST":
 		return PriorityLowAvailabilityFirst
+	case "PREFERRED":
+		return PriorityPreferred
 	default:
 		return PriorityOrder
 	}

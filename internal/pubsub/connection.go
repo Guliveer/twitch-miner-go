@@ -166,6 +166,19 @@ func (c *Connection) Close() {
 	})
 }
 
+// closeSocket force-closes the underlying WebSocket without touching channel
+// state. It is used when the connection is presumed dead (e.g. no PONG for a
+// prolonged period) so that the read loop fails and the pool re-establishes
+// the connection instead of leaking a zombie socket.
+func (c *Connection) closeSocket() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if c.conn != nil {
+		c.conn.Close(websocket.StatusNormalClosure, "no pong received") //nolint:errcheck // best-effort WebSocket close
+	}
+}
+
 // Messages returns the channel on which parsed PubSub messages are delivered.
 func (c *Connection) Messages() <-chan *model.Message {
 	return c.messages
@@ -262,8 +275,9 @@ func (c *Connection) pingLoop(ctx context.Context) {
 			}
 
 			if elapsed > 5*time.Minute {
-				c.log.Warn("No PONG received in over 5 minutes, connection may be dead",
+				c.log.Warn("No PONG received in over 5 minutes, closing dead connection",
 					"conn", c.index, "elapsed", elapsed.Round(time.Second))
+				c.closeSocket()
 				return
 			}
 

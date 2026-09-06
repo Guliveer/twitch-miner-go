@@ -5,6 +5,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -82,6 +83,7 @@ func LoadAllAccountConfigs(dir string) ([]*AccountConfig, error) {
 	}
 
 	var configs []*AccountConfig
+	var skippedOwner int
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -98,6 +100,7 @@ func LoadAllAccountConfigs(dir string) ([]*AccountConfig, error) {
 		}
 
 		if isOwnerAccount(cfg.Username) && os.Getenv("RUN_OWNER_ACCOUNTS") != "true" {
+			skippedOwner++
 			continue
 		}
 
@@ -105,11 +108,20 @@ func LoadAllAccountConfigs(dir string) ([]*AccountConfig, error) {
 	}
 
 	if len(configs) == 0 {
-		return nil, fmt.Errorf("no account config files found in %s", dir)
+		if skippedOwner > 0 {
+			return nil, fmt.Errorf("%w: all %d config(s) in %s belong to owner accounts; set RUN_OWNER_ACCOUNTS=true to run them, or mount your own configs",
+				ErrNoUsableAccounts, skippedOwner, dir)
+		}
+		return nil, fmt.Errorf("%w: no .yaml/.yml account config files in %s", ErrNoUsableAccounts, dir)
 	}
 
 	return configs, nil
 }
+
+// ErrNoUsableAccounts reports that a config directory yielded no account the
+// miner may run. Callers use it to tell an operator misconfiguration apart from
+// a transient load failure, which must not tear down running miners.
+var ErrNoUsableAccounts = errors.New("no usable account configs")
 
 func isOwnerAccount(username string) bool {
 	for _, name := range ownerAccounts {
@@ -124,6 +136,16 @@ func applyDefaults(cfg *AccountConfig) {
 	if cfg.MaxWatchStreams == nil {
 		v := constants.MaxWatchStreams
 		cfg.MaxWatchStreams = &v
+	}
+
+	if cfg.StreakWatchStreams == nil {
+		v := constants.StreakWatchStreams
+		cfg.StreakWatchStreams = &v
+	}
+
+	if cfg.WatchStreakMinutes == nil {
+		v := constants.WatchStreakMinutes
+		cfg.WatchStreakMinutes = &v
 	}
 
 	if len(cfg.Priority) == 0 {
@@ -232,14 +254,32 @@ func AccountConfigFromJSON(username, jsonBlob string) (*AccountConfig, error) {
 	return &cfg, nil
 }
 
+// validateWatchSettings checks the knobs governing how many streams are
+// watched and how long a channel holds a watch-streak slot.
+func validateWatchSettings(cfg *AccountConfig) error {
+	if cfg.MaxWatchStreams != nil && *cfg.MaxWatchStreams < 0 {
+		return fmt.Errorf("account %s: max_watch_streams must be non-negative (0 = unlimited)", cfg.Username)
+	}
+
+	if cfg.StreakWatchStreams != nil && *cfg.StreakWatchStreams < 0 {
+		return fmt.Errorf("account %s: streak_watch_streams must be non-negative (0 = disabled)", cfg.Username)
+	}
+
+	if cfg.WatchStreakMinutes != nil && *cfg.WatchStreakMinutes <= 0 {
+		return fmt.Errorf("account %s: watch_streak_minutes must be greater than zero", cfg.Username)
+	}
+
+	return nil
+}
+
 // Validate checks the configuration for common errors and contradictory settings.
 func Validate(cfg *AccountConfig) error {
 	if cfg.Username == "" {
 		return fmt.Errorf("username is required")
 	}
 
-	if cfg.MaxWatchStreams != nil && *cfg.MaxWatchStreams < 0 {
-		return fmt.Errorf("account %s: max_watch_streams must be non-negative (0 = unlimited)", cfg.Username)
+	if err := validateWatchSettings(cfg); err != nil {
+		return err
 	}
 
 	if len(cfg.Streamers) == 0 && !cfg.Followers.Enabled && !cfg.CategoryWatcher.Enabled && !cfg.TeamWatcher.Enabled {

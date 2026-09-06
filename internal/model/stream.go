@@ -25,8 +25,9 @@ type Stream struct {
 	IsWatchStreakMissing bool    `json:"watch_streak_missing"`
 	MinuteWatched        float64 `json:"minute_watched"`
 
-	LastMinuteCreditedAt   time.Time `json:"last_minute_credited_at,omitempty"`
-	StalledCooldownUntil   time.Time `json:"stalled_cooldown_until,omitempty"`
+	LastMinuteCreditedAt  time.Time `json:"last_minute_credited_at,omitempty"`
+	LastMinuteAttemptedAt time.Time `json:"last_minute_attempted_at,omitempty"`
+	StalledCooldownUntil  time.Time `json:"stalled_cooldown_until,omitempty"`
 
 	lastUpdate             time.Time
 	minuteWatchedTimestamp time.Time
@@ -152,22 +153,50 @@ func (s *Stream) InitWatchStreak() {
 	s.minuteWatchedTimestamp = time.Time{}
 }
 
+// MaxWatchSegmentGap bounds the gap that still counts as continuous watching.
+// Successful minute-watched events are one watcher tick apart; anything much
+// larger means the channel was not being watched at all.
+const MaxWatchSegmentGap = 2 * time.Minute
+
+// MarkMinuteWatchAttempt records that a minute-watched event was sent for this
+// stream, whether or not Twitch credited it. Stall detection needs to tell
+// "we are watching and Twitch stopped counting" from "we stopped watching".
+func (s *Stream) MarkMinuteWatchAttempt() {
+	s.LastMinuteAttemptedAt = time.Now()
+}
+
 // UpdateMinuteWatched increments the minute-watched counter based on elapsed time.
+//
+// Only time actually spent watching is counted. The watch set rotates, so a
+// channel can sit unwatched for a long stretch; charging that gap to the
+// channel would push it past its streak window and retire it from the rotation
+// without it ever having been watched for that long.
 func (s *Stream) UpdateMinuteWatched() {
 	now := time.Now()
 	if !s.minuteWatchedTimestamp.IsZero() {
-		elapsed := now.Sub(s.minuteWatchedTimestamp).Minutes()
-		s.MinuteWatched += elapsed
+		elapsed := now.Sub(s.minuteWatchedTimestamp)
+		if elapsed <= MaxWatchSegmentGap {
+			s.MinuteWatched += elapsed.Minutes()
+		}
 	}
 	s.minuteWatchedTimestamp = now
 	s.LastMinuteCreditedAt = now
 }
 
-// IsMinuteWatchStalled returns true when the last successful minute-watched
-// credit is older than the given threshold. A zero LastMinuteCreditedAt
-// (never credited) is not considered stalled — the streamer is simply new.
+// IsMinuteWatchStalled reports that Twitch has stopped crediting a stream we
+// are still sending events for.
+//
+// It deliberately says nothing about a channel we are not currently watching:
+// the watch set rotates, and treating a rotated-out channel as frozen would put
+// it into a cooldown that keeps it out of selection long after it was dropped.
 func (s *Stream) IsMinuteWatchStalled(threshold time.Duration) bool {
-	return !s.LastMinuteCreditedAt.IsZero() && time.Since(s.LastMinuteCreditedAt) > threshold
+	if s.LastMinuteCreditedAt.IsZero() || s.LastMinuteAttemptedAt.IsZero() {
+		return false
+	}
+	if time.Since(s.LastMinuteAttemptedAt) > threshold {
+		return false
+	}
+	return time.Since(s.LastMinuteCreditedAt) > threshold
 }
 
 // String returns a human-readable representation of the stream.

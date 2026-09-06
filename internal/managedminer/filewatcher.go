@@ -2,6 +2,7 @@ package managedminer
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"time"
@@ -21,6 +22,9 @@ type FileWatcher struct {
 
 	// watermark: username → last seen mtime Unix seconds
 	watermark map[string]int64
+
+	// warnedNoAccounts suppresses the idle warning until accounts load again.
+	warnedNoAccounts bool
 
 	initialSyncDone chan struct{}
 	// InitialSyncDone is closed after the first sync() completes.
@@ -71,16 +75,23 @@ func (w *FileWatcher) Run(ctx context.Context) {
 func (w *FileWatcher) sync() {
 	cfgs, err := config.LoadAllAccountConfigs(w.dir)
 	if err != nil {
-		// Only treat the directory as empty (and stop running miners) when
-		// there genuinely are no YAML files. Any other error (parse failure,
-		// permission issue, transient I/O) is logged and the last-known-good
-		// set of miners is preserved.
-		if isEmptyDirError(w.dir) {
-			cfgs = nil
-		} else {
+		// Only a directory that yields no runnable account stops the miners.
+		// Any other error (parse failure, permission issue, transient I/O) is
+		// logged and the last-known-good set of miners is preserved.
+		if !errors.Is(err, config.ErrNoUsableAccounts) {
 			w.log.Error("File watcher: failed to load configs, keeping current miners", "dir", w.dir, "error", err)
 			return
 		}
+		// Warn once per transition, not once per poll: an operator who mounted
+		// the wrong directory otherwise gets no signal at all, while a correct
+		// idle state must not spam the log every interval.
+		if !w.warnedNoAccounts {
+			w.log.Warn("No account configs to run — no miners started", "dir", w.dir, "reason", err.Error())
+			w.warnedNoAccounts = true
+		}
+		cfgs = nil
+	} else {
+		w.warnedNoAccounts = false
 	}
 
 	seen := make(map[string]struct{}, len(cfgs))
@@ -128,24 +139,6 @@ func (w *FileWatcher) sync() {
 			delete(w.watermark, username)
 		}
 	}
-}
-
-// isEmptyDirError reports whether dir contains no YAML/YML files at all.
-func isEmptyDirError(dir string) bool {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return false
-	}
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
-		ext := filepath.Ext(e.Name())
-		if ext == ".yaml" || ext == ".yml" {
-			return false
-		}
-	}
-	return true
 }
 
 // fileMtime returns the modification time (Unix seconds) of the YAML file for

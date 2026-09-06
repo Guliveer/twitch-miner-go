@@ -103,8 +103,12 @@ func (cj *CookieJar) Save(path string) error {
 		return fmt.Errorf("marshaling cookies: %w", err)
 	}
 
-	if err := os.WriteFile(path, data, 0o600); err != nil {
-		return fmt.Errorf("writing cookie file %s: %w", path, err)
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, data, 0o600); err != nil {
+		return fmt.Errorf("writing cookie file %s: %w", tmp, err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		return fmt.Errorf("replacing cookie file %s: %w", path, err)
 	}
 
 	return nil

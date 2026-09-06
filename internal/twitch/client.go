@@ -112,6 +112,22 @@ type Client struct {
 	dropMilestoneNotified sync.Map
 
 	startupDropsLogged bool
+
+	// streaks, when set, remembers watch streaks across restarts so a channel
+	// whose streak was already paid out for the running broadcast is not put
+	// back into the rotation. Optional; nil means no persistence.
+	streaks StreakLookup
+}
+
+// StreakLookup answers whether a channel's current broadcast has already paid
+// out its watch streak in an earlier run.
+type StreakLookup interface {
+	Earned(channel, broadcastID string) bool
+}
+
+// SetStreakLookup attaches the persistent watch-streak record.
+func (c *Client) SetStreakLookup(l StreakLookup) {
+	c.streaks = l
 }
 
 // NewClient creates a new high-level Twitch Client from account configuration.
@@ -179,12 +195,12 @@ func (c *Client) CheckStreamerOnline(ctx context.Context, streamer *model.Stream
 					streamer.Mu.Unlock()
 					c.Log.Info("Streamer renamed", "old", oldLogin, "new", newLogin)
 
-				if retryErr := c.updateStream(ctx, streamer); retryErr != nil {
-					streamer.Mu.Lock()
-					streamer.SetOffline()
-					streamer.Mu.Unlock()
-					return nil //nolint:nilerr // streamer already set offline; caller only needs to know check completed
-				}
+					if retryErr := c.updateStream(ctx, streamer); retryErr != nil {
+						streamer.Mu.Lock()
+						streamer.SetOffline()
+						streamer.Mu.Unlock()
+						return nil //nolint:nilerr // streamer already set offline; caller only needs to know check completed
+					}
 				} else {
 					streamer.Mu.Lock()
 					streamer.SetOffline()
@@ -202,6 +218,7 @@ func (c *Client) CheckStreamerOnline(ctx context.Context, streamer *model.Stream
 		streamer.Mu.Lock()
 		streamer.SetOnline()
 		streamer.Mu.Unlock()
+		c.restoreWatchStreak(streamer)
 	} else {
 		// Streamer is already online — refresh spade URL if missing.
 		streamer.Mu.RLock()
@@ -223,10 +240,48 @@ func (c *Client) CheckStreamerOnline(ctx context.Context, streamer *model.Stream
 			streamer.Mu.Lock()
 			streamer.SetOffline()
 			streamer.Mu.Unlock()
+			return nil
 		}
+
+		// The category and team watchers construct streamers already marked
+		// online, with an empty broadcast ID. They never pass through the
+		// branch above, and the ID only appears once updateStream has run —
+		// which is here. restoreWatchStreak is a guarded map lookup, so
+		// repeating it on later passes costs nothing.
+		c.restoreWatchStreak(streamer)
 	}
 
 	return nil
+}
+
+// restoreWatchStreak clears the streak flag that SetOnline just raised, when a
+// previous run already collected the streak for this very broadcast. Without
+// it, every restart re-enters the rotation for channels Twitch has already
+// paid, burning slot time that other channels need.
+func (c *Client) restoreWatchStreak(streamer *model.Streamer) {
+	if c.streaks == nil {
+		return
+	}
+
+	streamer.Mu.RLock()
+	username := streamer.Username
+	broadcastID := ""
+	if streamer.Stream != nil {
+		broadcastID = streamer.Stream.BroadcastID
+	}
+	missing := streamer.Stream != nil && streamer.Stream.IsWatchStreakMissing
+	streamer.Mu.RUnlock()
+
+	if !missing || !c.streaks.Earned(username, broadcastID) {
+		return
+	}
+
+	streamer.Mu.Lock()
+	streamer.MarkWatchStreakEarned()
+	streamer.Mu.Unlock()
+
+	c.Log.Debug("Watch streak already collected for this broadcast, skipping rotation",
+		"streamer", username, "broadcast_id", broadcastID)
 }
 
 func (c *Client) updateStream(ctx context.Context, streamer *model.Streamer) error {

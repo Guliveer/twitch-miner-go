@@ -9,6 +9,9 @@ fly.toml
 cookies/
 analytics/
 tools/
+# Real account configs are mounted at runtime and must never enter the image.
+configs/*
+!configs/example.yaml.example
 edit-config.bat
 edit-config.sh
 *.log

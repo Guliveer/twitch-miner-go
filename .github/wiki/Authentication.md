@@ -65,6 +65,10 @@ The miner uses the OAuth token to make authenticated Twitch API calls. The devic
 
 Validated tokens are saved to `{DATA_DIR}/cookies/{username}.json`. On subsequent runs, the cookie is loaded and reused — no re-authentication needed unless the token expires.
 
+Cookie files are written atomically (temp file + rename), so a crash mid-write never leaves a truncated token file behind.
+
+If `COOKIE_ENCRYPTION_KEY` is set but cannot be parsed as a Base64-encoded 32-byte AES-256 key, the miner refuses to start instead of silently falling back to a plaintext cookie jar — generate a key with `./tools/gen-cookie-key.sh`. See README section 1.6.5 for details.
+
 In Docker, mount a persistent volume to `DATA_DIR` to preserve cookies across container restarts:
 
 ```bash

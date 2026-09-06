@@ -17,4 +17,8 @@ echo "Building twitch-miner-go v${VERSION}..."
 go build -ldflags "${LDFLAGS}" -o twitch-miner-go ./cmd/twitch-miner-go
 
 echo "Starting twitch-miner-go..."
-./twitch-miner-go "$@"
+if [ -n "${TWITCH_MINER_RUN_LOCALDEV:-}" ]; then
+  ./twitch-miner-go "$@"
+else
+  ./twitch-miner-go -no-console "$@"
+fi

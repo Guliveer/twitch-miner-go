@@ -31,7 +31,9 @@ jobs:
 
       # on.pull_request.paths filters against the full PR diff, so a push that
       # only touches docs/scripts/pipelines would still re-run the benchmarks.
-      # Filter per push instead: compare the commit range of this sync event.
+      # Filter on the PR's own Go changes instead. pull_request events carry no
+      # push-style before/after SHA pair, so diff the PR head against the
+      # merge-base with the base branch.
       - name: Check for Go changes in this push
         id: go-changes
         run: |
@@ -39,14 +41,15 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          BEFORE="${{ github.event.before }}"
-          AFTER="${{ github.event.after }}"
-          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          if [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
             # First push of the PR (opened event): no previous commit to diff.
             echo "changed=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          FILES=$(git diff --name-only "$BEFORE" "$AFTER")
+          MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA")
+          FILES=$(git diff --name-only "$MERGE_BASE" "$HEAD_SHA")
           if echo "$FILES" | grep -E '\.go$|^go\.(mod|sum)$' > /dev/null; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else

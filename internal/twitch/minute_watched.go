@@ -50,6 +50,13 @@ func (c *Client) SendMinuteWatchedEvents(ctx context.Context, streamers []*model
 }
 
 func (c *Client) sendMinuteWatchedForStreamer(ctx context.Context, httpClient *http.Client, streamer *model.Streamer) error {
+	// Stamped before anything can fail: stall detection compares this against
+	// the last credit, so it must reflect every attempt, not just the ones
+	// that got as far as the spade request.
+	streamer.Mu.Lock()
+	streamer.Stream.MarkMinuteWatchAttempt()
+	streamer.Mu.Unlock()
+
 	streamer.Mu.RLock()
 	username := streamer.Username
 	spadeURL := streamer.Stream.SpadeURL
@@ -258,18 +265,68 @@ func getSecondLastURL(playlist string) string {
 	return ""
 }
 
-// SelectStreamersToWatch selects up to maxWatch streamers to send minute-watched
-// events for, based on the configured priority order.
-// This implements the priority selection logic from the Python version.
-func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Priority, maxWatch int) []*model.Streamer {
-	if maxWatch <= 0 {
-		maxWatch = len(streamers)
-	}
+// WatchOptions configures which streamers receive minute-watched events.
+type WatchOptions struct {
+	// Priorities is the ordered list of selection strategies.
+	Priorities []model.Priority
+	// MaxWatch is the width of the watch set once no streak is pending.
+	MaxWatch int
+	// StreakWatch narrows the set while a streak is pending. Zero disables
+	// the narrowing and MaxWatch applies throughout.
+	StreakWatch int
+	// StreakMinutes is how long a channel may hold a streak slot.
+	StreakMinutes float64
+	// Preferred lists channel logins for the PREFERRED priority, in order.
+	Preferred []string
+}
 
+// WatchSet is the outcome of a selection pass.
+type WatchSet struct {
+	// Streamers are the channels to send minute-watched events to.
+	Streamers []*model.Streamer
+	// StreakHarvest reports whether the set was narrowed to chase pending
+	// watch streaks rather than run at full width.
+	StreakHarvest bool
+	// Width is the cap that was applied.
+	Width int
+}
+
+// SelectStreamersToWatch selects up to maxWatch streamers using the default
+// streak window. Kept for callers that do not configure the adaptive width.
+func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Priority, maxWatch int) []*model.Streamer {
+	return SelectWatchSet(streamers, WatchOptions{
+		Priorities:    priorities,
+		MaxWatch:      maxWatch,
+		StreakMinutes: constants.WatchStreakMinutes,
+	}).Streamers
+}
+
+// SelectWatchSet selects the streamers to send minute-watched events for.
+//
+// Twitch only credits roughly two concurrent streams. Sending to every live
+// channel therefore lets Twitch pick which two count, and no watch streak
+// lands reliably. So while any channel still has a streak pending, the set
+// narrows to StreakWatch and the STREAK priority fills it; each channel holds
+// its slot until the streak arrives or StreakMinutes elapse, then gives way to
+// the next. Once nothing is pending the set widens back to MaxWatch.
+func SelectWatchSet(streamers []*model.Streamer, opts WatchOptions) WatchSet {
 	now := time.Now()
 	onlineIndices := collectOnlineIndices(streamers, now)
 	if len(onlineIndices) == 0 {
-		return nil
+		return WatchSet{}
+	}
+
+	if opts.StreakMinutes <= 0 {
+		opts.StreakMinutes = constants.WatchStreakMinutes
+	}
+
+	maxWatch := opts.MaxWatch
+	streakHarvest := opts.StreakWatch > 0 && anyStreakPending(streamers, onlineIndices, opts.StreakMinutes)
+	if streakHarvest {
+		maxWatch = opts.StreakWatch
+	}
+	if maxWatch <= 0 {
+		maxWatch = len(streamers)
 	}
 
 	watching := make(map[int]struct{})
@@ -287,18 +344,45 @@ func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Prio
 		return true
 	}
 
-	for _, priority := range priorities {
+	for _, priority := range opts.Priorities {
 		if len(watching) >= maxWatch {
 			break
 		}
-		applyPriority(priority, streamers, onlineIndices, watching, maxWatch, add)
+		applyPriority(priority, streamers, onlineIndices, watching, maxWatch, add, opts)
 	}
 
 	result := make([]*model.Streamer, 0, len(selectedIndices))
 	for _, idx := range selectedIndices {
 		result = append(result, streamers[idx])
 	}
-	return result
+
+	return WatchSet{
+		Streamers:     result,
+		StreakHarvest: streakHarvest,
+		Width:         maxWatch,
+	}
+}
+
+// isStreakPending reports whether a streamer still stands to earn a watch
+// streak this session. A channel that has already been given its slot time
+// without the streak arriving is no longer pending, so the narrowed watch set
+// cannot get stuck on it.
+func isStreakPending(s *model.Streamer, streakMinutes float64) bool {
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+
+	return s.Settings != nil && s.Settings.WatchStreak &&
+		s.Stream.IsWatchStreakMissing &&
+		s.Stream.MinuteWatched < streakMinutes
+}
+
+func anyStreakPending(streamers []*model.Streamer, onlineIndices []int, streakMinutes float64) bool {
+	for _, idx := range onlineIndices {
+		if isStreakPending(streamers[idx], streakMinutes) {
+			return true
+		}
+	}
+	return false
 }
 
 func collectOnlineIndices(streamers []*model.Streamer, now time.Time) []int {
@@ -342,13 +426,16 @@ func applyPriority(
 	watching map[int]struct{},
 	maxWatch int,
 	add func(int) bool,
+	opts WatchOptions,
 ) {
 	remaining := maxWatch - len(watching)
 	switch priority {
 	case model.PriorityOrder:
 		applyPriorityOrder(onlineIndices, remaining, add)
+	case model.PriorityPreferred:
+		applyPriorityPreferred(streamers, onlineIndices, watching, remaining, add, opts.Preferred)
 	case model.PriorityStreak:
-		applyPriorityStreak(streamers, onlineIndices, watching, remaining, add)
+		applyPriorityStreak(streamers, onlineIndices, watching, remaining, add, opts.StreakMinutes)
 	case model.PriorityDrops:
 		applyPriorityDrops(streamers, onlineIndices, watching, remaining, add)
 	case model.PrioritySubscribed:
@@ -373,19 +460,71 @@ func applyPriorityOrder(onlineIndices []int, remaining int, add func(int) bool) 
 	}
 }
 
-func applyPriorityStreak(streamers []*model.Streamer, onlineIndices []int, watching map[int]struct{}, remaining int, add func(int) bool) {
+// applyPriorityStreak fills slots with channels still owed a watch streak,
+// longest-served last: a channel keeps its slot until the streak arrives or
+// streakMinutes of watch time have gone by, then the next one takes over.
+func applyPriorityStreak(streamers []*model.Streamer, onlineIndices []int, watching map[int]struct{}, remaining int, add func(int) bool, streakMinutes float64) {
+	if streakMinutes <= 0 {
+		streakMinutes = constants.WatchStreakMinutes
+	}
+
+	pending := make([]int, 0, len(onlineIndices))
 	for _, idx := range onlineIndices {
 		if _, ok := watching[idx]; ok {
 			continue
 		}
-		s := streamers[idx]
-		s.Mu.RLock()
-		watchStreak := s.Settings != nil && s.Settings.WatchStreak
-		missing := s.Stream.IsWatchStreakMissing
-		minuteWatched := s.Stream.MinuteWatched
-		s.Mu.RUnlock()
-		if watchStreak && missing &&
-			minuteWatched < 7 && add(idx) {
+		if isStreakPending(streamers[idx], streakMinutes) {
+			pending = append(pending, idx)
+		}
+	}
+
+	// Most watch time first, so a channel part-way through its slot finishes
+	// before a fresh one starts. Without this the set would churn every tick
+	// and nobody would accumulate the minutes a streak needs.
+	sort.SliceStable(pending, func(i, j int) bool {
+		return minuteWatchedOf(streamers[pending[i]]) > minuteWatchedOf(streamers[pending[j]])
+	})
+
+	for _, idx := range pending {
+		if add(idx) {
+			remaining--
+			if remaining <= 0 {
+				break
+			}
+		}
+	}
+}
+
+func minuteWatchedOf(s *model.Streamer) float64 {
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+	return s.Stream.MinuteWatched
+}
+
+// applyPriorityPreferred fills slots from the configured preferred_streamers
+// list, in the order it is written.
+func applyPriorityPreferred(streamers []*model.Streamer, onlineIndices []int, watching map[int]struct{}, remaining int, add func(int) bool, preferred []string) {
+	if len(preferred) == 0 {
+		return
+	}
+
+	online := make(map[string]int, len(onlineIndices))
+	for _, idx := range onlineIndices {
+		if _, ok := watching[idx]; ok {
+			continue
+		}
+		streamers[idx].Mu.RLock()
+		username := strings.ToLower(streamers[idx].Username)
+		streamers[idx].Mu.RUnlock()
+		online[username] = idx
+	}
+
+	for _, name := range preferred {
+		idx, ok := online[strings.ToLower(strings.TrimSpace(name))]
+		if !ok {
+			continue
+		}
+		if add(idx) {
 			remaining--
 			if remaining <= 0 {
 				break

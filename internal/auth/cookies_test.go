@@ -307,3 +307,33 @@ func TestLoadThenSaveEncryptsPlaintextFile(t *testing.T) {
 		t.Fatalf("after migration: got %q", v)
 	}
 }
+
+func TestSaveReplacesFileAtomically(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "cookies.json")
+
+	jar := NewCookieJar()
+	jar.Set("auth-token", "first-value")
+	if err := jar.Save(path); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	jar.Set("auth-token", "second-value")
+	if err := jar.Save(path); err != nil {
+		t.Fatalf("Save (overwrite): %v", err)
+	}
+
+	// A leftover temp file means the rename step did not run, which is what
+	// keeps a kill mid-write from truncating live credentials.
+	if _, err := os.Stat(path + ".tmp"); !os.IsNotExist(err) {
+		t.Fatalf("expected no leftover temp file, stat err = %v", err)
+	}
+
+	reloaded := NewCookieJar()
+	if err := reloaded.Load(path); err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if v := reloaded.Get("auth-token"); v != "second-value" {
+		t.Fatalf("expected second-value, got %q", v)
+	}
+}
