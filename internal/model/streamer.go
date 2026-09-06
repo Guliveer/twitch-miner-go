@@ -108,8 +108,17 @@ func (s *Streamer) UpdateHistory(reasonCode string, earned int, counter int) {
 	}
 	s.History[reasonCode].Counter += counter
 	s.History[reasonCode].Amount += earned
+}
 
-	if reasonCode == "WATCH_STREAK" {
+// MarkWatchStreakEarned records that Twitch has paid out the watch streak for
+// the current broadcast, releasing the channel from the streak rotation.
+//
+// This used to live in UpdateHistory, keyed on a reason code of "WATCH_STREAK".
+// No caller ever passed that — the points handler passes the mapped event name
+// "GAIN_FOR_WATCH_STREAK" — so the flag was never actually cleared and every
+// channel stayed in the rotation for its full slot even after being paid.
+func (s *Streamer) MarkWatchStreakEarned() {
+	if s.Stream != nil {
 		s.Stream.IsWatchStreakMissing = false
 	}
 }
