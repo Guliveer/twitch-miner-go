@@ -11,6 +11,31 @@ import (
 	"github.com/Guliveer/twitch-miner-go/internal/twitch"
 )
 
+// watchOptions builds the watch-set configuration from the account config.
+// Pointer fields are filled in by applyDefaults, but a config assembled in
+// code (tests, the DB path) may leave them nil, so each falls back.
+func (m *Miner) watchOptions() twitch.WatchOptions {
+	opts := twitch.WatchOptions{
+		Priorities:    m.priorities,
+		MaxWatch:      constants.MaxWatchStreams,
+		StreakWatch:   constants.StreakWatchStreams,
+		StreakMinutes: constants.WatchStreakMinutes,
+		Preferred:     m.cfg.PreferredStreamers,
+	}
+
+	if m.cfg.MaxWatchStreams != nil {
+		opts.MaxWatch = *m.cfg.MaxWatchStreams
+	}
+	if m.cfg.StreakWatchStreams != nil {
+		opts.StreakWatch = *m.cfg.StreakWatchStreams
+	}
+	if m.cfg.WatchStreakMinutes != nil {
+		opts.StreakMinutes = *m.cfg.WatchStreakMinutes
+	}
+
+	return opts
+}
+
 func (m *Miner) runMinuteWatcher(ctx context.Context) error {
 	ticker := time.NewTicker(constants.DefaultMinuteWatchedInterval)
 	defer ticker.Stop()
@@ -21,8 +46,10 @@ func (m *Miner) runMinuteWatcher(ctx context.Context) error {
 			return ctx.Err()
 		case <-ticker.C:
 			streamers := m.getStreamers()
-			toWatch := twitch.SelectStreamersToWatch(streamers, m.priorities, *m.cfg.MaxWatchStreams)
+			set := twitch.SelectWatchSet(streamers, m.watchOptions())
+			toWatch := set.Streamers
 
+			m.logWatchModeChange(set)
 			m.logWatchingChanges(toWatch)
 
 			if len(toWatch) > 0 {
@@ -35,6 +62,36 @@ func (m *Miner) runMinuteWatcher(ctx context.Context) error {
 			}
 		}
 	}
+}
+
+// logWatchModeChange reports when the watch set switches between chasing
+// pending streaks on a narrow set and running at full width, so the shrunken
+// channel list is never a mystery in the log.
+func (m *Miner) logWatchModeChange(set twitch.WatchSet) {
+	// Nobody online yet says nothing about the mode. Reporting it here would
+	// announce a spurious "widened to 0" on every gap in coverage, and would
+	// consume the transition that the first real selection should announce.
+	if len(set.Streamers) == 0 {
+		return
+	}
+
+	m.lastWatchingMu.Lock()
+	changed := m.lastStreakHarvest == nil || *m.lastStreakHarvest != set.StreakHarvest
+	harvest := set.StreakHarvest
+	m.lastStreakHarvest = &harvest
+	m.lastWatchingMu.Unlock()
+
+	if !changed {
+		return
+	}
+
+	if set.StreakHarvest {
+		m.log.Info("🔥 Chasing watch streaks — narrowing watch set",
+			"streams", set.Width,
+			"minutes_per_channel", m.watchOptions().StreakMinutes)
+		return
+	}
+	m.log.Info("✅ All watch streaks settled — widening watch set", "streams", set.Width)
 }
 
 // logWatchingChanges compares the current set of watched streamers with the

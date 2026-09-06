@@ -76,13 +76,24 @@ func (m *Miner) handlePointsEarnedOrSpent(ctx context.Context, msg *model.Messag
 		if streamer != nil {
 			streamer.Mu.Lock()
 			streamer.UpdateHistory(string(mapReasonToEvent(reasonCode)), earned, 1)
+			if reasonCode == "WATCH_STREAK" {
+				streamer.MarkWatchStreakEarned()
+			}
 			streamer.Mu.Unlock()
 
 			streamer.Mu.RLock()
 			username := streamer.Username
 			currentBalance := streamer.ChannelPoints
 			category := streamer.ResolveCategory()
+			broadcastID := ""
+			if streamer.Stream != nil {
+				broadcastID = streamer.Stream.BroadcastID
+			}
 			streamer.Mu.RUnlock()
+
+			if reasonCode == "WATCH_STREAK" {
+				m.rememberWatchStreak(username, broadcastID)
+			}
 
 			event := mapReasonToEvent(reasonCode)
 			m.log.Event(ctx, event,

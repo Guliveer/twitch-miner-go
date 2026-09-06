@@ -12,6 +12,8 @@ type DebugSnapshot struct {
 	Account              string                      `json:"account"`
 	IsRunning            bool                        `json:"is_running"`
 	Watching             []DebugWatchingEntry        `json:"watching"`
+	StreakHarvest        bool                        `json:"streak_harvest"`
+	WatchWidth           int                         `json:"watch_width"`
 	ActivePredictions    []DebugPredictionEntry      `json:"active_predictions"`
 	PubSubConnections    []pubsub.ConnectionSnapshot `json:"pubsub_connections,omitempty"`
 	PendingTimerCount    int                         `json:"pending_timer_count"`
@@ -49,10 +51,10 @@ type DebugPredictionEntry struct {
 // DebugSnapshot returns a read-only runtime view of the miner internals.
 func (m *Miner) DebugSnapshot() DebugSnapshot {
 	streamers := m.getStreamers()
-	watching := twitch.SelectStreamersToWatch(streamers, m.priorities, *m.cfg.MaxWatchStreams)
+	watchSet := twitch.SelectWatchSet(streamers, m.watchOptions())
 
-	watchingEntries := make([]DebugWatchingEntry, 0, len(watching))
-	for _, streamer := range watching {
+	watchingEntries := make([]DebugWatchingEntry, 0, len(watchSet.Streamers))
+	for _, streamer := range watchSet.Streamers {
 		streamer.Mu.RLock()
 		entry := DebugWatchingEntry{
 			Username:             streamer.Username,
@@ -109,6 +111,8 @@ func (m *Miner) DebugSnapshot() DebugSnapshot {
 		Account:              m.cfg.Username,
 		IsRunning:            m.IsRunning(),
 		Watching:             watchingEntries,
+		StreakHarvest:        watchSet.StreakHarvest,
+		WatchWidth:           watchSet.Width,
 		ActivePredictions:    predictions,
 		PubSubConnections:    pubsubConnections,
 		PendingTimerCount:    pendingTimerCount,
