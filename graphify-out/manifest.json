@@ -780,9 +780,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1788687864.9340322,
-    "seen": 1788688010.1238775,
-    "ast_hash": "ef81165c4c6ee34316203658ab51aecb",
+    "mtime": 1788695120.8591073,
+    "seen": 1788695444.3790932,
+    "ast_hash": "d738ec7fb2ae91099f4480e7c5a4c14c",
     "semantic_hash": ""
   },
   "SECURITY.md": {
@@ -1239,21 +1239,21 @@
     "semantic_hash": ""
   },
   "internal/tray/tray.go": {
-    "mtime": 1788626314.727398,
-    "seen": 1788686728.2108028,
-    "ast_hash": "b45479fc05ec56154c5fa6b709144ddd",
+    "mtime": 1788695088.6843145,
+    "seen": 1788695444.3733222,
+    "ast_hash": "b3764e432db37437ad64504993dd234f",
     "semantic_hash": ""
   },
   "internal/tray/tray_console_other.go": {
-    "mtime": 1788626314.727398,
-    "seen": 1788686728.210804,
-    "ast_hash": "36e45967f081ab3701483047bdb18c9d",
+    "mtime": 1788695344.863897,
+    "seen": 1788695444.3733237,
+    "ast_hash": "9d5625707884b90119fff0617c0bde32",
     "semantic_hash": ""
   },
   "internal/tray/tray_console_windows.go": {
-    "mtime": 1788691298.9015417,
-    "seen": 1788691361.5793293,
-    "ast_hash": "49a9e164f315cccd5fe70c485a9cbd0e",
+    "mtime": 1788695054.7463927,
+    "seen": 1788695444.3733244,
+    "ast_hash": "152fd8a763345b5735df125d7f5fbbe1",
     "semantic_hash": ""
   },
   ".github/wiki/Advanced-Guide.md": {
@@ -1371,9 +1371,9 @@
     "semantic_hash": ""
   },
   "internal/tray/tray_console_windows_test.go": {
-    "mtime": 1788691311.7752025,
-    "seen": 1788691361.579331,
-    "ast_hash": "047d1cde1a571d0163b1f9e193b215d6",
+    "mtime": 1788695248.345982,
+    "seen": 1788695444.3733253,
+    "ast_hash": "fd764f1c14394c60ca2f7e86023b4a64",
     "semantic_hash": ""
   }
 }
