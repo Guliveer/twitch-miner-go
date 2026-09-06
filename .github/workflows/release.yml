@@ -330,14 +330,16 @@ jobs:
           GIT_COMMIT=$(git rev-parse --short HEAD)
           LDFLAGS="-s -w -X github.com/Guliveer/twitch-miner-go/internal/version.Number=${NEW_VERSION} -X github.com/Guliveer/twitch-miner-go/internal/version.GitCommit=${GIT_COMMIT}"
 
+          GOOS=${{ matrix.goos }}
+          GOARCH=${{ matrix.goarch }}
           mkdir -p dist
 
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build \
+          GOOS=$GOOS GOARCH=$GOARCH go build \
             -ldflags "$LDFLAGS" \
             -o "dist/twitch-miner-go-${GOOS}-${GOARCH}" \
             ./cmd/twitch-miner-go
 
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build \
+          GOOS=$GOOS GOARCH=$GOARCH go build \
             -ldflags "$LDFLAGS" \
             -o "dist/config-editor-${GOOS}-${GOARCH}" \
             ./cmd/config-editor
