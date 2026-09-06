@@ -232,13 +232,16 @@ followers:
 ### 1.5.2. Config Editor
 
 The `twitch-miner-go` binary itself embeds the config editor. When the miner is
-running, the editor is always available at **http://localhost:8070** (bound to
-`localhost` only — no other device on your network can reach it), so you can
-manage account configs while the miner is running without a separate program.
+running in **file mode**, the editor is always available at
+**http://localhost:8070** (bound to `localhost` only — no other device on your
+network can reach it), so you can manage account configs while the miner is
+running without a separate program. In **DB mode** the editor is not started
+(port 8070 stays closed) — account configs are managed via the REST API and
+[twitch-miner-go-dashboard](#153-database-mode-optional) instead.
 
 On Windows, Linux and macOS desktops a **system tray icon** is shown with
 quick links: left-click opens the dashboard, right-click shows a menu with
-**Dashboard**, **Config Editor**, a **Service** submenu (install/start/stop/
+**Dashboard**, **Config Editor** (hidden in DB mode), a **Service** submenu (install/start/stop/
 restart/status/uninstall, delegating to the platform installer script), a
 **Startup** submenu (start on logon, start at boot via the service installer),
 **Hide/Show Terminal** (Windows only, toggles the terminal window), and **Exit** (to stop the miner gracefully).
@@ -297,6 +300,10 @@ DB_DSN=postgresql://user:password@host:5432/dbname?sslmode=require
 ```
 
 The schema and migrations run automatically on first connection (via [goose](https://github.com/pressly/goose)).
+
+> **Note:** In DB mode the embedded config editor is **not** started (port 8070
+> stays closed) and the tray menu does not offer **Config Editor** — account
+> configs are managed exclusively through the database.
 
 **Migrate existing YAML configs to DB:**
 
@@ -1011,10 +1018,10 @@ won't restart; keep the file for later.
 <details>
 <summary>How do I open the editor without the terminal?</summary>
 
-While the miner is running, the editor is always at **http://localhost:8070**
-(localhost only). Or right-click the **system tray icon** → *Config Editor*. A
-standalone editor also exists: `tools/edit-config.sh` / `.bat` (web on `:3000`,
-or `--tui`).
+While the miner is running in file mode, the editor is always at
+**http://localhost:8070** (localhost only; not started in DB mode). Or right-click
+the **system tray icon** → *Config Editor* (hidden in DB mode). A standalone
+editor also exists: `tools/edit-config.sh` / `.bat` (web on `:3000`, or `--tui`).
 
 </details>
 

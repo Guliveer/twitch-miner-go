@@ -216,8 +216,16 @@ func main() {
 	})
 	rootLog.Info("🌐 Health/analytics server started", "addr", ":"+httpPort)
 
-	startConfigEditor(ctx, rootLog, *configDir, *configEditorPort)
-	startTray(rootLog, resolveNoTray(*noTray), httpPort, *configEditorPort, cancel)
+	// In DB mode account configs are managed via the database, so the embedded
+	// config editor (which edits YAML files) is neither started nor offered in
+	// the tray menu.
+	configEditorEnabled := !dbEnabled
+	if configEditorEnabled {
+		startConfigEditor(ctx, rootLog, *configDir, *configEditorPort)
+	} else {
+		rootLog.Info("Config editor skipped (DB mode — account configs are managed via the database)")
+	}
+	startTray(rootLog, resolveNoTray(*noTray), httpPort, *configEditorPort, configEditorEnabled, cancel)
 
 	telemetryCfg, err := telemetry.LoadConfigFromEnv(rootLog.Logger)
 	if err != nil {

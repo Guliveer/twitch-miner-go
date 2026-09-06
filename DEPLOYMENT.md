@@ -105,7 +105,8 @@ The installer uses NSSM to wrap the application as a native Windows service. On 
 ### Config Editor & Tray in Service Mode
 
 When running as a Windows service, the embedded config editor is still available
-at **http://localhost:8070** — the service binds it to `127.0.0.1` only, so you
+at **http://localhost:8070** in file mode (DB mode does not start it) — the
+service binds it to `127.0.0.1` only, so you
 can open it in a browser on the machine to manage account configs.
 
 The system tray icon is **not** shown in service mode: Windows services run in a
@@ -224,7 +225,8 @@ Containers are headless — there is no desktop or DBus session for a system tra
 icon to attach to. The image therefore ships with the tray disabled by default
 (`NO_TRAY=true` is set in the `Dockerfile` and `docker-compose.yml`), and the
 miner runs as a pure daemon. The embedded config editor remains available at
-`http://127.0.0.1:8070` inside the container regardless.
+`http://127.0.0.1:8070` inside the container in file mode (DB mode does not
+start it).
 
 #### Updating
 

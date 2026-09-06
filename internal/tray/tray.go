@@ -113,7 +113,13 @@ func onReady(opts Options) {
 	})
 
 	mDashboard := systray.AddMenuItem("Dashboard", "Open the analytics dashboard")
-	mEditor := systray.AddMenuItem("Config Editor", "Open the config editor")
+
+	// An empty ConfigEditorURL means the config editor is not running (DB mode),
+	// so the menu must not offer an item that points at a dead editor.
+	var mEditor *systray.MenuItem
+	if opts.Links.ConfigEditorURL != "" {
+		mEditor = systray.AddMenuItem("Config Editor", "Open the config editor")
+	}
 
 	// Service actions delegate to the platform installer script; the submenu is
 	// only built when the script is discoverable next to the binary.
@@ -168,7 +174,7 @@ func onReady(opts Options) {
 			select {
 			case <-mDashboard.ClickedCh:
 				_ = utils.OpenBrowser(opts.Links.DashboardURL)
-			case <-mEditor.ClickedCh:
+			case <-clickCh(mEditor):
 				_ = utils.OpenBrowser(opts.Links.ConfigEditorURL)
 			case <-clickCh(mServiceInstall):
 				RunServiceAction(ServiceInstall, logf)
