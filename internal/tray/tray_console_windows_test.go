@@ -31,3 +31,23 @@ func TestWindowResolutionProcsResolve(t *testing.T) {
 		}
 	}
 }
+
+func TestConsoleToggleStateStartsVisible(t *testing.T) {
+	// The tray toggle must start in the "visible" state so the menu item
+	// shows "Hide Terminal" on a fresh start. This test never calls
+	// HideConsole(): the test binary may share the developer's terminal, and
+	// hiding it would be destructive.
+	if isConsoleHidden() {
+		t.Fatal("console toggle starts hidden; menu would show 'Show Terminal'")
+	}
+}
+
+func TestShowConsoleWithoutHideIsNoop(t *testing.T) {
+	// showConsole with nothing hidden must not touch any window. It also
+	// must not panic or flip the state, so a stray menu click before any
+	// HideConsole is harmless.
+	showConsole()
+	if isConsoleHidden() {
+		t.Fatal("showConsole flipped the state to hidden")
+	}
+}

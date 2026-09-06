@@ -142,9 +142,17 @@ func onReady(opts Options) {
 	mAutostart := mStartup.AddSubMenuItemCheckbox("Start on logon", "Launch when you log on", AutostartEnabled())
 	mBoot := mStartup.AddSubMenuItem("Start at boot", "Install as a service that starts at boot")
 
+	// The console toggle switches between hiding and showing the terminal
+	// window on Windows. The initial title reflects the process state: when
+	// started with -no-console the window is already hidden, so the item must
+	// offer to bring it back.
 	var mHideConsole *systray.MenuItem
 	if runtime.GOOS == "windows" {
-		mHideConsole = systray.AddMenuItem("Hide Console", "Hide the console window")
+		if isConsoleHidden() {
+			mHideConsole = systray.AddMenuItem("Show Terminal", "Show the terminal window")
+		} else {
+			mHideConsole = systray.AddMenuItem("Hide Terminal", "Hide the terminal window")
+		}
 	}
 
 	systray.AddSeparator()
@@ -194,7 +202,15 @@ func onReady(opts Options) {
 			case <-mBoot.ClickedCh:
 				RunServiceAction(ServiceInstall, logf)
 			case <-clickCh(mHideConsole):
-				HideConsole()
+				if isConsoleHidden() {
+					showConsole()
+					mHideConsole.SetTitle("Hide Terminal")
+					mHideConsole.SetTooltip("Hide the terminal window")
+				} else {
+					HideConsole()
+					mHideConsole.SetTitle("Show Terminal")
+					mHideConsole.SetTooltip("Show the terminal window")
+				}
 			case <-mExit.ClickedCh:
 				systray.Quit()
 				if opts.OnExit != nil {

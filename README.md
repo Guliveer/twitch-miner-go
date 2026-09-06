@@ -239,7 +239,7 @@ quick links: left-click opens the dashboard, right-click shows a menu with
 **Dashboard**, **Config Editor**, a **Service** submenu (install/start/stop/
 restart/status/uninstall, delegating to the platform installer script), a
 **Startup** submenu (start on logon, start at boot via the service installer),
-**Hide Console** (Windows only), and **Exit** (to stop the miner gracefully).
+**Hide/Show Terminal** (Windows only, toggles the terminal window), and **Exit** (to stop the miner gracefully).
 The tray is skipped automatically when running as a Windows service (session 0
 has no desktop) or when `-no-tray` is set. The embedded editor's port can be
 changed with `-config-editor-port`. Note that on macOS the tray requires cgo,

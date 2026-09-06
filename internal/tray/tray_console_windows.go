@@ -6,6 +6,14 @@ import (
 	"golang.org/x/sys/windows"
 )
 
+// consoleHidden/consoleHwnd track which window HideConsole hid so showConsole
+// can restore it. They are only touched by the startup path (applyNoConsole,
+// before the tray goroutine exists) and the tray event loop, so no mutex.
+var (
+	consoleHidden bool
+	consoleHwnd   uintptr
+)
+
 // HideConsole hides the console window associated with the current process.
 // It is a no-op when the process has no attached console (e.g. a GUI
 // subsystem build). On Windows the miner is a console application, so hiding
@@ -56,6 +64,32 @@ func HideConsole() {
 	if showWindow := findProc("ShowWindow", "user32.dll"); showWindow != nil {
 		_, _, _ = showWindow.Call(target, 0)
 	}
+	consoleHidden = true
+	consoleHwnd = target
+}
+
+// showConsole restores the terminal window hidden by HideConsole. Restoring
+// the foreground window that was actually hidden (and not just the console
+// owner) is what made the hide stick, so the same handle is restored here.
+func showConsole() {
+	if !consoleHidden || consoleHwnd == 0 {
+		return
+	}
+	// SW_SHOW = 5.
+	if showWindow := findProc("ShowWindow", "user32.dll"); showWindow != nil {
+		_, _, _ = showWindow.Call(consoleHwnd, 5)
+	}
+	if setForeground := findProc("SetForegroundWindow", "user32.dll"); setForeground != nil {
+		_, _, _ = setForeground.Call(consoleHwnd)
+	}
+	consoleHidden = false
+	consoleHwnd = 0
+}
+
+// isConsoleHidden reports whether the terminal window is currently hidden by
+// HideConsole (or was hidden at startup via the -no-console flag).
+func isConsoleHidden() bool {
+	return consoleHidden
 }
 
 // findProc resolves an export from the first DLL that provides it. It returns
