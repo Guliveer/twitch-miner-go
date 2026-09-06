@@ -173,8 +173,26 @@ features:
 
 max_watch_streams: 2
 
+# While any live channel still owes a watch streak, the watch set narrows to
+# this many streams so the streak actually lands (Twitch only credits about two
+# concurrent streams; a wider set lets Twitch pick and no streak sticks).
+# Each channel holds its slot until the streak arrives or watch_streak_minutes
+# elapse, then the next pending channel takes over. Set to 0 to disable.
+#
+# Collected streaks are persisted to {DATA_DIR}/streaks/{account}.json, keyed by
+# broadcast ID, so a restart does not spend slot time chasing streaks Twitch has
+# already paid out. A channel that starts a new broadcast is chased again.
+streak_watch_streams: 2
+watch_streak_minutes: 10
+
+# Channels the PREFERRED priority picks first, in this order.
+preferred_streamers:
+  - jimpanse
+  - insym
+
 priority:
   - STREAK
+  - PREFERRED
   - DROPS
   - ORDER
 
@@ -345,7 +363,7 @@ For example, for user `guliveer_` the Telegram token variable is `TELEGRAM_TOKEN
 | `SKIP_UNAUTH`               | Set to `true` to skip accounts with no valid credentials instead of prompting for device code login | `false`          |
 | `NO_BANNER`                 | Set to `true` to suppress the startup banner animation                                        | `false`          |
 | `NO_TRAY`                   | Set to `true` to disable the system tray icon (headless/service/container environments)       | `false`          |
-| `LOG_DIR`                   | Enable file logging; directory for `.log` files named with startup timestamp                  | _(disabled)_     |
+| `LOG_DIR`                   | Enable file logging; directory for `.log` files named with startup timestamp. In Docker use a path under the `/data` volume (e.g. `/data/logs`) — a relative path lands in the container layer and is lost on redeploy. Files are not rotated. | _(disabled)_     |
 | `PORT`                      | HTTP server port for health/analytics                                                         | `8080`           |
 | `DATA_DIR`                  | Persistent data directory (cookies, state)                                                    | `.`              |
 | `TWITCH_CLIENT_ID_TV`       | Twitch TV client ID (falls back to built-in default if unset; override recommended)           | built-in default |
