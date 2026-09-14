@@ -250,6 +250,11 @@ running without a separate program. In **DB mode** the editor is not started
 (port 8070 stays closed) — account configs are managed via the REST API and
 [twitch-miner-go-dashboard](#153-database-mode-optional) instead.
 
+The config schema exposed at `/api/config/schema` is generated from the model
+constants that define the accepted enum values and defaults — the Go types are
+the single source of truth, so any client (dashboard, editor) always sees
+exactly the values the miner accepts.
+
 On Windows, Linux and macOS desktops a **system tray icon** is shown with
 quick links: left-click opens the dashboard, right-click shows a menu with
 **Dashboard**, **Config Editor** (hidden in DB mode), a **Service** submenu (install/start/stop/
@@ -342,7 +347,7 @@ All endpoints return `501 Not Implemented` when `DB_ENABLED=false`. Auth follows
 
 | Method   | Endpoint                    | Description                                           |
 |----------|-----------------------------|-------------------------------------------------------|
-| `GET`    | `/api/config/schema`        | Returns validation schema and default values           |
+| `GET`    | `/api/config/schema`        | Returns schema generated from model constants: enums, defaults, `notification_providers`, `outcome_keys`, and `rules` |
 | `POST`   | `/api/config/validate`      | Validates config JSON without saving (body: AccountConfig JSON) |
 | `POST`   | `/api/config/generate`      | Generates YAML from config JSON (body: AccountConfig JSON) |
 
