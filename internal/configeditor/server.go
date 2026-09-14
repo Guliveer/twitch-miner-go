@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Guliveer/twitch-miner-go/internal/config"
 	"github.com/Guliveer/twitch-miner-go/internal/constants"
 	"github.com/Guliveer/twitch-miner-go/internal/utils"
 	"gopkg.in/yaml.v3"
@@ -30,40 +31,9 @@ var secretFields = map[string][]string{
 	"gotify":   {"url", "token"},
 }
 
-// schema is the static validation schema returned to the frontend.
-var schema = map[string]any{
-	"strategies": []string{
-		"MOST_VOTED", "HIGH_ODDS", "PERCENTAGE", "SMART_MONEY", "SMART",
-		"NUMBER_1", "NUMBER_2", "NUMBER_3", "NUMBER_4",
-		"NUMBER_5", "NUMBER_6", "NUMBER_7", "NUMBER_8",
-	},
-	"chat_modes":      []string{"ALWAYS", "NEVER", "ONLINE", "OFFLINE"},
-	"priorities":      []string{"BADGES", "STREAK", "DROPS", "ORDER", "PREFERRED", "SUBSCRIBED", "ENDING_SOONEST", "LOW_AVAILABILITY_FIRST", "POINTS_ASCENDING", "POINTS_DESCENDING"},
-	"followers_order": []string{"ASC", "DESC"},
-	"delay_modes":     []string{"FROM_START", "FROM_END", "PERCENTAGE"},
-	"filter_where":    []string{"GT", "LT", "GTE", "LTE"},
-	"filter_by":       []string{"total_users", "total_points"},
-	"webhook_methods": []string{"GET", "POST"},
-	"notification_events": []string{
-		"STREAMER_ONLINE", "STREAMER_OFFLINE",
-		"GAIN_FOR_RAID", "GAIN_FOR_CLAIM", "GAIN_FOR_WATCH", "GAIN_FOR_WATCH_STREAK",
-		"BET_WIN", "BET_LOSE", "BET_REFUND", "BET_FILTERS", "BET_GENERAL", "BET_FAILED", "BET_START",
-		"BONUS_CLAIM", "MOMENT_CLAIM", "JOIN_RAID",
-		"DROP_CLAIM", "DROP_STATUS", "DROP_MILESTONE",
-		"CHAT_MENTION", "GIFTED_SUB",
-		"MINER_STARTED", "MINER_STOPPED", "MINER_CRASHED",
-		"ACCOUNT_CONFIG_RELOADED",
-		"TEST",
-	},
-	"defaults": map[string]any{
-		"max_watch_streams":              2,
-		"priority":                       []string{"STREAK", "DROPS", "ORDER"},
-		"category_watcher_poll_interval": "120s",
-		"team_watcher_poll_interval":     "120s",
-		"badge_watcher_poll_interval":    "5m",
-		"followers_order":                "ASC",
-	},
-}
+// schema is the validation schema returned to the frontend, built once at
+// startup from the model constants so it can never drift from the bot.
+var schema = config.BuildSchemaPayload()
 
 // Server handles HTTP requests for the config editor web UI.
 type Server struct {
