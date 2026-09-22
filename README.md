@@ -14,7 +14,7 @@
 [![Created At](https://img.shields.io/github/created-at/Guliveer/twitch-miner-go?style=for-the-badge&logo=github)](https://github.com/Guliveer/twitch-miner-go)
 [![License](https://img.shields.io/github/license/Guliveer/twitch-miner-go?style=for-the-badge)](https://github.com/Guliveer/twitch-miner-go/blob/main/LICENSE.txt)
 
-A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2). Mines channel points, claims bonuses, places predictions, joins raids, claims drops, and more — all with a fraction of the resource usage.
+Mines channel points, claims bonuses, places predictions, joins raids, claims drops, and more — all with a fraction of the resource usage.
 
 Automatically claim:
 - 🎁 Twitch Drops
@@ -33,13 +33,16 @@ Built for low resource usage and long-running deployments.
 
 ## Why twitch-miner-go?
 
-A drop-in **alternative to the Twitch Channel Points Miner v2** that runs on a single static binary:
+A drop-in **alternative to [Twitch Channel Points Miner v2](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2), [TwitchDropsMiner](https://github.com/DevilXD/TwitchDropsMiner) and many others**, but better:
 
-- **No Python runtime** — one compiled binary for Windows, macOS and Linux; no `pip install`, no dependency conflicts
-- **~80 MB RAM** vs >250 MB — see the [resource comparison](#13-resource-comparison)
-- **~12 MB Docker image** vs 200–500 MB
-- **Same feature set** — points, bonuses, predictions, raids, drops, moments, goals, streaks
-- **More on top** — multi-account, hot-reload configs, DB mode, notifications, analytics dashboard, auto-update
+- **Fully cross-platform** — one compiled binary for Windows, macOS and Linux (amd64 and arm64), a multi-arch Docker image and native services (systemd/OpenRC, Windows service) — the same setup runs on a desktop, a Raspberry Pi or a VPS
+- **No runtime dependencies** — no Python, no `pip install`, no dependency conflicts; just a single static binary
+- **Lightweight** — ~80 MB RAM vs >250 MB and a ~12 MB Docker image vs 200–500 MB; see the [resource comparison](#13-resource-comparison)
+- **Complete feature set** — channel points, watch streaks, bonuses, drops, predictions, raids, moments and goals
+- **Multi-account** — run several Twitch accounts from a single process, each with its own config and notification channel
+- **Headless & 24/7** — no GUI required, automatic restart on crash; TwitchDropsMiner is a desktop GUI app without auto-restart
+- **Notifications** — Telegram, Discord, Webhook, Matrix, Pushover, Gotify; TwitchDropsMiner ships no notification system
+- **More on top** — hot-reload configs, PostgreSQL DB mode with REST API, analytics dashboard, config editor and auto-update
 
 ## Use cases
 
