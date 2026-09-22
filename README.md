@@ -16,11 +16,32 @@
 
 A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2). Mines channel points, claims bonuses, places predictions, joins raids, claims drops, and more — all with a fraction of the resource usage.
 
+**Quick start:** download a [release binary](https://github.com/Guliveer/twitch-miner-go/releases/latest) (Windows, macOS, Linux) or run `./_run.sh` — no Python, no browser, no Docker required. See [Running Locally](#14-running-locally) and the [Quick Start config](#151-quick-start).
+
 > ⭐ **[Star this repo](https://github.com/Guliveer/twitch-miner-go/stargazers)** to bookmark it and get notified about new releases — the project is young, actively developed, and the best time to jump in is now.
+
+## Why twitch-miner-go?
+
+A drop-in **alternative to the Twitch Channel Points Miner v2** that runs on a single static binary:
+
+- **No Python runtime** — one compiled binary for Windows, macOS and Linux; no `pip install`, no dependency conflicts
+- **~80 MB RAM** vs >250 MB — see the [resource comparison](#13-resource-comparison)
+- **~12 MB Docker image** vs 200–500 MB
+- **Same feature set** — points, bonuses, predictions, raids, drops, moments, goals, streaks
+- **More on top** — multi-account, hot-reload configs, DB mode, notifications, analytics dashboard, auto-update
+
+## Who is it for?
+
+- **Twitch viewers** who want channel points, drops and predictions handled automatically while they are away
+- **Multi-account users** who run several accounts from a single process
+- **Self-hosters** who want a small, low-footprint service (Docker, Fly.io, VPS, Raspberry Pi)
+- **Developers** who want a configurable miner with a REST API and PostgreSQL backend
 
 ## 1.1. Table of Contents
 
 - [twitch-miner-go - Efficient Auto Drops & Points Claim for Twitch](#twitch-miner-go---efficient-auto-drops--points-claim-for-twitch)
+    - [Why twitch-miner-go?](#why-twitch-miner-go)
+    - [Who is it for?](#who-is-it-for)
     - [1.1. Table of Contents](#11-table-of-contents)
     - [1.2. Features](#12-features)
     - [1.3. Resource Comparison](#13-resource-comparison)
@@ -66,6 +87,7 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
     - [1.15. License](#115-license)
     - [1.16. FAQ](#116-faq)
     - [1.17. Advanced Guide](#117-advanced-guide)
+    - [Community](#community)
 
 ## 1.2. Features
 
@@ -1256,3 +1278,10 @@ The hand-held explanations live in the
 [wiki](https://github.com/Guliveer/twitch-miner-go/wiki). For the internal
 package map and data flow, see
 [Architecture](https://github.com/Guliveer/twitch-miner-go/wiki/Architecture).
+
+## Community
+
+- [r/Twitch](https://www.reddit.com/r/Twitch/) — the main Twitch subreddit (~2.9M members)
+- [r/TwitchDrops](https://www.reddit.com/r/TwitchDrops/) — news about active drops campaigns
+
+Found a bug or have a feature request? Open an [issue](https://github.com/Guliveer/twitch-miner-go/issues). Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md).
