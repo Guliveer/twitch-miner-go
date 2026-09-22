@@ -16,13 +16,24 @@
 
 A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2). Mines channel points, claims bonuses, places predictions, joins raids, claims drops, and more — all with a fraction of the resource usage.
 
+Automatically claim:
+- 🎁 Twitch Drops
+- 💎 Channel Points
+- 🎉 Bonuses
+- 🔮 Predictions
+- ⚔️ Raids
+- 🎯 Community Goals
+- 🎊 Community Moments
+
+Built for low resource usage and long-running deployments.
+
 **Quick start:** download a [release binary](https://github.com/Guliveer/twitch-miner-go/releases/latest) (Windows, macOS, Linux) or run `./_run.sh` — no Python, no browser, no Docker required. See [Running Locally](#14-running-locally) and the [Quick Start config](#151-quick-start).
 
 > ⭐ **[Star this repo](https://github.com/Guliveer/twitch-miner-go/stargazers)** to bookmark it and get notified about new releases — the project is young, actively developed, and the best time to jump in is now.
 
-## Twitch Channel Points Miner alternative
+## Why twitch-miner-go?
 
-Looking for a faster, lightweight alternative to Twitch Channel Points Miner? `twitch-miner-go` is a Go-based Twitch automation bot that runs on a single static binary:
+A drop-in **alternative to the Twitch Channel Points Miner v2** that runs on a single static binary:
 
 - **No Python runtime** — one compiled binary for Windows, macOS and Linux; no `pip install`, no dependency conflicts
 - **~80 MB RAM** vs >250 MB — see the [resource comparison](#13-resource-comparison)
@@ -40,7 +51,7 @@ Looking for a faster, lightweight alternative to Twitch Channel Points Miner? `t
 ## 1.1. Table of Contents
 
 - [twitch-miner-go - Efficient Auto Drops & Points Claim for Twitch](#twitch-miner-go---efficient-auto-drops--points-claim-for-twitch)
-    - [Twitch Channel Points Miner alternative](#twitch-channel-points-miner-alternative)
+    - [Why twitch-miner-go?](#why-twitch-miner-go)
     - [Use cases](#use-cases)
     - [1.1. Table of Contents](#11-table-of-contents)
     - [1.2. Features](#12-features)
@@ -116,6 +127,8 @@ Looking for a faster, lightweight alternative to Twitch Channel Points Miner? `t
 | Startup time    | 5–10 s                  | **~2–3 s**                               | **2–4× faster**        |
 | Streamer loading| ~4 500 ms / 5 streamers | **~260 ms / 5 streamers** *(concurrent)* | **~17× faster**        |
 | OS threads      | 60+                     | **~4–5** / ~25 goroutines                | **12× fewer**          |
+
+> Measurements are approximate and depend on configuration, number of accounts and active channels.
 
 > Impressed by the difference? A [⭐ star](https://github.com/Guliveer/twitch-miner-go/stargazers) helps the next person find this instead of running the bloated Python image. Already using the miner? That one click keeps you in the loop for what ships next.
 
