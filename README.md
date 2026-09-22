@@ -206,7 +206,7 @@ priority:
 # so discovery pauses safely if either catalog is unavailable or malformed.
 badge_watcher:
   enabled: false
-  poll_interval: 5m # catalogs are cached for one hour
+  poll_interval: 5m # catalogs are cached for fifteen minutes
   streamer_limit: 1
 
 streamer_defaults:
