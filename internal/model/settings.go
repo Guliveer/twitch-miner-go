@@ -165,6 +165,22 @@ func ParsePriority(s string) Priority {
 	}
 }
 
+// AllPriorities returns a slice of all defined priorities in canonical order.
+func AllPriorities() []Priority {
+	return []Priority{
+		PriorityOrder,
+		PriorityStreak,
+		PriorityDrops,
+		PrioritySubscribed,
+		PriorityPointsAscending,
+		PriorityPointsDescending,
+		PriorityEndingSoonest,
+		PriorityLowAvailabilityFirst,
+		PriorityPreferred,
+		PriorityBadges,
+	}
+}
+
 // FollowersOrder defines the sort order for followed channels.
 type FollowersOrder int
 
@@ -196,5 +212,13 @@ func ParseFollowersOrder(s string) FollowersOrder {
 		return FollowersOrderDESC
 	default:
 		return FollowersOrderASC
+	}
+}
+
+// AllFollowersOrders returns a slice of all defined followers orders in canonical order.
+func AllFollowersOrders() []FollowersOrder {
+	return []FollowersOrder{
+		FollowersOrderASC,
+		FollowersOrderDESC,
 	}
 }
