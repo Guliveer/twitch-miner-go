@@ -539,7 +539,7 @@ func (c *Client) logDropStatuses(ctx context.Context) {
 				ID              string `json:"id"`
 				Name            string `json:"name"`
 				RequiredMinutes int    `json:"requiredMinutesWatched"`
-				BenefitEdges []struct {
+				BenefitEdges    []struct {
 					Benefit struct {
 						Name string `json:"name"`
 					} `json:"benefit"`
