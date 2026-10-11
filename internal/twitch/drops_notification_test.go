@@ -639,3 +639,139 @@ func milestoneEventCount(t *testing.T, lc *logCapture) int {
 	}
 	return count
 }
+
+// --- logInventoryDropProgress tests ---
+
+func TestLogInventoryDropProgress_ProgressChangeFiresStatus(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = inventoryJSON([]inventoryDrop{
+		{id: "drop1", timeName: "2 Hours", benefitName: "Charm Pack", requiredMinutes: 120, currentMinutes: 15},
+	})
+	client, lc := newTestClientWithCapture(t, transport)
+
+	client.logInventoryDropProgress(context.Background())
+
+	entries := lc.infoEntries(t)
+	if len(entries) != 1 {
+		t.Fatalf("expected 1 info entry (DROP_STATUS), got %d: %v", len(entries), entries)
+	}
+	if entries[0]["event"] != string(model.EventDropStatus) {
+		t.Errorf("expected event %q, got %v", model.EventDropStatus, entries[0]["event"])
+	}
+	if entries[0]["reward"] != "Charm Pack" {
+		t.Errorf("expected reward %q, got %v", "Charm Pack", entries[0]["reward"])
+	}
+}
+
+func TestLogInventoryDropProgress_UnchangedProgressDoesNotRepeat(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = inventoryJSON([]inventoryDrop{
+		{id: "drop1", timeName: "2 Hours", benefitName: "Charm Pack", requiredMinutes: 120, currentMinutes: 15},
+	})
+	client, lc := newTestClientWithCapture(t, transport)
+
+	client.logInventoryDropProgress(context.Background())
+	lc.reset()
+	client.logInventoryDropProgress(context.Background())
+
+	if entries := lc.infoEntries(t); len(entries) != 0 {
+		t.Fatalf("expected no info entries for unchanged progress, got %d: %v", len(entries), entries)
+	}
+}
+
+func TestLogInventoryDropProgress_MilestoneFiresAtQuarter(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = inventoryJSON([]inventoryDrop{
+		{id: "drop1", timeName: "2 Hours", benefitName: "Charm Pack", requiredMinutes: 120, currentMinutes: 30},
+	})
+	client, lc := newTestClientWithCapture(t, transport)
+
+	client.logInventoryDropProgress(context.Background())
+
+	if count := milestoneEventCount(t, lc); count != 1 {
+		t.Fatalf("expected 1 DROP_MILESTONE at 25%%, got %d", count)
+	}
+}
+
+func TestLogInventoryDropProgress_ClaimableFiresEvent(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = inventoryJSON([]inventoryDrop{
+		{id: "drop1", timeName: "2 Hours", benefitName: "Charm Pack", instanceID: "inst-1", requiredMinutes: 60, currentMinutes: 60},
+	})
+	client, lc := newTestClientWithCapture(t, transport)
+
+	client.logInventoryDropProgress(context.Background())
+
+	var status, milestone, claimable bool
+	for _, e := range lc.infoEntries(t) {
+		switch e["event"] {
+		case string(model.EventDropStatus):
+			status = true
+		case string(model.EventDropMilestone):
+			milestone = true
+		case string(model.EventDropClaimAvailable):
+			claimable = true
+		}
+	}
+	if !status || !milestone || !claimable {
+		t.Fatalf("expected DROP_STATUS, DROP_MILESTONE and DROP_CLAIM_AVAILABLE; got status=%t milestone=%t claimable=%t", status, milestone, claimable)
+	}
+}
+
+func TestLogInventoryDropProgress_NilInventoryEmitsNothing(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	transport.responses["Inventory"] = `{"data": null}`
+	client, lc := newTestClientWithCapture(t, transport)
+
+	client.logInventoryDropProgress(context.Background())
+
+	if entries := lc.infoEntries(t); len(entries) != 0 {
+		t.Fatalf("expected no info entries for nil inventory, got %d: %v", len(entries), entries)
+	}
+}
+
+func TestSyncCampaigns_EmptyDashboard_EmitsInventoryProgress(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	watched := 15
+	transport.setResponseFunc("Inventory", func(_ int, _ map[string]any) string {
+		return inventoryJSON([]inventoryDrop{
+			{id: "drop1", timeName: "2 Hours", benefitName: "Charm Pack", requiredMinutes: 120, currentMinutes: watched},
+		})
+	})
+	client, lc := newTestClientWithCapture(t, transport)
+
+	ctx := context.Background()
+
+	if err := client.SyncCampaigns(ctx, nil); err != nil {
+		t.Fatalf("first SyncCampaigns returned error: %v", err)
+	}
+	lc.reset()
+
+	watched = 30
+	if err := client.SyncCampaigns(ctx, nil); err != nil {
+		t.Fatalf("second SyncCampaigns returned error: %v", err)
+	}
+
+	var found bool
+	for _, e := range lc.infoEntries(t) {
+		if e["event"] == string(model.EventDropStatus) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("expected DROP_STATUS after progress advanced with an empty dashboard, got %v", lc.infoEntries(t))
+	}
+}

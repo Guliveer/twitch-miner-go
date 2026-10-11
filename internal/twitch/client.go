@@ -117,6 +117,12 @@ type Client struct {
 	// the first minute would never be reported.
 	dropProgress sync.Map
 
+	// inventoryProgress caches the last reported percentage per drop ID for
+	// inventory-sourced progress notifications. The dashboard campaign feed
+	// Twitch used to populate Stream.Campaigns is empty (issue #37), so progress
+	// is reported from the inventory instead and this cache suppresses repeats.
+	inventoryProgress sync.Map
+
 	startupDropsLogged bool
 
 	// streaks, when set, remembers watch streaks across restarts so a channel

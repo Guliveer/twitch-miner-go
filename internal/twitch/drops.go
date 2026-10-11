@@ -30,6 +30,8 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		if !c.startupDropsLogged {
 			c.startupDropsLogged = true
 			c.logDropStatuses(ctx)
+		} else {
+			c.logInventoryDropProgress(ctx)
 		}
 		return nil
 	}
@@ -671,6 +673,111 @@ func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.
 			}
 		}
 		streamer.Mu.Unlock()
+	}
+}
+
+func (c *Client) logInventoryDropProgress(ctx context.Context) {
+	inventoryData, err := c.GQL.GetDropsInventory(ctx)
+	if err != nil {
+		c.Log.Debug("Failed to get drops inventory for progress", "error", err)
+		return
+	}
+
+	if inventoryData == nil {
+		return
+	}
+
+	var inventory struct {
+		DropCampaignsInProgress []struct {
+			Game *struct {
+				Name string `json:"name"`
+				Slug string `json:"slug"`
+			} `json:"game"`
+			TimeBasedDrops []struct {
+				ID              string `json:"id"`
+				Name            string `json:"name"`
+				RequiredMinutes int    `json:"requiredMinutesWatched"`
+				BenefitEdges    []struct {
+					Benefit struct {
+						Name string `json:"name"`
+					} `json:"benefit"`
+				} `json:"benefitEdges"`
+				Self *struct {
+					HasPreconditionsMet   bool   `json:"hasPreconditionsMet"`
+					CurrentMinutesWatched int    `json:"currentMinutesWatched"`
+					DropInstanceID        string `json:"dropInstanceID"`
+					IsClaimed             bool   `json:"isClaimed"`
+				} `json:"self"`
+			} `json:"timeBasedDrops"`
+		} `json:"dropCampaignsInProgress"`
+	}
+
+	if err := json.Unmarshal(inventoryData, &inventory); err != nil {
+		c.Log.Debug("Failed to parse inventory for progress", "error", err)
+		return
+	}
+
+	for _, campaign := range inventory.DropCampaignsInProgress {
+		gameName := ""
+		if campaign.Game != nil {
+			gameName = campaign.Game.Slug
+			if gameName == "" {
+				gameName = campaign.Game.Name
+			}
+		}
+
+		for _, drop := range campaign.TimeBasedDrops {
+			if drop.Self == nil {
+				continue
+			}
+
+			rewardName := drop.Name
+			if len(drop.BenefitEdges) > 0 && drop.BenefitEdges[0].Benefit.Name != "" {
+				rewardName = drop.BenefitEdges[0].Benefit.Name
+			}
+
+			progress := fmt.Sprintf("%d/%dm", drop.Self.CurrentMinutesWatched, drop.RequiredMinutes)
+			percentage := model.Percentage(drop.Self.CurrentMinutesWatched, drop.RequiredMinutes)
+
+			last, seen := c.inventoryProgress.Load(drop.ID)
+			lastPercentage, _ := last.(int)
+			if !seen || lastPercentage != percentage {
+				c.inventoryProgress.Store(drop.ID, percentage)
+
+				status := "IN_PROGRESS"
+				if drop.Self.IsClaimed {
+					status = "CLAIMED"
+				} else if drop.Self.DropInstanceID != "" {
+					status = "CLAIMABLE"
+				}
+
+				c.Log.Event(ctx, model.EventDropStatus, "Drop progress",
+					"reward", rewardName,
+					"category", gameName,
+					"progress", progress,
+					"status", status)
+			}
+
+			if isQuarterMilestone(percentage) {
+				key := drop.ID + ":" + fmt.Sprintf("%d", percentage)
+				if _, loaded := c.dropMilestoneNotified.LoadOrStore(key, true); !loaded {
+					c.Log.Event(ctx, model.EventDropMilestone,
+						fmt.Sprintf("Drop milestone: %d%%", percentage),
+						"reward", rewardName,
+						"category", gameName,
+						"progress", progress)
+				}
+			}
+
+			if !drop.Self.IsClaimed && drop.Self.DropInstanceID != "" {
+				if _, alreadySeen := c.seenClaimable.LoadOrStore(drop.ID, true); !alreadySeen {
+					c.Log.Event(ctx, model.EventDropClaimAvailable,
+						fmt.Sprintf("Drop available to claim: %s", rewardName),
+						"reward", rewardName,
+						"category", gameName)
+				}
+			}
+		}
 	}
 }
 
