@@ -338,32 +338,45 @@ func (c *Client) updateStream(ctx context.Context, streamer *model.Streamer) err
 		}
 	}
 
-	payload := map[string]any{
-		"channel_id":   streamer.ChannelID,
-		"broadcast_id": streamer.Stream.BroadcastID,
-		"player":       "site",
-		"user_id":      c.Auth.UserID(),
-		"live":         true,
-		"channel":      streamer.Username,
+	// Twitch validates the Spade payload against its web client: the old
+	// reduced payload gets HTTP 204 but is not credited, silently freezing
+	// Drops progress with no error (issue #37).
+	streamer.Stream.Payload = map[string]any{
+		"event":      "minute-watched",
+		"properties": buildMinuteWatchedProperties(streamer, c.Auth.UserID()),
 	}
 
 	if streamer.Stream.GameName() != "" && streamer.Stream.GameID() != "" &&
 		streamer.Settings != nil && streamer.Settings.ClaimDrops {
-		payload["game"] = streamer.Stream.GameName()
-		payload["game_id"] = streamer.Stream.GameID()
-
-		campaignIDs, err := c.GQL.GetAvailableCampaigns(ctx, streamer.ChannelID)
-		if err == nil {
+		if campaignIDs, err := c.GQL.GetAvailableCampaigns(ctx, streamer.ChannelID); err == nil {
 			streamer.Stream.CampaignIDs = campaignIDs
 		}
 	}
 
-	streamer.Stream.Payload = map[string]any{
-		"event":      "minute-watched",
-		"properties": payload,
-	}
-
 	return nil
+}
+
+// buildMinuteWatchedProperties mirrors the Twitch web client's "minute-watched"
+// properties; Twitch silently withholds watch credit for payloads that omit
+// them. Callers must hold the streamer lock.
+func buildMinuteWatchedProperties(streamer *model.Streamer, userID string) map[string]any {
+	return map[string]any{
+		"broadcast_id":   streamer.Stream.BroadcastID,
+		"channel_id":     streamer.ChannelID,
+		"channel":        streamer.Username,
+		"client_time":    time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
+		"game":           streamer.Stream.GameName(),
+		"game_id":        streamer.Stream.GameID(),
+		"hidden":         false,
+		"is_live":        true,
+		"live":           true,
+		"location":       "channel",
+		"logged_in":      true,
+		"minutes_logged": 1,
+		"muted":          false,
+		"player":         "site",
+		"user_id":        userID,
+	}
 }
 
 // updateSpadeURL fetches the spade URL for a streamer by scraping their channel page.

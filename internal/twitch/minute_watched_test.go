@@ -501,3 +501,65 @@ func TestStalledCooldown_AllInCooldownReturnsNone(t *testing.T) {
 		t.Fatalf("expected 0 when all in cooldown, got %d", len(selected))
 	}
 }
+
+func TestBuildMinuteWatchedProperties_MatchesWebClient(t *testing.T) {
+	t.Parallel()
+
+	s := makeOnlineStreamer("streamer")
+	s.ChannelID = "123456"
+	s.Stream.BroadcastID = "987654321"
+	s.Stream.Game = &model.GameInfo{ID: "509658", Name: "Just Chatting"}
+
+	props := buildMinuteWatchedProperties(s, "42")
+
+	want := map[string]any{
+		"broadcast_id":   "987654321",
+		"channel_id":     "123456",
+		"channel":        "streamer",
+		"game":           "Just Chatting",
+		"game_id":        "509658",
+		"hidden":         false,
+		"is_live":        true,
+		"live":           true,
+		"location":       "channel",
+		"logged_in":      true,
+		"minutes_logged": 1,
+		"muted":          false,
+		"player":         "site",
+		"user_id":        "42",
+	}
+
+	for key, wantVal := range want {
+		got, ok := props[key]
+		if !ok {
+			t.Errorf("missing payload field %q", key)
+			continue
+		}
+		if got != wantVal {
+			t.Errorf("field %q = %v (%T), want %v (%T)", key, got, got, wantVal, wantVal)
+		}
+	}
+
+	if clientTime, ok := props["client_time"].(string); !ok || clientTime == "" {
+		t.Errorf("client_time missing or empty: %v (%T)", props["client_time"], props["client_time"])
+	}
+}
+
+func TestBuildMinuteWatchedProperties_AlwaysIncludesGameFields(t *testing.T) {
+	t.Parallel()
+
+	s := makeOnlineStreamer("nogame")
+	s.Stream.Game = nil
+
+	props := buildMinuteWatchedProperties(s, "1")
+
+	if _, ok := props["game"]; !ok {
+		t.Error("game field must be present even when the stream has no game")
+	}
+	if _, ok := props["game_id"]; !ok {
+		t.Error("game_id field must be present even when the stream has no game")
+	}
+	if props["game"] != "" || props["game_id"] != "" {
+		t.Errorf("expected empty game/game_id, got %v / %v", props["game"], props["game_id"])
+	}
+}
