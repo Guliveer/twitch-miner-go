@@ -108,8 +108,14 @@ type Client struct {
 	dropSynthetic sync.Map
 
 	// dropMilestoneNotified tracks which quarter milestones have been reported
-	// for a given drop instance. Keys are "dropInstanceID:milestone" strings.
+	// for a given drop instance. Keys are "dropID:milestone" strings.
 	dropMilestoneNotified sync.Map
+
+	// dropProgress caches the last observed watch progress per drop ID. Drop
+	// campaigns are rebuilt from scratch on every sync, so without this cache
+	// Drop.Update would always compare against a zeroed drop and progress past
+	// the first minute would never be reported.
+	dropProgress sync.Map
 
 	startupDropsLogged bool
 
@@ -123,6 +129,13 @@ type Client struct {
 // out its watch streak in an earlier run.
 type StreakLookup interface {
 	Earned(channel, broadcastID string) bool
+}
+
+// dropProgressState is the last observed watch progress for a single drop,
+// cached across sync cycles so quarter-milestone crossings can be detected.
+type dropProgressState struct {
+	currentMinutesWatched int
+	percentageProgress    int
 }
 
 // SetStreakLookup attaches the persistent watch-streak record.

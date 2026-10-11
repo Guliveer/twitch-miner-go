@@ -188,7 +188,8 @@ func (c *Client) syncCampaignsWithInventory(ctx context.Context, campaigns []*mo
 				for _, timeDrop := range progress.TimeBasedDrops {
 					for _, drop := range campaigns[i].Drops {
 						if drop.ID == timeDrop.ID && timeDrop.Self != nil {
-							drop.Update(
+							c.applyDropUpdate(
+								drop,
 								timeDrop.Self.HasPreconditionsMet,
 								timeDrop.Self.CurrentMinutesWatched,
 								timeDrop.Self.DropInstanceID,
@@ -204,6 +205,24 @@ func (c *Client) syncCampaignsWithInventory(ctx context.Context, campaigns []*mo
 	}
 
 	return campaigns, nil
+}
+
+// applyDropUpdate refreshes a drop, restoring progress cached from the previous
+// sync first because campaigns are rebuilt from scratch on every sync.
+func (c *Client) applyDropUpdate(drop *model.Drop, hasPreconditionsMet bool, currentMinutesWatched int, dropInstanceID string, isClaimed bool) {
+	if prev, ok := c.dropProgress.Load(drop.ID); ok {
+		if state, ok := prev.(dropProgressState); ok {
+			drop.CurrentMinutesWatched = state.currentMinutesWatched
+			drop.PercentageProgress = state.percentageProgress
+		}
+	}
+
+	drop.Update(hasPreconditionsMet, currentMinutesWatched, dropInstanceID, isClaimed)
+
+	c.dropProgress.Store(drop.ID, dropProgressState{
+		currentMinutesWatched: drop.CurrentMinutesWatched,
+		percentageProgress:    drop.PercentageProgress,
+	})
 }
 
 func (c *Client) detectVanishedDrops(currentDropIDs map[string]struct{}) {
@@ -623,7 +642,7 @@ func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.
 						"status", status)
 
 					if isQuarterMilestone(drop.PercentageProgress) {
-						key := drop.DropInstanceID + ":" + fmt.Sprintf("%d", drop.PercentageProgress)
+						key := drop.ID + ":" + fmt.Sprintf("%d", drop.PercentageProgress)
 						if _, loaded := c.dropMilestoneNotified.LoadOrStore(key, true); !loaded {
 							streamer.UpdateHistory(string(model.EventDropMilestone), 0, 1)
 							c.Log.Event(ctx, model.EventDropMilestone,
