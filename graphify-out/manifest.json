@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "internal/gql/client.go": {
-    "mtime": 1788211796.5616462,
-    "seen": 1788555176.5097582,
+    "mtime": 1791726371.9203715,
+    "seen": 1791728205.2347693,
     "ast_hash": "c96eb5b4a33cb0c4369634a211e497c9",
     "semantic_hash": ""
   },
@@ -138,8 +138,8 @@
     "semantic_hash": ""
   },
   "internal/gql/operations.go": {
-    "mtime": 1789405442.7116187,
-    "seen": 1791717596.7465427,
+    "mtime": 1791726371.9213717,
+    "seen": 1791728205.2348874,
     "ast_hash": "c7481153131775b07eb77ec185bb94ef",
     "semantic_hash": ""
   },
@@ -432,15 +432,15 @@
     "semantic_hash": ""
   },
   "internal/twitch/client.go": {
-    "mtime": 1791716019.5784106,
-    "seen": 1791717596.750054,
-    "ast_hash": "d37c970cc7146aed3509f445ea2211e7",
+    "mtime": 1791727875.9158185,
+    "seen": 1791728205.2409492,
+    "ast_hash": "9b3f7f133a5fa80ba10541af5187d525",
     "semantic_hash": ""
   },
   "internal/twitch/drops.go": {
-    "mtime": 1791716075.7408617,
-    "seen": 1791717596.7500546,
-    "ast_hash": "bab5f0fd23bde2d2b5834f0c581c329a",
+    "mtime": 1791727895.8228111,
+    "seen": 1791728205.24095,
+    "ast_hash": "6f6212704a9d71de21a31a1de2f43587",
     "semantic_hash": ""
   },
   "internal/twitch/drops_test.go": {
@@ -714,9 +714,9 @@
     "semantic_hash": ""
   },
   ".github/workflows/ci.yml": {
-    "mtime": 1788211796.5382779,
-    "seen": 1788555176.5098484,
-    "ast_hash": "4aebbb57a1c1c9c415d3839c08771a61",
+    "mtime": 1791718374.043076,
+    "seen": 1791728205.24516,
+    "ast_hash": "00fd543ab33613ffa06cab22b28adc46",
     "semantic_hash": ""
   },
   ".github/workflows/docker-publish.yml": {
@@ -1035,9 +1035,9 @@
     "semantic_hash": ""
   },
   "internal/twitch/drops_notification_test.go": {
-    "mtime": 1788211796.5946307,
-    "seen": 1788555176.5098112,
-    "ast_hash": "7819b216530e836318233848db98e0a1",
+    "mtime": 1791728048.6805143,
+    "seen": 1791728205.24101,
+    "ast_hash": "adc976062aa7013a7ae67fd7827ac897",
     "semantic_hash": ""
   },
   ".github/workflows/dependency-review.yml": {
