@@ -438,9 +438,9 @@
     "semantic_hash": ""
   },
   "internal/twitch/drops.go": {
-    "mtime": 1791727895.8228111,
-    "seen": 1791728205.24095,
-    "ast_hash": "6f6212704a9d71de21a31a1de2f43587",
+    "mtime": 1791746232.8057501,
+    "seen": 1791746335.3377743,
+    "ast_hash": "b2a83713559d242192efc4e694e23549",
     "semantic_hash": ""
   },
   "internal/twitch/drops_test.go": {
@@ -1035,9 +1035,9 @@
     "semantic_hash": ""
   },
   "internal/twitch/drops_notification_test.go": {
-    "mtime": 1791728048.6805143,
-    "seen": 1791728205.24101,
-    "ast_hash": "adc976062aa7013a7ae67fd7827ac897",
+    "mtime": 1791746232.8057501,
+    "seen": 1791746335.3378537,
+    "ast_hash": "1b691af13d81cadcd29cf6e3a315a3f4",
     "semantic_hash": ""
   },
   ".github/workflows/dependency-review.yml": {
