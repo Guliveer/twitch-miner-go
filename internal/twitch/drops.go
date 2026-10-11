@@ -758,14 +758,16 @@ func (c *Client) logInventoryDropProgress(ctx context.Context) {
 					"status", status)
 			}
 
-			if isQuarterMilestone(percentage) {
-				key := drop.ID + ":" + fmt.Sprintf("%d", percentage)
-				if _, loaded := c.dropMilestoneNotified.LoadOrStore(key, true); !loaded {
-					c.Log.Event(ctx, model.EventDropMilestone,
-						fmt.Sprintf("Drop milestone: %d%%", percentage),
-						"reward", rewardName,
-						"category", gameName,
-						"progress", progress)
+			if seen {
+				for _, quarter := range crossedQuarters(lastPercentage, percentage) {
+					key := fmt.Sprintf("%s:%d", drop.ID, quarter)
+					if _, loaded := c.dropMilestoneNotified.LoadOrStore(key, true); !loaded {
+						c.Log.Event(ctx, model.EventDropMilestone,
+							fmt.Sprintf("Drop milestone: %d%%", quarter),
+							"reward", rewardName,
+							"category", gameName,
+							"progress", progress)
+					}
 				}
 			}
 
@@ -783,4 +785,17 @@ func (c *Client) logInventoryDropProgress(ctx context.Context) {
 
 func isQuarterMilestone(pct int) bool {
 	return pct > 0 && pct%25 == 0
+}
+
+// crossedQuarters returns the 25% milestones crossed from previous to current.
+// Drops sync every ten minutes, so progress can skip a quarter entirely;
+// reporting each crossed value keeps milestone notifications from being lost.
+func crossedQuarters(previous, current int) []int {
+	var crossed []int
+	for quarter := 25; quarter <= 100; quarter += 25 {
+		if previous < quarter && current >= quarter {
+			crossed = append(crossed, quarter)
+		}
+	}
+	return crossed
 }

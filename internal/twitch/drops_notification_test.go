@@ -683,7 +683,53 @@ func TestLogInventoryDropProgress_UnchangedProgressDoesNotRepeat(t *testing.T) {
 	}
 }
 
-func TestLogInventoryDropProgress_MilestoneFiresAtQuarter(t *testing.T) {
+func TestLogInventoryDropProgress_MilestoneFiresOnBoundaryCrossing(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	watched := 20
+	transport.setResponseFunc("Inventory", func(_ int, _ map[string]any) string {
+		return inventoryJSON([]inventoryDrop{
+			{id: "drop1", timeName: "2 Hours", benefitName: "Charm Pack", requiredMinutes: 120, currentMinutes: watched},
+		})
+	})
+	client, lc := newTestClientWithCapture(t, transport)
+
+	client.logInventoryDropProgress(context.Background())
+	lc.reset()
+
+	watched = 30
+	client.logInventoryDropProgress(context.Background())
+
+	if count := milestoneEventCount(t, lc); count != 1 {
+		t.Fatalf("expected 1 DROP_MILESTONE when crossing 25%%, got %d", count)
+	}
+}
+
+func TestLogInventoryDropProgress_MilestoneFiresForSkippedQuarters(t *testing.T) {
+	t.Parallel()
+
+	transport := newMockTransport()
+	watched := 12
+	transport.setResponseFunc("Inventory", func(_ int, _ map[string]any) string {
+		return inventoryJSON([]inventoryDrop{
+			{id: "drop1", timeName: "2 Hours", benefitName: "Charm Pack", requiredMinutes: 120, currentMinutes: watched},
+		})
+	})
+	client, lc := newTestClientWithCapture(t, transport)
+
+	client.logInventoryDropProgress(context.Background())
+	lc.reset()
+
+	watched = 90
+	client.logInventoryDropProgress(context.Background())
+
+	if count := milestoneEventCount(t, lc); count != 3 {
+		t.Fatalf("expected 3 DROP_MILESTONE when jumping across 25/50/75%%, got %d", count)
+	}
+}
+
+func TestLogInventoryDropProgress_NoMilestoneOnFirstObservation(t *testing.T) {
 	t.Parallel()
 
 	transport := newMockTransport()
@@ -694,8 +740,8 @@ func TestLogInventoryDropProgress_MilestoneFiresAtQuarter(t *testing.T) {
 
 	client.logInventoryDropProgress(context.Background())
 
-	if count := milestoneEventCount(t, lc); count != 1 {
-		t.Fatalf("expected 1 DROP_MILESTONE at 25%%, got %d", count)
+	if count := milestoneEventCount(t, lc); count != 0 {
+		t.Fatalf("expected 0 DROP_MILESTONE on first observation, got %d", count)
 	}
 }
 
@@ -710,19 +756,17 @@ func TestLogInventoryDropProgress_ClaimableFiresEvent(t *testing.T) {
 
 	client.logInventoryDropProgress(context.Background())
 
-	var status, milestone, claimable bool
+	var status, claimable bool
 	for _, e := range lc.infoEntries(t) {
 		switch e["event"] {
 		case string(model.EventDropStatus):
 			status = true
-		case string(model.EventDropMilestone):
-			milestone = true
 		case string(model.EventDropClaimAvailable):
 			claimable = true
 		}
 	}
-	if !status || !milestone || !claimable {
-		t.Fatalf("expected DROP_STATUS, DROP_MILESTONE and DROP_CLAIM_AVAILABLE; got status=%t milestone=%t claimable=%t", status, milestone, claimable)
+	if !status || !claimable {
+		t.Fatalf("expected DROP_STATUS and DROP_CLAIM_AVAILABLE; got status=%t claimable=%t", status, claimable)
 	}
 }
 
