@@ -89,6 +89,25 @@ func ParseStrategy(s string) Strategy {
 	}
 }
 
+// AllStrategies returns a slice of all defined strategies in canonical order.
+func AllStrategies() []Strategy {
+	return []Strategy{
+		StrategyMostVoted,
+		StrategyHighOdds,
+		StrategyPercentage,
+		StrategySmartMoney,
+		StrategySmart,
+		StrategyNumber1,
+		StrategyNumber2,
+		StrategyNumber3,
+		StrategyNumber4,
+		StrategyNumber5,
+		StrategyNumber6,
+		StrategyNumber7,
+		StrategyNumber8,
+	}
+}
+
 // Condition defines a comparison operator for filter conditions.
 type Condition int
 
@@ -194,6 +213,15 @@ func ParseDelayMode(s string) DelayMode {
 		return DelayModePercentage
 	default:
 		return DelayModeFromEnd
+	}
+}
+
+// AllDelayModes returns a slice of all defined delay modes in canonical order.
+func AllDelayModes() []DelayMode {
+	return []DelayMode{
+		DelayModeFromStart,
+		DelayModeFromEnd,
+		DelayModePercentage,
 	}
 }
 

@@ -258,6 +258,16 @@ func ParseChatPresence(s string) ChatPresence {
 	}
 }
 
+// AllChatModes returns a slice of all defined chat presence modes in canonical order.
+func AllChatModes() []ChatPresence {
+	return []ChatPresence{
+		ChatAlways,
+		ChatNever,
+		ChatOnline,
+		ChatOffline,
+	}
+}
+
 // StreamerSettings holds per-streamer feature toggles and bet configuration.
 type StreamerSettings struct {
 	MakePredictions       bool         `json:"make_predictions" yaml:"make_predictions"`

@@ -14,13 +14,48 @@
 [![Created At](https://img.shields.io/github/created-at/Guliveer/twitch-miner-go?style=for-the-badge&logo=github)](https://github.com/Guliveer/twitch-miner-go)
 [![License](https://img.shields.io/github/license/Guliveer/twitch-miner-go?style=for-the-badge)](https://github.com/Guliveer/twitch-miner-go/blob/main/LICENSE.txt)
 
-A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2). Mines channel points, claims bonuses, places predictions, joins raids, claims drops, and more — all with a fraction of the resource usage.
+Mines channel points, claims bonuses, places predictions, joins raids, claims drops, and more — all with a fraction of the resource usage.
+
+Automatically claim:
+- 🎁 Twitch Drops
+- 💎 Channel Points
+- 🎉 Bonuses
+- 🔮 Predictions
+- ⚔️ Raids
+- 🎯 Community Goals
+- 🎊 Community Moments
+
+Built for low resource usage and long-running deployments.
+
+**Quick start:** download a [release binary](https://github.com/Guliveer/twitch-miner-go/releases/latest) (Windows, macOS, Linux) or run `./_run.sh` — no Python, no browser, no Docker required. See [Running Locally](#14-running-locally) and the [Quick Start config](#151-quick-start).
 
 > ⭐ **[Star this repo](https://github.com/Guliveer/twitch-miner-go/stargazers)** to bookmark it and get notified about new releases — the project is young, actively developed, and the best time to jump in is now.
+
+## Why twitch-miner-go?
+
+A drop-in **alternative to [Twitch Channel Points Miner v2](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2), [TwitchDropsMiner](https://github.com/DevilXD/TwitchDropsMiner) and many others**, but better:
+
+- **Fully cross-platform** — one compiled binary for Windows, macOS and Linux (amd64 and arm64), a multi-arch Docker image and native services (systemd/OpenRC, Windows service) — the same setup runs on a desktop, a Raspberry Pi or a VPS
+- **No runtime dependencies** — no Python, no `pip install`, no dependency conflicts; just a single static binary
+- **Lightweight** — ~80 MB RAM vs >250 MB and a ~12 MB Docker image vs 200–500 MB; see the [resource comparison](#13-resource-comparison)
+- **Complete feature set** — channel points, watch streaks, bonuses, drops, predictions, raids, moments and goals
+- **Multi-account** — run several Twitch accounts from a single process, each with its own config and notification channel
+- **Headless & 24/7** — no GUI required, automatic restart on crash; TwitchDropsMiner is a desktop GUI app without auto-restart
+- **Notifications** — Telegram, Discord, Webhook, Matrix, Pushover, Gotify; TwitchDropsMiner ships no notification system
+- **More on top** — hot-reload configs, PostgreSQL DB mode with REST API, analytics dashboard, config editor and auto-update
+
+## Use cases
+
+- **Leave-and-forget mining** — set up your account once and let the miner claim channel points, bonuses, drops, predictions and raids while you are away
+- **Multi-account farming** — run several Twitch accounts from a single process, each with its own config and notification channel
+- **Self-hosting** — a small, low-footprint service that fits on a Raspberry Pi, VPS, Docker or Fly.io
+- **Programmatic management** — manage accounts via the REST API and PostgreSQL backend, or the [twitch-miner-go-dashboard](https://github.com/Guliveer/twitch-miner-go-dashboard) UI
 
 ## 1.1. Table of Contents
 
 - [twitch-miner-go - Efficient Auto Drops & Points Claim for Twitch](#twitch-miner-go---efficient-auto-drops--points-claim-for-twitch)
+    - [Why twitch-miner-go?](#why-twitch-miner-go)
+    - [Use cases](#use-cases)
     - [1.1. Table of Contents](#11-table-of-contents)
     - [1.2. Features](#12-features)
     - [1.3. Resource Comparison](#13-resource-comparison)
@@ -95,6 +130,8 @@ A high-performance Go rewrite of the [Twitch Channel Points Miner v2](https://gi
 | Startup time    | 5–10 s                  | **~2–3 s**                               | **2–4× faster**        |
 | Streamer loading| ~4 500 ms / 5 streamers | **~260 ms / 5 streamers** *(concurrent)* | **~17× faster**        |
 | OS threads      | 60+                     | **~4–5** / ~25 goroutines                | **12× fewer**          |
+
+> Measurements are approximate and depend on configuration, number of accounts and active channels.
 
 > Impressed by the difference? A [⭐ star](https://github.com/Guliveer/twitch-miner-go/stargazers) helps the next person find this instead of running the bloated Python image. Already using the miner? That one click keeps you in the loop for what ships next.
 
@@ -250,6 +287,11 @@ running without a separate program. In **DB mode** the editor is not started
 (port 8070 stays closed) — account configs are managed via the REST API and
 [twitch-miner-go-dashboard](#153-database-mode-optional) instead.
 
+The config schema exposed at `/api/config/schema` is generated from the model
+constants that define the accepted enum values and defaults — the Go types are
+the single source of truth, so any client (dashboard, editor) always sees
+exactly the values the miner accepts.
+
 On Windows, Linux and macOS desktops a **system tray icon** is shown with
 quick links: left-click opens the dashboard, right-click shows a menu with
 **Dashboard**, **Config Editor** (hidden in DB mode), a **Service** submenu (install/start/stop/
@@ -342,7 +384,7 @@ All endpoints return `501 Not Implemented` when `DB_ENABLED=false`. Auth follows
 
 | Method   | Endpoint                    | Description                                           |
 |----------|-----------------------------|-------------------------------------------------------|
-| `GET`    | `/api/config/schema`        | Returns validation schema and default values           |
+| `GET`    | `/api/config/schema`        | Returns schema generated from model constants: enums, defaults, `notification_providers`, `outcome_keys`, and `rules` |
 | `POST`   | `/api/config/validate`      | Validates config JSON without saving (body: AccountConfig JSON) |
 | `POST`   | `/api/config/generate`      | Generates YAML from config JSON (body: AccountConfig JSON) |
 
