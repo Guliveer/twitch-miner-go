@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"sort"
 	"strings"
 	"sync"
@@ -145,25 +146,30 @@ func (c *Client) sendMinuteWatchedForStreamer(ctx context.Context, httpClient *h
 		return fmt.Errorf("reading stream URL list for %s: %w", username, err)
 	}
 
-	segmentURL := getSecondLastURL(string(streamBody))
-	if segmentURL == "" {
+	// Twitch credits watch time from requests for the actual stream segments, so
+	// every chunk in the media playlist is HEADed (as a playing client would),
+	// not just a single one.
+	segmentURLs := getAllURLs(string(streamBody))
+	if len(segmentURLs) == 0 {
 		return fmt.Errorf("no segment URL found for %s", username)
 	}
 
-	headReq, err := http.NewRequestWithContext(ctx, http.MethodHead, segmentURL, nil)
-	if err != nil {
-		return fmt.Errorf("creating HEAD request: %w", err)
-	}
-	headReq.Header.Set("User-Agent", constants.DefaultUserAgent)
+	for _, segmentURL := range segmentURLs {
+		headReq, err := http.NewRequestWithContext(ctx, http.MethodHead, segmentURL, nil)
+		if err != nil {
+			return fmt.Errorf("creating HEAD request: %w", err)
+		}
+		headReq.Header.Set("User-Agent", constants.DefaultUserAgent)
 
-	headResp, err := httpClient.Do(headReq)
-	if err != nil {
-		return fmt.Errorf("HEAD request for %s: %w", username, err)
-	}
-	headResp.Body.Close()
+		headResp, err := httpClient.Do(headReq)
+		if err != nil {
+			return fmt.Errorf("HEAD request for %s: %w", username, err)
+		}
+		headResp.Body.Close()
 
-	if headResp.StatusCode != http.StatusOK {
-		return fmt.Errorf("HEAD request for %s returned status %d", username, headResp.StatusCode)
+		if headResp.StatusCode != http.StatusOK {
+			return fmt.Errorf("HEAD request for %s returned status %d", username, headResp.StatusCode)
+		}
 	}
 
 	c.Log.Debug("Simulated stream watching", "streamer", username)
@@ -174,10 +180,11 @@ func (c *Client) sendMinuteWatchedForStreamer(ctx context.Context, httpClient *h
 	}
 
 	spadeReq, err := http.NewRequestWithContext(ctx, http.MethodPost, spadeURL,
-		strings.NewReader(encodedPayload))
+		strings.NewReader(url.Values{"data": {encodedPayload}}.Encode()))
 	if err != nil {
 		return fmt.Errorf("creating spade request: %w", err)
 	}
+	spadeReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	spadeReq.Header.Set("User-Agent", constants.DefaultUserAgent)
 
 	spadeResp, err := httpClient.Do(spadeReq)
@@ -245,24 +252,16 @@ func getLastURL(manifest string) string {
 	return ""
 }
 
-// getSecondLastURL returns the second-to-last URL from an m3u8 segment playlist.
-func getSecondLastURL(playlist string) string {
+func getAllURLs(playlist string) []string {
 	lines := strings.Split(strings.TrimSpace(playlist), "\n")
-	count := 0
-	for i := len(lines) - 1; i >= 0; i-- {
-		line := strings.TrimSpace(lines[i])
+	urls := make([]string, 0, len(lines))
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "http://") || strings.HasPrefix(line, "https://") {
-			count++
-			if count == 1 {
-				continue
-			}
-			return line
+			urls = append(urls, line)
 		}
 	}
-	if count == 1 {
-		return getLastURL(playlist)
-	}
-	return ""
+	return urls
 }
 
 // WatchOptions configures which streamers receive minute-watched events.
