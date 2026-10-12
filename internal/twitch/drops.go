@@ -30,8 +30,6 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		if !c.startupDropsLogged {
 			c.startupDropsLogged = true
 			c.logDropStatuses(ctx)
-		} else {
-			c.logInventoryDropProgress(ctx)
 		}
 		return nil
 	}
@@ -190,8 +188,7 @@ func (c *Client) syncCampaignsWithInventory(ctx context.Context, campaigns []*mo
 				for _, timeDrop := range progress.TimeBasedDrops {
 					for _, drop := range campaigns[i].Drops {
 						if drop.ID == timeDrop.ID && timeDrop.Self != nil {
-							c.applyDropUpdate(
-								drop,
+							drop.Update(
 								timeDrop.Self.HasPreconditionsMet,
 								timeDrop.Self.CurrentMinutesWatched,
 								timeDrop.Self.DropInstanceID,
@@ -207,24 +204,6 @@ func (c *Client) syncCampaignsWithInventory(ctx context.Context, campaigns []*mo
 	}
 
 	return campaigns, nil
-}
-
-// applyDropUpdate refreshes a drop, restoring progress cached from the previous
-// sync first because campaigns are rebuilt from scratch on every sync.
-func (c *Client) applyDropUpdate(drop *model.Drop, hasPreconditionsMet bool, currentMinutesWatched int, dropInstanceID string, isClaimed bool) {
-	if prev, ok := c.dropProgress.Load(drop.ID); ok {
-		if state, ok := prev.(dropProgressState); ok {
-			drop.CurrentMinutesWatched = state.currentMinutesWatched
-			drop.PercentageProgress = state.percentageProgress
-		}
-	}
-
-	drop.Update(hasPreconditionsMet, currentMinutesWatched, dropInstanceID, isClaimed)
-
-	c.dropProgress.Store(drop.ID, dropProgressState{
-		currentMinutesWatched: drop.CurrentMinutesWatched,
-		percentageProgress:    drop.PercentageProgress,
-	})
 }
 
 func (c *Client) detectVanishedDrops(currentDropIDs map[string]struct{}) {
@@ -539,7 +518,7 @@ func (c *Client) logDropStatuses(ctx context.Context) {
 				ID              string `json:"id"`
 				Name            string `json:"name"`
 				RequiredMinutes int    `json:"requiredMinutesWatched"`
-				BenefitEdges    []struct {
+				BenefitEdges []struct {
 					Benefit struct {
 						Name string `json:"name"`
 					} `json:"benefit"`
@@ -644,7 +623,7 @@ func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.
 						"status", status)
 
 					if isQuarterMilestone(drop.PercentageProgress) {
-						key := drop.ID + ":" + fmt.Sprintf("%d", drop.PercentageProgress)
+						key := drop.DropInstanceID + ":" + fmt.Sprintf("%d", drop.PercentageProgress)
 						if _, loaded := c.dropMilestoneNotified.LoadOrStore(key, true); !loaded {
 							streamer.UpdateHistory(string(model.EventDropMilestone), 0, 1)
 							c.Log.Event(ctx, model.EventDropMilestone,
@@ -676,126 +655,6 @@ func (c *Client) logUpdatedDropProgress(ctx context.Context, streamers []*model.
 	}
 }
 
-func (c *Client) logInventoryDropProgress(ctx context.Context) {
-	inventoryData, err := c.GQL.GetDropsInventory(ctx)
-	if err != nil {
-		c.Log.Debug("Failed to get drops inventory for progress", "error", err)
-		return
-	}
-
-	if inventoryData == nil {
-		return
-	}
-
-	var inventory struct {
-		DropCampaignsInProgress []struct {
-			Game *struct {
-				Name string `json:"name"`
-				Slug string `json:"slug"`
-			} `json:"game"`
-			TimeBasedDrops []struct {
-				ID              string `json:"id"`
-				Name            string `json:"name"`
-				RequiredMinutes int    `json:"requiredMinutesWatched"`
-				BenefitEdges    []struct {
-					Benefit struct {
-						Name string `json:"name"`
-					} `json:"benefit"`
-				} `json:"benefitEdges"`
-				Self *struct {
-					HasPreconditionsMet   bool   `json:"hasPreconditionsMet"`
-					CurrentMinutesWatched int    `json:"currentMinutesWatched"`
-					DropInstanceID        string `json:"dropInstanceID"`
-					IsClaimed             bool   `json:"isClaimed"`
-				} `json:"self"`
-			} `json:"timeBasedDrops"`
-		} `json:"dropCampaignsInProgress"`
-	}
-
-	if err := json.Unmarshal(inventoryData, &inventory); err != nil {
-		c.Log.Debug("Failed to parse inventory for progress", "error", err)
-		return
-	}
-
-	for _, campaign := range inventory.DropCampaignsInProgress {
-		gameName := ""
-		if campaign.Game != nil {
-			gameName = campaign.Game.Slug
-			if gameName == "" {
-				gameName = campaign.Game.Name
-			}
-		}
-
-		for _, drop := range campaign.TimeBasedDrops {
-			if drop.Self == nil {
-				continue
-			}
-
-			rewardName := drop.Name
-			if len(drop.BenefitEdges) > 0 && drop.BenefitEdges[0].Benefit.Name != "" {
-				rewardName = drop.BenefitEdges[0].Benefit.Name
-			}
-
-			progress := fmt.Sprintf("%d/%dm", drop.Self.CurrentMinutesWatched, drop.RequiredMinutes)
-			percentage := model.Percentage(drop.Self.CurrentMinutesWatched, drop.RequiredMinutes)
-
-			last, seen := c.inventoryProgress.Load(drop.ID)
-			lastPercentage, _ := last.(int)
-			if !seen || lastPercentage != percentage {
-				c.inventoryProgress.Store(drop.ID, percentage)
-
-				status := "IN_PROGRESS"
-				if drop.Self.IsClaimed {
-					status = "CLAIMED"
-				} else if drop.Self.DropInstanceID != "" {
-					status = "CLAIMABLE"
-				}
-
-				c.Log.Event(ctx, model.EventDropStatus, "Drop progress",
-					"reward", rewardName,
-					"category", gameName,
-					"progress", progress,
-					"status", status)
-			}
-
-			if seen {
-				for _, quarter := range crossedQuarters(lastPercentage, percentage) {
-					key := fmt.Sprintf("%s:%d", drop.ID, quarter)
-					if _, loaded := c.dropMilestoneNotified.LoadOrStore(key, true); !loaded {
-						c.Log.Event(ctx, model.EventDropMilestone,
-							fmt.Sprintf("Drop milestone: %d%%", quarter),
-							"reward", rewardName,
-							"category", gameName,
-							"progress", progress)
-					}
-				}
-			}
-
-			if !drop.Self.IsClaimed && drop.Self.DropInstanceID != "" {
-				if _, alreadySeen := c.seenClaimable.LoadOrStore(drop.ID, true); !alreadySeen {
-					c.Log.Event(ctx, model.EventDropClaimAvailable,
-						fmt.Sprintf("Drop available to claim: %s", rewardName),
-						"reward", rewardName,
-						"category", gameName)
-				}
-			}
-		}
-	}
-}
-
 func isQuarterMilestone(pct int) bool {
 	return pct > 0 && pct%25 == 0
-}
-
-// crossedQuarters returns the 25% milestones crossed from previous to current.
-// Drops sync every ten minutes, so progress can skip a quarter entirely;
-// reporting each crossed value keeps milestone notifications from being lost.
-func crossedQuarters(previous, current int) []int {
-	var crossed []int
-	for quarter := 25; quarter <= 100; quarter += 25 {
-		if previous < quarter && current >= quarter {
-			crossed = append(crossed, quarter)
-		}
-	}
-	return crossed
 }

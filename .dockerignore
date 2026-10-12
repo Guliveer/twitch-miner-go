@@ -2,9 +2,6 @@
 .gitignore
 .github
 .vscode
-.codegraph
-.opencode
-graphify-out/
 *.md
 !README.md
 Dockerfile
@@ -20,5 +17,4 @@ edit-config.sh
 *.log
 *.pkl
 *.pyc
-*.exe
 __pycache__
