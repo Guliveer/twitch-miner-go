@@ -30,12 +30,12 @@
 
   // Category display config
   const CATEGORY_CONFIG = {
-    drops: { label: "Drops", emoji: "🎯", color: "#e040fb" },
-    points: { label: "Points", emoji: "💰", color: "#ffca28" },
-    bets: { label: "Bets", emoji: "🎰", color: "#ff6f00" },
-    raids: { label: "Raids", emoji: "⚔️", color: "#f44336" },
-    streams: { label: "Streams", emoji: "🟢", color: "#00e676" },
-    other: { label: "Other", emoji: "🎉", color: "#29b6f6" },
+    drops: { label: "Drops", emoji: "🎯" },
+    points: { label: "Points", emoji: "💰" },
+    bets: { label: "Bets", emoji: "🎰" },
+    raids: { label: "Raids", emoji: "⚔️" },
+    streams: { label: "Streams", emoji: "🟢" },
+    other: { label: "Other", emoji: "🎉" },
   };
 
   // Category to events mapping (must match backend)
@@ -175,7 +175,7 @@
     container.innerHTML = Object.entries(CATEGORY_CONFIG)
       .map(function ([key, cfg]) {
         const totals = catTotals[key];
-        return '<div class="category-card" style="border-left-color: ' + cfg.color + '">' + '<div class="category-header">' + '<span class="category-emoji">' + cfg.emoji + "</span>" + '<span class="category-label">' + cfg.label + "</span>" + "</div>" + '<div class="category-stats">' + '<span class="category-count">' + formatPoints(totals.count) + " events</span>" + '<span class="category-points">' + formatPoints(totals.amount) + " pts</span>" + "</div>" + "</div>";
+        return '<div class="category-card">' + '<div class="category-header">' + '<span class="category-emoji">' + cfg.emoji + "</span>" + '<span class="category-label">' + cfg.label + "</span>" + "</div>" + '<div class="category-stats">' + '<span class="category-count">' + formatPoints(totals.count) + " events</span>" + '<span class="category-points">' + formatPoints(totals.amount) + " pts</span>" + "</div>" + "</div>";
       })
       .join("");
   }
@@ -188,7 +188,7 @@
     const tbody = document.getElementById("events-body");
 
     if (sorted.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#53535f;padding:2rem;">No events found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted-fg);padding:2rem;">No events found</td></tr>';
       return;
     }
 

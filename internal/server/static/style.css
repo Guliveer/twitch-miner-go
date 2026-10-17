@@ -1,27 +1,37 @@
-/* ─── Bold Typography Design System ───────────────────────────────────── */
-/* Poster design translated to web — sharp, editorial, type-driven.      */
+/* ─── Command Center Design System (DESIGN.md) ────────────────────────── */
+/* Dark canvas, grid wireframe motif, single cornflower accent, 8px radii */
 
 :root {
-  --bg:         #0A0A0A;
-  --fg:         #FAFAFA;
-  --muted:      #1A1A1A;
-  --muted-fg:   #737373;
-  --accent:     #00add8;
-  --accent-fg:  #0A0A0A;
-  --border:     #262626;
-  --input-bg:   #1A1A1A;
-  --card-bg:    #0F0F0F;
+  --bg:         #0a0a0a; /* page ink */
+  --fg:         #ffffff; /* snow */
+  --muted:      #141414; /* deep coal */
+  --muted-fg:   #a7a7a7; /* ash */
+  --fog:        #7c7c7c; /* fog */
+  --accent:     #6798ff; /* blue cornflower */
+  --accent-fg:  #0a0a0a;
+  --border:     #313131; /* steel border */
+  --border-strong: #454545; /* graphite */
+  --input-bg:   #0a0a0a;
+  --card-bg:    #1e1e1e; /* card carbon */
+  --grid-line:  #1e1e1e;
   --success:    #34d399;
   --danger:     #f87171;
-  --font-sans:  'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono:  'JetBrains Mono', 'Fira Code', monospace;
+  --radius-tag: 4px;
+  --radius:     8px;
+  --font-sans:  'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg);
+  letter-spacing: -0.19px;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 48px 48px;
   color: var(--fg);
   min-height: 100vh;
   display: flex;
@@ -44,10 +54,10 @@ header {
 
 /* Brand — site name linking to dashboard */
 .brand {
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.19px;
+  color: var(--fg);
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
@@ -77,11 +87,9 @@ header {
 }
 
 .topbar-nav .nav-link {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.17px;
   color: var(--muted-fg);
   text-decoration: none;
   padding: 0.4rem 0.75rem;
@@ -123,14 +131,14 @@ header {
 /* ─── Stats Bar ───────────────────────────────────────────────────────── */
 #stats-bar {
   display: flex;
-  gap: 2rem;
-  font-size: 0.85rem;
+  gap: 1.5rem;
+  font-size: 0.75rem;
   font-family: var(--font-mono);
 }
 
 #stats-bar span {
   color: var(--muted-fg);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.85px;
 }
 
 /* ─── Status Banner ───────────────────────────────────────────────────── */
@@ -139,9 +147,9 @@ header {
   margin: 1.5rem auto 0;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border);
-  font-size: 0.85rem;
-  font-family: var(--font-mono);
-  letter-spacing: 0.02em;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  letter-spacing: -0.17px;
 }
 
 .status-banner.hidden { display: none; }
@@ -152,8 +160,8 @@ header {
 }
 
 .status-banner.error {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 /* ─── Filter Bar ──────────────────────────────────────────────────────── */
@@ -174,10 +182,10 @@ header {
 }
 
 .filter-group label {
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.85px;
   color: var(--muted-fg);
   font-family: var(--font-mono);
 }
@@ -186,10 +194,12 @@ header {
 .filter-group input[type="text"] {
   background: var(--input-bg);
   color: var(--fg);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
   padding: 0.5rem 0.75rem;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-family: var(--font-sans);
+  letter-spacing: -0.17px;
   min-width: 140px;
   outline: none;
   transition: border-color 150ms cubic-bezier(0.25, 0, 0, 1);
@@ -197,7 +207,7 @@ header {
 }
 
 .filter-group select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23737373'%3E%3Cpath d='M2 5l4 4 4-4'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23a7a7a7'%3E%3Cpath d='M2 5l4 4 4-4'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.6rem center;
   padding-right: 2rem;
@@ -207,6 +217,12 @@ header {
 .filter-group select:focus,
 .filter-group input[type="text"]:focus {
   border-color: var(--accent);
+}
+
+.filter-group select:focus-visible,
+.filter-group input[type="text"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .filter-group input[type="text"]::placeholder {
@@ -220,41 +236,24 @@ header {
   align-items: flex-end;
 }
 
-/* ─── Ghost Button (Clear Filters) ────────────────────────────────────── */
+/* ─── Secondary Outlined Button (Clear Filters) ────────────────────────── */
 #clear-filters {
   font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.17px;
   background: transparent;
-  color: var(--muted-fg);
-  border: none;
-  padding: 0.5rem 0;
+  color: var(--fg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
   cursor: pointer;
-  transition: color 150ms cubic-bezier(0.25, 0, 0, 1);
-  position: relative;
-}
-
-#clear-filters::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--accent);
-  transform: scaleX(0);
-  transition: transform 150ms cubic-bezier(0.25, 0, 0, 1);
-  transform-origin: left;
+  transition: border-color 150ms cubic-bezier(0.25, 0, 0, 1),
+              color 150ms cubic-bezier(0.25, 0, 0, 1);
 }
 
 #clear-filters:hover {
-  color: var(--accent);
-}
-
-#clear-filters:hover::after {
-  transform: scaleX(1);
+  border-color: var(--muted-fg);
 }
 
 #clear-filters:focus-visible {
@@ -265,11 +264,13 @@ header {
 /* ─── Account Badge ──────────────────────────────────────────────────── */
 .badge.account {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.85px;
   color: var(--muted-fg);
   border: 1px solid var(--border);
+  border-radius: var(--radius-tag);
   padding: 0.1rem 0.4rem;
   margin-left: 0.4rem;
   vertical-align: middle;
@@ -288,7 +289,7 @@ main {
 h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.42px;
   margin-bottom: 1.25rem;
   color: var(--fg);
 }
@@ -297,17 +298,22 @@ h2 {
 #streamers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
+  gap: 1rem;
   margin-bottom: 3rem;
 }
 
 .streamer-card {
   background: var(--card-bg);
-  padding: 1.25rem;
+  border: 1px solid var(--grid-line);
   border-left: 3px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
   transition: border-color 150ms cubic-bezier(0.25, 0, 0, 1);
+}
+
+.streamer-card:hover {
+  border-color: var(--border-strong);
+  border-left-color: var(--border-strong);
 }
 
 .streamer-card.online {
@@ -322,7 +328,7 @@ h2 {
   font-weight: 600;
   font-size: 1rem;
   margin-bottom: 0.35rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.19px;
 }
 
 .streamer-card .name a {
@@ -347,11 +353,12 @@ h2 {
 .streamer-card .status .badge {
   display: inline-block;
   padding: 0.15rem 0.5rem;
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.85px;
   font-family: var(--font-mono);
+  border-radius: var(--radius-tag);
 }
 
 .badge.online {
@@ -368,20 +375,21 @@ h2 {
   border: 1px solid var(--accent);
   color: var(--accent);
   background: transparent;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   margin-left: 0.3rem;
 }
 
 .streamer-card .details {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: var(--muted-fg);
   line-height: 1.5;
 }
 
 .streamer-card .details .points {
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 500;
   font-family: var(--font-mono);
+  letter-spacing: 0.85px;
 }
 
 /* ─── Drops Progress ────────────────────────────────────────────────── */
@@ -405,14 +413,15 @@ h2 {
 .drop-game {
   color: var(--muted-fg);
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.85px;
 }
 
 .drop-reward {
   color: var(--fg);
   font-weight: 500;
+  font-size: 0.875rem;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -421,18 +430,19 @@ h2 {
 
 .drop-status-badge {
   font-family: var(--font-mono);
-  font-size: 0.55rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.85px;
   padding: 0.1rem 0.35rem;
   border: 1px solid;
+  border-radius: var(--radius-tag);
   flex-shrink: 0;
 }
 
 .drop-status-badge.status-in-progress {
-  border-color: #63b3ed;
-  color: #63b3ed;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .drop-status-badge.status-claimable {
@@ -459,10 +469,10 @@ h2 {
 
 .drop-bar-label {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   color: var(--muted-fg);
   margin-top: 0.15rem;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.85px;
 }
 
 /* ─── History Table ─────────────────────────────────────────────────── */
@@ -470,8 +480,11 @@ h2 {
 
 #history-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
 #history-table th,
@@ -482,10 +495,10 @@ h2 {
 
 #history-table th {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.85px;
   color: var(--muted-fg);
   background: var(--muted);
   border-bottom: 1px solid var(--border);
@@ -493,7 +506,8 @@ h2 {
 
 #history-table td {
   border-bottom: 1px solid var(--border);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  letter-spacing: -0.17px;
 }
 
 #history-table tr:last-child td { border-bottom: none; }
@@ -507,7 +521,7 @@ footer {
   color: var(--muted-fg);
   font-size: 0.75rem;
   font-family: var(--font-mono);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.85px;
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -533,9 +547,8 @@ footer a:hover {
   text-align: center;
   padding: 3rem 1rem;
   color: var(--muted-fg);
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  letter-spacing: 0.05em;
+  font-size: 0.875rem;
+  letter-spacing: -0.17px;
 }
 
 /* ─── Logs Page (category summary, events table) ─────────────────────── */
@@ -548,7 +561,7 @@ footer a:hover {
 #category-summary {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1px;
+  gap: 1rem;
   max-width: 1200px;
   margin: 1.5rem auto;
   padding: 0 2rem;
@@ -556,13 +569,17 @@ footer a:hover {
 
 .category-card {
   background: var(--card-bg);
-  border: 1px solid var(--border);
+  border: 1px solid var(--grid-line);
   border-left: 3px solid var(--border);
-  padding: 1.25rem;
+  border-radius: var(--radius);
+  padding: 1.5rem;
   transition: border-color 150ms cubic-bezier(0.25, 0, 0, 1);
 }
 
-.category-card:hover { border-color: var(--fg); }
+.category-card:hover {
+  border-color: var(--border-strong);
+  border-left-color: var(--border-strong);
+}
 
 .category-header {
   display: flex;
@@ -573,8 +590,8 @@ footer a:hover {
 
 .category-label {
   font-weight: 600;
-  font-size: 0.9rem;
-  letter-spacing: -0.02em;
+  font-size: 1rem;
+  letter-spacing: -0.19px;
   color: var(--fg);
 }
 
@@ -584,20 +601,25 @@ footer a:hover {
   font-size: 0.75rem;
   color: var(--muted-fg);
   font-family: var(--font-mono);
+  letter-spacing: 0.85px;
 }
 
 .category-points {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 400;
   font-family: var(--font-mono);
+  letter-spacing: 0.85px;
 }
 
 /* Events table */
 #events-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
 #events-table th,
@@ -608,10 +630,10 @@ footer a:hover {
 
 #events-table th {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.85px;
   color: var(--muted-fg);
   background: var(--muted);
   border-bottom: 1px solid var(--border);
@@ -644,7 +666,8 @@ footer a:hover {
 
 #events-table td {
   border-bottom: 1px solid var(--border);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  letter-spacing: -0.17px;
 }
 
 #events-table tr:last-child td { border-bottom: none; }
@@ -652,8 +675,9 @@ footer a:hover {
 
 td.points {
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 500;
   font-family: var(--font-mono);
+  letter-spacing: 0.85px;
 }
 
 /* ─── Responsive ────────────────────────────────────────────────────── */
@@ -664,7 +688,7 @@ td.points {
   }
 
   .header-left { gap: 0.75rem; }
-  .topbar-nav .nav-link { padding: 0.4rem 0.5rem; font-size: 0.65rem; }
+  .topbar-nav .nav-link { padding: 0.4rem 0.5rem; font-size: 0.75rem; }
 
   #stats-bar { gap: 0.5rem; }
 

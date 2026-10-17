@@ -184,7 +184,7 @@
 
     var tbody = document.getElementById("history-body");
     if (!stats.history || Object.keys(stats.history).length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#adadb8">No history yet</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted-fg)">No history yet</td></tr>';
       return;
     }
 
@@ -219,7 +219,7 @@
       console.error("Dashboard refresh error:", err);
       document.getElementById("streamers-grid").innerHTML = '<div class="loading">Dashboard data could not be loaded.</div>';
       document.getElementById("history-body").innerHTML =
-        '<tr><td colspan="3" style="text-align:center;color:#ff7777">Dashboard data could not be loaded.</td></tr>';
+        '<tr><td colspan="3" style="text-align:center;color:var(--danger)">Dashboard data could not be loaded.</td></tr>';
       setStatus("Failed to refresh dashboard data. Verify authentication and backend connectivity.", "error");
     }
   }
