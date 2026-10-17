@@ -771,7 +771,7 @@
       oninput: markDirty,
     });
     const triEl = el('select', { className: 'tri-select cat-drops-only' });
-    const triLabel = el('span', { style: 'font-size:0.7rem;color:var(--text-muted)' }, 'drops only');
+    const triLabel = el('span', { style: 'font-size:0.75rem;color:var(--muted-fg)' }, 'drops only');
     const removeBtn = el('button', {
       type: 'button', className: 'item-remove', title: 'Remove',
       onclick: function () { this.closest('.dynamic-item').remove(); markDirty(); },
@@ -870,9 +870,9 @@
 
     const behaviorGrid = el('div', { className: 'form-grid', style: 'margin-top:0.5rem' }, [
       ...behaviorFields.map(({ label, select }) =>
-        el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, label), select])
+        el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, label), select])
       ),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Chat'), chatSelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Chat'), chatSelect]),
     ]);
 
     const betStrategySelect = el('select', { className: 'form-input input-sm s-bet-strategy' });
@@ -916,20 +916,20 @@
     const betFilterValueInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-filter-value', value: filter.value ?? '' });
 
     const betGrid = el('div', { className: 'form-grid' }, [
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Strategy'), betStrategySelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Percentage'), betPercentageInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Percentage Gap'), betGapInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Max Points'), betMaxInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Minimum Points'), betMinInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Stealth Mode'), betStealthSelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Delay (s)'), betDelayInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Delay Mode'), betDelayModeSelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Strategy'), betStrategySelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Percentage'), betPercentageInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Percentage Gap'), betGapInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Max Points'), betMaxInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Minimum Points'), betMinInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Stealth Mode'), betStealthSelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Delay (s)'), betDelayInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Delay Mode'), betDelayModeSelect]),
     ]);
 
     const betFilterGrid = el('div', { className: 'form-grid' }, [
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter By'), betFilterBySelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter Where'), betFilterWhereSelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter Value'), betFilterValueInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Filter By'), betFilterBySelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Filter Where'), betFilterWhereSelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Filter Value'), betFilterValueInput]),
     ]);
 
     const betSubsection = el('div', { className: 'subsection', style: 'margin-top:0.75rem' }, [
