@@ -1,0 +1,6 @@
+# Ownership for workflow definitions. Modifying any GitHub Actions workflow
+# requires review by the file owner, so trigger authorization (e.g. the
+# AUTHORIZED_TRIGGERERS allowlist in PR Test Deploy) cannot be changed without
+# the owner's approval. Only effective together with branch protection on main
+# having "Require review from Code Owners" enabled.
+/.github/ @Guliveer
