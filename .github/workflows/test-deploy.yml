@@ -1,0 +1,282 @@
+name: "PR Test Deploy"
+
+# Deploys a PR branch to the production Fly app as a "test" version when the `test-deploy` label is added. Version is not computed here: the existing Release workflow (dry run) derives the bump from the PR title's conventional commit type on top of the latest tag, and this workflow appends "-test" — prod 1.26.4 + "fix" PR title -> 1.26.5-test. The deploy itself reuses the existing Fly.io Deploy reusable workflow, so no flyctl logic lives here.
+#
+# All outcomes (rejections, skips, cancellations, success/failure) are written to the run's Summary page in the Actions tab; nothing is posted as a PR comment.
+#
+# Authorization is strictly the allowlist below, with no fallback to repository permission levels. Labels can be added by anyone with Triage permission, so the workflow re-checks the actor per event.
+#
+# Label lifecycle semantics (the bot re-add / strip below are itself a no-op action, purely visual):
+# - authorized add             -> label take-over from other PRs, then the version is computed and the deploy starts.
+# - bot (restored) add         -> no-op: purely a visual restoration, no deploy.
+# - unauthorized add           -> the bot strips the label immediately; the run rejects; nothing else happens.
+# - unauthorized human removal -> the bot restores the label immediately (visual indicator only); any in-flight deploy keeps running.
+# - authorized removal         -> all in-flight runs for this commit are cancelled at once; when this was the last PR carrying the label, prod is also restored by redeploying `main` with the version from its `VERSION` file.
+# - bot removal                -> auto-removal by this workflow (label take-over): in-flight runs for that PR are cancelled (superseded).
+# - deploy failed             -> the label is stripped from the PR automatically, so a re-try is a clean add.
+# - label on several PRs       -> only the newest authorized request keeps the label; older PRs lose it and their deploys are superseded (via bot take-over and the shared fly-deploy concurrency group). A real release always supersedes a test deploy.
+#
+# Re-run: remove the label and add it again (only "labeled" fires a deploy).
+# Note: a test deploy overwrites the running prod release until the next real release, because it targets the same fly app.
+
+on:
+  pull_request:
+    types: [labeled, unlabeled]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  # GitHub logins allowed to trigger and cancel a test deploy.
+  AUTHORIZED_TRIGGERERS: "Guliveer"
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  guard:
+    if: github.event.label.name == 'test-deploy' && github.event.action == 'labeled'
+    runs-on: ubuntu-latest
+    outputs:
+      allowed: ${{ steps.auth.outputs.allowed }}
+    steps:
+      - name: Detect bot-restored label
+        id: restoration
+        run: |
+          # The bot re-adds the label after unauthorized removals as a pure
+          # visual indicator. That must never trigger a fresh deploy.
+          if [ "${{ github.event.sender.login }}" = "github-actions[bot]" ]; then
+            echo "is=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Summary on label restoration
+        if: steps.restoration.outputs.is == 'true'
+        run: |
+          echo "## PR Test Deploy — restored" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "The label was re-applied by the bot purely as the visual indicator after an unauthorized removal. No deploy is triggered; any in-flight authorized deploy continues." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check trigger authorization
+        id: auth
+        if: steps.restoration.outputs.is != 'true'
+        run: |
+          SENDER="${{ github.event.sender.login }}"
+          ALLOWED=false
+          for login in $(echo "${{ env.AUTHORIZED_TRIGGERERS }}" | tr ',' '\n'); do
+            if [ "${login}" = "${SENDER}" ]; then ALLOWED=true; fi
+          done
+          echo "allowed=${ALLOWED}" >> "$GITHUB_OUTPUT"
+
+      # No code checkout here; steps using `gh` must set GH_REPO because the
+      # CLI otherwise tries to resolve the repository from a git (absent).
+      - name: Strip label, summarize and reject unauthorized trigger
+        if: steps.restoration.outputs.is != 'true' && steps.auth.outputs.allowed != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # Remove the label right away: an unauthorized add is purely
+          # visual noise and carries no intent.
+          gh pr edit ${{ github.event.pull_request.number }} --remove-label test-deploy > /dev/null || true
+          echo "## PR Test Deploy — rejected" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Sender \`${{ github.event.sender.login }}\` is not on \`AUTHORIZED_TRIGGERERS\`. The label has been removed and nothing else was executed." >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+
+      - name: Take over the test-deploy label from other PRs
+        if: steps.auth.outputs.allowed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # Only the newest authorized request may carry the label: strip it
+          # from every other open PR. Their in-flight deploys are then
+          # cancelled by the on-unlabeled job (bot removal), and supersession
+          # is additionally enforced by the shared fly-deploy group.
+          MOVE_FROM=""
+          OTHERS=$(gh pr list --label test-deploy --state open --json number \
+            --jq '.[] | select(.number != '"${{ github.event.pull_request.number }}"') | .number')
+          for N in $OTHERS; do
+            gh pr edit "$N" --remove-label test-deploy > /dev/null && MOVE_FROM="$MOVE_FROM #$N"
+          done
+
+          echo "## PR Test Deploy — take-over" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$MOVE_FROM" ]; then
+            echo "🔁 Label moved to this PR from:$MOVE_FROM — the newest request wins." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Label resides here; no other PRs carried \`test-deploy\`." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  version:
+    needs: guard
+    if: needs.guard.outputs.allowed == 'true'
+    concurrency:
+      group: fly-deploy
+      cancel-in-progress: true
+    # Reuse the Release workflow for the bump computation only: in dry-run it
+    # derives the bump from the PR title (same rules as a real release) and
+    # exposes the would-be version as an output without tagging anything.
+    uses: ./.github/workflows/release.yml
+    with:
+      dry_run: true
+
+  deploy:
+    needs: [guard, version]
+    if: needs.guard.outputs.allowed == 'true'
+    concurrency:
+      group: fly-deploy
+      cancel-in-progress: true
+    uses: ./.github/workflows/fly-deploy.yml
+    with:
+      version: ${{ needs.version.outputs.new_version }}-test
+    secrets: inherit
+
+  summary:
+    needs: [guard, version, deploy]
+    if: always() && needs.guard.outputs.allowed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary on result
+        run: |
+          TEST_VERSION="${{ needs.version.outputs.new_version }}-test"
+          echo "## PR Test Deploy — ${TEST_VERSION}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          case "${{ needs.version.result }}" in
+            success)
+              case "${{ needs.deploy.result }}" in
+                success)
+                  echo "🚀 Live at https://twitch-miner-go.fly.dev — prod was \`v${{ needs.version.outputs.current_version }}\`, bump: \`${{ needs.version.outputs.bumped }}\`." >> "$GITHUB_STEP_SUMMARY" ;;
+                cancelled)
+                  echo "⚠️ Deploy was cancelled (likely superseded by another Fly deploy)." >> "$GITHUB_STEP_SUMMARY" ;;
+                *)
+                  echo "❌ Deploy failed — whatever was running before stays live (a prod release or, if a test build flew earlier, that test build). To restore prod, remove \`test-deploy\` from all PRs: the workflow then redeploys \`main\` with the released version." >> "$GITHUB_STEP_SUMMARY" ;;
+              esac ;;
+            *)
+              echo "❌ Aborted — version computation did not finish (${{ needs.version.result }})." >> "$GITHUB_STEP_SUMMARY" ;;
+          esac
+
+      # A failed attempt must not leave the label lying around: the bot strip
+      # fires the unlabeled handler (bot path), which cancels nothing and
+      # never restores prod — a failed deploy leaves the previous release up.
+      - name: Remove the label on failure
+        if: needs.version.result == 'failure' || needs.deploy.result == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} --remove-label test-deploy > /dev/null || true
+          echo "🧹 \`test-deploy\` label removed from this PR after the failed attempt (re-try = add the label again)." >> "$GITHUB_STEP_SUMMARY"
+
+  # Reacts to label removal. Authorized removal = intent to cancel: any queued
+  # or in-flight run of this workflow for the same PR head is cancelled. Bot
+  # removal = auto-removal by this workflow (label take-over): same cancel
+  # behavior. Unauthorized human removal = ignored: the label is restored as a
+  # pure visual indicator and in-flight deploys keep running.
+  on-unlabeled:
+    if: github.event.label.name == 'test-deploy' && github.event.action == 'unlabeled'
+    runs-on: ubuntu-latest
+    outputs:
+      # Set only on an authorized removal when no open PR carries the label
+      # anymore: the retired test build is followed by a prod restore deploy.
+      restore: ${{ steps.handle.outputs.restore }}
+    steps:
+      - name: Handle label removal
+        id: handle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          SENDER="${{ github.event.sender.login }}"
+          ALLOWED=false
+          for login in $(echo "${{ env.AUTHORIZED_TRIGGERERS }}" | tr ',' '\n'); do
+            if [ "${login}" = "${SENDER}" ]; then ALLOWED=true; fi
+          done
+
+          cancel_runs() {
+            SHA="${{ github.event.pull_request.head.sha }}"
+            CANCELLED=0
+            RUN_IDS=$(gh api "repos/${{ github.repository }}/actions/runs?event=pull_request&per_page=100" \
+              --jq '.workflow_runs[] | select(.name == "PR Test Deploy") | select(.head_sha == "'"$SHA"'") | select(.status == "queued" or .status == "in_progress") | select(.id != '"${{ github.run_id }}"') | .id')
+            for RUN_ID in $RUN_IDS; do
+              gh api -X POST "repos/${{ github.repository }}/actions/runs/${RUN_ID}/cancel" > /dev/null
+              CANCELLED=$((CANCELLED + 1))
+            done
+            echo "$CANCELLED"
+          }
+
+          if [ "$ALLOWED" = "true" ]; then
+            N=$(cancel_runs)
+            echo "## PR Test Deploy — label removed by \`${SENDER}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            if [ "$N" -gt 0 ]; then
+              echo "🛑 Cancelled $N in-flight test-deploy run(s) for this commit." >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "No in-flight test-deploy run found for this commit — nothing to cancel." >> "$GITHUB_STEP_SUMMARY"
+            fi
+            # Prod restore: when this was the last PR carrying the label, the
+            # test build (if it ever deployed) is retired and `main` is
+            # redeployed so prod runs the released version again.
+            if [ "$(gh pr list --label test-deploy --state open --json number --jq 'length')" -eq 0 ]; then
+              echo "restore=true" >> "$GITHUB_OUTPUT"
+              echo "Prod is restored next: \`main\` is redeployed with the released version (\`VERSION\` file)." >> "$GITHUB_STEP_SUMMARY"
+            fi
+            exit 0
+          fi
+
+          if [ "$SENDER" = "github-actions[bot]" ]; then
+            N=$(cancel_runs)
+            echo "## PR Test Deploy — label auto-removed by the workflow" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "🔁 Superseded — a newer authorized test-deploy request took the label." >> "$GITHUB_STEP_SUMMARY"
+            if [ "$N" -gt 0 ]; then
+              echo "🛑 Cancelled $N in-flight test-deploy run(s) for this commit." >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "No in-flight test-deploy run found for this commit." >> "$GITHUB_STEP_SUMMARY"
+            fi
+            exit 0
+          fi
+
+          # Unauthorized human removal: restore the label as a visual
+          # indicator only — nothing is cancelled or triggered.
+          gh pr edit ${{ github.event.pull_request.number }} --add-label test-deploy > /dev/null \
+            && RESTORED=true || RESTORED=false
+          echo "## PR Test Deploy — unauthorized removal ignored" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Sender \`${SENDER}\` is not on \`AUTHORIZED_TRIGGERERS\`; in-flight deploys keep running." >> "$GITHUB_STEP_SUMMARY"
+          if [ "$RESTORED" = "true" ]; then
+            echo "🟢 Label restored visually (no deploy was triggered by the restoration)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "⚠️ Label could not be restored (PR closed?). Next authorized add will still work." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  # The label is gone from every PR (removed by the authorized user): retire
+  # any test build by redeploying `main`. No version input here — fly-deploy
+  # then builds main with the version from its `VERSION` file, which is the
+  # last real release. Shares the fly-deploy group, so this also supersedes a
+  # deploy still in flight.
+  restore-prod:
+    needs: on-unlabeled
+    if: needs.on-unlabeled.outputs.restore == 'true'
+    uses: ./.github/workflows/fly-deploy.yml
+    with:
+      ref: main
+    secrets: inherit
+
+  restore-summary:
+    needs: [on-unlabeled, restore-prod]
+    if: always() && needs.on-unlabeled.outputs.restore == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary on prod restore
+        run: |
+          echo "## PR Test Deploy — prod restore" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          case "${{ needs.restore-prod.result }}" in
+            success)
+              echo "✅ Prod restored — \`main\` is live again with the released version from the \`VERSION\` file." >> "$GITHUB_STEP_SUMMARY" ;;
+            *)
+              echo "⚠️ Prod restore did not complete (result: \`${{ needs.restore-prod.result }}\`). Deploy \`main\` manually via the Fly.io Deploy workflow if prod still serves a test build." >> "$GITHUB_STEP_SUMMARY" ;;
+          esac
