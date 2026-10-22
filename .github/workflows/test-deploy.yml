@@ -47,16 +47,12 @@ jobs:
           # visual indicator. That must never trigger a fresh deploy.
           if [ "${{ github.event.sender.login }}" = "github-actions[bot]" ]; then
             echo "is=true" >> "$GITHUB_OUTPUT"
+            echo "## PR Test Deploy — restored" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "The label was re-applied by the bot purely as the visual indicator after an unauthorized removal. No deploy is triggered; any in-flight authorized deploy continues." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "is=false" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Summary on label restoration
-        if: steps.restoration.outputs.is == 'true'
-        run: |
-          echo "## PR Test Deploy — restored" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "The label was re-applied by the bot purely as the visual indicator after an unauthorized removal. No deploy is triggered; any in-flight authorized deploy continues." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check trigger authorization
         id: auth
@@ -134,41 +130,21 @@ jobs:
       version: ${{ needs.version.outputs.new_version }}-test
     secrets: inherit
 
-  summary:
+  # Real cleanup only: after a failed attempt the label must not linger, so a
+  # re-try is a clean add. The bot strip fires the unlabeled handler (bot
+  # path), which cancels nothing and never restores prod.
+  cleanup:
     needs: [guard, version, deploy]
-    if: always() && needs.guard.outputs.allowed == 'true'
+    if: always() && needs.guard.outputs.allowed == 'true' && (needs.version.result != 'success' || needs.deploy.result == 'failure')
     runs-on: ubuntu-latest
     steps:
-      - name: Summary on result
-        run: |
-          TEST_VERSION="${{ needs.version.outputs.new_version }}-test"
-          echo "## PR Test Deploy — ${TEST_VERSION}" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          case "${{ needs.version.result }}" in
-            success)
-              case "${{ needs.deploy.result }}" in
-                success)
-                  echo "🚀 Live at https://twitch-miner-go.fly.dev — prod was \`v${{ needs.version.outputs.current_version }}\`, bump: \`${{ needs.version.outputs.bumped }}\`." >> "$GITHUB_STEP_SUMMARY" ;;
-                cancelled)
-                  echo "⚠️ Deploy was cancelled (likely superseded by another Fly deploy)." >> "$GITHUB_STEP_SUMMARY" ;;
-                *)
-                  echo "❌ Deploy failed — whatever was running before stays live (a prod release or, if a test build flew earlier, that test build). To restore prod, remove \`test-deploy\` from all PRs: the workflow then redeploys \`main\` with the released version." >> "$GITHUB_STEP_SUMMARY" ;;
-              esac ;;
-            *)
-              echo "❌ Aborted — version computation did not finish (${{ needs.version.result }})." >> "$GITHUB_STEP_SUMMARY" ;;
-          esac
-
-      # A failed attempt must not leave the label lying around: the bot strip
-      # fires the unlabeled handler (bot path), which cancels nothing and
-      # never restores prod — a failed deploy leaves the previous release up.
-      - name: Remove the label on failure
-        if: needs.version.result == 'failure' || needs.deploy.result == 'failure'
+      - name: Remove the test-deploy label from this PR
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
           gh pr edit ${{ github.event.pull_request.number }} --remove-label test-deploy > /dev/null || true
-          echo "🧹 \`test-deploy\` label removed from this PR after the failed attempt (re-try = add the label again)." >> "$GITHUB_STEP_SUMMARY"
+          echo "🧹 \`test-deploy\` label removed after the failed attempt (re-try = add the label again)." >> "$GITHUB_STEP_SUMMARY"
 
   # Reacts to label removal. Authorized removal = intent to cancel: any queued
   # or in-flight run of this workflow for the same PR head is cancelled. Bot
@@ -264,19 +240,3 @@ jobs:
     with:
       ref: main
     secrets: inherit
-
-  restore-summary:
-    needs: [on-unlabeled, restore-prod]
-    if: always() && needs.on-unlabeled.outputs.restore == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Summary on prod restore
-        run: |
-          echo "## PR Test Deploy — prod restore" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          case "${{ needs.restore-prod.result }}" in
-            success)
-              echo "✅ Prod restored — \`main\` is live again with the released version from the \`VERSION\` file." >> "$GITHUB_STEP_SUMMARY" ;;
-            *)
-              echo "⚠️ Prod restore did not complete (result: \`${{ needs.restore-prod.result }}\`). Deploy \`main\` manually via the Fly.io Deploy workflow if prod still serves a test build." >> "$GITHUB_STEP_SUMMARY" ;;
-          esac

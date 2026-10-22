@@ -53,6 +53,12 @@ jobs:
             VERSION="$(cat VERSION)"
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Fly.io deploy"
+            echo ""
+            echo "- Version: \`${VERSION}\`"
+            echo "- Ref: \`${{ inputs.ref || github.ref_name }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Deploy to Fly.io
         env:
@@ -67,3 +73,7 @@ jobs:
           flyctl deploy --remote-only \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "GIT_COMMIT=${GIT_COMMIT}"
+          {
+            echo "- Deploy: ✅ live at https://twitch-miner-go.fly.dev"
+            echo "- Commit: \`${GIT_COMMIT}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
