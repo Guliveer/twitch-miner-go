@@ -1,0 +1,139 @@
+name: "PR Test Deploy"
+
+# Deploys a PR branch to the production Fly app as a "test" version when the
+# `test-deploy` label is added. The version is computed from the PR title's
+# conventional commit bump on top of the latest published tag, e.g. prod 1.26.4
+# + "fix" PR title -> 1.26.5-test.
+#
+# The label itself is NOT the authorization: only senders on the allowlist
+# below (or with write access to the repository) are honored. Labels can be
+# added by anyone with Triage permission, so the workflow re-checks the actor
+# and posts a refusal comment otherwise.
+#
+# Re-run: remove the label and add it again (only "labeled" fires this). The
+# deploy uses the same fly app and FLY_API_TOKEN as the regular release, so a
+# test deploy overwrites the running prod release until the next real one.
+
+on:
+  pull_request:
+    types: [labeled]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  # GitHub logins allowed to trigger a test deploy by adding the label.
+  AUTHORIZED_TRIGGERERS: "Guliveer"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  # Share the prod deploy group with release.yml's fly-deploy so a real
+  # release can always supersede a test deploy, never the other way around.
+  group: fly-deploy
+  cancel-in-progress: true
+
+jobs:
+  test-deploy:
+    if: github.event.label.name == 'test-deploy'
+    runs-on: ubuntu-latest
+    environment:
+      name: fly.io [prod]
+      url: https://twitch-miner-go.fly.dev
+    steps:
+      - name: Check trigger authorization
+        id: auth
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SENDER="${{ github.event.sender.login }}"
+          AUTHORIZED="${{ env.AUTHORIZED_TRIGGERERS }}"
+          ALLOWED=false
+          for login in $(echo "$AUTHORIZED" | tr ',' '\n'); do
+            if [ "${login}" = "${SENDER}" ]; then ALLOWED=true; fi
+          done
+          if [ "$ALLOWED" != "true" ]; then
+            PERM=$(gh api "repos/${{ github.repository }}/collaborators/${SENDER}/permission" --jq '.permission' 2>/dev/null || echo "none")
+            case "$PERM" in
+              admin|write|maintain) ALLOWED=true ;;
+            esac
+          fi
+          echo "allowed=${ALLOWED}" >> "$GITHUB_OUTPUT"
+          echo "sender=${SENDER}" >> "$GITHUB_OUTPUT"
+
+      - name: Comment and reject
+        if: steps.auth.outputs.allowed != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body "🚫 \`${{ github.event.sender.login }}\` is not authorized to trigger test deploys. Skipping."
+          echo "Not authorized."
+          exit 1
+
+      - name: Checkout code (PR merge ref)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute test version
+        id: version
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          LAST_TAG=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1)
+          if [ -z "$LAST_TAG" ]; then
+            CURRENT="$(cat VERSION)"
+          else
+            CURRENT="${LAST_TAG#v}"
+          fi
+
+          # Conventional commit bump: same precedence rules as release.yml.
+          BUMP="patch"
+          if echo "$PR_TITLE" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\([a-zA-Z0-9_-]+\))?!: '; then
+            BUMP="major"
+          elif echo "$PR_TITLE" | grep -qiE 'BREAKING CHANGE:'; then
+            BUMP="major"
+          elif echo "$PR_TITLE" | grep -qE '^feat(\([a-zA-Z0-9_-]+\))?: '; then
+            BUMP="minor"
+          elif echo "$PR_TITLE" | grep -qE '^(fix|perf|refactor|build)(\([a-zA-Z0-9_-]+\))?: '; then
+            BUMP="patch"
+          else
+            BUMP="patch"
+          fi
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          case "$BUMP" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-test"
+
+          echo "prod=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          flyctl deploy --remote-only \
+            --build-arg "VERSION=${VERSION}" \
+            --build-arg "GIT_COMMIT=${GIT_COMMIT}"
+
+      - name: Comment on result
+        if: always() && steps.auth.outputs.allowed == 'true' && steps.version.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "🚀 Test deploy **\`${{ steps.version.outputs.version }}\`** is live at https://twitch-miner-go.fly.dev (prod was \`${{ steps.version.outputs.prod }}\`, bump: \`${{ steps.version.outputs.bump }}\`). Re-run by removing and re-adding the \`test-deploy\` label."
+          else
+            gh pr comment ${{ github.event.pull_request.number }} --body "❌ Test deploy **\`${{ steps.version.outputs.version }}\`** failed (current prod \`v${{ steps.version.outputs.prod }}\` stays deployed). See the [run log](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})."
+          fi
