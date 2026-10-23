@@ -108,8 +108,8 @@
     "semantic_hash": ""
   },
   "internal/configeditor/web/app.js": {
-    "mtime": 1789405442.7095945,
-    "seen": 1791829509.1934776,
+    "mtime": 1792688701.284547,
+    "seen": 1792699676.9924343,
     "ast_hash": "37a61da014c326c73a0028be85352ac5",
     "semantic_hash": ""
   },
@@ -420,21 +420,21 @@
     "semantic_hash": ""
   },
   "internal/server/static/app.js": {
-    "mtime": 1788211796.5886235,
-    "seen": 1788555176.5097973,
+    "mtime": 1792688701.2865489,
+    "seen": 1792699676.9970183,
     "ast_hash": "c2215583b61cf39dc72e31759c650be3",
     "semantic_hash": ""
   },
   "internal/server/static/logs.js": {
-    "mtime": 1788211796.5906255,
-    "seen": 1788555176.509798,
+    "mtime": 1792688701.2875476,
+    "seen": 1792699676.9970193,
     "ast_hash": "9350f35a1132776a2e89fee8cb1a400e",
     "semantic_hash": ""
   },
   "internal/twitch/client.go": {
-    "mtime": 1791829440.0396833,
-    "seen": 1791829509.1986916,
-    "ast_hash": "3d91c206debd5d61ffb4cd1b4311bb18",
+    "mtime": 1792699633.7785232,
+    "seen": 1792699676.9983933,
+    "ast_hash": "a285b3c550ece2b58ec2d613af1cad4c",
     "semantic_hash": ""
   },
   "internal/twitch/drops.go": {
@@ -456,15 +456,15 @@
     "semantic_hash": ""
   },
   "internal/twitch/minute_watched.go": {
-    "mtime": 1791830806.5961168,
-    "seen": 1791832206.3065605,
+    "mtime": 1792688728.8368137,
+    "seen": 1792699676.9986768,
     "ast_hash": "68f53972ba41bf6e944d0c2885ca9d15",
     "semantic_hash": ""
   },
   "internal/twitch/minute_watched_test.go": {
-    "mtime": 1791827871.907374,
-    "seen": 1791829509.1988277,
-    "ast_hash": "1efa0417048235f2da691298d7682a6a",
+    "mtime": 1792699617.1524904,
+    "seen": 1792699676.9986775,
+    "ast_hash": "9a65e2063c11874a608ffbb26abea21b",
     "semantic_hash": ""
   },
   "internal/twitch/predictions.go": {
@@ -540,8 +540,8 @@
     "semantic_hash": ""
   },
   ".claude/CLAUDE.md": {
-    "mtime": 1788211796.5243711,
-    "seen": 1788555176.5098274,
+    "mtime": 1792688701.2655473,
+    "seen": 1792699677.0003123,
     "ast_hash": "e5f75ca3ee64f2116aeead283de89c0b",
     "semantic_hash": ""
   },
@@ -648,8 +648,8 @@
     "semantic_hash": ""
   },
   ".github/copilot-instructions.md": {
-    "mtime": 1788211796.5302706,
-    "seen": 1788555176.5098398,
+    "mtime": 1792688701.266549,
+    "seen": 1792699677.0015159,
     "ast_hash": "252ef4b82454122c76fb44a73944179d",
     "semantic_hash": ""
   },
@@ -744,14 +744,14 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1788211796.5382779,
-    "seen": 1788555176.5098522,
+    "mtime": 1792688701.2675455,
+    "seen": 1792699677.0026448,
     "ast_hash": "dfc67997fa1813b4038bc7385e6607d8",
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1788211796.5382779,
-    "seen": 1788555176.5098526,
+    "mtime": 1792688701.2675455,
+    "seen": 1792699677.0026455,
     "ast_hash": "8a535dccc06244540b07b331fd202124",
     "semantic_hash": ""
   },
@@ -768,8 +768,8 @@
     "semantic_hash": ""
   },
   "GEMINI.md": {
-    "mtime": 1788211796.5382779,
-    "seen": 1788555176.509855,
+    "mtime": 1792688701.2685466,
+    "seen": 1792699677.00281,
     "ast_hash": "8a535dccc06244540b07b331fd202124",
     "semantic_hash": ""
   },
@@ -780,8 +780,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1791749134.679494,
-    "seen": 1791829509.2042637,
+    "mtime": 1792688701.2685466,
+    "seen": 1792699677.0028648,
     "ast_hash": "743bc911683798e2929e535e278fda41",
     "semantic_hash": ""
   },
@@ -810,20 +810,20 @@
     "semantic_hash": ""
   },
   "internal/configeditor/web/index.html": {
-    "mtime": 1789405442.7095945,
-    "seen": 1791829509.2045262,
+    "mtime": 1792688701.2855484,
+    "seen": 1792699677.0030842,
     "ast_hash": "0bb4ed2369de2cdfc545dcd4070591f3",
     "semantic_hash": ""
   },
   "internal/server/static/index.html": {
-    "mtime": 1788211796.5906255,
-    "seen": 1788555176.5098598,
+    "mtime": 1792688701.2865489,
+    "seen": 1792699677.0030851,
     "ast_hash": "d568b6ed3bf9be6f73745fa6d3b34501",
     "semantic_hash": ""
   },
   "internal/server/static/logs.html": {
-    "mtime": 1788211796.5906255,
-    "seen": 1788555176.5098603,
+    "mtime": 1792688701.2875476,
+    "seen": 1792699677.0030859,
     "ast_hash": "bbadd64cc83773d74b8c9baa0ae345c8",
     "semantic_hash": ""
   },
@@ -999,14 +999,14 @@
     "semantic_hash": ""
   },
   "docs/social_preview_1.png": {
-    "mtime": 1788211796.545918,
-    "seen": 1788555176.5098612,
+    "mtime": 1792688701.2705455,
+    "seen": 1792699677.0030866,
     "ast_hash": "b971bd426a69acfe951998ad0ff4401f",
     "semantic_hash": ""
   },
   "docs/social_preview_2.png": {
-    "mtime": 1788211796.545918,
-    "seen": 1788555176.5098615,
+    "mtime": 1792688701.2725465,
+    "seen": 1792699677.003087,
     "ast_hash": "cd964587556cc35929c843bba44f4a81",
     "semantic_hash": ""
   },
@@ -1167,8 +1167,8 @@
     "semantic_hash": ""
   },
   "docs/social_preview_3.png": {
-    "mtime": 1788211796.545918,
-    "seen": 1788555176.5098622,
+    "mtime": 1792688701.2735462,
+    "seen": 1792699677.0030878,
     "ast_hash": "8976bb9a532f6e4d7c58a6607629f31c",
     "semantic_hash": ""
   },
