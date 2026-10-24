@@ -339,6 +339,10 @@ func (c *Client) updateStream(ctx context.Context, streamer *model.Streamer) err
 		}
 	}
 
+	// The web client always sends "location" and "player"; without them Twitch
+	// attributes the session to a non-site context and stops watch-based
+	// channel point accrual (passive earnings, bonus chest, watch streaks),
+	// even though Spade still answers 204 (issue #41).
 	properties := map[string]any{
 		"broadcast_id":   streamer.Stream.BroadcastID,
 		"channel_id":     streamer.ChannelID,
@@ -349,9 +353,11 @@ func (c *Client) updateStream(ctx context.Context, streamer *model.Streamer) err
 		"hidden":         false,
 		"is_live":        true,
 		"live":           true,
+		"location":       "channel",
 		"logged_in":      true,
 		"minutes_logged": 1,
 		"muted":          false,
+		"player":         "site",
 	}
 
 	// Twitch attributes watch time to the numeric account id, matching its web

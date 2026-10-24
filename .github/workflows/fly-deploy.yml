@@ -7,6 +7,11 @@ on:
         description: "Version to deploy (leave empty to use VERSION file)"
         required: false
         type: string
+      ref:
+        description: "Git ref to deploy (leave empty to deploy the calling ref)"
+        required: false
+        type: string
+        default: ""
   workflow_dispatch:
     inputs:
       version:
@@ -33,6 +38,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Setup flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
@@ -46,6 +53,12 @@ jobs:
             VERSION="$(cat VERSION)"
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Fly.io deploy"
+            echo ""
+            echo "- Version: \`${VERSION}\`"
+            echo "- Ref: \`${{ inputs.ref || github.ref_name }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Deploy to Fly.io
         env:
@@ -53,10 +66,14 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           if [ -z "$FLY_API_TOKEN" ]; then
-            echo "⚠️ FLY_API_TOKEN not set — skipping deploy"
-            exit 0
+            echo "❌ FLY_API_TOKEN not available in this run context — refusing to silently skip a deploy."
+            exit 1
           fi
           GIT_COMMIT=$(git rev-parse --short HEAD)
           flyctl deploy --remote-only \
             --build-arg "VERSION=${VERSION}" \
             --build-arg "GIT_COMMIT=${GIT_COMMIT}"
+          {
+            echo "- Deploy: ✅ live at https://twitch-miner-go.fly.dev"
+            echo "- Commit: \`${GIT_COMMIT}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
