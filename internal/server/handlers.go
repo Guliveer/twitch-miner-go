@@ -14,11 +14,13 @@ func (s *AnalyticsServer) handleDashboard(w http.ResponseWriter, r *http.Request
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
 	w.Write(dashboardHTML) //nolint:errcheck // static HTML to ResponseWriter; error not actionable
 }
 
 func (s *AnalyticsServer) handleLogs(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
 	w.Write(logsHTML) //nolint:errcheck // static HTML to ResponseWriter; error not actionable
 }
 

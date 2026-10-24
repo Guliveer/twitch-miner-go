@@ -64,6 +64,15 @@ type AnalyticsServer struct {
 // NewAnalyticsServer creates a new AnalyticsServer bound to the given address.
 // If auth or apiKey is provided, all endpoints (except /health and /static)
 // require either HTTP Basic Auth (browser users) or an X-API-Key header (machine clients).
+// noCacheFiles serves embedded assets with Cache-Control: no-store so the
+// browser always fetches the assets baked into the running build.
+func noCacheFiles(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		next.ServeHTTP(w, r)
+	})
+}
+
 func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth, apiKey string) *AnalyticsServer {
 	s := &AnalyticsServer{
 		addr:   addr,
@@ -98,7 +107,7 @@ func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth, ap
 	mux.HandleFunc("POST /api/config/validate", s.handleConfigValidate)
 	mux.HandleFunc("POST /api/config/generate", s.handleConfigGenerate)
 
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(staticFS)))
+	mux.Handle("GET /static/", http.StripPrefix("/static/", noCacheFiles(http.FileServerFS(staticFS))))
 
 	// Heap and goroutine dumps expose live Twitch auth tokens held in process
 	// memory, so the profiling endpoints only exist once the server is actually
