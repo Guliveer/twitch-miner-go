@@ -105,7 +105,7 @@
       drops
         .map(function (d) {
           var statusClass = "status-in-progress";
-          var statusLabel = "IN_PROGRESS";
+          var statusLabel = "In progress";
           if (d.is_claimed) {
             statusClass = "status-claimed";
             statusLabel = "CLAIMED";
@@ -178,13 +178,13 @@
   }
 
   function renderStats(stats) {
-    document.getElementById("total-streamers").textContent = "Streamers: " + stats.total_streamers;
-    document.getElementById("online-streamers").textContent = "Online: " + stats.online_streamers;
-    document.getElementById("total-points").textContent = "Total Points: " + formatPoints(stats.total_points);
+    document.getElementById("total-streamers").textContent = stats.total_streamers;
+    document.getElementById("online-streamers").textContent = stats.online_streamers;
+    document.getElementById("total-points").textContent = formatPoints(stats.total_points);
 
     var tbody = document.getElementById("history-body");
     if (!stats.history || Object.keys(stats.history).length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted-fg)">No history yet</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="3" class="table-message">No history yet</td></tr>';
       return;
     }
 
@@ -219,7 +219,7 @@
       console.error("Dashboard refresh error:", err);
       document.getElementById("streamers-grid").innerHTML = '<div class="loading">Dashboard data could not be loaded.</div>';
       document.getElementById("history-body").innerHTML =
-        '<tr><td colspan="3" style="text-align:center;color:var(--danger)">Dashboard data could not be loaded.</td></tr>';
+        '<tr><td colspan="3" class="table-message error">Dashboard data could not be loaded.</td></tr>';
       setStatus("Failed to refresh dashboard data. Verify authentication and backend connectivity.", "error");
     }
   }

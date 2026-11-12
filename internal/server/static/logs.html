@@ -18,7 +18,7 @@
                 <a href="/" class="brand">Twitch Miner Go</a>
                 <nav class="topbar-nav">
                     <a href="/" class="nav-link">Dashboard</a>
-                    <a href="/logs" class="nav-link active">Event Logs</a>
+                    <a href="/logs" class="nav-link" aria-current="page">Event Logs</a>
                 </nav>
             </div>
             <div class="header-right"></div>
@@ -53,8 +53,8 @@
                     <option value="">All Events</option>
                 </select>
             </div>
-            <div class="filter-group filter-actions">
-                <button id="clear-filters" type="button">Clear Filters</button>
+            <div class="filter-actions">
+                <button class="btn btn-ghost" id="clear-filters" type="button">Clear filters</button>
             </div>
         </section>
 
@@ -65,18 +65,20 @@
         <main>
             <section id="events-section">
                 <h2>Event Details</h2>
-                <table id="events-table">
-                    <thead>
-                        <tr>
-                            <th data-sort="event">Event</th>
-                            <th data-sort="streamer">Streamer</th>
-                            <th data-sort="account">Account</th>
-                            <th data-sort="count">Count</th>
-                            <th data-sort="amount">Points</th>
-                        </tr>
-                    </thead>
-                    <tbody id="events-body"></tbody>
-                </table>
+                <div class="table-scroll">
+                    <table id="events-table" aria-label="Event details">
+                        <thead>
+                            <tr>
+                                <th data-sort="event" aria-sort="none"><button type="button" class="th-sort">Event</button></th>
+                                <th data-sort="streamer" aria-sort="none"><button type="button" class="th-sort">Streamer</button></th>
+                                <th data-sort="account" aria-sort="none"><button type="button" class="th-sort">Account</button></th>
+                                <th data-sort="count" aria-sort="none"><button type="button" class="th-sort">Count</button></th>
+                                <th data-sort="amount" aria-sort="none"><button type="button" class="th-sort">Points</button></th>
+                            </tr>
+                        </thead>
+                        <tbody id="events-body"></tbody>
+                    </table>
+                </div>
             </section>
         </main>
 

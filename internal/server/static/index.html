@@ -17,14 +17,14 @@
             <div class="header-left">
                 <a href="/" class="brand">Twitch Miner Go</a>
                 <nav class="topbar-nav">
-                    <a href="/" class="nav-link active">Dashboard</a>
+                    <a href="/" class="nav-link" aria-current="page">Dashboard</a>
                     <a href="/logs" class="nav-link">Event Logs</a>
                 </nav>
             </div>
             <div class="header-right" id="stats-bar">
-                <span id="total-streamers">Streamers: —</span>
-                <span id="online-streamers">Online: —</span>
-                <span id="total-points">Total Points: —</span>
+                <span class="stat"><span class="stat-label">Streamers</span><span class="stat-value" id="total-streamers">—</span></span>
+                <span class="stat"><span class="stat-label">Online</span><span class="stat-value" id="online-streamers">—</span></span>
+                <span class="stat"><span class="stat-label">Points</span><span class="stat-value" id="total-points">—</span></span>
             </div>
         </header>
 
@@ -53,8 +53,8 @@
                     <option value="false">Offline</option>
                 </select>
             </div>
-            <div class="filter-group filter-actions">
-                <button id="clear-filters" type="button">Clear Filters</button>
+            <div class="filter-actions">
+                <button class="btn btn-ghost" id="clear-filters" type="button">Clear filters</button>
             </div>
         </section>
 
@@ -68,16 +68,18 @@
 
             <section id="history-section">
                 <h2>Earnings History</h2>
-                <table id="history-table">
-                    <thead>
-                        <tr>
-                            <th>Reason</th>
-                            <th>Count</th>
-                            <th>Points</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-body"></tbody>
-                </table>
+                <div class="table-scroll">
+                    <table id="history-table" aria-label="Earnings history">
+                        <thead>
+                            <tr>
+                                <th>Reason</th>
+                                <th>Count</th>
+                                <th>Points</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body"></tbody>
+                    </table>
+                </div>
             </section>
         </main>
 
