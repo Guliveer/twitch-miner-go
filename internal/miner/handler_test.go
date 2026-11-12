@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Guliveer/twitch-miner-go/internal/auth"
+	"github.com/Guliveer/twitch-miner-go/internal/chat"
 	"github.com/Guliveer/twitch-miner-go/internal/gql"
 	"github.com/Guliveer/twitch-miner-go/internal/logger"
 	"github.com/Guliveer/twitch-miner-go/internal/model"
@@ -16,6 +17,7 @@ import (
 type mockTwitch struct {
 	mu        sync.Mutex
 	joinCalls []string
+	online    map[string]bool
 }
 
 func (m *mockTwitch) JoinRaid(_ context.Context, raidID string) error {
@@ -27,7 +29,16 @@ func (m *mockTwitch) JoinRaid(_ context.Context, raidID string) error {
 
 func (m *mockTwitch) Login(_ context.Context) error                         { return nil }
 func (m *mockTwitch) SetSkipUnauth(_ bool)                                  {}
-func (m *mockTwitch) CheckStreamerOnline(_ context.Context, _ *model.Streamer) error { return nil }
+func (m *mockTwitch) CheckStreamerOnline(_ context.Context, s *model.Streamer) error {
+	m.mu.Lock()
+	online := m.online[s.Username]
+	m.mu.Unlock()
+
+	s.Mu.Lock()
+	s.IsOnline = online
+	s.Mu.Unlock()
+	return nil
+}
 func (m *mockTwitch) LoadChannelPointsContext(_ context.Context, _ *model.Streamer) error { return nil }
 func (m *mockTwitch) SendMinuteWatchedEvents(_ context.Context, _ []*model.Streamer) error { return nil }
 func (m *mockTwitch) MakePrediction(_ context.Context, _ *model.Streamer, _ *model.EventPrediction) error { return nil }
@@ -326,5 +337,28 @@ func TestHandleRaid_WrongMessageType(t *testing.T) {
 
 	if streamer.Raid != nil {
 		t.Error("expected streamer.Raid to be nil for non-raid_update_v2 message")
+	}
+}
+
+// TestCheckAllStreamersOnline_AppliesChatPresence verifies that chat presence is
+// applied once the initial online state is known, so channels that are already
+// live at startup get their chat joined.
+func TestCheckAllStreamersOnline_AppliesChatPresence(t *testing.T) {
+	m, mock := newTestMiner(t)
+	mock.online = map[string]bool{"livechannel": true}
+	m.chat = chat.NewManager("testaccount", "token", m.log)
+
+	m.streamers = []*model.Streamer{
+		{Username: "livechannel", Settings: &model.StreamerSettings{Chat: model.ChatOnline}},
+		{Username: "offlinechannel", Settings: &model.StreamerSettings{Chat: model.ChatOnline}},
+	}
+
+	m.checkAllStreamersOnline(context.Background())
+
+	if !m.chat.IsJoined("livechannel") {
+		t.Error("expected chat to be joined for a channel already live at startup")
+	}
+	if m.chat.IsJoined("offlinechannel") {
+		t.Error("did not expect chat to be joined for an offline channel in ONLINE mode")
 	}
 }

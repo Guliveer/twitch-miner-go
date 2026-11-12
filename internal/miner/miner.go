@@ -184,9 +184,10 @@ func (m *Miner) DeviceCodeStatus() *auth.DeviceCodeStatus {
 //  3. Resolve streamer channel IDs — concurrent (worker pool)
 //  4. Create notification dispatcher
 //  5. Create PubSub pool and subscribe to topics — immediately after IDs resolved
-//  6. Create chat manager and join channels — immediately
+//  6. Create chat manager and apply configured chat presence — immediately
 //  7. Load channel points context — concurrent in background (worker pool)
-//  8. Check online status — concurrent in background (worker pool)
+//  8. Check online status — concurrent in background (worker pool), then
+//     re-apply chat presence for modes that depend on the online state
 //  9. Start background goroutines (minute watcher, campaign sync, context refresh)
 //  10. Monitor loop + graceful shutdown
 func (m *Miner) Run(ctx context.Context) error {
@@ -235,7 +236,7 @@ func (m *Miner) Run(ctx context.Context) error {
 	}
 
 	m.chat = chat.NewManager(m.cfg.Username, m.twitch.AuthProvider().AuthToken(), m.log)
-	m.joinInitialChats()
+	m.syncInitialChatPresence()
 
 	parentCtx := ctx
 	g, ctx := errgroup.WithContext(ctx)
@@ -475,6 +476,10 @@ func (m *Miner) checkAllStreamersOnline(ctx context.Context) {
 		"online", onlineCount,
 		"offline", offlineCount,
 		"total", len(streamers))
+
+	// Channels that were already live never trigger a stream-up event, so their
+	// chat is only joined once the online state above is known.
+	m.syncInitialChatPresence()
 }
 
 func (m *Miner) subscribeAllTopics(ctx context.Context) error {
@@ -529,23 +534,17 @@ func (m *Miner) streamerTopics(s *model.Streamer) []*model.PubSubTopic {
 	return topics
 }
 
-func (m *Miner) joinInitialChats() {
-	streamers := m.getStreamers()
-	for _, s := range streamers {
+// syncInitialChatPresence applies the configured chat presence to every
+// streamer based on its current online state. It runs before the initial online
+// check, to enter chats that do not depend on it, and again afterwards, when
+// the online state is known.
+func (m *Miner) syncInitialChatPresence() {
+	for _, s := range m.getStreamers() {
 		s.Mu.RLock()
-		chatPresence := model.ChatNever
-		if s.Settings != nil {
-			chatPresence = s.Settings.Chat
-		}
 		isOnline := s.IsOnline
-		username := s.Username
 		s.Mu.RUnlock()
 
-		if model.ShouldJoinChat(chatPresence, isOnline) {
-			if err := m.chat.Join(username); err != nil {
-				m.log.Warn("Failed to join chat", "streamer", username, "error", err)
-			}
-		}
+		m.updateChatPresence(s, isOnline)
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -206,6 +207,56 @@ func TestGetUserID_SendsLogin(t *testing.T) {
 	vars := transport.getCapturedVars(t)
 	assertVarPresent(t, vars, "login")
 	assertVarEquals(t, vars, "login", "testuser")
+}
+
+func (m *mockTransport) getCallCount() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.callCount
+}
+
+// TestGetFollowedStreamers_UsesDataAlongsidePartialErrors covers accounts that
+// follow channels Twitch reports per-node "service error" entries for. The data
+// is complete, so the errors must not discard it or trigger client-ID retries.
+func TestGetFollowedStreamers_UsesDataAlongsidePartialErrors(t *testing.T) {
+	t.Parallel()
+
+	transport := &mockTransport{
+		respBody: `{"data":{"user":{"follows":{"edges":[` +
+			`{"node":{"login":"alpha"},"cursor":"c1"},` +
+			`{"node":{"login":"beta"},"cursor":"c2"}],` +
+			`"pageInfo":{"hasNextPage":false}}}},` +
+			`"errors":[{"message":"service error"},{"message":"service error"}]}`,
+	}
+	client := newTestGQLClient(transport)
+
+	follows, err := client.GetFollowedStreamers(context.Background(), 100, "DESC")
+	if err != nil {
+		t.Fatalf("GetFollowedStreamers failed: %v", err)
+	}
+
+	want := []string{"alpha", "beta"}
+	if !reflect.DeepEqual(follows, want) {
+		t.Errorf("follows = %v, want %v", follows, want)
+	}
+	if got := transport.getCallCount(); got != 1 {
+		t.Errorf("request count = %d, want 1 (partial errors must not trigger retries)", got)
+	}
+}
+
+// TestGetFollowedStreamers_FailsWhenDataMissing verifies that errors still fail
+// the call when the follows data itself is absent.
+func TestGetFollowedStreamers_FailsWhenDataMissing(t *testing.T) {
+	t.Parallel()
+
+	transport := &mockTransport{
+		respBody: `{"data":{"user":null},"errors":[{"message":"service error"}]}`,
+	}
+	client := newTestGQLClient(transport)
+
+	if _, err := client.GetFollowedStreamers(context.Background(), 100, "DESC"); err == nil {
+		t.Fatal("expected an error when the follows data is missing")
+	}
 }
 
 func TestGetPlaybackAccessToken_PlatformIsNonEmptyString(t *testing.T) {

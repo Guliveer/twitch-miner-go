@@ -37,6 +37,9 @@ type operationBehavior struct {
 	tryAltClientIDs bool
 	retryGQLErrors  bool
 	clientID        string // if set, override Client-Id header for this operation
+	// partialDataCheck reports whether a response that carries both data and
+	// a non-empty errors array still holds complete data and can be used.
+	partialDataCheck func(data json.RawMessage) bool
 }
 
 // integrityFailureOps lists GQL operations where integrity check failures are
@@ -52,9 +55,12 @@ var operationBehaviors = map[string]operationBehavior{
 	// This browser-oriented query frequently fails when sent with integrity
 	// headers or with stale persisted-query behavior. Treating errors as fatal
 	// prevents silent "0 followers" fallbacks.
+	// Twitch also reports per-node failures (deleted or suspended channels) in
+	// errors while still returning every follow, so complete data must win.
 	"ChannelFollows": {
-		failOnErrors:    true,
-		tryAltClientIDs: true,
+		failOnErrors:     true,
+		tryAltClientIDs:  true,
+		partialDataCheck: hasChannelFollowsData,
 	},
 	"VideoPlayerStreamInfoOverlayChannel": {
 		tryAltClientIDs: true,
@@ -63,6 +69,23 @@ var operationBehaviors = map[string]operationBehavior{
 	"TeamPage": {
 		failOnErrors: true,
 	},
+}
+
+// hasChannelFollowsData reports whether a ChannelFollows response contains the
+// follows connection. Per-node errors leave data.user.follows intact, while a
+// failure resolving the user returns null there.
+func hasChannelFollowsData(data json.RawMessage) bool {
+	var resp struct {
+		User *struct {
+			Follows *struct {
+				Edges []json.RawMessage `json:"edges"`
+			} `json:"follows"`
+		} `json:"user"`
+	}
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return false
+	}
+	return resp.User != nil && resp.User.Follows != nil
 }
 
 // circuitBreaker tracks consecutive failures and backs off when the API
@@ -322,6 +345,18 @@ func (c *Client) doGQLRequest(ctx context.Context, reqBody gqlRequest, opName st
 			}
 
 			errMsg := response.Errors[0].Message
+
+			// A non-empty errors array does not always mean the response is
+			// unusable: Twitch reports per-node failures (e.g. deleted channels
+			// in ChannelFollows) while still returning the complete result.
+			if behavior.partialDataCheck != nil && behavior.partialDataCheck(response.Data) {
+				c.log.Warn("GQL operation returned partial errors, using complete data",
+					"operation", opName,
+					"errors", len(response.Errors),
+					"error", errMsg,
+					"client_id_attempt", idx+1)
+				return response.Data, nil
+			}
 
 			// PersistedQueryNotFound means the server doesn't recognize this
 			// persisted query hash — a transient condition during ad breaks
