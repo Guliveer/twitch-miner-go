@@ -242,7 +242,7 @@
     }
     accounts.forEach((a) => {
       const meta = [];
-      if (a.streamer_count > 0) meta.push(a.streamer_count + ' streamers');
+      if (a.streamer_count > 0) meta.push(a.streamer_count + (a.streamer_count === 1 ? ' streamer' : ' streamers'));
       if (a.has_category_watcher) meta.push('CW');
       if (a.has_team_watcher) meta.push('TW');
       if (a.has_followers) meta.push('FL');
@@ -771,7 +771,7 @@
       oninput: markDirty,
     });
     const triEl = el('select', { className: 'tri-select cat-drops-only' });
-    const triLabel = el('span', { style: 'font-size:0.7rem;color:var(--text-muted)' }, 'drops only');
+    const triLabel = el('span', { className: 'tri-label' }, 'drops only');
     const removeBtn = el('button', {
       type: 'button', className: 'item-remove', title: 'Remove',
       onclick: function () { this.closest('.dynamic-item').remove(); markDirty(); },
@@ -870,9 +870,9 @@
 
     const behaviorGrid = el('div', { className: 'form-grid', style: 'margin-top:0.5rem' }, [
       ...behaviorFields.map(({ label, select }) =>
-        el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, label), select])
+        el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, label), select])
       ),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Chat'), chatSelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Chat'), chatSelect]),
     ]);
 
     const betStrategySelect = el('select', { className: 'form-input input-sm s-bet-strategy' });
@@ -916,20 +916,20 @@
     const betFilterValueInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-filter-value', value: filter.value ?? '' });
 
     const betGrid = el('div', { className: 'form-grid' }, [
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Strategy'), betStrategySelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Percentage'), betPercentageInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Percentage Gap'), betGapInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Max Points'), betMaxInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Minimum Points'), betMinInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Stealth Mode'), betStealthSelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Delay (s)'), betDelayInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Delay Mode'), betDelayModeSelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Strategy'), betStrategySelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Percentage'), betPercentageInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Percentage Gap'), betGapInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Max Points'), betMaxInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Minimum Points'), betMinInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Stealth Mode'), betStealthSelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Delay (s)'), betDelayInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Delay Mode'), betDelayModeSelect]),
     ]);
 
     const betFilterGrid = el('div', { className: 'form-grid' }, [
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter By'), betFilterBySelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter Where'), betFilterWhereSelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter Value'), betFilterValueInput]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Filter By'), betFilterBySelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Filter Where'), betFilterWhereSelect]),
+      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.75rem' }, 'Filter Value'), betFilterValueInput]),
     ]);
 
     const betSubsection = el('div', { className: 'subsection', style: 'margin-top:0.75rem' }, [
@@ -975,6 +975,7 @@
       const enabledId = 'prov-' + p + '-enabled';
       const enabledInput = el('input', {
         type: 'checkbox', className: 'toggle-input prov-enabled', id: enabledId,
+        'aria-label': 'Enable ' + p.charAt(0).toUpperCase() + p.slice(1) + ' notifications',
       });
       if (pConfig.enabled) enabledInput.checked = true;
       const enabledLabel = el('label', { for: enabledId, className: 'toggle-slider' });
@@ -998,11 +999,14 @@
 
       if (p === 'telegram') {
         const disNotifId = 'prov-' + p + '-disable-notif';
-        const disInput = el('input', { type: 'checkbox', className: 'toggle-input prov-disable-notification', id: disNotifId });
+        const disInput = el('input', {
+          type: 'checkbox', className: 'toggle-input prov-disable-notification', id: disNotifId,
+          'aria-label': 'Disable notification sound',
+        });
         if (pConfig.disable_notification) disInput.checked = true;
         const disLabel = el('label', { for: disNotifId, className: 'toggle-slider' });
-        section.appendChild(el('div', { className: 'form-field', style: 'margin-top:0.5rem' }, [
-          el('label', {}, 'Disable Notification Sound'),
+        section.appendChild(el('div', { className: 'form-field field-spaced' }, [
+          el('label', { for: disNotifId }, 'Disable Notification Sound'),
           el('div', { className: 'toggle-wrap' }, [disInput, disLabel]),
         ]));
       }
@@ -1014,7 +1018,7 @@
           if (pConfig.method === m || (!pConfig.method && m === 'POST')) opt.selected = true;
           methodSelect.appendChild(opt);
         });
-        section.appendChild(el('div', { className: 'form-field', style: 'margin-top:0.5rem' }, [
+        section.appendChild(el('div', { className: 'form-field field-spaced' }, [
           el('label', {}, 'Method'),
           methodSelect,
         ]));
@@ -1226,7 +1230,11 @@
     };
 
     document.querySelectorAll('.accordion-header').forEach((header) => {
-      header.onclick = () => { header.parentElement.classList.toggle('open'); };
+      const accordion = header.parentElement;
+      header.setAttribute('aria-expanded', String(accordion.classList.contains('open')));
+      header.onclick = () => {
+        header.setAttribute('aria-expanded', String(accordion.classList.toggle('open')));
+      };
     });
 
     document.getElementById('add-category-btn').onclick = () => {

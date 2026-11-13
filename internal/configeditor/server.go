@@ -97,6 +97,7 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("/api/accounts/", s.handleCORS(s.handleAccount))
 	s.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		s.setCORSHeaders(w)
+		w.Header().Set("Cache-Control", "no-store")
 		staticFS.ServeHTTP(w, r)
 	})
 }

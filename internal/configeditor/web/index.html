@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Config Editor — Twitch Miner</title>
+  <title>Config Editor — Twitch Miner Go</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230e0e0e'/%3E%3Cg fill='none' stroke='%233fd6c6' stroke-width='2.2'%3E%3Cpath d='M8 12V8h4'/%3E%3Cpath d='M24 12V8h-4'/%3E%3Cpath d='M8 20v4h4'/%3E%3Cpath d='M24 20v4h-4'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='2.2' fill='%233fd6c6'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header>
     <div class="header-left">
-      <a href="/" class="brand">Twitch Miner</a>
-      <nav class="topbar-nav">
-        <a href="/" class="nav-link active">Config Editor</a>
-      </nav>
+      <a href="/" class="brand">Twitch Miner Go</a>
+      <span class="config-dir">Config Editor</span>
     </div>
     <div class="header-right">
       <span class="config-dir" id="config-dir"></span>
@@ -26,7 +25,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h2>Accounts</h2>
-        <button class="btn btn-primary btn-sm" id="new-account-btn" title="Create new account">+ New</button>
+        <button class="btn btn-ghost btn-sm" id="new-account-btn" title="Create new account">+ New</button>
       </div>
       <ul class="account-list" id="account-list">
         <li class="loading-placeholder">Loading...</li>
@@ -35,7 +34,6 @@
 
     <section class="editor" id="editor">
       <div class="editor-placeholder" id="editor-placeholder">
-        <div class="placeholder-icon"></div>
         <p>Select an account to edit</p>
         <p class="placeholder-hint">or create a new one with the <strong>+ New</strong> button</p>
       </div>
@@ -50,13 +48,13 @@
           <!-- General -->
           <div class="accordion open" data-section="general">
             <button type="button" class="accordion-header">
-              <span class="accordion-arrow">&#9654;</span>
+              <span class="accordion-arrow" aria-hidden="true">+</span>
               General
             </button>
             <div class="accordion-body">
               <div class="form-grid">
                 <div class="form-field">
-                  <label>Enabled</label>
+                  <label for="cfg-enabled">Enabled</label>
                   <div class="toggle-wrap">
                     <input type="checkbox" id="cfg-enabled" class="toggle-input">
                     <label for="cfg-enabled" class="toggle-slider"></label>
@@ -84,13 +82,13 @@
           <!-- Features -->
           <div class="accordion" data-section="features">
             <button type="button" class="accordion-header">
-              <span class="accordion-arrow">&#9654;</span>
+              <span class="accordion-arrow" aria-hidden="true">+</span>
               Features
             </button>
             <div class="accordion-body">
               <div class="form-grid">
                 <div class="form-field">
-                  <label>Claim drops on startup</label>
+                  <label for="cfg-claim-drops-startup">Claim drops on startup</label>
                   <div class="toggle-wrap">
                     <input type="checkbox" id="cfg-claim-drops-startup" class="toggle-input">
                     <label for="cfg-claim-drops-startup" class="toggle-slider"></label>
@@ -98,7 +96,7 @@
                   <span class="field-hint">Claim any pending drops when miner starts</span>
                 </div>
                 <div class="form-field">
-                  <label>Enable analytics</label>
+                  <label for="cfg-enable-analytics">Enable analytics</label>
                   <div class="toggle-wrap">
                     <input type="checkbox" id="cfg-enable-analytics" class="toggle-input">
                     <label for="cfg-enable-analytics" class="toggle-slider"></label>
@@ -112,13 +110,13 @@
           <!-- Category Watcher -->
           <div class="accordion" data-section="category-watcher">
             <button type="button" class="accordion-header">
-              <span class="accordion-arrow">&#9654;</span>
+              <span class="accordion-arrow" aria-hidden="true">+</span>
               Category Watcher
             </button>
             <div class="accordion-body">
               <div class="form-grid">
                 <div class="form-field">
-                  <label>Enabled</label>
+                  <label for="cfg-cw-enabled">Enabled</label>
                   <div class="toggle-wrap">
                     <input type="checkbox" id="cfg-cw-enabled" class="toggle-input">
                     <label for="cfg-cw-enabled" class="toggle-slider"></label>
@@ -129,7 +127,7 @@
                   <input type="text" id="cfg-cw-interval" placeholder="120s" class="form-input input-sm">
                 </div>
                 <div class="form-field">
-                  <label>Drops Only</label>
+                  <label for="cfg-cw-drops-only">Drops Only</label>
                   <div class="toggle-wrap">
                     <input type="checkbox" id="cfg-cw-drops-only" class="toggle-input">
                     <label for="cfg-cw-drops-only" class="toggle-slider"></label>
@@ -146,9 +144,9 @@
 
           <!-- Badge Watcher -->
           <div class="accordion" data-section="badge-watcher">
-            <button type="button" class="accordion-header"><span class="accordion-arrow">&#9654;</span>Badge Watcher</button>
+            <button type="button" class="accordion-header"><span class="accordion-arrow" aria-hidden="true">+</span>Badge Watcher</button>
             <div class="accordion-body"><div class="form-grid">
-              <div class="form-field"><label>Enabled</label><div class="toggle-wrap"><input type="checkbox" id="cfg-bw-enabled" class="toggle-input"><label for="cfg-bw-enabled" class="toggle-slider"></label></div></div>
+              <div class="form-field"><label for="cfg-bw-enabled">Enabled</label><div class="toggle-wrap"><input type="checkbox" id="cfg-bw-enabled" class="toggle-input"><label for="cfg-bw-enabled" class="toggle-slider"></label></div></div>
               <div class="form-field"><label for="cfg-bw-interval">Poll Interval</label><input type="text" id="cfg-bw-interval" placeholder="5m" class="form-input input-sm"></div>
               <div class="form-field"><label for="cfg-bw-limit">Streamer limit</label><input type="number" id="cfg-bw-limit" min="1" max="2" value="1" class="form-input input-sm"><span class="field-hint">Automatically mine watch-time chat badge Drops</span></div>
             </div></div>
@@ -157,13 +155,13 @@
           <!-- Team Watcher -->
           <div class="accordion" data-section="team-watcher">
             <button type="button" class="accordion-header">
-              <span class="accordion-arrow">&#9654;</span>
+              <span class="accordion-arrow" aria-hidden="true">+</span>
               Team Watcher
             </button>
             <div class="accordion-body">
               <div class="form-grid">
                 <div class="form-field">
-                  <label>Enabled</label>
+                  <label for="cfg-tw-enabled">Enabled</label>
                   <div class="toggle-wrap">
                     <input type="checkbox" id="cfg-tw-enabled" class="toggle-input">
                     <label for="cfg-tw-enabled" class="toggle-slider"></label>
@@ -185,7 +183,7 @@
           <!-- Streamer Defaults -->
           <div class="accordion" data-section="streamer-defaults">
             <button type="button" class="accordion-header">
-              <span class="accordion-arrow">&#9654;</span>
+              <span class="accordion-arrow" aria-hidden="true">+</span>
               Streamer Defaults
             </button>
             <div class="accordion-body">
@@ -296,7 +294,7 @@
           <!-- Streamers -->
           <div class="accordion" data-section="streamers">
             <button type="button" class="accordion-header">
-              <span class="accordion-arrow">&#9654;</span>
+              <span class="accordion-arrow" aria-hidden="true">+</span>
               Streamers
               <span class="badge" id="streamers-count">0</span>
             </button>
@@ -309,7 +307,7 @@
           <!-- Blacklists -->
           <div class="accordion" data-section="blacklists">
             <button type="button" class="accordion-header">
-              <span class="accordion-arrow">&#9654;</span>
+              <span class="accordion-arrow" aria-hidden="true">+</span>
               Blacklists
             </button>
             <div class="accordion-body">
@@ -337,13 +335,13 @@
           <!-- Followers -->
           <div class="accordion" data-section="followers">
             <button type="button" class="accordion-header">
-              <span class="accordion-arrow">&#9654;</span>
+              <span class="accordion-arrow" aria-hidden="true">+</span>
               Followers
             </button>
             <div class="accordion-body">
               <div class="form-grid">
                 <div class="form-field">
-                  <label>Enabled</label>
+                  <label for="cfg-fol-enabled">Enabled</label>
                   <div class="toggle-wrap">
                     <input type="checkbox" id="cfg-fol-enabled" class="toggle-input">
                     <label for="cfg-fol-enabled" class="toggle-slider"></label>
@@ -363,7 +361,7 @@
           <!-- Notifications -->
           <div class="accordion" data-section="notifications">
             <button type="button" class="accordion-header">
-              <span class="accordion-arrow">&#9654;</span>
+              <span class="accordion-arrow" aria-hidden="true">+</span>
               Notifications
             </button>
             <div class="accordion-body">

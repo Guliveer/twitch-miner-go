@@ -4,38 +4,14 @@
   const REFRESH_INTERVAL = 30000;
   const FILTER_REFRESH_INTERVAL = 60000;
 
-  // Event emoji mapping
-  const EVENT_EMOJIS = {
-    GAIN_FOR_WATCH: "📺",
-    GAIN_FOR_WATCH_STREAK: "📺",
-    GAIN_FOR_CLAIM: "🎁",
-    GAIN_FOR_RAID: "🎁",
-    BONUS_CLAIM: "💰",
-    BET_START: "🎰",
-    BET_FILTERS: "🎰",
-    BET_GENERAL: "🎰",
-    BET_FAILED: "🎰",
-    BET_WIN: "🏆",
-    BET_LOSE: "💸",
-    BET_REFUND: "↩️",
-    DROP_CLAIM: "🎯",
-    DROP_CLAIM_AVAILABLE: "📦",
-    DROP_STATUS: "📦",
-    STREAMER_ONLINE: "🟢",
-    STREAMER_OFFLINE: "⚫",
-    JOIN_RAID: "⚔️",
-    CHAT_MENTION: "💬",
-    MOMENT_CLAIM: "🎉",
-  };
-
   // Category display config
   const CATEGORY_CONFIG = {
-    drops: { label: "Drops", emoji: "🎯", color: "#e040fb" },
-    points: { label: "Points", emoji: "💰", color: "#ffca28" },
-    bets: { label: "Bets", emoji: "🎰", color: "#ff6f00" },
-    raids: { label: "Raids", emoji: "⚔️", color: "#f44336" },
-    streams: { label: "Streams", emoji: "🟢", color: "#00e676" },
-    other: { label: "Other", emoji: "🎉", color: "#29b6f6" },
+    drops: { label: "Drops" },
+    points: { label: "Points" },
+    bets: { label: "Bets" },
+    raids: { label: "Raids" },
+    streams: { label: "Streams" },
+    other: { label: "Other" },
   };
 
   // Category to events mapping (must match backend)
@@ -146,10 +122,11 @@
 
   function updateSortIndicators() {
     document.querySelectorAll("#events-table th[data-sort]").forEach(function (th) {
-      th.classList.remove("sort-asc", "sort-desc");
       if (th.dataset.sort === currentSort.key) {
-        th.classList.add(currentSort.dir === "asc" ? "sort-asc" : "sort-desc");
+        th.setAttribute("aria-sort", currentSort.dir === "asc" ? "ascending" : "descending");
+        return;
       }
+      th.setAttribute("aria-sort", "none");
     });
   }
 
@@ -175,7 +152,7 @@
     container.innerHTML = Object.entries(CATEGORY_CONFIG)
       .map(function ([key, cfg]) {
         const totals = catTotals[key];
-        return '<div class="category-card" style="border-left-color: ' + cfg.color + '">' + '<div class="category-header">' + '<span class="category-emoji">' + cfg.emoji + "</span>" + '<span class="category-label">' + cfg.label + "</span>" + "</div>" + '<div class="category-stats">' + '<span class="category-count">' + formatPoints(totals.count) + " events</span>" + '<span class="category-points">' + formatPoints(totals.amount) + " pts</span>" + "</div>" + "</div>";
+        return '<div class="category-card">' + '<div class="category-header">' + '<span class="category-label">' + cfg.label + "</span>" + "</div>" + '<div class="category-stats">' + '<span class="category-points">' + formatPoints(totals.amount) + " pts</span>" + '<span class="category-count">' + formatPoints(totals.count) + " events</span>" + "</div>" + "</div>";
       })
       .join("");
   }
@@ -188,14 +165,13 @@
     const tbody = document.getElementById("events-body");
 
     if (sorted.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#53535f;padding:2rem;">No events found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="table-message">No events found</td></tr>';
       return;
     }
 
     tbody.innerHTML = sorted
       .map(function (e) {
-        const emoji = EVENT_EMOJIS[e.event] || "❓";
-        return "<tr>" + '<td><span class="event-emoji">' + emoji + "</span> " + escapeHTML(e.event) + "</td>" + "<td>" + escapeHTML(e.streamer) + "</td>" + "<td>" + escapeHTML(e.account) + "</td>" + "<td>" + formatPoints(e.count) + "</td>" + '<td class="points">' + formatPoints(e.amount) + "</td>" + "</tr>";
+        return "<tr>" + "<td>" + escapeHTML(e.event) + "</td>" + "<td>" + escapeHTML(e.streamer) + "</td>" + "<td>" + escapeHTML(e.account) + "</td>" + "<td>" + formatPoints(e.count) + "</td>" + '<td class="points">' + formatPoints(e.amount) + "</td>" + "</tr>";
       })
       .join("");
   }
@@ -224,9 +200,9 @@
     document.getElementById("clear-filters").addEventListener("click", clearFilters);
 
     // Sort event listeners
-    document.querySelectorAll("#events-table th[data-sort]").forEach(function (th) {
-      th.addEventListener("click", function () {
-        handleSort(th.dataset.sort);
+    document.querySelectorAll("#events-table .th-sort").forEach(function (button) {
+      button.addEventListener("click", function () {
+        handleSort(button.closest("th").dataset.sort);
       });
     });
 
