@@ -11,6 +11,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/Guliveer/twitch-miner-go/internal/model"
 )
 
 const (
@@ -26,6 +28,7 @@ type badgeCampaign struct {
 	HasAmbiguousDrops            bool
 	Channels                     []string
 	BadgeNames                   []string
+	WatchTimes                   map[string]time.Duration
 }
 
 type flexibleStrings []string
@@ -307,6 +310,7 @@ func loadBadgeCampaigns(ctx context.Context, client *http.Client, dropsURL, badg
 				continue
 			}
 			var matches []string
+			watchTimes := make(map[string]time.Duration)
 			watchDrops := 0
 			hadAmbiguousDrop := false
 			lastUnmatchedDrop := ""
@@ -329,6 +333,9 @@ func loadBadgeCampaigns(ctx context.Context, client *http.Client, dropsURL, badg
 					lastUnmatchedDrop = drop.Name
 				}
 				matches = appendUnique(matches, rewardMatches...)
+				for _, name := range rewardMatches {
+					watchTimes[name] = max(watchTimes[name], watchRequirement(drop.Requirement))
+				}
 			}
 			if len(matches) == 0 {
 				if watchDrops > 0 && !hadAmbiguousDrop && logSkip != nil {
@@ -338,6 +345,7 @@ func loadBadgeCampaigns(ctx context.Context, client *http.Client, dropsURL, badg
 			}
 			sort.Strings(matches)
 			entry := badgeCampaign{ID: campaign.ID, Name: campaign.Name, GameName: game.Game, GameSlug: gameSlug, EndsAt: *campaign.EndsAt, AllChannels: campaign.AllChannels, HasAmbiguousDrops: hadAmbiguousDrop, Channels: campaign.Channels, BadgeNames: matches}
+			entry.WatchTimes = watchTimes
 			if campaign.StartsAt != nil {
 				entry.StartsAt = *campaign.StartsAt
 			}
@@ -388,6 +396,14 @@ func mergeBadgeCampaigns(a, b badgeCampaign) badgeCampaign {
 	merged.HasAmbiguousDrops = a.HasAmbiguousDrops || b.HasAmbiguousDrops
 	merged.Channels = appendUnique(append([]string(nil), a.Channels...), b.Channels...)
 	merged.BadgeNames = appendUniqueBadgeNames(append([]string(nil), a.BadgeNames...), b.BadgeNames...)
+	merged.WatchTimes = make(map[string]time.Duration)
+	for _, times := range []map[string]time.Duration{a.WatchTimes, b.WatchTimes} {
+		for name, duration := range times {
+			if duration > merged.WatchTimes[name] {
+				merged.WatchTimes[name] = duration
+			}
+		}
+	}
 	sort.Strings(merged.BadgeNames)
 	return merged
 }
@@ -414,14 +430,7 @@ func ownsCampaignBadge(c badgeCampaign, owned map[string]struct{}) bool {
 		return false
 	}
 	for _, reward := range c.BadgeNames {
-		ownedReward := false
-		for title := range owned {
-			if isBadgeReward(reward, c.GameName, title) {
-				ownedReward = true
-				break
-			}
-		}
-		if !ownedReward {
+		if !c.ownsBadge(reward, owned) {
 			return false
 		}
 	}
@@ -476,10 +485,125 @@ func campaignCompleted(c badgeCampaign, completed []completedCampaignSignature) 
 		if c.ID != "" && s.ID != "" && c.ID == s.ID {
 			return true
 		}
-		const endTimeTolerance = 5 * time.Second
-		if c.GameSlug == s.GameSlug && strings.EqualFold(c.Name, s.Name) && c.EndsAt.Sub(s.EndsAt) < endTimeTolerance && s.EndsAt.Sub(c.EndsAt) < endTimeTolerance {
+		if c.matchesInventory(s.GameSlug, s.Name, s.EndsAt) {
 			return true
 		}
 	}
 	return false
+}
+
+func (c badgeCampaign) matchesInventory(gameSlug, name string, end time.Time) bool {
+	const tolerance = 5 * time.Second
+	delta := c.EndsAt.Sub(end)
+	return c.GameSlug == gameSlug && strings.EqualFold(strings.TrimSpace(c.Name), strings.TrimSpace(name)) &&
+		!end.IsZero() && delta > -tolerance && delta < tolerance
+}
+
+func watchRequirement(requirement string) time.Duration {
+	remainder, ok := strings.CutPrefix(strings.ToLower(strings.TrimSpace(requirement)), "watch ")
+	if !ok {
+		return 0
+	}
+	duration, err := time.ParseDuration(strings.ReplaceAll(remainder, " ", ""))
+	if err != nil || duration < time.Minute || duration%time.Minute != 0 {
+		return 0
+	}
+	return duration
+}
+
+type badgeInventoryCampaign struct {
+	ID    string    `json:"id"`
+	Name  string    `json:"name"`
+	EndAt time.Time `json:"endAt"`
+	Game  struct {
+		Slug string `json:"slug"`
+		Name string `json:"name"`
+	} `json:"game"`
+	Drops []badgeInventoryDrop `json:"timeBasedDrops"`
+}
+
+type badgeInventoryDrop struct {
+	Name            string            `json:"name"`
+	StartAt         time.Time         `json:"startAt"`
+	EndAt           time.Time         `json:"endAt"`
+	RequiredMinutes int               `json:"requiredMinutesWatched"`
+	RequiredSubs    int               `json:"requiredSubs"`
+	Preconditions   []json.RawMessage `json:"preconditionDrops"`
+	Benefits        []struct {
+		Benefit struct {
+			Name string `json:"name"`
+		} `json:"benefit"`
+	} `json:"benefitEdges"`
+	Self *struct {
+		Minutes  int    `json:"currentMinutesWatched"`
+		Claimed  bool   `json:"isClaimed"`
+		Instance string `json:"dropInstanceID"`
+		Eligible bool   `json:"hasPreconditionsMet"`
+	} `json:"self"`
+}
+
+func (c badgeCampaign) nextReward(owned map[string]struct{}, inventory []badgeInventoryCampaign, now time.Time) model.RewardDeadline {
+	var next model.RewardDeadline
+	for _, name := range c.BadgeNames {
+		if c.ownsBadge(name, owned) {
+			continue
+		}
+		reward := c.badgeDeadline(name, inventory, now)
+		if reward.Remaining > 0 && !reward.LatestStart().Before(now) &&
+			(next.Remaining == 0 || reward.Remaining < next.Remaining ||
+				(reward.Remaining == next.Remaining && reward.EndAt.Before(next.EndAt))) {
+			next = reward
+		}
+	}
+	return next
+}
+
+func (c badgeCampaign) ownsBadge(name string, owned map[string]struct{}) bool {
+	for title := range owned {
+		if isBadgeReward(name, c.GameName, title) {
+			return true
+		}
+	}
+	return false
+}
+
+func (c badgeCampaign) badgeDeadline(name string, inventory []badgeInventoryCampaign, now time.Time) model.RewardDeadline {
+	for _, campaign := range inventory {
+		game := campaign.Game.Slug
+		if game == "" {
+			game = slugify(campaign.Game.Name)
+		}
+		if campaign.ID != c.ID && !c.matchesInventory(game, campaign.Name, campaign.EndAt) {
+			continue
+		}
+		for _, drop := range campaign.Drops {
+			for _, benefit := range drop.Benefits {
+				if isBadgeReward(benefit.Benefit.Name, c.GameName, name) {
+					return drop.deadline(c.EndsAt, now)
+				}
+			}
+		}
+	}
+	return model.RewardDeadline{EndAt: c.EndsAt, Remaining: c.WatchTimes[name]}
+}
+
+func (d badgeInventoryDrop) deadline(end, now time.Time) model.RewardDeadline {
+	if d.RequiredSubs > 0 || now.Before(d.StartAt) || d.RequiredMinutes <= 0 ||
+		(d.Self == nil && len(d.Preconditions) > 0) {
+		return model.RewardDeadline{}
+	}
+	if !d.EndAt.IsZero() && d.EndAt.Before(end) {
+		end = d.EndAt
+	}
+	remaining := d.RequiredMinutes
+	if d.Self != nil {
+		if d.Self.Claimed || d.Self.Instance != "" || !d.Self.Eligible || d.Self.Minutes < 0 || d.Self.Minutes >= remaining {
+			return model.RewardDeadline{}
+		}
+		remaining -= d.Self.Minutes
+	}
+	if remaining > int(end.Sub(now)/time.Minute) {
+		return model.RewardDeadline{}
+	}
+	return model.RewardDeadline{EndAt: end, Remaining: time.Duration(remaining) * time.Minute}
 }

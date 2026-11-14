@@ -107,6 +107,8 @@ const (
 	PriorityPreferred
 	// PriorityBadges prioritizes channels dynamically added for chat badge campaigns.
 	PriorityBadges
+	// PriorityUrgentRewards reserves one slot for a time-sensitive reward.
+	PriorityUrgentRewards
 )
 
 // String returns the string representation of a Priority.
@@ -132,6 +134,8 @@ func (p Priority) String() string {
 		return "PREFERRED"
 	case PriorityBadges:
 		return "BADGES"
+	case PriorityUrgentRewards:
+		return "URGENT_REWARDS"
 	default:
 		return "ORDER"
 	}
@@ -160,6 +164,8 @@ func ParsePriority(s string) Priority {
 		return PriorityPreferred
 	case "BADGES":
 		return PriorityBadges
+	case "URGENT_REWARDS":
+		return PriorityUrgentRewards
 	default:
 		return PriorityOrder
 	}
@@ -178,6 +184,7 @@ func AllPriorities() []Priority {
 		PriorityLowAvailabilityFirst,
 		PriorityPreferred,
 		PriorityBadges,
+		PriorityUrgentRewards,
 	}
 }
 

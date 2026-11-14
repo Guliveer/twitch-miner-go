@@ -26,14 +26,6 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		return fmt.Errorf("getting drops dashboard: %w", err)
 	}
 
-	if len(dashboardCampaigns) == 0 {
-		if !c.startupDropsLogged {
-			c.startupDropsLogged = true
-			c.logDropStatuses(ctx)
-		}
-		return nil
-	}
-
 	campaignIDs := make([]string, 0, len(dashboardCampaigns))
 	for _, raw := range dashboardCampaigns {
 		var campaignID struct {
@@ -44,29 +36,15 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		}
 	}
 
-	campaignDetails, err := c.GQL.GetDropCampaignDetailsBatch(ctx, campaignIDs, c.Auth.UserID())
-	if err != nil {
-		return fmt.Errorf("getting campaign details: %w", err)
+	var campaignDetails []json.RawMessage
+	if len(campaignIDs) > 0 {
+		campaignDetails, err = c.GQL.GetDropCampaignDetailsBatch(ctx, campaignIDs, c.Auth.UserID())
+		if err != nil {
+			return fmt.Errorf("getting campaign details: %w", err)
+		}
 	}
 
-	activeCampaigns := make([]*model.Campaign, 0, len(campaignDetails))
-	for _, raw := range campaignDetails {
-		if raw == nil {
-			continue
-		}
-		campaign, err := parseCampaign(raw)
-		if err != nil {
-			c.Log.Debug("Failed to parse campaign", "error", err)
-			continue
-		}
-		if !campaign.IsWithinTimeWindow {
-			continue
-		}
-		campaign.ClearDrops()
-		if len(campaign.Drops) > 0 {
-			activeCampaigns = append(activeCampaigns, campaign)
-		}
-	}
+	activeCampaigns := c.activeCampaigns(campaignDetails)
 
 	activeCampaigns, err = c.syncCampaignsWithInventory(ctx, activeCampaigns)
 	if err != nil {
@@ -164,6 +142,19 @@ func (c *Client) syncCampaignsWithInventory(ctx context.Context, campaigns []*mo
 
 	if inventory.DropCampaignsInProgress == nil {
 		return campaigns, nil
+	}
+
+	// The dashboard can be empty even when Twitch returns complete campaign
+	// details alongside progress in inventory. IDs still have to match the
+	// channel's own eligibility before the scheduler can use those details.
+	if len(campaigns) == 0 {
+		var details struct {
+			Campaigns []json.RawMessage `json:"dropCampaignsInProgress"`
+		}
+		if err := json.Unmarshal(inventoryData, &details); err != nil {
+			return campaigns, fmt.Errorf("parsing inventory campaign details: %w", err)
+		}
+		campaigns = c.activeCampaigns(details.Campaigns)
 	}
 
 	currentDropIDs := make(map[string]struct{})
@@ -414,6 +405,27 @@ func (c *Client) ClaimAllDropsFromInventory(ctx context.Context) error {
 	return nil
 }
 
+func (c *Client) activeCampaigns(details []json.RawMessage) []*model.Campaign {
+	campaigns := make([]*model.Campaign, 0, len(details))
+	for _, raw := range details {
+		if raw == nil {
+			continue
+		}
+		campaign, err := parseCampaign(raw)
+		if err != nil {
+			c.Log.Debug("Failed to parse campaign", "error", err)
+			continue
+		}
+		if campaign.IsWithinTimeWindow {
+			campaign.ClearDrops()
+			if len(campaign.Drops) > 0 {
+				campaigns = append(campaigns, campaign)
+			}
+		}
+	}
+	return campaigns
+}
+
 func parseCampaign(raw json.RawMessage) (*model.Campaign, error) {
 	var data struct {
 		ID      string `json:"id"`
@@ -436,6 +448,7 @@ func parseCampaign(raw json.RawMessage) (*model.Campaign, error) {
 			ID              string `json:"id"`
 			Name            string `json:"name"`
 			RequiredMinutes int    `json:"requiredMinutesWatched"`
+			RequiredSubs    int    `json:"requiredSubs"`
 			StartAt         string `json:"startAt"`
 			EndAt           string `json:"endAt"`
 			BenefitEdges    []struct {
@@ -482,6 +495,7 @@ func parseCampaign(raw json.RawMessage) (*model.Campaign, error) {
 		}
 
 		drop := model.NewDrop(timeDrop.ID, timeDrop.Name, benefits, timeDrop.RequiredMinutes, dropStart, dropEnd)
+		drop.RequiresSubscription = timeDrop.RequiredSubs > 0
 		campaign.Drops = append(campaign.Drops, drop)
 	}
 
@@ -518,7 +532,7 @@ func (c *Client) logDropStatuses(ctx context.Context) {
 				ID              string `json:"id"`
 				Name            string `json:"name"`
 				RequiredMinutes int    `json:"requiredMinutesWatched"`
-				BenefitEdges []struct {
+				BenefitEdges    []struct {
 					Benefit struct {
 						Name string `json:"name"`
 					} `json:"benefit"`

@@ -105,12 +105,21 @@ func (bw *BadgeWatcher) evaluate(ctx context.Context, add func(context.Context, 
 		bw.log.Warn("Failed to parse Drops inventory for badges", "error", err)
 		return
 	}
+	var inventory struct {
+		Campaigns []badgeInventoryCampaign `json:"dropCampaignsInProgress"`
+	}
+	if err := json.Unmarshal(raw, &inventory); err != nil {
+		bw.log.Warn("Failed to parse badge reward progress", "error", err)
+	}
+	now := time.Now()
+	rewards := make(map[string]model.RewardDeadline, len(campaigns))
 	eligible := make(map[string]badgeCampaign)
 	eligibleOrdered := make([]badgeCampaign, 0, len(campaigns))
 	for _, c := range campaigns {
-		if c.EndsAt.After(time.Now()) && !ownsCampaignBadge(c, owned) && !campaignCompleted(c, completed) {
+		if c.EndsAt.After(now) && !ownsCampaignBadge(c, owned) && !campaignCompleted(c, completed) {
 			eligible[c.ID] = c
 			eligibleOrdered = append(eligibleOrdered, c)
+			rewards[c.ID] = c.nextReward(owned, inventory.Campaigns, now)
 		}
 	}
 	sort.SliceStable(eligibleOrdered, func(i, j int) bool {
@@ -127,6 +136,9 @@ func (bw *BadgeWatcher) evaluate(ctx context.Context, add func(context.Context, 
 		streamer := findStreamer(get(), tr.username)
 		valid := eligibleNow && streamer != nil && badgeStreamerValid(streamer, campaign)
 		if valid {
+			streamer.Mu.Lock()
+			streamer.BadgeReward = rewards[id]
+			streamer.Mu.Unlock()
 			continue
 		}
 		if tr.added {
@@ -180,6 +192,7 @@ func (bw *BadgeWatcher) evaluate(ctx context.Context, add func(context.Context, 
 			existing.Mu.Lock()
 			existing.IsBadgeWatched = true
 			existing.BadgeCampaign = c.Name
+			existing.BadgeReward = rewards[id]
 			if len(candidate.campaignIDs) > 0 {
 				existing.Stream.CampaignIDs = append([]string(nil), candidate.campaignIDs...)
 			}
@@ -193,6 +206,7 @@ func (bw *BadgeWatcher) evaluate(ctx context.Context, add func(context.Context, 
 			continue
 		}
 		s := bw.badgeStreamer(ctx, candidate.stream, c, candidate.campaignIDs)
+		s.BadgeReward = rewards[id]
 		add(ctx, s)
 		bw.mu.Lock()
 		bw.tracked[id] = badgeTracked{candidate.stream.Username, true}
@@ -477,6 +491,7 @@ func unmarkBadge(streamers []*model.Streamer, username string) {
 		s.Mu.Lock()
 		s.IsBadgeWatched = false
 		s.BadgeCampaign = ""
+		s.BadgeReward = model.RewardDeadline{}
 		s.Mu.Unlock()
 	}
 }

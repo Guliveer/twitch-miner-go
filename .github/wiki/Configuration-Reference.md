@@ -190,6 +190,36 @@ category_watcher:
       drops_only: true
 ```
 
+### `URGENT_REWARDS`
+
+Opt in by adding `URGENT_REWARDS` to the `priority` list. Put it first to let a
+time-sensitive reward take precedence over normal badge, streak, and Drops
+selection. Keep the existing priorities for the remaining slots and for when no
+reward is urgent:
+
+```yaml
+priority: [URGENT_REWARDS, BADGES, STREAK, DROPS, ORDER]
+```
+
+Only one slot may be reserved by this priority. For each eligible campaign the
+miner considers the nearest unfinished watch-time reward and subtracts the
+remaining credited watch time from its deadline. It prefers the smallest
+remaining slack, between five minutes (a safety margin) and two hours. Within
+five minutes of the tightest slack, it prefers a channel already being watched,
+then a badge. Expired, unattainable, paid, and already claimable rewards do not
+get the urgent slot. Regular priorities may still select those channels.
+
+This only ranks already tracked, live, eligible channels. Discovery, the badge
+watcher limit, existing watch-slot limits, and claim settings stay unchanged.
+Progress comes from Twitch inventory, not from locally sent watch events. Badge
+rewards without matched inventory progress can use the full watch duration from
+the badge catalog as a conservative estimate. Ordinary Drops without confirmed
+inventory progress keep their normal priority until their eligibility and
+remaining time can be verified. When the Drops dashboard is empty, in-progress
+inventory campaigns can supply metadata for channels whose Twitch campaign IDs
+match. This also makes those campaigns visible to the existing campaign-based
+priorities.
+
 ### `badge_watcher`
 
 Automatically discovers active watch-time Drops whose rewards match global
