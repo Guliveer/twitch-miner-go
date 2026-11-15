@@ -14043,7 +14043,7 @@
       "file_type": "code",
       "norm_label": "clickch()",
       "source_file": "internal/tray/tray.go",
-      "source_location": "L243"
+      "source_location": "L246"
     },
     {
       "id": "internal_tray_tray_onready",
@@ -36641,7 +36641,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "internal/tray/tray.go",
-      "source_location": "L107",
+      "source_location": "L109",
       "weight": 1.0
     },
     {
@@ -36653,7 +36653,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "internal/tray/tray.go",
-      "source_location": "L113",
+      "source_location": "L116",
       "weight": 1.0
     },
     {
@@ -36665,7 +36665,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "internal/tray/tray.go",
-      "source_location": "L183",
+      "source_location": "L186",
       "weight": 1.0
     },
     {
@@ -36677,7 +36677,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "internal/tray/tray.go",
-      "source_location": "L227",
+      "source_location": "L230",
       "weight": 1.0
     },
     {
@@ -36689,7 +36689,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "internal/tray/tray.go",
-      "source_location": "L229",
+      "source_location": "L232",
       "weight": 1.0
     },
     {
@@ -53429,7 +53429,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "internal/tray/tray.go",
-      "source_location": "L243",
+      "source_location": "L246",
       "weight": 1.0
     },
     {
@@ -75877,7 +75877,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "internal/tray/tray.go",
-      "source_location": "L243",
+      "source_location": "L246",
       "weight": 1.0
     },
     {
@@ -89710,7 +89710,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "internal/tray/tray.go",
-      "source_location": "L136",
+      "source_location": "L139",
       "weight": 1.0
     },
     {
@@ -89722,7 +89722,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "internal/tray/tray.go",
-      "source_location": "L186",
+      "source_location": "L189",
       "weight": 1.0
     },
     {
@@ -91503,5 +91503,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f9de2799e5c4de0a5a2e80578565ae4e74fa856e"
+  "built_at_commit": "151a711572c18e37414cd81689f9863999e1b08b"
 }

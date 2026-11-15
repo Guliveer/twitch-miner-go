@@ -816,15 +816,15 @@
     "semantic_hash": ""
   },
   "internal/server/static/index.html": {
-    "mtime": 1794746069.202528,
-    "seen": 1794746171.4133584,
-    "ast_hash": "6481342dab0005e032e434399d37f997",
+    "mtime": 1794746378.1214201,
+    "seen": 1794746395.9818752,
+    "ast_hash": "d94ced3f00c1ee8e4f775240bd09f445",
     "semantic_hash": ""
   },
   "internal/server/static/logs.html": {
-    "mtime": 1794746069.202528,
-    "seen": 1794746171.4133604,
-    "ast_hash": "d71c4e9311ef1adeae790f446b892358",
+    "mtime": 1794746378.6291156,
+    "seen": 1794746395.9818761,
+    "ast_hash": "b9038c0e75edd520b64f1d5f3a693ec6",
     "semantic_hash": ""
   },
   ".opencode/plugins/graphify.js": {
@@ -1239,9 +1239,9 @@
     "semantic_hash": ""
   },
   "internal/tray/tray.go": {
-    "mtime": 1794746069.2042677,
-    "seen": 1794746171.4040954,
-    "ast_hash": "3d669a168cdac0091825f73c6afa328e",
+    "mtime": 1794746377.618003,
+    "seen": 1794746395.972739,
+    "ast_hash": "f5c863a9c9ac739998719bcba1b913d1",
     "semantic_hash": ""
   },
   "internal/tray/tray_console_other.go": {

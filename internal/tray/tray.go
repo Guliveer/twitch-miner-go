@@ -100,12 +100,15 @@ func onReady(opts Options) {
 	if icon != nil {
 		systray.SetIcon(icon)
 	}
-	if opts.Title != "" {
-		systray.SetTitle(opts.Title)
-		systray.SetTooltip(opts.Title)
-	} else {
-		systray.SetTooltip("twitch-miner-go " + version.Label())
+	// The version rides along in the title and tooltip so a bug report can
+	// name the build the user actually runs.
+	title := opts.Title
+	if title == "" {
+		title = "twitch-miner-go"
 	}
+	title += " " + version.Label()
+	systray.SetTitle(title)
+	systray.SetTooltip(title)
 
 	// Left-click on the icon opens the dashboard.
 	systray.SetOnTapped(func() {
@@ -164,8 +167,8 @@ func onReady(opts Options) {
 	}
 
 	systray.AddSeparator()
-	mReportBug := systray.AddMenuItem("Report a Bug", "Open the bug report form on GitHub")
-	mRequestFeature := systray.AddMenuItem("Request a Feature", "Open the feature request form on GitHub")
+	mReportBug := systray.AddMenuItem("Report bug", "Open the bug report form on GitHub")
+	mRequestFeature := systray.AddMenuItem("Request new feature", "Open the feature request form on GitHub")
 
 	systray.AddSeparator()
 	mExit := systray.AddMenuItem("Exit", "Stop twitch-miner-go")
