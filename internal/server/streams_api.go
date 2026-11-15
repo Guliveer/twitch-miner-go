@@ -137,11 +137,11 @@ type streamInfo struct {
 }
 
 type campaignInfo struct {
-	Game     string     `json:"game,omitempty"`
-	Name     string     `json:"name,omitempty"`
-	Status   string     `json:"status,omitempty"`
-	EndAt    string     `json:"end_at,omitempty"`
-	Drops    []dropInfo `json:"drops,omitempty"`
+	Game   string     `json:"game,omitempty"`
+	Name   string     `json:"name,omitempty"`
+	Status string     `json:"status,omitempty"`
+	EndAt  string     `json:"end_at,omitempty"`
+	Drops  []dropInfo `json:"drops,omitempty"`
 }
 
 type dropInfo struct {
@@ -288,6 +288,26 @@ func (s *AnalyticsServer) handleAuthStatus(w http.ResponseWriter, r *http.Reques
 	}
 
 	writeJSON(w, http.StatusOK, result)
+}
+
+// handleAuthStatuses answers the batched form of handleAuthStatus, so a dashboard
+// showing many accounts can poll once per interval instead of once per account.
+func (s *AnalyticsServer) handleAuthStatuses(w http.ResponseWriter, _ *http.Request) {
+	s.mu.RLock()
+	fn := s.authStatusListFunc
+	s.mu.RUnlock()
+
+	if fn == nil {
+		writeJSON(w, http.StatusOK, map[string]any{})
+		return
+	}
+
+	statuses := fn()
+	if statuses == nil {
+		statuses = map[string]any{}
+	}
+
+	writeJSON(w, http.StatusOK, statuses)
 }
 
 func (s *AnalyticsServer) handleStreamers(w http.ResponseWriter, r *http.Request) {

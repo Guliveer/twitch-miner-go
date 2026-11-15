@@ -414,6 +414,18 @@ func setupAnalyticsServer(addr string, rootLog *logger.Logger, mgr *managedminer
 		return nil
 	})
 
+	srv.SetAuthStatusListFunc(func() map[string]any {
+		statuses := make(map[string]any)
+		for _, e := range mgr.Entries() {
+			status := e.Miner.DeviceCodeStatus()
+			if status == nil {
+				continue
+			}
+			statuses[strings.ToLower(e.Miner.Username())] = status
+		}
+		return statuses
+	})
+
 	return srv
 }
 
