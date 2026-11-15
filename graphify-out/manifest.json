@@ -1239,9 +1239,9 @@
     "semantic_hash": ""
   },
   "internal/tray/tray.go": {
-    "mtime": 1794746377.618003,
-    "seen": 1794746395.972739,
-    "ast_hash": "f5c863a9c9ac739998719bcba1b913d1",
+    "mtime": 1794747150.15166,
+    "seen": 1794747171.9918785,
+    "ast_hash": "b4f37d77e7faf80ec1d2ffd594718b61",
     "semantic_hash": ""
   },
   "internal/tray/tray_console_other.go": {

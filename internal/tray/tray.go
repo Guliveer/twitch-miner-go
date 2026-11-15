@@ -100,15 +100,7 @@ func onReady(opts Options) {
 	if icon != nil {
 		systray.SetIcon(icon)
 	}
-	// The version rides along in the title and tooltip so a bug report can
-	// name the build the user actually runs.
-	title := opts.Title
-	if title == "" {
-		title = "twitch-miner-go"
-	}
-	title += " " + version.Label()
-	systray.SetTitle(title)
-	systray.SetTooltip(title)
+	setIconTitle(opts.Title)
 
 	// Left-click on the icon opens the dashboard.
 	systray.SetOnTapped(func() {
@@ -239,6 +231,17 @@ func onReady(opts Options) {
 			}
 		}
 	}()
+}
+
+// setIconTitle shows the application name together with the running version,
+// so a bug report can name the build the user actually runs.
+func setIconTitle(title string) {
+	if title == "" {
+		title = "twitch-miner-go"
+	}
+	title += " " + version.Label()
+	systray.SetTitle(title)
+	systray.SetTooltip(title)
 }
 
 // clickCh returns the item's click channel, or a nil channel (which never
