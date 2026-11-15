@@ -239,6 +239,8 @@ priority:
 
 # Optional: discover active Drops whose reward matches a global Twitch chat badge.
 # BADGES must be present in priority to guarantee a badge channel gets a watch slot.
+# Optional: add URGENT_REWARDS above BADGES to prioritize one time-sensitive
+# Drop or badge. See URGENT_REWARDS in the wiki Configuration Reference.
 # The two catalogs are maintained by the Twitch-Channel-Points-Miner-v3 project,
 # so discovery pauses safely if either catalog is unavailable or malformed.
 badge_watcher:
