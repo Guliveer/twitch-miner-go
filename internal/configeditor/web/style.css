@@ -219,6 +219,35 @@ header {
   white-space: nowrap;
 }
 
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  border-top: var(--dp-border-hairline) solid var(--dp-color-hairline);
+  color: var(--dp-color-meta);
+  font-family: var(--dp-typography-mono);
+  font-size: var(--dp-type-label);
+  letter-spacing: var(--dp-tracking-label);
+  text-transform: uppercase;
+}
+
+.sidebar-footer .app-version {
+  text-transform: none;
+}
+
+.sidebar-footer a {
+  color: var(--dp-color-read);
+  text-decoration: none;
+  transition: color var(--dp-motion-duration) var(--dp-motion-ease);
+}
+
+.sidebar-footer a:hover {
+  color: var(--dp-color-bright);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .loading-placeholder {
   padding: 24px 16px;
   color: var(--dp-color-meta);

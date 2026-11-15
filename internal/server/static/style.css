@@ -709,6 +709,18 @@ footer a:hover {
   text-underline-offset: 3px;
 }
 
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.footer-version {
+  color: var(--dp-color-meta);
+  text-transform: none;
+}
+
 /* ─── Empty / loading states ──────────────────────────────────────────── */
 
 .loading {

@@ -20,7 +20,9 @@ import (
 
 	"fyne.io/systray"
 
+	"github.com/Guliveer/twitch-miner-go/internal/feedback"
 	"github.com/Guliveer/twitch-miner-go/internal/utils"
+	"github.com/Guliveer/twitch-miner-go/internal/version"
 )
 
 //go:embed icon.png icon.ico
@@ -102,7 +104,7 @@ func onReady(opts Options) {
 		systray.SetTitle(opts.Title)
 		systray.SetTooltip(opts.Title)
 	} else {
-		systray.SetTooltip("twitch-miner-go")
+		systray.SetTooltip("twitch-miner-go " + version.Label())
 	}
 
 	// Left-click on the icon opens the dashboard.
@@ -162,6 +164,10 @@ func onReady(opts Options) {
 	}
 
 	systray.AddSeparator()
+	mReportBug := systray.AddMenuItem("Report a Bug", "Open the bug report form on GitHub")
+	mRequestFeature := systray.AddMenuItem("Request a Feature", "Open the feature request form on GitHub")
+
+	systray.AddSeparator()
 	mExit := systray.AddMenuItem("Exit", "Stop twitch-miner-go")
 
 	logf := opts.OnLog
@@ -217,6 +223,10 @@ func onReady(opts Options) {
 					mHideConsole.SetTitle("Show Terminal")
 					mHideConsole.SetTooltip("Show the terminal window")
 				}
+			case <-mReportBug.ClickedCh:
+				_ = utils.OpenBrowser(feedback.BugReportURL())
+			case <-mRequestFeature.ClickedCh:
+				_ = utils.OpenBrowser(feedback.FeatureRequestURL())
 			case <-mExit.ClickedCh:
 				systray.Quit()
 				if opts.OnExit != nil {

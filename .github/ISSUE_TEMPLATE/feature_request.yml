@@ -12,6 +12,15 @@ body:
         - label: This feature is not already present in the [latest release](https://github.com/Guliveer/twitch-miner-go/releases/latest)
           required: true
 
+  - type: input
+    id: version
+    attributes:
+      label: Version (optional)
+      description: Run `./twitch-miner-go -version` or check the startup log line.
+      placeholder: "1.16.5"
+    validations:
+      required: false
+
   - type: textarea
     id: problem
     attributes:

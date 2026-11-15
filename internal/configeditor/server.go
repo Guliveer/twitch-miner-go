@@ -98,6 +98,11 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		s.setCORSHeaders(w)
 		w.Header().Set("Cache-Control", "no-store")
+		if r.URL.Path == "/" || r.URL.Path == "/index.html" {
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			_, _ = w.Write(indexHTML)
+			return
+		}
 		staticFS.ServeHTTP(w, r)
 	})
 }
