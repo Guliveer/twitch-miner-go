@@ -61,6 +61,15 @@ type AnalyticsServer struct {
 	accountStore   store.Store
 }
 
+// The dashboard polls /api/auth-status once per account card every 5s, so a
+// 16-account setup already sends roughly 192 requests per minute from a single
+// client IP. The limit stays clear of that legitimate load while still cutting
+// off a runaway client.
+const (
+	dashboardRateLimit       = 600
+	dashboardRateLimitPeriod = time.Minute
+)
+
 // NewAnalyticsServer creates a new AnalyticsServer bound to the given address.
 // If auth or apiKey is provided, all endpoints (except /health and /static)
 // require either HTTP Basic Auth (browser users) or an X-API-Key header (machine clients).
@@ -124,7 +133,7 @@ func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth, ap
 		handler = withAuth(auth, apiKey, mux)
 	}
 
-	limiter := newRateLimiter(100, time.Minute)
+	limiter := newRateLimiter(dashboardRateLimit, dashboardRateLimitPeriod)
 	handler = withRateLimit(limiter, handler)
 	handler = withRequestID(handler)
 
