@@ -108,11 +108,12 @@ func (rw *responseWriter) WriteHeader(code int) {
 }
 
 type rateLimiter struct {
-	clients map[string]*tokenBucket
-	mu      sync.Mutex
-	now     func() time.Time
-	rate    int
-	period  time.Duration
+	clients   map[string]*tokenBucket
+	mu        sync.Mutex
+	now       func() time.Time
+	lastSweep time.Time
+	rate      int
+	period    time.Duration
 }
 
 type tokenBucket struct {
@@ -121,6 +122,13 @@ type tokenBucket struct {
 }
 
 func newRateLimiter(rps int, period time.Duration) *rateLimiter {
+	if rps <= 0 {
+		panic("server: rate limiter rate must be positive")
+	}
+	if period <= 0 {
+		panic("server: rate limiter period must be positive")
+	}
+
 	return &rateLimiter{
 		clients: make(map[string]*tokenBucket),
 		now:     time.Now,
@@ -134,6 +142,8 @@ func (rl *rateLimiter) allow(key string) bool {
 	defer rl.mu.Unlock()
 
 	now := rl.now()
+	rl.evictIdleLocked(now)
+
 	bucket, exists := rl.clients[key]
 	if !exists {
 		rl.clients[key] = &tokenBucket{tokens: rl.rate - 1, lastTime: now}
@@ -158,6 +168,22 @@ func (rl *rateLimiter) allow(key string) bool {
 	}
 	bucket.tokens--
 	return true
+}
+
+// A bucket that has been idle for a full period is refilled to its cap, so
+// dropping it is equivalent to keeping it and stops the map from growing with
+// every client address that ever connected.
+func (rl *rateLimiter) evictIdleLocked(now time.Time) {
+	if !rl.lastSweep.IsZero() && now.Sub(rl.lastSweep) < rl.period {
+		return
+	}
+	rl.lastSweep = now
+
+	for key, bucket := range rl.clients {
+		if now.Sub(bucket.lastTime) >= rl.period {
+			delete(rl.clients, key)
+		}
+	}
 }
 
 func withRateLimit(limiter *rateLimiter, next http.Handler) http.Handler {
