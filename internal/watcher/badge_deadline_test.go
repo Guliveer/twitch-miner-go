@@ -42,6 +42,23 @@ func TestBadgeWatcherRefreshesDeadlineFromInventory(t *testing.T) {
 	}
 }
 
+func TestBadgeWatcherSkipsPollWithMalformedProgress(t *testing.T) {
+	t.Parallel()
+
+	campaign := activeBadgeCampaign("catalog-id", "Game One", "game-one", "Badge One")
+	campaign.WatchTimes = map[string]time.Duration{"Badge One": 30 * time.Minute}
+	client := &stubBadgeGQL{
+		raw: json.RawMessage(`{"dropCampaignsInProgress":[{"endAt":"invalid"}]}`),
+		streams: map[string][]gql.TopStream{
+			"game-one": {{Username: "one", ChannelID: "1", GameName: "Game One"}},
+		},
+	}
+	bw := testBadgeWatcher(t, client, 1, campaign)
+	bw.evaluate(context.Background(), func(context.Context, *model.Streamer) {
+		t.Error("added a streamer using catalog estimates after an inventory parse error")
+	}, func(string, string) {}, func() []*model.Streamer { return nil })
+}
+
 func TestBadgeWatchRequirement(t *testing.T) {
 	t.Parallel()
 	for input, want := range map[string]time.Duration{
@@ -54,5 +71,30 @@ func TestBadgeWatchRequirement(t *testing.T) {
 		if got := watchRequirement(input); got != want {
 			t.Errorf("%q = %s, want %s", input, got, want)
 		}
+	}
+}
+
+func TestBadgeCampaignNextRewardUsesTightestSlack(t *testing.T) {
+	t.Parallel()
+
+	now := time.Date(2026, 11, 15, 12, 0, 0, 0, time.UTC)
+	campaign := badgeCampaign{
+		ID:         "campaign",
+		EndsAt:     now.Add(3 * time.Hour),
+		BadgeNames: []string{"Short Badge", "Urgent Badge"},
+	}
+	var inventory []badgeInventoryCampaign
+	if err := json.Unmarshal([]byte(`[{"id":"campaign","timeBasedDrops":[
+		{"endAt":"2026-11-15T15:00:00Z","requiredMinutesWatched":30,"benefitEdges":[{"benefit":{"name":"Short Badge"}}]},
+		{"endAt":"2026-11-15T13:50:00Z","requiredMinutesWatched":100,"benefitEdges":[{"benefit":{"name":"Urgent Badge"}}]}
+	]}]`), &inventory); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := campaign.nextReward(nil, inventory, now).LatestStart(), now.Add(10*time.Minute); !got.Equal(want) {
+		t.Fatalf("latest start = %s; want %s for the urgent longer badge", got, want)
+	}
+	inventory[0].Drops[1].RequiredMinutes = 106
+	if got, want := campaign.nextReward(nil, inventory, now).LatestStart(), now.Add(150*time.Minute); !got.Equal(want) {
+		t.Fatalf("latest start = %s; want %s when the urgent badge misses the safety margin", got, want)
 	}
 }

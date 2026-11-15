@@ -9,7 +9,6 @@ import (
 
 const (
 	urgentRewardWindow = 2 * time.Hour
-	rewardSafetyMargin = 5 * time.Minute
 	rewardSwitchMargin = 5 * time.Minute
 )
 
@@ -90,15 +89,14 @@ func streamerRewardStart(s *model.Streamer, now time.Time) (time.Time, bool) {
 }
 
 func campaignRewardStart(c *model.Campaign, now time.Time) time.Time {
-	var next model.RewardDeadline
+	var earliest time.Time
 	for _, drop := range c.Drops {
-		r := availableDropDeadline(c.EndAt, drop, now)
-		if r.Remaining > 0 && (next.Remaining == 0 || r.Remaining < next.Remaining ||
-			(r.Remaining == next.Remaining && r.EndAt.Before(next.EndAt))) {
-			next = r
+		start := urgentStart(availableDropDeadline(c.EndAt, drop, now), now)
+		if !start.IsZero() && (earliest.IsZero() || start.Before(earliest)) {
+			earliest = start
 		}
 	}
-	return urgentStart(next, now)
+	return earliest
 }
 
 func availableDropDeadline(campaignEnd time.Time, d *model.Drop, now time.Time) model.RewardDeadline {
@@ -125,7 +123,7 @@ func urgentStart(reward model.RewardDeadline, now time.Time) time.Time {
 	}
 	start := reward.LatestStart()
 	slack := start.Sub(now)
-	if slack < rewardSafetyMargin || slack > urgentRewardWindow {
+	if slack < model.RewardDeadlineSafetyMargin || slack > urgentRewardWindow {
 		return time.Time{}
 	}
 	return start

@@ -349,12 +349,14 @@ func selectWatchSetAt(streamers []*model.Streamer, opts WatchOptions, now time.T
 	}
 
 	urgentEvaluated := false
+	// Leave the only slot available to STREAK while the watch set is narrowed.
+	allowUrgentReward := !streakHarvest || maxWatch > 1
 	for _, priority := range opts.Priorities {
 		if len(watching) >= maxWatch {
 			break
 		}
 		if priority == model.PriorityUrgentRewards {
-			if !urgentEvaluated {
+			if allowUrgentReward && !urgentEvaluated {
 				applyUrgentReward(streamers, onlineIndices, watching, add, opts.PreviouslyWatched, now)
 				urgentEvaluated = true
 			}

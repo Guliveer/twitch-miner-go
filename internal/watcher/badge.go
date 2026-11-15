@@ -110,6 +110,7 @@ func (bw *BadgeWatcher) evaluate(ctx context.Context, add func(context.Context, 
 	}
 	if err := json.Unmarshal(raw, &inventory); err != nil {
 		bw.log.Warn("Failed to parse badge reward progress", "error", err)
+		return
 	}
 	now := time.Now()
 	rewards := make(map[string]model.RewardDeadline, len(campaigns))

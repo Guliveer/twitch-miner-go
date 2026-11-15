@@ -549,9 +549,9 @@ func (c badgeCampaign) nextReward(owned map[string]struct{}, inventory []badgeIn
 			continue
 		}
 		reward := c.badgeDeadline(name, inventory, now)
-		if reward.Remaining > 0 && !reward.LatestStart().Before(now) &&
-			(next.Remaining == 0 || reward.Remaining < next.Remaining ||
-				(reward.Remaining == next.Remaining && reward.EndAt.Before(next.EndAt))) {
+		start := reward.LatestStart()
+		if reward.Remaining > 0 && start.Sub(now) >= model.RewardDeadlineSafetyMargin &&
+			(next.Remaining == 0 || start.Before(next.LatestStart())) {
 			next = reward
 		}
 	}

@@ -2,6 +2,7 @@ package miner
 
 import (
 	"context"
+	"maps"
 	"math/rand/v2"
 	"runtime"
 	"time"
@@ -16,7 +17,7 @@ import (
 // code (tests, the DB path) may leave them nil, so each falls back.
 func (m *Miner) watchOptions() twitch.WatchOptions {
 	m.lastWatchingMu.Lock()
-	previouslyWatched := m.lastWatching
+	previouslyWatched := maps.Clone(m.lastWatching)
 	m.lastWatchingMu.Unlock()
 	opts := twitch.WatchOptions{
 		Priorities:        m.priorities,

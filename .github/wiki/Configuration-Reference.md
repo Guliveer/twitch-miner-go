@@ -201,8 +201,11 @@ reward is urgent:
 priority: [URGENT_REWARDS, BADGES, STREAK, DROPS, ORDER]
 ```
 
-Only one slot may be reserved by this priority. For each eligible campaign the
-miner considers the nearest unfinished watch-time reward and subtracts the
+This priority can reserve one slot. If a streak is pending and
+`streak_watch_streams` is set to 1, it leaves that slot available to the other
+priorities. Keep `STREAK` ahead of priorities that could fill it.
+
+For each eligible, unfinished watch-time reward, the miner subtracts the
 remaining credited watch time from its deadline. It prefers the smallest
 remaining slack, between five minutes (a safety margin) and two hours. Within
 five minutes of the tightest slack, it prefers a channel already being watched,

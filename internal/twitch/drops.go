@@ -51,6 +51,34 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		c.Log.Warn("Failed to sync campaigns with inventory", "error", err)
 	}
 
+	if len(activeCampaigns) > 0 {
+		c.prefetchCampaignIDs(ctx, streamers)
+	}
+	for _, streamer := range streamers {
+		streamer.Mu.Lock()
+		if streamer.Settings != nil && streamer.Settings.ClaimDrops {
+			var matchingCampaigns []model.Campaign
+			for _, campaign := range activeCampaigns {
+				if len(campaign.Drops) > 0 && campaignMatchesStreamer(campaign, streamer) {
+					matchingCampaigns = append(matchingCampaigns, *campaign)
+				}
+			}
+			streamer.Stream.Campaigns = matchingCampaigns
+		}
+		streamer.Mu.Unlock()
+	}
+
+	if !c.startupDropsLogged {
+		c.startupDropsLogged = true
+		c.logDropStatuses(ctx)
+	} else {
+		c.logUpdatedDropProgress(ctx, streamers)
+	}
+
+	return nil
+}
+
+func (c *Client) prefetchCampaignIDs(ctx context.Context, streamers []*model.Streamer) {
 	// Pre-populate CampaignIDs for streamers with ClaimDrops but no CampaignIDs yet.
 	// campaignMatchesStreamer requires CampaignIDs, which are normally set by
 	// updateStream() during the minute-watched loop. At startup updateStream()
@@ -84,29 +112,6 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		}(streamer, channelID)
 	}
 	campaignIDWg.Wait()
-
-	for _, streamer := range streamers {
-		streamer.Mu.Lock()
-		if streamer.Settings != nil && streamer.Settings.ClaimDrops {
-			var matchingCampaigns []model.Campaign
-			for _, campaign := range activeCampaigns {
-				if len(campaign.Drops) > 0 && campaignMatchesStreamer(campaign, streamer) {
-					matchingCampaigns = append(matchingCampaigns, *campaign)
-				}
-			}
-			streamer.Stream.Campaigns = matchingCampaigns
-		}
-		streamer.Mu.Unlock()
-	}
-
-	if !c.startupDropsLogged {
-		c.startupDropsLogged = true
-		c.logDropStatuses(ctx)
-	} else {
-		c.logUpdatedDropProgress(ctx, streamers)
-	}
-
-	return nil
 }
 
 func (c *Client) syncCampaignsWithInventory(ctx context.Context, campaigns []*model.Campaign) ([]*model.Campaign, error) {
@@ -141,6 +146,9 @@ func (c *Client) syncCampaignsWithInventory(ctx context.Context, campaigns []*mo
 	}
 
 	if inventory.DropCampaignsInProgress == nil {
+		return campaigns, nil
+	}
+	if len(campaigns) == 0 && len(inventory.DropCampaignsInProgress) == 0 {
 		return campaigns, nil
 	}
 

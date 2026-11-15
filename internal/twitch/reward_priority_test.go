@@ -106,32 +106,49 @@ func TestUrgentRewardRejectsUnusableRewards(t *testing.T) {
 	}
 }
 
-func TestUrgentRewardKeepsStreakWidth(t *testing.T) {
+func TestUrgentRewardLeavesSingleSlotForPendingStreak(t *testing.T) {
 	t.Parallel()
 
 	now := time.Now()
 	badge := deadlineBadgeStreamer(now, time.Hour, 30*time.Minute)
+	badge.Settings.WatchStreak = false
+	streak := streakPending("streak", 1)
+	streamers := []*model.Streamer{streak, badge}
 	opts := rotationOptions()
 	opts.StreakWatch = 1
 	opts.Priorities = []model.Priority{model.PriorityUrgentRewards, model.PriorityStreak, model.PriorityOrder}
-	got := selectWatchSetAt([]*model.Streamer{streakPending("streak", 1), badge}, opts, now)
-	if !got.StreakHarvest || got.Width != 1 || !slices.Equal(usernames(got), []string{"badge"}) {
-		t.Fatalf("selection = %+v (%v); want one badge slot", got, usernames(got))
+	got := selectWatchSetAt(streamers, opts, now)
+	if !got.StreakHarvest || got.Width != 1 || !slices.Equal(usernames(got), []string{"streak"}) {
+		t.Fatalf("selection = %+v (%v); want one streak slot", got, usernames(got))
+	}
+	opts.StreakWatch = 2
+	got = selectWatchSetAt(streamers, opts, now)
+	if !got.StreakHarvest || got.Width != 2 || !slices.Equal(usernames(got), []string{"badge", "streak"}) {
+		t.Fatalf("selection = %+v (%v); want both badge and streak slots", got, usernames(got))
+	}
+	opts.StreakWatch = 1
+	streak.Stream.MinuteWatched = opts.StreakMinutes
+	got = selectWatchSetAt(streamers, opts, now)
+	if got.StreakHarvest || got.Width != opts.MaxWatch || !slices.Equal(usernames(got), []string{"badge", "streak"}) {
+		t.Fatalf("selection = %+v (%v); want urgency restored after streak harvest", got, usernames(got))
 	}
 }
 
-func TestUrgentRewardUsesNearestTierAndEarlierDeadline(t *testing.T) {
+func TestUrgentRewardUsesTightestSlackAmongEligibleDrops(t *testing.T) {
 	t.Parallel()
 
 	now := time.Now()
 	s := deadlineDropStreamer("drop", now, 4*time.Hour, 60, 0)
 	c := &s.Stream.Campaigns[0]
-	later := model.NewDrop("later", "Later tier", nil, 220, now.Add(-time.Hour), c.EndAt)
+	later := model.NewDrop("later", "Later tier", nil, 100, now.Add(-time.Hour), now.Add(110*time.Minute))
 	later.Update(true, 0, "", false)
 	c.Drops = append(c.Drops, later)
-	// The higher tier is urgent, but the nearer reward has three hours of slack.
+	if got, want := campaignRewardStart(c, now), now.Add(10*time.Minute); !got.Equal(want) {
+		t.Fatalf("latest start = %s; want %s for the urgent longer reward", got, want)
+	}
+	later.Update(false, 0, "", false)
 	if got := campaignRewardStart(c, now); !got.IsZero() {
-		t.Fatalf("unexpected urgent higher tier: %s", got)
+		t.Fatalf("unexpected urgent locked tier: %s", got)
 	}
 	c.Drops[0].EndAt = now.Add(90 * time.Minute)
 	if got, want := campaignRewardStart(c, now), now.Add(30*time.Minute); !got.Equal(want) {
