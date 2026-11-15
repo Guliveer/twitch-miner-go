@@ -277,6 +277,8 @@ type WatchOptions struct {
 	StreakMinutes float64
 	// Preferred lists channel logins for the PREFERRED priority, in order.
 	Preferred []string
+	// PreviouslyWatched is the immutable snapshot from the last watch tick.
+	PreviouslyWatched map[string]bool
 }
 
 // WatchSet is the outcome of a selection pass.
@@ -309,7 +311,10 @@ func SelectStreamersToWatch(streamers []*model.Streamer, priorities []model.Prio
 // its slot until the streak arrives or StreakMinutes elapse, then gives way to
 // the next. Once nothing is pending the set widens back to MaxWatch.
 func SelectWatchSet(streamers []*model.Streamer, opts WatchOptions) WatchSet {
-	now := time.Now()
+	return selectWatchSetAt(streamers, opts, time.Now())
+}
+
+func selectWatchSetAt(streamers []*model.Streamer, opts WatchOptions, now time.Time) WatchSet {
 	onlineIndices := collectOnlineIndices(streamers, now)
 	if len(onlineIndices) == 0 {
 		return WatchSet{}
@@ -343,9 +348,19 @@ func SelectWatchSet(streamers []*model.Streamer, opts WatchOptions) WatchSet {
 		return true
 	}
 
+	urgentEvaluated := false
+	// Leave the only slot available to STREAK while the watch set is narrowed.
+	allowUrgentReward := !streakHarvest || maxWatch > 1
 	for _, priority := range opts.Priorities {
 		if len(watching) >= maxWatch {
 			break
+		}
+		if priority == model.PriorityUrgentRewards {
+			if allowUrgentReward && !urgentEvaluated {
+				applyUrgentReward(streamers, onlineIndices, watching, add, opts.PreviouslyWatched, now)
+				urgentEvaluated = true
+			}
+			continue
 		}
 		applyPriority(priority, streamers, onlineIndices, watching, maxWatch, add, opts)
 	}

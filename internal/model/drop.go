@@ -10,10 +10,11 @@ import (
 
 // Drop represents a single time-based drop within a campaign.
 type Drop struct {
-	ID              string `json:"id"`
-	Name            string `json:"name"`
-	Benefit         string `json:"benefit"`
-	MinutesRequired int    `json:"minutes_required"`
+	ID                   string `json:"id"`
+	Name                 string `json:"name"`
+	Benefit              string `json:"benefit"`
+	MinutesRequired      int    `json:"minutes_required"`
+	RequiresSubscription bool   `json:"-"`
 
 	HasPreconditionsMet   *bool  `json:"has_preconditions_met,omitempty"`
 	CurrentMinutesWatched int    `json:"current_minutes_watched"`

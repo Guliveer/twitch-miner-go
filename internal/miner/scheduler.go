@@ -2,6 +2,7 @@ package miner
 
 import (
 	"context"
+	"maps"
 	"math/rand/v2"
 	"runtime"
 	"time"
@@ -15,12 +16,16 @@ import (
 // Pointer fields are filled in by applyDefaults, but a config assembled in
 // code (tests, the DB path) may leave them nil, so each falls back.
 func (m *Miner) watchOptions() twitch.WatchOptions {
+	m.lastWatchingMu.Lock()
+	previouslyWatched := maps.Clone(m.lastWatching)
+	m.lastWatchingMu.Unlock()
 	opts := twitch.WatchOptions{
-		Priorities:    m.priorities,
-		MaxWatch:      constants.MaxWatchStreams,
-		StreakWatch:   constants.StreakWatchStreams,
-		StreakMinutes: constants.WatchStreakMinutes,
-		Preferred:     m.cfg.PreferredStreamers,
+		Priorities:        m.priorities,
+		MaxWatch:          constants.MaxWatchStreams,
+		StreakWatch:       constants.StreakWatchStreams,
+		StreakMinutes:     constants.WatchStreakMinutes,
+		Preferred:         m.cfg.PreferredStreamers,
+		PreviouslyWatched: previouslyWatched,
 	}
 
 	if m.cfg.MaxWatchStreams != nil {

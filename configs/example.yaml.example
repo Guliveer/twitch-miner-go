@@ -35,6 +35,7 @@ watch_streak_minutes: 10
 
 # Watch priority evaluated in order, first match wins
 priority:
+  # - URGENT_REWARDS # Optional: reserve one slot for a feasible, time-sensitive reward.
   - BADGES
   - STREAK
   - PREFERRED
