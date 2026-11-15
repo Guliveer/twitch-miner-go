@@ -33,6 +33,10 @@ type DebugSnapshotFunc func() any
 // username, or nil if the miner is not found or has no pending flow.
 type AuthStatusFunc func(username string) any
 
+// AuthStatusListFunc returns the pending device code auth status of every miner
+// with an active flow, keyed by lowercase username.
+type AuthStatusListFunc func() map[string]any
+
 // MinerCountFunc returns the number of miners the manager currently runs.
 type MinerCountFunc func() int
 
@@ -51,15 +55,25 @@ type AnalyticsServer struct {
 	auth   *DashboardAuth
 	apiKey string
 
-	mu             sync.RWMutex
-	streamers      []*model.Streamer
-	streamerFunc   StreamerFunc
-	notifyTestFunc NotifyTestFunc
-	debugFunc      DebugSnapshotFunc
-	authStatusFunc AuthStatusFunc
-	minerCountFunc MinerCountFunc
-	accountStore   store.Store
+	mu                 sync.RWMutex
+	streamers          []*model.Streamer
+	streamerFunc       StreamerFunc
+	notifyTestFunc     NotifyTestFunc
+	debugFunc          DebugSnapshotFunc
+	authStatusFunc     AuthStatusFunc
+	authStatusListFunc AuthStatusListFunc
+	minerCountFunc     MinerCountFunc
+	accountStore       store.Store
 }
+
+// The dashboard polls /api/auth-status once per account card every 5s, so a
+// 16-account setup already sends roughly 192 requests per minute from a single
+// client IP. The limit stays clear of that legitimate load while still cutting
+// off a runaway client.
+const (
+	dashboardRateLimit       = 600
+	dashboardRateLimitPeriod = time.Minute
+)
 
 // NewAnalyticsServer creates a new AnalyticsServer bound to the given address.
 // If auth or apiKey is provided, all endpoints (except /health and /static)
@@ -86,6 +100,7 @@ func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth, ap
 
 	mux.HandleFunc("POST /api/test-notification", s.handleTestNotification)
 
+	mux.HandleFunc("GET /api/auth-status", s.handleAuthStatuses)
 	mux.HandleFunc("GET /api/auth-status/{username}", s.handleAuthStatus)
 
 	mux.HandleFunc("GET /api/accounts", s.handleListAccounts)
@@ -124,7 +139,7 @@ func NewAnalyticsServer(addr string, log *logger.Logger, auth *DashboardAuth, ap
 		handler = withAuth(auth, apiKey, mux)
 	}
 
-	limiter := newRateLimiter(100, time.Minute)
+	limiter := newRateLimiter(dashboardRateLimit, dashboardRateLimitPeriod)
 	handler = withRateLimit(limiter, handler)
 	handler = withRequestID(handler)
 
@@ -170,6 +185,14 @@ func (s *AnalyticsServer) SetDebugFunc(fn DebugSnapshotFunc) {
 func (s *AnalyticsServer) SetAuthStatusFunc(fn AuthStatusFunc) {
 	s.mu.Lock()
 	s.authStatusFunc = fn
+	s.mu.Unlock()
+}
+
+// SetAuthStatusListFunc sets a function that returns the device-code auth
+// status of every miner with an active flow. Thread-safe.
+func (s *AnalyticsServer) SetAuthStatusListFunc(fn AuthStatusListFunc) {
+	s.mu.Lock()
+	s.authStatusListFunc = fn
 	s.mu.Unlock()
 }
 
