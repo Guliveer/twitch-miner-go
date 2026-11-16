@@ -169,9 +169,15 @@ header {
   align-items: center;
   column-gap: 10px;
   row-gap: 2px;
+  width: 100%;
   padding: 10px 16px;
+  border: 0;
   border-left: 2px solid transparent;
   border-bottom: var(--dp-border-hairline) solid var(--dp-color-hairline);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   transition:
     background-color var(--dp-motion-duration) var(--dp-motion-ease),
@@ -237,6 +243,7 @@ header {
 }
 
 .sidebar-footer a {
+  padding: 4px 0;
   color: var(--dp-color-read);
   text-decoration: none;
   transition: color var(--dp-motion-duration) var(--dp-motion-ease);
@@ -293,7 +300,7 @@ header {
   border-bottom: var(--dp-border-hairline) solid var(--dp-color-hairline);
 }
 
-.editor-header h2 {
+.editor-header #editor-title {
   font-size: var(--dp-type-display);
   font-weight: 600;
   letter-spacing: var(--dp-tracking-heading);
@@ -708,7 +715,7 @@ select.form-input,
 .dynamic-item .item-remove,
 .dynamic-item .item-expand {
   flex-shrink: 0;
-  padding: 4px;
+  padding: 6px;
   background: none;
   border: none;
   color: var(--dp-color-meta);
@@ -838,7 +845,10 @@ select.form-input,
 }
 
 .ordered-item-remove {
-  padding: 0 2px;
+  /* Generous padding with an equal negative margin keeps the glyph in place
+     while giving the button a usable pointer target. */
+  padding: 6px 8px;
+  margin: -6px -6px;
   background: none;
   border: none;
   color: var(--dp-color-meta);
@@ -929,7 +939,7 @@ select.form-input,
   margin-bottom: 12px;
 }
 
-.provider-header h5 {
+.provider-header .provider-title {
   font-size: var(--dp-type-body);
   font-weight: 600;
   letter-spacing: var(--dp-tracking-body);
@@ -1132,7 +1142,8 @@ select.form-input,
     border-bottom: var(--dp-border-hairline) solid var(--dp-color-hairline);
   }
 
-  .account-list { overflow-y: visible; }
+  /* Keep the stacked account list from pushing the editor below the fold. */
+  .account-list { max-height: 45vh; overflow-y: auto; }
 
   .editor {
     padding-bottom: 112px;

@@ -61,6 +61,7 @@
         <section id="dashboard-status" class="status-banner hidden" aria-live="polite"></section>
 
         <main>
+            <h1 class="visually-hidden">Dashboard</h1>
             <section id="streamers-section">
                 <h2>Streamers</h2>
                 <div id="streamers-grid"></div>
@@ -72,9 +73,9 @@
                     <table id="history-table" aria-label="Earnings history">
                         <thead>
                             <tr>
-                                <th>Reason</th>
-                                <th>Count</th>
-                                <th>Points</th>
+                                <th scope="col">Reason</th>
+                                <th scope="col">Count</th>
+                                <th scope="col">Points</th>
                             </tr>
                         </thead>
                         <tbody id="history-body"></tbody>

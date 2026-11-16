@@ -338,6 +338,11 @@ h2 {
   margin-bottom: 48px;
 }
 
+/* Empty and error messages span the whole grid instead of one column. */
+#streamers-grid > .loading {
+  grid-column: 1 / -1;
+}
+
 .streamer-card {
   display: flex;
   flex-direction: column;
@@ -602,7 +607,10 @@ td.points {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0;
+  /* Padding plus an equal negative margin keeps the label aligned with the
+     cell while giving the button a full-height pointer target. */
+  padding: 10px 0;
+  margin: -10px 0;
   background: none;
   border: 0;
   color: inherit;
@@ -719,6 +727,19 @@ footer a:hover {
 .footer-version {
   color: var(--dp-color-meta);
   text-transform: none;
+}
+
+.footer-links a {
+  padding: 4px 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* ─── Empty / loading states ──────────────────────────────────────────── */

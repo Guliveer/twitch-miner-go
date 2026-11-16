@@ -12,9 +12,9 @@
     "semantic_hash": ""
   },
   "cmd/twitch-miner-go/main.go": {
-    "mtime": 1788701295.86185,
-    "seen": 1791829509.1924057,
-    "ast_hash": "2c101926c442ef62cc7f01b016db20b8",
+    "mtime": 1794863903.0572217,
+    "seen": 1794863939.2207751,
+    "ast_hash": "ef21a03019eb3a2676418a02236de348",
     "semantic_hash": ""
   },
   "go.mod": {
@@ -108,9 +108,9 @@
     "semantic_hash": ""
   },
   "internal/configeditor/web/app.js": {
-    "mtime": 1794746068.923013,
-    "seen": 1794746171.3942173,
-    "ast_hash": "d350d94f1dd2a9e528552459a9d3d5f1",
+    "mtime": 1794863903.170936,
+    "seen": 1794863939.222062,
+    "ast_hash": "f8791c29769a0441c0655f9701f6c67c",
     "semantic_hash": ""
   },
   "internal/constants/constants.go": {
@@ -198,9 +198,9 @@
     "semantic_hash": ""
   },
   "internal/miner/scheduler.go": {
-    "mtime": 1788701295.8728466,
-    "seen": 1791829509.1948469,
-    "ast_hash": "b3037d277cc5a2e76e1a5dd47ecddecf",
+    "mtime": 1794863903.0587256,
+    "seen": 1794863939.2238686,
+    "ast_hash": "54f10df541968a71317f75a0ae6919a2",
     "semantic_hash": ""
   },
   "internal/miner/streamer_manager.go": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   "internal/model/drop.go": {
-    "mtime": 1788211796.5768669,
-    "seen": 1788555176.5097747,
-    "ast_hash": "93c9a2bd5b40afa37e38392fb68da4de",
+    "mtime": 1794863903.0602915,
+    "seen": 1794863939.224282,
+    "ast_hash": "0a1bae765e17306d31d7c0863eedce40",
     "semantic_hash": ""
   },
   "internal/model/game_registry.go": {
@@ -288,9 +288,9 @@
     "semantic_hash": ""
   },
   "internal/model/settings.go": {
-    "mtime": 1791749134.6915085,
-    "seen": 1791829509.1957061,
-    "ast_hash": "3dc06de4128e9dabafe0e759824e78f1",
+    "mtime": 1794863903.0612967,
+    "seen": 1794863939.2248225,
+    "ast_hash": "8b9e25906fd1a3d9db3103506d53039a",
     "semantic_hash": ""
   },
   "internal/model/stream.go": {
@@ -300,9 +300,9 @@
     "semantic_hash": ""
   },
   "internal/model/streamer.go": {
-    "mtime": 1791749134.692508,
-    "seen": 1791829509.1957083,
-    "ast_hash": "5f4a3b05e82547c048a2fcb4b1bbd991",
+    "mtime": 1794863903.0622964,
+    "seen": 1794863939.2248821,
+    "ast_hash": "5aba81f2eb4fbf196f5e66270f6f798a",
     "semantic_hash": ""
   },
   "internal/notify/base.go": {
@@ -438,9 +438,9 @@
     "semantic_hash": ""
   },
   "internal/twitch/drops.go": {
-    "mtime": 1791827871.905371,
-    "seen": 1791829509.1986928,
-    "ast_hash": "8ede102a902abe7bf879b37487f48889",
+    "mtime": 1794863903.0673025,
+    "seen": 1794863939.228357,
+    "ast_hash": "3e36e5802dd0421ef06c586b5495fa2b",
     "semantic_hash": ""
   },
   "internal/twitch/drops_test.go": {
@@ -456,9 +456,9 @@
     "semantic_hash": ""
   },
   "internal/twitch/minute_watched.go": {
-    "mtime": 1792688728.8368137,
-    "seen": 1792699676.9986768,
-    "ast_hash": "68f53972ba41bf6e944d0c2885ca9d15",
+    "mtime": 1794863903.0673025,
+    "seen": 1794863939.228605,
+    "ast_hash": "e28850267e028c8cc50146bb938edc82",
     "semantic_hash": ""
   },
   "internal/twitch/minute_watched_test.go": {
@@ -666,9 +666,9 @@
     "semantic_hash": ""
   },
   ".github/wiki/Configuration-Reference.md": {
-    "mtime": 1789405442.704595,
-    "seen": 1791829509.2030468,
-    "ast_hash": "7f14025822597d78226544b36891e002",
+    "mtime": 1794863903.055223,
+    "seen": 1794863939.2320006,
+    "ast_hash": "0ce49cea389426676dbc92c471e5d768",
     "semantic_hash": ""
   },
   ".github/wiki/Getting-Started.md": {
@@ -780,9 +780,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794746068.9039712,
-    "seen": 1794746171.413008,
-    "ast_hash": "34a90c2c5a2800aec44c136c28e3c667",
+    "mtime": 1794863903.0562234,
+    "seen": 1794863939.2334657,
+    "ast_hash": "e10b8bb8d7bbf2bc8032e3211ff64057",
     "semantic_hash": ""
   },
   "SECURITY.md": {
@@ -810,21 +810,21 @@
     "semantic_hash": ""
   },
   "internal/configeditor/web/index.html": {
-    "mtime": 1794746069.200022,
-    "seen": 1794746171.4133568,
-    "ast_hash": "c70599de8541a85ded6e1af2ce97477f",
+    "mtime": 1794863903.1714609,
+    "seen": 1794863939.2336967,
+    "ast_hash": "20b07d08abc0462cdc78e298eb9172cf",
     "semantic_hash": ""
   },
   "internal/server/static/index.html": {
-    "mtime": 1794746378.1214201,
-    "seen": 1794746395.9818752,
-    "ast_hash": "d94ced3f00c1ee8e4f775240bd09f445",
+    "mtime": 1794863903.173023,
+    "seen": 1794863939.233698,
+    "ast_hash": "5b9700cb8b3f438766ad3ab8b471a845",
     "semantic_hash": ""
   },
   "internal/server/static/logs.html": {
-    "mtime": 1794746378.6291156,
-    "seen": 1794746395.9818761,
-    "ast_hash": "b9038c0e75edd520b64f1d5f3a693ec6",
+    "mtime": 1794863903.173023,
+    "seen": 1794863939.2336984,
+    "ast_hash": "2a667136bc2173a460e105e3272eb5a0",
     "semantic_hash": ""
   },
   ".opencode/plugins/graphify.js": {
@@ -1023,15 +1023,15 @@
     "semantic_hash": ""
   },
   "internal/server/middleware.go": {
-    "mtime": 1788211796.5886235,
-    "seen": 1788555176.509796,
-    "ast_hash": "1c70df63c0bb906224c4c14faf54143b",
+    "mtime": 1794863903.0632982,
+    "seen": 1794863939.2266312,
+    "ast_hash": "9c148bfc746b9e09b6f06c477f17af8f",
     "semantic_hash": ""
   },
   "internal/server/streams_api.go": {
-    "mtime": 1789405442.7146187,
-    "seen": 1791829509.1974876,
-    "ast_hash": "eaca0a0abdec01e20398f668ba850fc1",
+    "mtime": 1794863903.0663023,
+    "seen": 1794863939.2268121,
+    "ast_hash": "d706056e033dfb85129ff594433f6ef3",
     "semantic_hash": ""
   },
   "internal/twitch/drops_notification_test.go": {
@@ -1083,9 +1083,9 @@
     "semantic_hash": ""
   },
   "internal/server/server.go": {
-    "mtime": 1794746068.926013,
-    "seen": 1794746171.4024577,
-    "ast_hash": "1e3de2c4edbc470b7dccb056fb4d5c7c",
+    "mtime": 1794863903.065303,
+    "seen": 1794863939.2266335,
+    "ast_hash": "773a59affdd03850775a909d69a6656f",
     "semantic_hash": ""
   },
   "tools/edit-config.sh": {
@@ -1389,15 +1389,15 @@
     "semantic_hash": ""
   },
   "internal/watcher/badge.go": {
-    "mtime": 1791714788.7173274,
-    "seen": 1791829509.1995187,
-    "ast_hash": "5108c1fd0117e3ae5e92352c90954be3",
+    "mtime": 1794863903.0703049,
+    "seen": 1794863939.2292767,
+    "ast_hash": "752b9b0b3298a4ebb39307ed829e5101",
     "semantic_hash": ""
   },
   "internal/watcher/badge_catalog.go": {
-    "mtime": 1791714788.7183278,
-    "seen": 1791829509.19952,
-    "ast_hash": "0fe7370ce4ba4a3ad73ddccc460e6640",
+    "mtime": 1794863903.071304,
+    "seen": 1794863939.2292774,
+    "ast_hash": "2a6e6c5ade43df2c80e2149372ad1944",
     "semantic_hash": ""
   },
   "internal/watcher/badge_catalog_test.go": {
@@ -1440,6 +1440,54 @@
     "mtime": 1794746068.9069717,
     "seen": 1794746171.413367,
     "ast_hash": "e37cd45fe7aa39a340fa1456dbd159ee",
+    "semantic_hash": ""
+  },
+  "internal/model/reward_deadline.go": {
+    "mtime": 1794863903.0602915,
+    "seen": 1794863939.2248216,
+    "ast_hash": "9117fefed32517f15f13e1fb3df62438",
+    "semantic_hash": ""
+  },
+  "internal/server/auth_status_test.go": {
+    "mtime": 1794863903.0622964,
+    "seen": 1794863939.2263384,
+    "ast_hash": "5799d7fff289c42f62a4576eb9fe4708",
+    "semantic_hash": ""
+  },
+  "internal/server/middleware_test.go": {
+    "mtime": 1794863903.0642984,
+    "seen": 1794863939.2266319,
+    "ast_hash": "5b9820389103e0f5320bef1f63b51c18",
+    "semantic_hash": ""
+  },
+  "internal/server/ratelimit_test.go": {
+    "mtime": 1794863903.065303,
+    "seen": 1794863939.2266326,
+    "ast_hash": "9b14b2a74cc4a9179fa16bccb46e5aa2",
+    "semantic_hash": ""
+  },
+  "internal/twitch/reward_inventory_test.go": {
+    "mtime": 1794863903.0683036,
+    "seen": 1794863939.2287889,
+    "ast_hash": "f0c0ed557fb819086ca894c56c616d50",
+    "semantic_hash": ""
+  },
+  "internal/twitch/reward_priority.go": {
+    "mtime": 1794863903.0693026,
+    "seen": 1794863939.2287898,
+    "ast_hash": "780084508d7d6742b8ceeeff4911868b",
+    "semantic_hash": ""
+  },
+  "internal/twitch/reward_priority_test.go": {
+    "mtime": 1794863903.0693026,
+    "seen": 1794863939.2287903,
+    "ast_hash": "7edcf42bbf397b8dc5705cea90627f01",
+    "semantic_hash": ""
+  },
+  "internal/watcher/badge_deadline_test.go": {
+    "mtime": 1794863903.071304,
+    "seen": 1794863939.2293391,
+    "ast_hash": "1aefa6a78ebe602d064dfd0fe49b9fd9",
     "semantic_hash": ""
   }
 }

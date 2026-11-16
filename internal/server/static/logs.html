@@ -63,17 +63,18 @@
         </section>
 
         <main>
+            <h1 class="visually-hidden">Event Logs</h1>
             <section id="events-section">
                 <h2>Event Details</h2>
                 <div class="table-scroll">
                     <table id="events-table" aria-label="Event details">
                         <thead>
                             <tr>
-                                <th data-sort="event" aria-sort="none"><button type="button" class="th-sort">Event</button></th>
-                                <th data-sort="streamer" aria-sort="none"><button type="button" class="th-sort">Streamer</button></th>
-                                <th data-sort="account" aria-sort="none"><button type="button" class="th-sort">Account</button></th>
-                                <th data-sort="count" aria-sort="none"><button type="button" class="th-sort">Count</button></th>
-                                <th data-sort="amount" aria-sort="none"><button type="button" class="th-sort">Points</button></th>
+                                <th scope="col" data-sort="event" aria-sort="none"><button type="button" class="th-sort">Event</button></th>
+                                <th scope="col" data-sort="streamer" aria-sort="none"><button type="button" class="th-sort">Streamer</button></th>
+                                <th scope="col" data-sort="account" aria-sort="none"><button type="button" class="th-sort">Account</button></th>
+                                <th scope="col" data-sort="count" aria-sort="none"><button type="button" class="th-sort">Count</button></th>
+                                <th scope="col" data-sort="amount" aria-sort="none"><button type="button" class="th-sort">Points</button></th>
                             </tr>
                         </thead>
                         <tbody id="events-body"></tbody>

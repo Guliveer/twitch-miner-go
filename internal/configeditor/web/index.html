@@ -45,7 +45,7 @@
 
       <div class="editor-content hidden" id="editor-content">
         <div class="editor-header">
-          <h2 id="editor-title"></h2>
+          <h1 id="editor-title"></h1>
           <div class="editor-badges" id="editor-badges"></div>
         </div>
 
@@ -194,33 +194,33 @@
             <div class="accordion-body">
               <div class="form-grid">
                 <div class="form-field">
-                  <label>Make Predictions</label>
+                  <label for="cfg-sd-predictions">Make Predictions</label>
                   <select class="tri-select" id="cfg-sd-predictions"></select>
                 </div>
                 <div class="form-field">
-                  <label>Follow Raid</label>
+                  <label for="cfg-sd-follow-raid">Follow Raid</label>
                   <select class="tri-select" id="cfg-sd-follow-raid"></select>
                 </div>
                 <div class="form-field">
-                  <label>Claim drops</label>
+                  <label for="cfg-sd-claim-drops">Claim drops</label>
                   <select class="tri-select" id="cfg-sd-claim-drops"></select>
                 </div>
                 <div class="form-field">
-                  <label>Claim moments</label>
+                  <label for="cfg-sd-claim-moments">Claim moments</label>
                   <select class="tri-select" id="cfg-sd-claim-moments"></select>
                 </div>
                 <div class="form-field">
-                  <label>Watch streak</label>
+                  <label for="cfg-sd-watch-streak">Watch streak</label>
                   <select class="tri-select" id="cfg-sd-watch-streak"></select>
                 </div>
                 <div class="form-field">
-                  <label>Community goals</label>
+                  <label for="cfg-sd-community-goals">Community goals</label>
                   <select class="tri-select" id="cfg-sd-community-goals"></select>
                 </div>
                 <div class="form-field">
                   <label for="cfg-sd-chat">Chat</label>
                   <select id="cfg-sd-chat" class="form-input">
-                    <option value="">— default —</option>
+                    <option value="">Default</option>
                     <option value="ALWAYS">ALWAYS</option>
                     <option value="NEVER">NEVER</option>
                     <option value="ONLINE">ONLINE</option>
@@ -231,7 +231,7 @@
 
               <!-- Bet Settings sub-section -->
               <div class="subsection">
-                <h4 class="subsection-title">Bet Settings</h4>
+                <h3 class="subsection-title">Bet Settings</h3>
                 <div class="form-grid">
                   <div class="form-field">
                     <label for="cfg-bet-strategy">Strategy</label>
@@ -239,32 +239,32 @@
                   </div>
                   <div class="form-field">
                     <label for="cfg-bet-percentage">Percentage</label>
-                    <input type="number" id="cfg-bet-percentage" min="1" max="100" class="form-input input-sm">
+                    <input type="number" id="cfg-bet-percentage" min="1" max="100" placeholder="default" class="form-input input-sm">
                   </div>
                   <div class="form-field">
                     <label for="cfg-bet-gap">Percentage Gap</label>
-                    <input type="number" id="cfg-bet-gap" min="0" max="100" class="form-input input-sm">
+                    <input type="number" id="cfg-bet-gap" min="0" max="100" placeholder="default" class="form-input input-sm">
                   </div>
                   <div class="form-field">
                     <label for="cfg-bet-max">Max Points</label>
-                    <input type="number" id="cfg-bet-max" min="0" class="form-input input-sm">
+                    <input type="number" id="cfg-bet-max" min="0" placeholder="default" class="form-input input-sm">
                   </div>
                   <div class="form-field">
                     <label for="cfg-bet-min">Minimum Points</label>
-                    <input type="number" id="cfg-bet-min" min="0" class="form-input input-sm">
+                    <input type="number" id="cfg-bet-min" min="0" placeholder="default" class="form-input input-sm">
                   </div>
                   <div class="form-field">
-                    <label>Stealth Mode</label>
+                    <label for="cfg-bet-stealth">Stealth Mode</label>
                     <select class="tri-select" id="cfg-bet-stealth"></select>
                   </div>
                   <div class="form-field">
                     <label for="cfg-bet-delay">Delay (seconds)</label>
-                    <input type="number" id="cfg-bet-delay" min="0" step="0.5" class="form-input input-sm">
+                    <input type="number" id="cfg-bet-delay" min="0" step="0.5" placeholder="default" class="form-input input-sm">
                   </div>
                   <div class="form-field">
                     <label for="cfg-bet-delay-mode">Delay Mode</label>
                     <select id="cfg-bet-delay-mode" class="form-input">
-                      <option value="">— default —</option>
+                      <option value="">Default</option>
                       <option value="FROM_START">FROM_START</option>
                       <option value="FROM_END">FROM_END</option>
                       <option value="PERCENTAGE">PERCENTAGE</option>
@@ -272,18 +272,18 @@
                   </div>
                 </div>
                 <div class="subsection">
-                  <h5 class="subsection-title-sm">Filter Condition</h5>
+                  <h3 class="subsection-title-sm">Filter Condition</h3>
                   <div class="form-grid">
                     <div class="form-field">
                       <label for="cfg-bet-filter-by">By</label>
                       <select id="cfg-bet-filter-by" class="form-input">
-                        <option value="">— none —</option>
+                        <option value="">None</option>
                       </select>
                     </div>
                     <div class="form-field">
                       <label for="cfg-bet-filter-where">Where</label>
                       <select id="cfg-bet-filter-where" class="form-input">
-                        <option value="">— none —</option>
+                        <option value="">None</option>
                       </select>
                     </div>
                     <div class="form-field">
@@ -318,7 +318,7 @@
             <div class="accordion-body">
               <div class="form-grid">
                 <div class="form-field full-width">
-                  <label>Streamer Blacklist</label>
+                  <label for="cfg-blacklist-input">Streamer Blacklist</label>
                   <div class="tag-list" id="cfg-blacklist"></div>
                   <div class="tag-add-row">
                     <input type="text" id="cfg-blacklist-input" placeholder="username" class="form-input input-sm">
@@ -326,7 +326,7 @@
                   </div>
                 </div>
                 <div class="form-field full-width">
-                  <label>Category Blacklist</label>
+                  <label for="cfg-cat-blacklist-input">Category Blacklist</label>
                   <div class="tag-list" id="cfg-cat-blacklist"></div>
                   <div class="tag-add-row">
                     <input type="text" id="cfg-cat-blacklist-input" placeholder="category-slug" class="form-input input-sm">
@@ -374,10 +374,10 @@
 
               <!-- Global Batch -->
               <div class="subsection">
-                <h4 class="subsection-title">Global Batch Settings</h4>
+                <h3 class="subsection-title">Global Batch Settings</h3>
                 <div class="form-grid">
                   <div class="form-field">
-                    <label>Batch Enabled</label>
+                    <label for="cfg-batch-enabled">Batch Enabled</label>
                     <select class="tri-select" id="cfg-batch-enabled"></select>
                   </div>
                   <div class="form-field">
@@ -413,7 +413,7 @@
 
   <!-- Modal overlay -->
   <div class="modal-overlay hidden" id="modal-overlay">
-    <div class="modal" id="modal">
+    <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
       <div class="modal-header" id="modal-title"></div>
       <div class="modal-body" id="modal-body"></div>
       <div class="modal-footer" id="modal-footer"></div>
