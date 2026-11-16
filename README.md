@@ -29,7 +29,7 @@ Built for low resource usage and long-running deployments.
 
 **Quick start:** download a [release binary](https://github.com/Guliveer/twitch-miner-go/releases/latest) (Windows, macOS, Linux) or run `./_run.sh` — no Python, no browser, no Docker required. See [Running Locally](#14-running-locally) and the [Quick Start config](#151-quick-start).
 
-> ⭐ **[Star this repo](https://github.com/Guliveer/twitch-miner-go/stargazers)** to bookmark it and get notified about new releases — the project is young, actively developed, and the best time to jump in is now.
+> ⭐ **[Star this repo](https://github.com/Guliveer/twitch-miner-go/stargazers)** to bookmark it to help others discover it — the project is young, actively developed, and the best time to jump in is now.
 
 ## Why twitch-miner-go?
 
@@ -40,8 +40,8 @@ A drop-in **alternative to [Twitch Channel Points Miner v2](https://github.com/r
 - **Lightweight** — ~80 MB RAM vs >250 MB and a ~12 MB Docker image vs 200–500 MB; see the [resource comparison](#13-resource-comparison)
 - **Complete feature set** — channel points, watch streaks, bonuses, drops, predictions, raids, moments and goals
 - **Multi-account** — run several Twitch accounts from a single process, each with its own config and notification channel
-- **Headless & 24/7** — no GUI required, automatic restart on crash; TwitchDropsMiner is a desktop GUI app without auto-restart
-- **Notifications** — Telegram, Discord, Webhook, Matrix, Pushover, Gotify; TwitchDropsMiner ships no notification system
+- **Headless & 24/7** — no GUI required, automatic restart on crash
+- **Notifications** — Telegram, Discord, Webhook, Matrix, Pushover, Gotify
 - **More on top** — hot-reload configs, PostgreSQL DB mode with REST API, analytics dashboard, config editor and auto-update
 
 ## Use cases

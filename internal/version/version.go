@@ -26,6 +26,15 @@ func String() string {
 	return fmt.Sprintf("%s (%s)", Number, GitCommit)
 }
 
+// Label returns the short display label used by the UIs: "v1.2.3" for a
+// build with an injected version, or "dev" otherwise.
+func Label() string {
+	if Number == "" || Number == "dev" {
+		return "dev"
+	}
+	return "v" + Number
+}
+
 // Parse parses a version string like "1.2.3" or "v1.2.3".
 func Parse(s string) (Version, error) {
 	s = strings.TrimPrefix(s, "v")

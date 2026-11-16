@@ -20,7 +20,9 @@ import (
 
 	"fyne.io/systray"
 
+	"github.com/Guliveer/twitch-miner-go/internal/feedback"
 	"github.com/Guliveer/twitch-miner-go/internal/utils"
+	"github.com/Guliveer/twitch-miner-go/internal/version"
 )
 
 //go:embed icon.png icon.ico
@@ -98,12 +100,7 @@ func onReady(opts Options) {
 	if icon != nil {
 		systray.SetIcon(icon)
 	}
-	if opts.Title != "" {
-		systray.SetTitle(opts.Title)
-		systray.SetTooltip(opts.Title)
-	} else {
-		systray.SetTooltip("twitch-miner-go")
-	}
+	setIconTitle(opts.Title)
 
 	// Left-click on the icon opens the dashboard.
 	systray.SetOnTapped(func() {
@@ -162,6 +159,10 @@ func onReady(opts Options) {
 	}
 
 	systray.AddSeparator()
+	mReportBug := systray.AddMenuItem("Report bug", "Open the bug report form on GitHub")
+	mRequestFeature := systray.AddMenuItem("Request new feature", "Open the feature request form on GitHub")
+
+	systray.AddSeparator()
 	mExit := systray.AddMenuItem("Exit", "Stop twitch-miner-go")
 
 	logf := opts.OnLog
@@ -217,6 +218,10 @@ func onReady(opts Options) {
 					mHideConsole.SetTitle("Show Terminal")
 					mHideConsole.SetTooltip("Show the terminal window")
 				}
+			case <-mReportBug.ClickedCh:
+				_ = utils.OpenBrowser(feedback.BugReportURL())
+			case <-mRequestFeature.ClickedCh:
+				_ = utils.OpenBrowser(feedback.FeatureRequestURL())
 			case <-mExit.ClickedCh:
 				systray.Quit()
 				if opts.OnExit != nil {
@@ -226,6 +231,17 @@ func onReady(opts Options) {
 			}
 		}
 	}()
+}
+
+// setIconTitle shows the application name together with the running version,
+// so a bug report can name the build the user actually runs.
+func setIconTitle(title string) {
+	if title == "" {
+		title = "twitch-miner-go"
+	}
+	title += " " + version.Label()
+	systray.SetTitle(title)
+	systray.SetTooltip(title)
 }
 
 // clickCh returns the item's click channel, or a nil channel (which never

@@ -46,6 +46,18 @@
     return node;
   }
 
+  // Labels in the dynamic rows are siblings of their control, so they need an
+  // explicit association through matching ids.
+  let dynamicFieldId = 0;
+
+  function labeledField(text, control) {
+    if (!control.id) control.id = 'dyn-field-' + (++dynamicFieldId);
+    return el('div', { className: 'form-field' }, [
+      el('label', { for: control.id, style: 'font-size:0.75rem' }, text),
+      control,
+    ]);
+  }
+
   // ─── Drag & Drop Reordering ───
 
   const REORDERABLE_FLAG = '__reorderableBound';
@@ -224,12 +236,23 @@
       const btn = el('button', { className: 'btn ' + (b.class || 'btn-ghost'), onclick: () => { hideModal(); if (b.action) b.action(); } }, b.label);
       footer.appendChild(btn);
     });
+    const modal = document.getElementById('modal');
+    modalReturnFocus = document.activeElement;
     document.getElementById('modal-overlay').classList.remove('hidden');
+    const firstControl = modal.querySelector('input, select, textarea, button');
+    (firstControl || modal).focus();
   }
 
   function hideModal() {
     document.getElementById('modal-overlay').classList.add('hidden');
+    if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') {
+      modalReturnFocus.focus();
+    }
+    modalReturnFocus = null;
   }
+
+  // Focus returns to the control that opened the dialog once it closes.
+  let modalReturnFocus = null;
 
   // ─── Sidebar ───
 
@@ -242,20 +265,23 @@
     }
     accounts.forEach((a) => {
       const meta = [];
-      if (a.streamer_count > 0) meta.push(a.streamer_count + ' streamers');
+      if (a.streamer_count > 0) meta.push(a.streamer_count + (a.streamer_count === 1 ? ' streamer' : ' streamers'));
       if (a.has_category_watcher) meta.push('CW');
       if (a.has_team_watcher) meta.push('TW');
       if (a.has_followers) meta.push('FL');
 
-      const li = el('li', {
-        className: 'account-item' + (currentAccount === a.name ? ' active' : ''),
+      const active = currentAccount === a.name;
+      const button = el('button', {
+        type: 'button',
+        className: 'account-item' + (active ? ' active' : ''),
         onclick: () => selectAccount(a.name),
       }, [
         el('span', { className: 'dot ' + (a.enabled ? 'enabled' : 'disabled') }),
         el('span', { className: 'account-name' }, a.name),
         el('span', { className: 'account-meta' }, meta.join(' ')),
       ]);
-      list.appendChild(li);
+      if (active) button.setAttribute('aria-current', 'true');
+      list.appendChild(el('li', {}, button));
     });
   }
 
@@ -768,12 +794,13 @@
     const slugInput = el('input', {
       type: 'text', className: 'form-input input-sm cat-slug',
       placeholder: 'category-slug', value: cat.slug || '',
+      'aria-label': 'Category slug',
       oninput: markDirty,
     });
-    const triEl = el('select', { className: 'tri-select cat-drops-only' });
-    const triLabel = el('span', { style: 'font-size:0.7rem;color:var(--text-muted)' }, 'drops only');
+    const triEl = el('select', { className: 'tri-select cat-drops-only', 'aria-label': 'Drops only' });
+    const triLabel = el('span', { className: 'tri-label' }, 'drops only');
     const removeBtn = el('button', {
-      type: 'button', className: 'item-remove', title: 'Remove',
+      type: 'button', className: 'item-remove', title: 'Remove', 'aria-label': 'Remove category',
       onclick: function () { this.closest('.dynamic-item').remove(); markDirty(); },
     }, '\u00d7');
 
@@ -810,10 +837,10 @@
     const handle = dragHandle();
     const input = el('input', {
       type: 'text', className: 'form-input input-sm team-name',
-      placeholder: 'team-name', value: team.name || '', oninput: markDirty,
+      placeholder: 'team-name', value: team.name || '', 'aria-label': 'Team name', oninput: markDirty,
     });
     const removeBtn = el('button', {
-      type: 'button', className: 'item-remove', title: 'Remove',
+      type: 'button', className: 'item-remove', title: 'Remove', 'aria-label': 'Remove team',
       onclick: function () { this.closest('.dynamic-item').remove(); markDirty(); },
     }, '\u00d7');
     const fields = el('div', { className: 'item-fields' }, [handle, input]);
@@ -844,13 +871,16 @@
     const filter = bet.filter_condition || {};
 
     const handle = dragHandle();
-    const expandBtn = el('button', { type: 'button', className: 'item-expand', title: 'Toggle per-streamer overrides' }, '\u25b6');
+    const expandBtn = el('button', {
+      type: 'button', className: 'item-expand', title: 'Toggle per-streamer overrides',
+      'aria-label': 'Toggle per-streamer overrides',
+    }, '\u25b6');
     const usernameInput = el('input', {
       type: 'text', className: 'form-input input-sm streamer-username',
-      placeholder: 'username', value: streamer.username || '', oninput: markDirty,
+      placeholder: 'username', value: streamer.username || '', 'aria-label': 'Streamer username', oninput: markDirty,
     });
     const removeBtn = el('button', {
-      type: 'button', className: 'item-remove', title: 'Remove',
+      type: 'button', className: 'item-remove', title: 'Remove', 'aria-label': 'Remove streamer',
       onclick: function () { this.closest('.dynamic-item').remove(); updateStreamerCount(); markDirty(); },
     }, '\u00d7');
 
@@ -862,43 +892,41 @@
     });
 
     const chatSelect = el('select', { className: 'form-input input-sm s-chat' });
-    [['', '— default —'], ['ALWAYS', 'ALWAYS'], ['NEVER', 'NEVER'], ['ONLINE', 'ONLINE'], ['OFFLINE', 'OFFLINE']].forEach(([val, text]) => {
+    [['', 'Default'], ['ALWAYS', 'ALWAYS'], ['NEVER', 'NEVER'], ['ONLINE', 'ONLINE'], ['OFFLINE', 'OFFLINE']].forEach(([val, text]) => {
       const opt = el('option', { value: val }, text);
       if (settings.chat === val) opt.selected = true;
       chatSelect.appendChild(opt);
     });
 
     const behaviorGrid = el('div', { className: 'form-grid', style: 'margin-top:0.5rem' }, [
-      ...behaviorFields.map(({ label, select }) =>
-        el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, label), select])
-      ),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Chat'), chatSelect]),
+      ...behaviorFields.map(({ label, select }) => labeledField(label, select)),
+      labeledField('Chat', chatSelect),
     ]);
 
     const betStrategySelect = el('select', { className: 'form-input input-sm s-bet-strategy' });
-    betStrategySelect.appendChild(el('option', { value: '' }, '— default —'));
+    betStrategySelect.appendChild(el('option', { value: '' }, 'Default'));
     schema.strategies.forEach((s) => {
       const opt = el('option', { value: s }, s);
       if (bet.strategy === s) opt.selected = true;
       betStrategySelect.appendChild(opt);
     });
 
-    const betPercentageInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-percentage', min: '1', max: '100', value: bet.percentage ?? '' });
-    const betGapInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-gap', min: '0', max: '100', value: bet.percentage_gap ?? '' });
-    const betMaxInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-max', min: '0', value: bet.max_points ?? '' });
-    const betMinInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-min', min: '0', value: bet.minimum_points ?? '' });
+    const betPercentageInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-percentage', min: '1', max: '100', placeholder: 'default', value: bet.percentage ?? '' });
+    const betGapInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-gap', min: '0', max: '100', placeholder: 'default', value: bet.percentage_gap ?? '' });
+    const betMaxInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-max', min: '0', placeholder: 'default', value: bet.max_points ?? '' });
+    const betMinInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-min', min: '0', placeholder: 'default', value: bet.minimum_points ?? '' });
     const betStealthSelect = el('select', { className: 'tri-select s-bet-stealth' });
-    const betDelayInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-delay', min: '0', step: '0.5', value: bet.delay ?? '' });
+    const betDelayInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-delay', min: '0', step: '0.5', placeholder: 'default', value: bet.delay ?? '' });
 
     const betDelayModeSelect = el('select', { className: 'form-input input-sm s-bet-delay-mode' });
-    [['', '— default —'], ['FROM_START', 'FROM_START'], ['FROM_END', 'FROM_END'], ['PERCENTAGE', 'PERCENTAGE']].forEach(([val, text]) => {
+    [['', 'Default'], ['FROM_START', 'FROM_START'], ['FROM_END', 'FROM_END'], ['PERCENTAGE', 'PERCENTAGE']].forEach(([val, text]) => {
       const opt = el('option', { value: val }, text);
       if (bet.delay_mode === val) opt.selected = true;
       betDelayModeSelect.appendChild(opt);
     });
 
     const betFilterBySelect = el('select', { className: 'form-input input-sm s-bet-filter-by' });
-    betFilterBySelect.appendChild(el('option', { value: '' }, '— none —'));
+    betFilterBySelect.appendChild(el('option', { value: '' }, 'None'));
     schema.filter_by.forEach((v) => {
       const opt = el('option', { value: v }, v);
       if (filter.by === v) opt.selected = true;
@@ -906,36 +934,36 @@
     });
 
     const betFilterWhereSelect = el('select', { className: 'form-input input-sm s-bet-filter-where' });
-    betFilterWhereSelect.appendChild(el('option', { value: '' }, '— none —'));
+    betFilterWhereSelect.appendChild(el('option', { value: '' }, 'None'));
     schema.filter_where.forEach((v) => {
       const opt = el('option', { value: v }, v);
       if (filter.where === v) opt.selected = true;
       betFilterWhereSelect.appendChild(opt);
     });
 
-    const betFilterValueInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-filter-value', value: filter.value ?? '' });
+    const betFilterValueInput = el('input', { type: 'number', className: 'form-input input-sm s-bet-filter-value', placeholder: 'none', value: filter.value ?? '' });
 
     const betGrid = el('div', { className: 'form-grid' }, [
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Strategy'), betStrategySelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Percentage'), betPercentageInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Percentage Gap'), betGapInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Max Points'), betMaxInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Minimum Points'), betMinInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Stealth Mode'), betStealthSelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Delay (s)'), betDelayInput]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Delay Mode'), betDelayModeSelect]),
+      labeledField('Strategy', betStrategySelect),
+      labeledField('Percentage', betPercentageInput),
+      labeledField('Percentage Gap', betGapInput),
+      labeledField('Max Points', betMaxInput),
+      labeledField('Minimum Points', betMinInput),
+      labeledField('Stealth Mode', betStealthSelect),
+      labeledField('Delay (s)', betDelayInput),
+      labeledField('Delay Mode', betDelayModeSelect),
     ]);
 
     const betFilterGrid = el('div', { className: 'form-grid' }, [
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter By'), betFilterBySelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter Where'), betFilterWhereSelect]),
-      el('div', { className: 'form-field' }, [el('label', { style: 'font-size:0.7rem' }, 'Filter Value'), betFilterValueInput]),
+      labeledField('Filter By', betFilterBySelect),
+      labeledField('Filter Where', betFilterWhereSelect),
+      labeledField('Filter Value', betFilterValueInput),
     ]);
 
     const betSubsection = el('div', { className: 'subsection', style: 'margin-top:0.75rem' }, [
-      el('h5', { className: 'subsection-title-sm' }, 'Bet Override'),
+      el('h3', { className: 'subsection-title-sm' }, 'Bet Override'),
       betGrid,
-      el('h5', { className: 'subsection-title-sm' }, 'Filter Condition'),
+      el('h3', { className: 'subsection-title-sm' }, 'Filter Condition'),
       betFilterGrid,
     ]);
 
@@ -975,11 +1003,12 @@
       const enabledId = 'prov-' + p + '-enabled';
       const enabledInput = el('input', {
         type: 'checkbox', className: 'toggle-input prov-enabled', id: enabledId,
+        'aria-label': 'Enable ' + p.charAt(0).toUpperCase() + p.slice(1) + ' notifications',
       });
       if (pConfig.enabled) enabledInput.checked = true;
       const enabledLabel = el('label', { for: enabledId, className: 'toggle-slider' });
 
-      const title = el('h5', {}, p.charAt(0).toUpperCase() + p.slice(1));
+      const title = el('h3', { className: 'provider-title' }, p.charAt(0).toUpperCase() + p.slice(1));
       const header = el('div', { className: 'provider-header' }, [
         title,
         el('div', { className: 'toggle-wrap' }, [enabledInput, enabledLabel]),
@@ -998,11 +1027,14 @@
 
       if (p === 'telegram') {
         const disNotifId = 'prov-' + p + '-disable-notif';
-        const disInput = el('input', { type: 'checkbox', className: 'toggle-input prov-disable-notification', id: disNotifId });
+        const disInput = el('input', {
+          type: 'checkbox', className: 'toggle-input prov-disable-notification', id: disNotifId,
+          'aria-label': 'Disable notification sound',
+        });
         if (pConfig.disable_notification) disInput.checked = true;
         const disLabel = el('label', { for: disNotifId, className: 'toggle-slider' });
-        section.appendChild(el('div', { className: 'form-field', style: 'margin-top:0.5rem' }, [
-          el('label', {}, 'Disable Notification Sound'),
+        section.appendChild(el('div', { className: 'form-field field-spaced' }, [
+          el('label', { for: disNotifId }, 'Disable Notification Sound'),
           el('div', { className: 'toggle-wrap' }, [disInput, disLabel]),
         ]));
       }
@@ -1014,8 +1046,8 @@
           if (pConfig.method === m || (!pConfig.method && m === 'POST')) opt.selected = true;
           methodSelect.appendChild(opt);
         });
-        section.appendChild(el('div', { className: 'form-field', style: 'margin-top:0.5rem' }, [
-          el('label', {}, 'Method'),
+        section.appendChild(el('div', { className: 'form-field field-spaced' }, [
+          el('label', { for: methodSelect.id }, 'Method'),
           methodSelect,
         ]));
       }
@@ -1200,17 +1232,17 @@
   function populateSelects() {
     const strategySelect = document.getElementById('cfg-bet-strategy');
     strategySelect.textContent = '';
-    strategySelect.appendChild(el('option', { value: '' }, '— none —'));
+    strategySelect.appendChild(el('option', { value: '' }, 'None'));
     schema.strategies.forEach((s) => strategySelect.appendChild(el('option', { value: s }, s)));
 
     const filterBySelect = document.getElementById('cfg-bet-filter-by');
     filterBySelect.textContent = '';
-    filterBySelect.appendChild(el('option', { value: '' }, '— none —'));
+    filterBySelect.appendChild(el('option', { value: '' }, 'None'));
     schema.filter_by.forEach((s) => filterBySelect.appendChild(el('option', { value: s }, s)));
 
     const filterWhereSelect = document.getElementById('cfg-bet-filter-where');
     filterWhereSelect.textContent = '';
-    filterWhereSelect.appendChild(el('option', { value: '' }, '— none —'));
+    filterWhereSelect.appendChild(el('option', { value: '' }, 'None'));
     schema.filter_where.forEach((s) => filterWhereSelect.appendChild(el('option', { value: s }, s)));
   }
 
@@ -1224,9 +1256,19 @@
     document.getElementById('modal-overlay').onclick = (e) => {
       if (e.target === e.currentTarget) hideModal();
     };
+    document.getElementById('modal-overlay').onkeydown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        hideModal();
+      }
+    };
 
     document.querySelectorAll('.accordion-header').forEach((header) => {
-      header.onclick = () => { header.parentElement.classList.toggle('open'); };
+      const accordion = header.parentElement;
+      header.setAttribute('aria-expanded', String(accordion.classList.contains('open')));
+      header.onclick = () => {
+        header.setAttribute('aria-expanded', String(accordion.classList.toggle('open')));
+      };
     });
 
     document.getElementById('add-category-btn').onclick = () => {
