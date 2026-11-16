@@ -15,6 +15,8 @@
 *.woff  binary
 *.woff2 binary
 *.ttf   binary
+*.mp4   binary
+*.webm  binary
 
 # Go
 # Union merge avoids conflicts when multiple branches add dependencies.

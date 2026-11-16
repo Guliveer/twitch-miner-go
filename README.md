@@ -1,10 +1,14 @@
 <p align="center">
-  <picture>
-    <img src="docs/social_preview_3.png" alt="twitch-miner-go - Efficient Auto Drops &amp; Points Claim for Twitch" width="100%">
-  </picture>
+  <a href="docs/brag.mp4">
+    <img src="docs/brag.jpg" alt="twitch-miner-go - Go to bed. It's mining." width="100%">
+  </a>
 </p>
 
-# twitch-miner-go - Efficient Auto Drops & Points Claim for Twitch
+<p align="center">
+  <a href="docs/brag.mp4"><b>▶️ Watch the 20-second launch film</b></a>
+</p>
+
+# twitch-miner-go // *Go to bed. It's mining.*
 
 [![GitHub Stars](https://img.shields.io/github/stars/Guliveer/twitch-miner-go?style=for-the-badge&logo=github&color=gold)](https://github.com/Guliveer/twitch-miner-go/stargazers)
 [![CI](https://img.shields.io/github/actions/workflow/status/Guliveer/twitch-miner-go/ci.yml?style=for-the-badge&logo=github&label=CI)](https://github.com/Guliveer/twitch-miner-go/actions/workflows/ci.yml)
@@ -27,7 +31,7 @@ Automatically claim:
 
 Built for low resource usage and long-running deployments.
 
-**Quick start:** download a [release binary](https://github.com/Guliveer/twitch-miner-go/releases/latest) (Windows, macOS, Linux) or run `./_run.sh` — no Python, no browser, no Docker required. See [Running Locally](#14-running-locally) and the [Quick Start config](#151-quick-start).
+**Quick start:** download a [release binary](https://github.com/Guliveer/twitch-miner-go/releases/latest) (Windows, macOS, Linux) or run `./_run.bat` — no browser, no Docker required. See [Running Locally](#14-running-locally) and the [Quick Start config](#151-quick-start).
 
 > ⭐ **[Star this repo](https://github.com/Guliveer/twitch-miner-go/stargazers)** to bookmark it to help others discover it — the project is young, actively developed, and the best time to jump in is now.
 
@@ -53,7 +57,7 @@ A drop-in **alternative to [Twitch Channel Points Miner v2](https://github.com/r
 
 ## 1.1. Table of Contents
 
-- [twitch-miner-go - Efficient Auto Drops & Points Claim for Twitch](#twitch-miner-go---efficient-auto-drops--points-claim-for-twitch)
+- [twitch-miner-go - Go to bed. It's mining.](#twitch-miner-go---go-to-bed-its-mining)
     - [Why twitch-miner-go?](#why-twitch-miner-go)
     - [Use cases](#use-cases)
     - [1.1. Table of Contents](#11-table-of-contents)
