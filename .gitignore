@@ -44,6 +44,9 @@ logs/
 # Service installer (generated)
 _service-start.bat
 
+# Brag video build output
+/brag-output/
+
 # Other
 !.claude/settings.json
 .remember/
