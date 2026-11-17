@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"runtime"
 	"testing"
 )
@@ -141,14 +142,14 @@ func TestPlatformAsset(t *testing.T) {
 	}
 }
 
-func TestDownloadAsset(t *testing.T) {
+func TestDownloadTo(t *testing.T) {
 	content := []byte("fake binary content")
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write(content)
 	}))
 	defer srv.Close()
 
-	tmp, err := DownloadAsset(context.Background(), srv.URL)
+	tmp, err := downloadTo(context.Background(), srv.URL, t.TempDir())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -171,13 +172,13 @@ func TestDownloadAsset(t *testing.T) {
 	}
 }
 
-func TestDownloadAsset_ServerError(t *testing.T) {
+func TestDownloadTo_ServerError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 	defer srv.Close()
 
-	_, err := DownloadAsset(context.Background(), srv.URL)
+	_, err := downloadTo(context.Background(), srv.URL, t.TempDir())
 	if err == nil {
 		t.Error("expected error on 404")
 	}
@@ -217,5 +218,63 @@ func TestReplaceBinary(t *testing.T) {
 	}
 	if string(data) != "new content" {
 		t.Errorf("replaced content = %q, want %q", data, "new content")
+	}
+}
+
+func TestReplaceWindows(t *testing.T) {
+	dir := t.TempDir()
+	exePath := filepath.Join(dir, "twitch-miner-go.exe")
+	if err := os.WriteFile(exePath, []byte("old content"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	tmpPath := filepath.Join(dir, ".update")
+	if err := os.WriteFile(tmpPath, []byte("new content"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := replaceWindows(exePath, tmpPath); err != nil {
+		t.Fatalf("replaceWindows: %v", err)
+	}
+
+	data, err := os.ReadFile(exePath)
+	if err != nil {
+		t.Fatalf("read replaced file: %v", err)
+	}
+	if string(data) != "new content" {
+		t.Errorf("replaced content = %q, want %q", data, "new content")
+	}
+
+	old, err := os.ReadFile(exePath + oldBinarySuffix)
+	if err != nil {
+		t.Fatalf("read previous binary: %v", err)
+	}
+	if string(old) != "old content" {
+		t.Errorf("previous content = %q, want %q", old, "old content")
+	}
+	if _, err := os.Stat(tmpPath); !os.IsNotExist(err) {
+		t.Errorf("expected downloaded file to be moved, stat err = %v", err)
+	}
+}
+
+func TestReplaceWindows_RestoresBinaryOnFailure(t *testing.T) {
+	dir := t.TempDir()
+	exePath := filepath.Join(dir, "twitch-miner-go.exe")
+	if err := os.WriteFile(exePath, []byte("old content"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := replaceWindows(exePath, filepath.Join(dir, "missing")); err == nil {
+		t.Fatal("expected error when the downloaded file is gone")
+	}
+
+	data, err := os.ReadFile(exePath)
+	if err != nil {
+		t.Fatalf("read restored file: %v", err)
+	}
+	if string(data) != "old content" {
+		t.Errorf("restored content = %q, want %q", data, "old content")
+	}
+	if _, err := os.Stat(exePath + oldBinarySuffix); !os.IsNotExist(err) {
+		t.Errorf("expected previous binary to be moved back, stat err = %v", err)
 	}
 }

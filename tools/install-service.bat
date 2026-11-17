@@ -4,10 +4,12 @@ setlocal enabledelayedexpansion
 REM ================================================================
 REM  Twitch Miner Go - Windows Service Installer
 REM  Uses NSSM (Non-Sucking Service Manager) to run as a service.
-REM  The service rebuilds the binary on every start.
+REM  The installer builds the binary once; the service then runs that binary
+REM  directly, so a downloaded auto-update is not overwritten by a rebuild on
+REM  every start.
 REM
 REM  Usage: install-service.bat [install|uninstall|start|stop|restart|status]
-REM  Requires: Administrator privileges, Go toolchain
+REM  Requires: Administrator privileges, Go toolchain (install and restart only)
 REM ================================================================
 
 net session >nul 2>&1
@@ -154,7 +156,7 @@ if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 > "%WRAPPER_SCRIPT%" echo @echo off
 >> "%WRAPPER_SCRIPT%" echo setlocal
 >> "%WRAPPER_SCRIPT%" echo cd /d "%PROJECT_DIR%"
->> "%WRAPPER_SCRIPT%" echo call _run.bat -config "!SVC_CONFIG!" -port !SVC_PORT! -log-level !SVC_LOG_LEVEL! -no-tray
+>> "%WRAPPER_SCRIPT%" echo "%PROJECT_DIR%\%BINARY_NAME%" -config "!SVC_CONFIG!" -port !SVC_PORT! -log-level !SVC_LOG_LEVEL! -no-tray -no-console %%*
 
 REM -- Install via NSSM --------------------------------------------
 echo [+] Installing service via NSSM...
@@ -203,14 +205,18 @@ echo.
 echo   Useful commands:
 echo     install-service.bat start     Start the service
 echo     install-service.bat stop      Stop the service
-echo     install-service.bat restart   Restart (triggers rebuild)
+echo     install-service.bat restart   Rebuild and restart the service
 echo     install-service.bat status    Show service status
 echo     install-service.bat uninstall Remove the service
 echo.
 echo   Logs: %LOG_DIR%\service.log
 echo.
+echo   NOTE: The service runs %BINARY_NAME% directly, so an auto-update applied
+echo         by the miner survives the restart.
+echo.
 echo   NOTE: The service runs under the SYSTEM account.
-echo   Ensure 'go' and 'git' are in the system PATH (not just user PATH).
+echo   Ensure 'go' and 'git' are in the system PATH (not just user PATH)
+echo   when installing or rebuilding.
 echo.
 pause
 goto :eof
@@ -268,7 +274,15 @@ REM ================================================================
 :do_start
 call :find_nssm
 if %errorlevel% neq 0 exit /b 1
-echo [+] Starting %SERVICE_NAME% (will rebuild first)...
+if exist "%PROJECT_DIR%\%BINARY_NAME%" goto :do_start_service
+echo [!] %BINARY_NAME% not found - building it first...
+call :build_binary
+if !errorlevel! neq 0 (
+    echo [x] Build failed.
+    exit /b 1
+)
+:do_start_service
+echo [+] Starting %SERVICE_NAME%...
 "!NSSM!" start %SERVICE_NAME%
 goto :eof
 
@@ -282,8 +296,17 @@ goto :eof
 :do_restart
 call :find_nssm
 if %errorlevel% neq 0 exit /b 1
-echo [+] Restarting %SERVICE_NAME% (will rebuild)...
-"!NSSM!" restart %SERVICE_NAME%
+echo [+] Stopping %SERVICE_NAME%...
+"!NSSM!" stop %SERVICE_NAME% >nul 2>&1
+timeout /t 3 /nobreak >nul
+echo [+] Rebuilding %BINARY_NAME%...
+call :build_binary
+if !errorlevel! neq 0 (
+    echo [x] Build failed. The service is stopped; fix the build and run 'install-service.bat start'.
+    exit /b 1
+)
+echo [+] Starting %SERVICE_NAME%...
+"!NSSM!" start %SERVICE_NAME%
 goto :eof
 
 :do_status
@@ -369,7 +392,7 @@ echo   install     Install as a Windows service (default)
 echo   uninstall   Stop and remove the service
 echo   start       Start the service
 echo   stop        Stop the service
-echo   restart     Restart the service (triggers a rebuild)
+echo   restart     Rebuild the binary and restart the service
 echo   status      Show service status
 echo.
 echo Requires NSSM (auto-downloaded if not found).

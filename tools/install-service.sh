@@ -296,7 +296,9 @@ User=${RUN_USER}
 WorkingDirectory=${DATA_DIR}
 EnvironmentFile=-${ENV_FILE}
 ExecStart=${bin_dest} -config ${CONFIG_DIR} -port ${PORT} -log-level ${LOG_LEVEL}
-Restart=on-failure
+# A miner is meant to run continuously, and the updater exits with code 0 once
+# the new binary is in place, so the unit must restart on a clean exit too.
+Restart=always
 RestartSec=10
 TimeoutStopSec=30
 

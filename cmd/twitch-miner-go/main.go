@@ -471,6 +471,8 @@ func resolveFileWatchInterval() time.Duration {
 }
 
 func runAutoUpdate(rootLog *logger.Logger, autoUpdate bool) {
+	updater.CleanupOldBinary(rootLog.Logger)
+
 	info, err := updater.CheckForUpdate(context.Background(), version.Number)
 	if err != nil {
 		rootLog.Debug("Update check failed", "error", err)

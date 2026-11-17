@@ -3,6 +3,7 @@ package updater
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -21,6 +22,9 @@ const (
 	repoURL         = "https://github.com/Guliveer/twitch-miner-go"
 	timeout         = 5 * time.Second
 	downloadTimeout = 5 * time.Minute
+	// oldBinarySuffix marks the previous executable on Windows, where a running
+	// image cannot be deleted or overwritten while the process is alive.
+	oldBinarySuffix = ".old"
 )
 
 // UpdateInfo holds the result of an update check.
@@ -134,9 +138,19 @@ func platformAsset() (string, error) {
 	return name, nil
 }
 
-// DownloadAsset downloads the binary at url to a temporary file and returns its path.
-// The caller is responsible for removing the file on error.
+// DownloadAsset downloads the binary at url next to the current executable and
+// returns its path. The caller is responsible for removing the file on error.
 func DownloadAsset(ctx context.Context, url string) (string, error) {
+	exe, err := executablePath()
+	if err != nil {
+		return "", err
+	}
+	return downloadTo(ctx, url, filepath.Dir(exe))
+}
+
+// downloadTo saves url into dir so the later rename stays on one filesystem;
+// renaming across volumes fails on Windows and on Unix.
+func downloadTo(ctx context.Context, url, dir string) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, downloadTimeout)
 	defer cancel()
 
@@ -155,7 +169,7 @@ func DownloadAsset(ctx context.Context, url string) (string, error) {
 		return "", fmt.Errorf("download returned %d", resp.StatusCode)
 	}
 
-	tmp, err := os.CreateTemp("", "twitch-miner-go-update-*")
+	tmp, err := os.CreateTemp(dir, ".twitch-miner-go-update-*")
 	if err != nil {
 		return "", fmt.Errorf("create temp file: %w", err)
 	}
@@ -178,21 +192,32 @@ func DownloadAsset(ctx context.Context, url string) (string, error) {
 // osExecutable is a variable so tests can override it.
 var osExecutable = os.Executable
 
-// ReplaceBinary atomically replaces the current executable with the file at tmpPath.
-// tmpPath is removed on failure.
-func ReplaceBinary(tmpPath string) error {
+// executablePath returns the real path of the running binary.
+func executablePath() (string, error) {
 	exe, err := osExecutable()
 	if err != nil {
-		os.Remove(tmpPath)
-		return fmt.Errorf("resolve executable path: %w", err)
+		return "", fmt.Errorf("resolve executable path: %w", err)
 	}
 	// Follow symlinks to the real file.
 	exe, err = filepath.EvalSymlinks(exe)
 	if err != nil {
+		return "", fmt.Errorf("eval symlinks: %w", err)
+	}
+	return exe, nil
+}
+
+// ReplaceBinary replaces the current executable with the file at tmpPath.
+// tmpPath is removed on failure.
+func ReplaceBinary(tmpPath string) error {
+	exe, err := executablePath()
+	if err != nil {
 		os.Remove(tmpPath)
-		return fmt.Errorf("eval symlinks: %w", err)
+		return err
 	}
 
+	if runtime.GOOS == "windows" {
+		return replaceWindows(exe, tmpPath)
+	}
 	if err := os.Rename(tmpPath, exe); err != nil {
 		os.Remove(tmpPath)
 		return fmt.Errorf("replace binary: %w", err)
@@ -200,8 +225,52 @@ func ReplaceBinary(tmpPath string) error {
 	return nil
 }
 
-// ExitForRestart logs that the update has been applied and exits with code 0
-// so the service manager (systemd, NSSM, OpenRC) restarts the process.
+// replaceWindows swaps the binary while it is running. Windows locks the
+// running image against deletion and overwrite but allows it to be renamed, so
+// the old binary is moved aside and removed by CleanupOldBinary on the next
+// start. A failed swap restores the previous binary.
+func replaceWindows(exe, tmpPath string) error {
+	oldPath := exe + oldBinarySuffix
+	if err := os.Remove(oldPath); err != nil && !os.IsNotExist(err) {
+		os.Remove(tmpPath)
+		return fmt.Errorf("remove previous binary %s: %w", oldPath, err)
+	}
+	if err := os.Rename(exe, oldPath); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("move running binary aside: %w", err)
+	}
+	if err := os.Rename(tmpPath, exe); err != nil {
+		if restoreErr := os.Rename(oldPath, exe); restoreErr != nil {
+			return errors.Join(
+				fmt.Errorf("replace binary: %w", err),
+				fmt.Errorf("restore previous binary: %w", restoreErr),
+			)
+		}
+		os.Remove(tmpPath)
+		return fmt.Errorf("replace binary: %w", err)
+	}
+	return nil
+}
+
+// CleanupOldBinary removes the executable that a Windows update moved aside.
+// The file stays locked until the updated process starts, so it is removed here.
+func CleanupOldBinary(log *slog.Logger) {
+	exe, err := executablePath()
+	if err != nil {
+		return
+	}
+	oldPath := exe + oldBinarySuffix
+	if err := os.Remove(oldPath); err != nil {
+		if !os.IsNotExist(err) {
+			log.Debug("Could not remove previous binary", "path", oldPath, "error", err)
+		}
+		return
+	}
+	log.Info("Removed previous binary after update", "path", oldPath)
+}
+
+// ExitForRestart logs that the update has been applied and exits with code 0 so
+// the service manager (systemd, NSSM, OpenRC) restarts the process.
 func ExitForRestart(log *slog.Logger) {
 	log.Info("Update applied — restarting via service manager")
 	os.Exit(0)
