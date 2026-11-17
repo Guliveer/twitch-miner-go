@@ -1,11 +1,11 @@
 <p align="center">
-  <a href="docs/brag.mp4">
+  <a href="https://glvr.vercel.app/twitch-miner-go">
     <img src="docs/brag.jpg" alt="twitch-miner-go - Go to bed. It's mining." width="100%">
   </a>
 </p>
 
 <p align="center">
-  <a href="docs/brag.mp4"><b>▶️ Watch the 20-second launch film</b></a>
+  <a href="https://glvr.vercel.app/twitch-miner-go"><b>▶️ Watch the 20-second launch film</b></a>
 </p>
 
 # twitch-miner-go // *Go to bed. It's mining.*
@@ -31,7 +31,7 @@ Automatically claim:
 
 Built for low resource usage and long-running deployments.
 
-**Quick start:** download a [release binary](https://github.com/Guliveer/twitch-miner-go/releases/latest) (Windows, macOS, Linux) or run `./_run.bat` — no browser, no Docker required. See [Running Locally](#14-running-locally) and the [Quick Start config](#151-quick-start).
+**Quick start:** download a [release binary](https://github.com/Guliveer/twitch-miner-go/releases/latest) (Windows, macOS, Linux), or from a clone run `./_run.sh` on macOS/Linux or double-click `_run.bat` on Windows — no browser, no Docker required. See [Running Locally](#14-running-locally) and the [Quick Start config](#151-quick-start).
 
 > ⭐ **[Star this repo](https://github.com/Guliveer/twitch-miner-go/stargazers)** to bookmark it to help others discover it — the project is young, actively developed, and the best time to jump in is now.
 
@@ -149,7 +149,7 @@ A drop-in **alternative to [Twitch Channel Points Miner v2](https://github.com/r
 ./_run.sh
 ```
 
-**Windows:**
+**Windows:** double-click `_run.bat` in File Explorer, or run it from Command Prompt or PowerShell:
 
 ```batch
 _run.bat
@@ -158,10 +158,16 @@ _run.bat
 **With custom flags:**
 
 ```bash
+# macOS / Linux
 ./_run.sh -config configs -port 9090 -log-level debug
 ```
 
-> The scripts build the binary and run it in one step. You can also build manually with `go build -o twitch-miner-go ./cmd/twitch-miner-go`.
+```bat
+REM Windows
+_run.bat -config configs -port 9090 -log-level debug
+```
+
+> The scripts build the binary and run it in one step. You can also build manually with `go build -o twitch-miner-go ./cmd/twitch-miner-go`. If the build fails after a double-click, the `_run.bat` window stays open with the error instead of closing.
 >
 > **Console window:** `_run.sh` / `_run.bat` pass `-no-console`, so on Windows the terminal window hides once the miner is running (bring it back with tray menu **Show Terminal**). Use `_run-localdev.sh` / `_run-localdev.bat` for local development — they keep the console visible and add dev-friendly flags (`-no-lifecycle-notify -skip-unauth -no-banner`).
 
@@ -192,8 +198,13 @@ Create one YAML file per account in the `configs/` directory. **The filename (wi
 For example, to add an account for Twitch user `guliveer_`, create `configs/guliveer_.yaml`.
 
 ```bash
-# Copy the example and customize for your account
+# macOS / Linux
 cp configs/example.yaml.example configs/your_twitch_username.yaml
+```
+
+```bat
+REM Windows (Command Prompt)
+copy configs\example.yaml.example configs\your_twitch_username.yaml
 ```
 
 See [`configs/example.yaml.example`](configs/example.yaml.example) for the full schema. Files with a `.yaml.example` extension are not loaded as configs — only `.yaml` and `.yml` files are loaded.
@@ -558,6 +569,8 @@ Cookie files store authentication tokens in plaintext by default. You can option
 echo 'COOKIE_ENCRYPTION_KEY=<generated_key>' >> .env
 ```
 
+> Both helpers are POSIX shell scripts. On Windows, generate the key with `openssl rand -base64 32` (for example in Git Bash) and add the `COOKIE_ENCRYPTION_KEY=<generated_key>` line to `.env` manually.
+
 **Behavior:**
 
 - **Without `COOKIE_ENCRYPTION_KEY`** — cookies are stored and loaded as plaintext (default, unchanged behavior).
@@ -640,7 +653,7 @@ The `events` list controls which events trigger a notification for a given provi
 | `ACCOUNT_CONFIG_RELOADED`    | 🔄    | Account config changed in DB or YAML and miner was restarted (DB mode and file mode) |
 | `TEST`                       | —     | Test notification (see below)                                                      |
 
-> **Note:** Emojis are prepended to log messages and notifications automatically. The emoji mappings are defined in [`eventEmoji`](internal/logger/logger.go:19). The event type constants are defined in [`internal/model/settings.go`](internal/model/settings.go:7).
+> **Note:** Emojis are prepended to log messages and notifications automatically. The emoji mappings are defined in [`eventEmoji`](internal/logger/logger.go#L19). The event type constants are defined in [`internal/model/settings.go`](internal/model/settings.go#L7).
 >
 > **Note:** Lifecycle events (`MINER_STARTED`, `MINER_STOPPED`, `MINER_CRASHED`, `ACCOUNT_CONFIG_RELOADED`) are always sent immediately — they bypass notification batching entirely.
 >
@@ -707,6 +720,8 @@ The miner exposes a `POST /api/test-notification` endpoint on the analytics serv
 curl -X POST http://localhost:8080/api/test-notification
 ```
 
+> On Windows PowerShell, `curl` is an alias for `Invoke-WebRequest` and does not accept `-X`. Use `curl.exe -X POST http://localhost:8080/api/test-notification`, or `Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/test-notification`.
+
 A successful response looks like:
 
 ```json
@@ -768,6 +783,17 @@ The variable name is `TWITCH_AUTH_TOKEN_` followed by the **uppercase** username
 
 ## 1.9. Docker
 
+The `docker run` commands below pass `--env-file .env`, so create that file from the template first — Docker fails if it is missing:
+
+```bash
+cp .env.example .env
+```
+
+```bat
+REM Windows (Command Prompt)
+copy .env.example .env
+```
+
 ```bash
 # Build
 docker build -t twitch-miner-go .
@@ -801,6 +827,8 @@ docker run -d \
   -e TWITCH_PASSWORD_YOUR_USERNAME=your_twitch_password \
   twitch-miner-go
 ```
+
+> These commands are written for bash: run them as a single line on Windows, and replace `$(pwd)` with `%cd%` in Command Prompt or `${PWD}` in PowerShell. PowerShell continues a line with a backtick, not `\`.
 
 ### 1.9.1. Docker Compose
 
@@ -882,10 +910,11 @@ sudo ./tools/install-service.sh uninstall
 
 ## 1.11. Windows Service
 
-Run twitch-miner-go as a Windows service with automatic restarts. The binary is rebuilt from source on every start, so config and code changes are always picked up. Uses [NSSM](https://nssm.cc/) (auto-downloaded if not installed).
+Run twitch-miner-go as a Windows service with automatic restarts. The installer builds the binary once and the service runs it directly, so a downloaded auto-update is not overwritten when the service restarts; the `restart` command rebuilds from source when you changed code. Uses [NSSM](https://nssm.cc/) (auto-downloaded if not installed).
+
+Double-click `tools\install-service.bat` and accept the UAC prompt — the script re-launches itself elevated. To pick a specific command, run it from Command Prompt or PowerShell (it asks for elevation the same way):
 
 ```bat
-REM Right-click and select "Run as administrator"
 tools\install-service.bat install
 ```
 
@@ -894,11 +923,15 @@ The wizard will prompt for config directory, port, and log level.
 ### 1.11.1. Managing the Service
 
 ```bat
-tools\install-service.bat start       REM starts (rebuilds the binary first)
+REM starts the service
+tools\install-service.bat start
 tools\install-service.bat stop
-tools\install-service.bat restart     REM restart with a fresh rebuild
+REM rebuilds from source, then restarts
+tools\install-service.bat restart
 tools\install-service.bat status
 ```
+
+> Services installed by an older version of the installer run `_run.bat` and rebuild on every start. Re-run `tools\install-service.bat install` once to switch them to the direct wrapper — otherwise an auto-update is replaced by a rebuild on the next restart.
 
 ### 1.11.2. Uninstalling
 
@@ -917,9 +950,12 @@ The repo includes [`fly.toml`](fly.toml) — the Fly.io deployment config. Fly.i
 ```bash
 # 1. Copy the example account config and customize (filename = your Twitch username)
 cp configs/example.yaml.example configs/your_twitch_username.yaml
+#    Windows: use "copy" instead of "cp"
 
-# 2. Install flyctl
+# 2. Install flyctl (macOS / Linux)
 curl -L https://fly.io/install.sh | sh
+#    Windows PowerShell:
+#    iwr https://fly.io/install.ps1 -useb | iex
 
 # 3. Login
 fly auth login
@@ -979,7 +1015,11 @@ For self-hosted deployments, Docker Compose is also supported — see the [Docke
 
 ## 1.13. Development
 
-This project uses [Conventional Commits](https://www.conventionalcommits.org/) and automated versioning. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full commit convention, git hooks setup, and versioning workflow.
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) and automated versioning. See [`CONTRIBUTING.md`](.github/CONTRIBUTING.md) for the full commit convention, git hooks setup, and versioning workflow.
+
+The landing page in [`docs/`](docs/) is published to GitHub Pages by the
+[`Pages`](.github/workflows/pages.yml) workflow on every push to `main` that
+touches that directory.
 
 ## 1.14. Auto-Update
 
@@ -990,15 +1030,27 @@ On startup, the miner automatically checks for new releases in the background. I
 Pass `-auto-update` to have the miner download and apply the update itself:
 
 ```bash
+# macOS / Linux
 ./_run.sh -auto-update
+```
+
+```bat
+REM Windows
+_run.bat -auto-update
 ```
 
 When a new release is detected:
 1. The platform-specific binary is downloaded from [GitHub Releases](https://github.com/Guliveer/twitch-miner-go/releases).
-2. The current binary is replaced atomically.
+2. The download is written next to the running executable and renamed into place, so the swap never crosses a filesystem boundary.
 3. The process exits with code 0 — your service manager (systemd, NSSM, OpenRC) restarts it automatically with the new binary.
 
 If the download or replacement fails (e.g. no write permission, Docker read-only filesystem), the miner continues running and prints the usual update notification instead.
+
+> **Windows:** a running executable cannot be overwritten, so the updater renames the current binary to `twitch-miner-go.exe.old`, puts the new one in place, and removes the leftover file on the next start. The `.old` file is expected until the process has restarted.
+
+> **systemd:** the unit written by `tools/install-service.sh` uses `Restart=always`, so the clean exit after an update restarts the service. Units installed by older versions used `Restart=on-failure` and must be reinstalled (or edited) to pick up automatic restarts after an update.
+
+> **Running by hand:** without a service manager the miner simply exits after applying the update. Start it again to use the new version.
 
 **To enable in a systemd unit**, add `-auto-update` to `ExecStart`:
 ```ini
