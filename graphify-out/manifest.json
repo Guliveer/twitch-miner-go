@@ -12,9 +12,9 @@
     "semantic_hash": ""
   },
   "cmd/twitch-miner-go/main.go": {
-    "mtime": 1794864416.7210548,
-    "seen": 1794867830.141719,
-    "ast_hash": "ef21a03019eb3a2676418a02236de348",
+    "mtime": 1794949316.1995537,
+    "seen": 1794949741.919667,
+    "ast_hash": "c2c86c61c6ea54686580830272dfd5a8",
     "semantic_hash": ""
   },
   "go.mod": {
@@ -474,15 +474,15 @@
     "semantic_hash": ""
   },
   "internal/updater/updater.go": {
-    "mtime": 1788211796.598376,
-    "seen": 1788555176.5098155,
-    "ast_hash": "77d46f5e6956814a32180021db8abcf8",
+    "mtime": 1794949309.1265442,
+    "seen": 1794949741.9289434,
+    "ast_hash": "76e0d99a4873b17f3a4d3b37aa2c4f8a",
     "semantic_hash": ""
   },
   "internal/updater/updater_test.go": {
-    "mtime": 1788211796.598376,
-    "seen": 1788555176.5098162,
-    "ast_hash": "95575d8394ac26d62a1b7bfde2a0a359",
+    "mtime": 1794949325.1935368,
+    "seen": 1794949741.9289443,
+    "ast_hash": "248dd333c22a751e67aad7a071bcdbb5",
     "semantic_hash": ""
   },
   "internal/utils/utils.go": {
@@ -642,9 +642,9 @@
     "semantic_hash": ""
   },
   ".github/PULL_REQUEST_TEMPLATE.md": {
-    "mtime": 1788211796.5302706,
-    "seen": 1788555176.5098395,
-    "ast_hash": "c95daf1d20a38e23db925a496b43acf8",
+    "mtime": 1794950054.7245908,
+    "seen": 1794950740.1380572,
+    "ast_hash": "da1c84887a3fcd905290bc3531530648",
     "semantic_hash": ""
   },
   ".github/copilot-instructions.md": {
@@ -672,15 +672,15 @@
     "semantic_hash": ""
   },
   ".github/wiki/Getting-Started.md": {
-    "mtime": 1789405442.704595,
-    "seen": 1791829509.20305,
-    "ast_hash": "5ddfe2d776376d000c60c3036911ca0a",
+    "mtime": 1794950401.0783944,
+    "seen": 1794950740.1384263,
+    "ast_hash": "98f937f7756777fdac33cbe48b2729e6",
     "semantic_hash": ""
   },
   ".github/wiki/Home.md": {
-    "mtime": 1788626314.7013965,
-    "seen": 1788686728.2136679,
-    "ast_hash": "6d1a38985315fc1a0b63219fa49d8878",
+    "mtime": 1794950055.9182057,
+    "seen": 1794950740.138427,
+    "ast_hash": "e5a2f6fa18fee3fed7a9a39e061a1780",
     "semantic_hash": ""
   },
   ".github/wiki/Notifications.md": {
@@ -702,9 +702,9 @@
     "semantic_hash": ""
   },
   ".github/wiki/_Footer.md": {
-    "mtime": 1788211796.5382779,
-    "seen": 1788555176.5098464,
-    "ast_hash": "1922ee48c712d576857cd562d647567d",
+    "mtime": 1794950056.4496336,
+    "seen": 1794950740.1386082,
+    "ast_hash": "8a3cded9a78c3849ce4873193a514ec1",
     "semantic_hash": ""
   },
   ".github/wiki/_Sidebar.md": {
@@ -755,16 +755,10 @@
     "ast_hash": "33be5432dfa59cd22db77966bbbeec9a",
     "semantic_hash": ""
   },
-  "CONTRIBUTING.md": {
-    "mtime": 1791749134.6784942,
-    "seen": 1791829509.204062,
-    "ast_hash": "53c9eb8408e2caa324cdd5f8838868ff",
-    "semantic_hash": ""
-  },
   "DEPLOYMENT.md": {
-    "mtime": 1788701295.8588471,
-    "seen": 1791829509.204064,
-    "ast_hash": "37b92dba51828599768da72bced9852e",
+    "mtime": 1794950459.152603,
+    "seen": 1794950740.1393168,
+    "ast_hash": "1be386aee7cc0e39137f57dc5bc49201",
     "semantic_hash": ""
   },
   "GEMINI.md": {
@@ -780,15 +774,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794870085.4242213,
-    "seen": 1794870305.563773,
-    "ast_hash": "32f7d9ad017eb9eea10af709d528e2a7",
-    "semantic_hash": ""
-  },
-  "SECURITY.md": {
-    "mtime": 1788211796.5382779,
-    "seen": 1788555176.5098567,
-    "ast_hash": "b54461f2766049e73814f85c298e7ab9",
+    "mtime": 1794952209.0895493,
+    "seen": 1794952539.9851575,
+    "ast_hash": "baa37b6a8d1f5c9956adca999da4572b",
     "semantic_hash": ""
   },
   "configs/guliveer_.yaml": {
@@ -992,12 +980,6 @@
     "ast_hash": "a73a831fee6bbba4a05b22f7197ea087",
     "semantic_hash": ""
   },
-  "CODE_OF_CONDUCT.md": {
-    "mtime": 1788211796.5382779,
-    "seen": 1788555176.5098534,
-    "ast_hash": "5012c4bd3df31974e1f5ec19c9d2b8d0",
-    "semantic_hash": ""
-  },
   "docs/social_preview_1.png": {
     "mtime": 1794864416.722055,
     "seen": 1794867830.153181,
@@ -1131,9 +1113,9 @@
     "semantic_hash": ""
   },
   "tools/install-service.sh": {
-    "mtime": 1788211796.6041217,
-    "seen": 1788555176.5098257,
-    "ast_hash": "f8ce1a059443e86c815defbe19426477",
+    "mtime": 1794949316.753549,
+    "seen": 1794949741.9301915,
+    "ast_hash": "f2105d677151e4cd2bacd76ee1ede884",
     "semantic_hash": ""
   },
   "internal/gql/operations_test.go": {
@@ -1431,9 +1413,9 @@
     "semantic_hash": ""
   },
   "DESIGN.md": {
-    "mtime": 1794864416.7185159,
-    "seen": 1794867830.152878,
-    "ast_hash": "aea0d7b6e10d041c12ef60002df23624",
+    "mtime": 1794950875.825418,
+    "seen": 1794951270.2722716,
+    "ast_hash": "c8d3f604615cd0d7163bc0e10b2804e5",
     "semantic_hash": ""
   },
   "docs/social_preview_4.png": {
@@ -1491,15 +1473,51 @@
     "semantic_hash": ""
   },
   "docs/brag.jpg": {
-    "mtime": 1794870653.9745033,
-    "seen": 1794870666.5590212,
+    "mtime": 1794871288.8481429,
+    "seen": 1794949741.9337964,
     "ast_hash": "761c6ead154f3443db5e6116463bc92a",
     "semantic_hash": ""
   },
   "docs/brag.mp4": {
-    "mtime": 1794870653.9735053,
-    "seen": 1794870666.5593092,
+    "mtime": 1794871288.853141,
+    "seen": 1794949741.9340868,
     "ast_hash": "f46125171ca0d694c5cb4d3af5e8d20a",
+    "semantic_hash": ""
+  },
+  "docs/app.js": {
+    "mtime": 1794951120.5698264,
+    "seen": 1794951270.2527108,
+    "ast_hash": "d1aec3a5f7f30fe11fe1e8ebc7b8c074",
+    "semantic_hash": ""
+  },
+  "docs/index.html": {
+    "mtime": 1794952493.1936243,
+    "seen": 1794952539.9853327,
+    "ast_hash": "42c2c74ccf312948fa87ec5a5e4541fc",
+    "semantic_hash": ""
+  },
+  ".github/CODE_OF_CONDUCT.md": {
+    "mtime": 1788211796.5382779,
+    "seen": 1794950740.137235,
+    "ast_hash": "5012c4bd3df31974e1f5ec19c9d2b8d0",
+    "semantic_hash": ""
+  },
+  ".github/CONTRIBUTING.md": {
+    "mtime": 1794950052.9784906,
+    "seen": 1794950740.1372366,
+    "ast_hash": "636dfe715944d89b6b4058b431e61ecd",
+    "semantic_hash": ""
+  },
+  ".github/SECURITY.md": {
+    "mtime": 1788211796.5382779,
+    "seen": 1794950740.1380584,
+    "ast_hash": "b54461f2766049e73814f85c298e7ab9",
+    "semantic_hash": ""
+  },
+  "docs/social_preview_5.png": {
+    "mtime": 1794950551.4067142,
+    "seen": 1794950740.1401994,
+    "ast_hash": "0bf6878bcecaf92fa9b2be2545633ccb",
     "semantic_hash": ""
   }
 }
