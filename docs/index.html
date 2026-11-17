@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>twitch-miner-go — Go to bed. It's mining.</title>
+        <meta name="description" content="One static Go binary that mines Twitch channel points, claims drops, bonuses, predictions, raids, moments and community goals. Multi-account, a built-in dashboard and ~80 MB of RAM.">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="twitch-miner-go — Go to bed. It's mining.">
+        <meta property="og:description" content="Mines channel points, claims drops, places predictions, joins raids and claims moments — several accounts in one small static binary.">
+        <meta property="og:image" content="https://raw.githubusercontent.com/Guliveer/twitch-miner-go/main/docs/brag.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230e0e0e'/%3E%3Cg fill='none' stroke='%233fd6c6' stroke-width='2.2'%3E%3Cpath d='M8 12V8h4'/%3E%3Cpath d='M24 12V8h-4'/%3E%3Cpath d='M8 20v4h4'/%3E%3Cpath d='M24 20v4h-4'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='2.2' fill='%233fd6c6'/%3E%3C/svg%3E">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="style.css">
+        <script>document.documentElement.classList.add('js');</script>
+        <noscript><style>.bar-fill { width: var(--bar-width, 0); }</style></noscript>
+    </head>
+
+    <body>
+        <a class="skip-link" href="#main">Skip to content</a>
+
+        <header class="site-header">
+            <div class="shell header-inner">
+                <a class="brand" href="#top" aria-label="twitch-miner-go — back to top">
+                    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                        <g fill="none" stroke="currentColor" stroke-width="2.2">
+                            <path d="M8 12V8h4" />
+                            <path d="M24 12V8h-4" />
+                            <path d="M8 20v4h4" />
+                            <path d="M24 20v4h-4" />
+                        </g>
+                        <circle cx="16" cy="16" r="2.2" fill="currentColor" />
+                    </svg>
+                    <span>twitch-miner-go</span>
+                </a>
+
+                <nav class="site-nav" aria-label="Sections">
+                    <a href="#film">Film</a>
+                    <a href="#discovery">Discovery</a>
+                    <a href="#claims">Claims</a>
+                    <a href="#performance">Performance</a>
+                    <a href="#install">Install</a>
+                    <a href="#quick-start">Quick start</a>
+                    <a href="#faq">FAQ</a>
+                </nav>
+
+                <div class="header-actions">
+                    <a class="btn btn-secondary" href="https://github.com/Guliveer/twitch-miner-go">GitHub</a>
+                    <a class="btn btn-primary" href="https://github.com/Guliveer/twitch-miner-go/releases/latest">Download</a>
+                </div>
+            </div>
+        </header>
+
+        <main id="main">
+            <section class="hero" id="top">
+                <div class="shell">
+                    <div class="hero-grid">
+                        <div class="hero-copy">
+                            <p class="kicker">Twitch channel points, drops and bonuses — automated</p>
+                            <h1 class="display">
+                                <span class="line"><span>Mine Twitch</span></span>
+                                <span class="line"><span>in your sleep.</span></span>
+                            </h1>
+                            <p class="hero-lede">
+                                A single Go binary that watches the channels worth watching, claims what
+                                they pay out, and keeps a dashboard open for you — on a desktop, a
+                                Raspberry Pi or a VPS.
+                            </p>
+                            <div class="hero-actions">
+                                <a class="btn btn-primary btn-lg" href="https://github.com/Guliveer/twitch-miner-go/releases/latest">Download the binary</a>
+                                <a class="btn btn-secondary btn-lg" href="#install">See how it runs</a>
+                            </div>
+                            <p class="hero-note">Windows, macOS and Linux · amd64 and arm64 · no runtime to install</p>
+                            <p class="hero-film"><a href="#film">Watch the 20-second film</a></p>
+                        </div>
+
+                        <div class="hero-object">
+                            <figure class="dash-figure">
+                                <div class="dash" aria-label="Preview of the built-in dashboard">
+                                    <div class="dash-head">
+                                        <span class="dash-brand">Twitch Miner Go</span>
+                                        <div class="dash-stats">
+                                            <span class="dash-stat"><span class="dash-key">Streamers</span><span class="dash-value" data-count="12">12</span></span>
+                                            <span class="dash-stat"><span class="dash-key">Online</span><span class="dash-value" data-count="9">9</span></span>
+                                            <span class="dash-stat"><span class="dash-key">Points</span><span class="dash-value" data-count="1.4" data-count-decimals="1" data-count-suffix="M">1.4M</span></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="dash-filters" aria-hidden="true">
+                                        <span class="dash-field">All accounts</span>
+                                        <span class="dash-field">Any category</span>
+                                        <span class="dash-field">Online</span>
+                                    </div>
+
+                                    <div class="dash-cards">
+                                        <article class="dash-card">
+                                            <div class="dash-card-head">
+                                                <span class="dash-name">xQc</span>
+                                                <span class="tag tag-live"><span class="live-dot" aria-hidden="true"></span>Live</span>
+                                            </div>
+                                            <p class="dash-meta"><span class="dash-points">84,120 pts</span> · Just Chatting · 42,318 viewers</p>
+                                            <div class="dash-drop">
+                                                <div class="dash-drop-head">
+                                                    <span class="dash-drop-name">Rust Twitch Drops</span>
+                                                    <span class="tag tag-claimable">Claimable</span>
+                                                </div>
+                                                <div class="bar"><span class="bar-fill" data-progress="100" style="--bar-width: 100%"></span></div>
+                                                <p class="bar-label">100% (60/60m)</p>
+                                            </div>
+                                        </article>
+
+                                        <article class="dash-card">
+                                            <div class="dash-card-head">
+                                                <span class="dash-name">insym</span>
+                                                <span class="tag tag-live"><span class="live-dot" aria-hidden="true"></span>Live</span>
+                                            </div>
+                                            <p class="dash-meta"><span class="dash-points">23,860 pts</span> · Phasmophobia · 6,204 viewers</p>
+                                            <div class="dash-drop">
+                                                <div class="dash-drop-head">
+                                                    <span class="dash-drop-name">Halloween Event</span>
+                                                    <span class="tag tag-muted">In progress</span>
+                                                </div>
+                                                <div class="bar"><span class="bar-fill" data-progress="82" style="--bar-width: 82%"></span></div>
+                                                <p class="bar-label">82% (41/50m)</p>
+                                            </div>
+                                        </article>
+
+                                        <article class="dash-card">
+                                            <div class="dash-card-head">
+                                                <span class="dash-name">jimpanse</span>
+                                                <span class="tag tag-outline">Offline</span>
+                                            </div>
+                                            <p class="dash-meta"><span class="dash-points">9,412 pts</span> · Chess · last seen 2h ago</p>
+                                            <div class="dash-drop">
+                                                <div class="dash-drop-head">
+                                                    <span class="dash-drop-name">Watch streak</span>
+                                                    <span class="tag tag-muted">Collected</span>
+                                                </div>
+                                                <div class="bar"><span class="bar-fill" data-progress="100" style="--bar-width: 100%"></span></div>
+                                                <p class="bar-label">100% (5/5m)</p>
+                                            </div>
+                                        </article>
+                                    </div>
+
+                                    <div class="dash-foot">
+                                        <span>Auto-refreshes every 30 seconds</span>
+                                        <span class="dash-version">v1.28.0</span>
+                                    </div>
+                                </div>
+                                <figcaption>Built-in dashboard at localhost:8080 — example data</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+
+                    <ul class="facts">
+                        <li>Single static binary</li>
+                        <li>Multi-account</li>
+                        <li>Built-in dashboard</li>
+                        <li>~80 MB RAM</li>
+                        <li>24/7 headless</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="section" id="film">
+                <div class="shell">
+                    <div class="film-head" data-reveal>
+                        <h2>The whole product, in twenty seconds.</h2>
+                        <p class="film-meta">Launch film · 20 s · 1920 × 1080</p>
+                    </div>
+
+                    <figure class="film-frame" data-reveal>
+                        <video id="brag-film" controls playsinline preload="metadata" poster="brag.jpg" width="1920" height="1080">
+                            <source src="brag.mp4" type="video/mp4">
+                            This browser cannot play the video. <a href="brag.mp4">Download the film</a> instead.
+                        </video>
+                        <button class="film-play" type="button" data-film-play aria-label="Play the 20-second launch film">
+                            <span class="film-play-icon" aria-hidden="true"></span>
+                            <span>Play the film</span>
+                            <span class="film-play-meta">20 s</span>
+                        </button>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="section" id="discovery">
+                <div class="shell">
+                    <div class="section-grid">
+                        <div class="section-intro" data-reveal>
+                            <h2>It finds the streamers.</h2>
+                            <p>
+                                You configure a rule, not a list. The miner looks for channels that
+                                match it and keeps watching the ones that pay out — new streamer, same
+                                config.
+                            </p>
+                        </div>
+
+                        <div class="rows" data-reveal>
+                            <div class="row">
+                                <h3 class="row-label">Category watcher</h3>
+                                <p>
+                                    Watches live channels in a game category you name. A stream that
+                                    starts later is picked up without touching the config.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">Badge watcher</h3>
+                                <p>
+                                    Opt-in discovery of streams that reward watch-time chat badges,
+                                    driven by the community catalogs the Python miners maintain.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">Team watcher</h3>
+                                <p>
+                                    Follows Twitch team membership, so every live channel on the team
+                                    joins the watch set.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">Followers mode</h3>
+                                <p>
+                                    Watches everyone you already follow, optionally ordered by viewer
+                                    count. Combine it with a blacklist when an account follows hundreds
+                                    of channels.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="claims">
+                <div class="shell">
+                    <div class="section-head" data-reveal>
+                        <h2>Collected while you were away.</h2>
+                        <p>Every routine claim has its own toggle and schedule, per account.</p>
+                    </div>
+
+                    <ul class="claims" data-reveal>
+                        <li>
+                            <span class="tick" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                            </span>
+                            <h3>Drops</h3>
+                            <p>Campaign progress is synced and each reward is claimed as it unlocks.</p>
+                        </li>
+                        <li>
+                            <span class="tick" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                            </span>
+                            <h3>Channel points</h3>
+                            <p>Minute-watched events and bonus chests, with a narrowed watch set for streaks.</p>
+                        </li>
+                        <li>
+                            <span class="tick" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                            </span>
+                            <h3>Bonuses</h3>
+                            <p>Available bonus claims are collected instead of expiring unattended.</p>
+                        </li>
+                        <li>
+                            <span class="tick" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                            </span>
+                            <h3>Predictions</h3>
+                            <p>SMART, HIGH_ODDS or MOST_VOTED strategies with a point cap and a bet delay.</p>
+                        </li>
+                        <li>
+                            <span class="tick" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                            </span>
+                            <h3>Raids</h3>
+                            <p>Joins the raid when a watched channel ends, so the points follow the host.</p>
+                        </li>
+                        <li>
+                            <span class="tick" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                            </span>
+                            <h3>Moments</h3>
+                            <p>Community moments are claimed while they are available.</p>
+                        </li>
+                        <li>
+                            <span class="tick" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                            </span>
+                            <h3>Goals</h3>
+                            <p>Contributes to active community goals when the account has points to spare.</p>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="section" id="performance">
+                <div class="shell">
+                    <div class="section-head" data-reveal>
+                        <h2>Small enough to forget.</h2>
+                        <p>
+                            One compiled binary instead of a Python environment. The figures below
+                            are the project's own measurements against a Python channel points miner.
+                        </p>
+                    </div>
+
+                    <div class="table-scroll" data-reveal>
+                        <table class="compare">
+                            <caption>Approximate. Depends on configuration, number of accounts and active channels.</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Resource</th>
+                                    <th scope="col">Python miner</th>
+                                    <th scope="col" class="featured">twitch-miner-go</th>
+                                    <th scope="col">Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Memory</th>
+                                    <td>&gt;250 MB, spiking</td>
+                                    <td class="featured">~80 MB, stable</td>
+                                    <td>3× less</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Docker image</th>
+                                    <td>200–500 MB</td>
+                                    <td class="featured">~12 MB</td>
+                                    <td>20–40× smaller</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Startup time</th>
+                                    <td>5–10 s</td>
+                                    <td class="featured">~2–3 s</td>
+                                    <td>2–4× faster</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Streamer loading</th>
+                                    <td>~4,500 ms / 5 streamers</td>
+                                    <td class="featured">~260 ms / 5 streamers</td>
+                                    <td>~17× faster</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">OS threads</th>
+                                    <td>60+</td>
+                                    <td class="featured">~4–5, ~25 goroutines</td>
+                                    <td>12× fewer</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="install">
+                <div class="shell">
+                    <div class="section-head" data-reveal>
+                        <h2>One binary. No runtime.</h2>
+                        <p>
+                            The dashboard, the config editor and the miner itself ship in the same
+                            executable. Pick the way you already deploy things.
+                        </p>
+                    </div>
+
+                    <div class="install-grid">
+                        <article class="install-panel" data-reveal>
+                            <p class="panel-label">Download</p>
+                            <h3>Release build</h3>
+                            <p class="panel-text">
+                                Unpack the file for your platform and run it. No Python, no
+                                <code>pip install</code>, no dependency conflicts.
+                            </p>
+                            <ul class="download-list">
+                                <li><a href="https://github.com/Guliveer/twitch-miner-go/releases/latest">Windows amd64 / arm64</a></li>
+                                <li><a href="https://github.com/Guliveer/twitch-miner-go/releases/latest">macOS arm64 / amd64</a></li>
+                                <li><a href="https://github.com/Guliveer/twitch-miner-go/releases/latest">Linux amd64 / arm64</a></li>
+                            </ul>
+                            <p class="panel-note">Then copy <code>configs/example.yaml.example</code> to <code>configs/&lt;username&gt;.yaml</code>.</p>
+                        </article>
+
+                        <article class="install-panel" data-reveal>
+                            <p class="panel-label">Source</p>
+                            <h3>Run the script</h3>
+                            <p class="panel-text">Requires Go 1.25 or newer. The script builds and starts the miner in one step.</p>
+                            <div class="code">
+                                <div class="code-bar">
+                                    <span class="code-label">Shell</span>
+                                    <button class="copy" type="button" data-copy="code-source" aria-label="Copy the source command">Copy</button>
+                                </div>
+                                <pre id="code-source"><code>git clone https://github.com/Guliveer/twitch-miner-go.git
+cd twitch-miner-go
+./_run.sh</code></pre>
+                            </div>
+                            <p class="panel-note">On Windows use <code>_run.bat</code>.</p>
+                        </article>
+
+                        <article class="install-panel install-panel-wide" data-reveal>
+                            <p class="panel-label">Container</p>
+                            <h3>Docker</h3>
+                            <p class="panel-text">
+                                A ~12 MB image. Mount the config directory and a data volume so
+                                cookies survive a restart.
+                            </p>
+                            <div class="code">
+                                <div class="code-bar">
+                                    <span class="code-label">Shell</span>
+                                    <button class="copy" type="button" data-copy="code-docker" aria-label="Copy the Docker command">Copy</button>
+                                </div>
+                                <pre id="code-docker"><code>docker run -d --name twitch-miner \
+  -p 8080:8080 \
+  -v miner_data:/data \
+  -v "$PWD/configs:/configs:ro" \
+  -e DATA_DIR=/data \
+  --env-file .env \
+  ghcr.io/guliveer/twitch-miner-go:latest</code></pre>
+                            </div>
+                            <p class="panel-note">Docker Compose, systemd, OpenRC, a Windows service and Fly.io are documented in the README.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="quick-start">
+                <div class="shell">
+                    <div class="section-grid">
+                        <div class="section-intro" data-reveal>
+                            <h2>Five steps to a running miner.</h2>
+                            <p>
+                                Download, one YAML file, one login. Everything else has a default.
+                                The <a href="https://github.com/Guliveer/twitch-miner-go/wiki/Getting-Started">wiki</a>
+                                has the long version with every flag and option.
+                            </p>
+                        </div>
+
+                        <ol class="rows steps" data-reveal>
+                            <li>
+                                <h3>Download the archive</h3>
+                                <p>
+                                    Take the Windows, macOS or Linux build from
+                                    <a href="https://github.com/Guliveer/twitch-miner-go/releases/latest">Releases</a>
+                                    and unpack it. The binary is the whole program — no runtime to install.
+                                </p>
+                            </li>
+                            <li>
+                                <h3>Create one config</h3>
+                                <p>
+                                    Copy <code>configs/example.yaml.example</code> to
+                                    <code>configs/&lt;your_twitch_username&gt;.yaml</code>. The filename is
+                                    the account name; the example explains every key.
+                                </p>
+                            </li>
+                            <li>
+                                <h3>Start the miner</h3>
+                                <p>
+                                    Run the binary, or from a clone double-click <code>_run.bat</code> on
+                                    Windows and run <code>./_run.sh</code> on macOS and Linux. On a desktop,
+                                    the tray icon opens the dashboard and the config editor.
+                                </p>
+                            </li>
+                            <li>
+                                <h3>Sign in once</h3>
+                                <p>
+                                    Approve the device code at twitch.tv/activate. The token is saved as
+                                    a cookie, so every later start is unattended; headless hosts pass
+                                    <code>TWITCH_AUTH_TOKEN_&lt;USERNAME&gt;</code> instead.
+                                </p>
+                            </li>
+                            <li>
+                                <h3>Open the dashboard</h3>
+                                <p>
+                                    Analytics on <code>localhost:8080</code>, the config editor on
+                                    <code>localhost:8070</code> in file mode. Both ship inside the same
+                                    binary.
+                                </p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="operations">
+                <div class="shell">
+                    <div class="columns" data-reveal>
+                        <div class="column">
+                            <p class="panel-label">Notifications</p>
+                            <h3>Know what it earned</h3>
+                            <p>
+                                A drop claimed, a bet won, a streamer online, a crash — sent to the
+                                channel you actually read. Filter events per provider or batch them
+                                into one message.
+                            </p>
+                            <ul class="chips">
+                                <li class="chip">Telegram</li>
+                                <li class="chip">Discord</li>
+                                <li class="chip">Webhook</li>
+                                <li class="chip">Matrix</li>
+                                <li class="chip">Pushover</li>
+                                <li class="chip">Gotify</li>
+                            </ul>
+                        </div>
+
+                        <div class="column">
+                            <p class="panel-label">Accounts</p>
+                            <h3>Many accounts, one process</h3>
+                            <p>
+                                Each account has its own YAML config (or a PostgreSQL row), its own
+                                cookies and its own notification channel. YAML changes hot-reload
+                                without a restart.
+                            </p>
+                            <p class="column-note">
+                                DB mode replaces files with a REST API and survives a redeploy without
+                                a config volume.
+                            </p>
+                        </div>
+
+                        <div class="column">
+                            <p class="panel-label">Built in</p>
+                            <h3>Dashboard included</h3>
+                            <p>
+                                Analytics on <code>:8080</code>, a config editor on
+                                <code>:8070</code> in file mode, and event logs. Nothing else to host,
+                                nothing to sign up for.
+                            </p>
+                            <p class="column-note">
+                                Prefer a dedicated UI? <a href="https://github.com/Guliveer/twitch-miner-go-dashboard">twitch-miner-go-dashboard</a>
+                                manages DB-mode accounts.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="faq">
+                <div class="shell">
+                    <div class="section-grid">
+                        <div class="section-intro" data-reveal>
+                            <h2>Questions people ask first.</h2>
+                            <p>The long version lives in the <a href="https://github.com/Guliveer/twitch-miner-go/wiki/FAQ">project wiki</a>.</p>
+                        </div>
+
+                        <div class="faq-list" data-reveal>
+                            <details>
+                                <summary>Do I need Go installed?</summary>
+                                <p>
+                                    No. The release binary is self-contained. Go is only needed to build
+                                    from source or to run the standalone config editor from its script.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>What happens on the first run?</summary>
+                                <p>
+                                    The miner walks through authentication until one method succeeds. In
+                                    an interactive terminal that means a device code: it prints a code,
+                                    you approve it at twitch.tv/activate, and the token is saved for the
+                                    next start. Headless hosts can supply
+                                    <code>TWITCH_AUTH_TOKEN_&lt;USERNAME&gt;</code> instead.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>How do I add a second account?</summary>
+                                <p>
+                                    Drop a YAML file into <code>configs/</code> named after the Twitch
+                                    username — the filename is the username, there is no field inside. The
+                                    file watcher starts the new account without a restart.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>Do config edits need a restart?</summary>
+                                <p>
+                                    No. YAML changes hot-reload by default. An invalid config is skipped
+                                    and a disabled account is stopped with a line in the log; set
+                                    <code>enabled: false</code> to pause an account without deleting it.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>Does it actually watch the stream?</summary>
+                                <p>
+                                    No video or audio is played. The miner sends minute-watched events
+                                    every 20 seconds for the streamers it picked, which is what Twitch
+                                    counts for points, streaks and drops.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>Does it collect any data?</summary>
+                                <p>
+                                    Anonymous telemetry is on by default: instance ID, version, OS,
+                                    architecture and the number of running accounts. No usernames,
+                                    channel names, IPs or tokens. Turn it off with
+                                    <code>TELEMETRY_AGREE=false</code>.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>Why does Docker lose the account after a restart?</summary>
+                                <p>
+                                    Cookies, state and the instance ID live in <code>/data</code>,
+                                    configs in <code>/configs</code>. Mount both as persistent volumes —
+                                    without <code>-v miner_data:/data</code> they vanish with the
+                                    container.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>Can it update itself?</summary>
+                                <p>
+                                    With <code>-auto-update</code> it downloads the release for your OS
+                                    and architecture, replaces the binary and exits so the service
+                                    manager starts the new version. On Windows the running executable is
+                                    moved aside first, because Windows will not overwrite it in place.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>Is it open source?</summary>
+                                <p>
+                                    Yes — GNU GPL v3.0. The source, the issue tracker and the release
+                                    history are all on <a href="https://github.com/Guliveer/twitch-miner-go">GitHub</a>.
+                                </p>
+                            </details>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="closing">
+                <div class="shell closing-inner">
+                    <div class="closing-copy" data-reveal>
+                        <h2 class="display">
+                            <span class="line"><span>Go to bed.</span></span>
+                            <span class="line"><span>It's mining.</span></span>
+                        </h2>
+                        <p>
+                            Set the streamers up once. The claims, the drops, the streak and the
+                            dashboard take care of themselves.
+                        </p>
+                        <div class="hero-actions">
+                            <a class="btn btn-primary btn-lg" href="https://github.com/Guliveer/twitch-miner-go/releases/latest">Download the binary</a>
+                            <a class="btn btn-secondary btn-lg" href="https://github.com/Guliveer/twitch-miner-go">Star on GitHub</a>
+                        </div>
+                    </div>
+                    <div class="closing-mark" aria-hidden="true">
+                        <svg viewBox="0 0 32 32" focusable="false">
+                            <g fill="none" stroke="currentColor" stroke-width="1.2">
+                                <path d="M8 12V8h4" />
+                                <path d="M24 12V8h-4" />
+                                <path d="M8 20v4h4" />
+                                <path d="M24 20v4h-4" />
+                            </g>
+                            <circle cx="16" cy="16" r="2.2" fill="currentColor" />
+                        </svg>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <div class="shell">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <a class="brand" href="#top">
+                            <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                                <g fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <path d="M8 12V8h4" />
+                                    <path d="M24 12V8h-4" />
+                                    <path d="M8 20v4h4" />
+                                    <path d="M24 20v4h-4" />
+                                </g>
+                                <circle cx="16" cy="16" r="2.2" fill="currentColor" />
+                            </svg>
+                            <span>twitch-miner-go</span>
+                        </a>
+                        <p>Twitch channel points, drops and bonuses. Automated.</p>
+                        <p class="footer-credit">Built by <a href="https://github.com/Guliveer">Guliveer</a></p>
+                    </div>
+
+                    <nav class="footer-links" aria-label="Product">
+                        <p class="footer-title">Product</p>
+                        <a href="#film">Film</a>
+                        <a href="#discovery">Discovery</a>
+                        <a href="#claims">Claims</a>
+                        <a href="#performance">Performance</a>
+                        <a href="#install">Install</a>
+                        <a href="#quick-start">Quick start</a>
+                    </nav>
+
+                    <nav class="footer-links" aria-label="Project">
+                        <p class="footer-title">Project</p>
+                        <a href="https://github.com/Guliveer/twitch-miner-go">GitHub</a>
+                        <a href="https://github.com/Guliveer/twitch-miner-go/releases/latest">Releases</a>
+                        <a href="https://github.com/Guliveer/twitch-miner-go/wiki">Wiki</a>
+                        <a href="https://github.com/Guliveer/twitch-miner-go/blob/main/LICENSE.txt">License</a>
+                    </nav>
+
+                    <nav class="footer-links" aria-label="Community">
+                        <p class="footer-title">Community</p>
+                        <a href="https://github.com/Guliveer/twitch-miner-go/issues">Issues</a>
+                        <a href="https://github.com/Guliveer/twitch-miner-go/discussions">Discussions</a>
+                        <a href="https://github.com/Guliveer/twitch-miner-go-dashboard">Dashboard</a>
+                    </nav>
+                </div>
+
+                <div class="footer-base">
+                    <p>GNU GPL v3.0 · Dashboard figures are illustrative</p>
+                    <p>Not affiliated with Twitch Interactive</p>
+                </div>
+            </div>
+        </footer>
+
+        <p class="visually-hidden" role="status" aria-live="polite" id="copy-status"></p>
+        <script src="app.js" onerror="document.documentElement.classList.remove('js')"></script>
+    </body>
+
+</html>
