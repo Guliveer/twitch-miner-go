@@ -28,6 +28,7 @@ go.sum merge=union
 # Keep Go as the displayed language in GitHub's language stats.
 graphify-out/**    linguist-generated=true
 .github/wiki/**    linguist-documentation=true
+docs/**            linguist-documentation=true
 *.html -linguist-detectable
 *.css  -linguist-detectable
 *.js   -linguist-detectable
