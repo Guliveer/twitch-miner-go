@@ -42,9 +42,11 @@ Use grayscale editorial photography with restrained contrast and slightly darken
 
 ## Motion
 
-Use the duration and easing tokens for brief control color changes. The white lighting is static. Do not add pointer-following light, staged entrances, floating panels, or animated decorative charts.
+Motion is authored, not ambient. Three uses are allowed: one opening sequence for the display statement and its product object, in-view reveals for a section's content, and micro-feedback on controls and live readouts. Everything settles; nothing loops except a small live-status mark.
 
-Honour `prefers-reduced-motion: reduce` by collapsing animation and transition durations to near zero; progress width changes, panel fades and toast entrances all follow that preference.
+Large type rises through a mask. Panels and text rise a short distance while fading, staggered by the stagger token. Numbers count up and progress bars fill once, when the viewport first reaches them. The product object may tilt a few degrees toward a fine pointer — never more than 4° — and returns to rest when the pointer leaves. The white lighting stays static.
+
+Use the entrance, reveal, stagger, spring and duration tokens. Do not add pointer-following light, floating panels, animated decorative charts, scroll-jacking or continuous ambient motion. Honour `prefers-reduced-motion: reduce` by removing transforms, counting and tilt, keeping the final values and at most a short opacity change.
 
 ## Responsive behavior
 
@@ -90,4 +92,10 @@ Keep large areas neutral and opaque. Avoid colored glows, translucent glass, hea
 | --dp-radius-pill | 999px |
 | --dp-border-hairline | 1px |
 | --dp-motion-duration | 120ms |
+| --dp-motion-duration-entrance | 900ms |
+| --dp-motion-duration-reveal | 700ms |
+| --dp-motion-stagger | 70ms |
+| --dp-motion-reveal-distance | 18px |
 | --dp-motion-ease | ease-out |
+| --dp-motion-ease-out | cubic-bezier(0.16, 1, 0.3, 1) |
+| --dp-motion-ease-spring | cubic-bezier(0.34, 1.4, 0.64, 1) |

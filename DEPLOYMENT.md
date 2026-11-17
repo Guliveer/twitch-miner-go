@@ -19,7 +19,7 @@ This project supports multiple deployment strategies with modular CI/CD pipeline
 | Method | Best For | Pros | Cons |
 |--------|----------|------|------|
 | **Linux Service** | Bare-metal Linux, VPS, Alpine | Native, zero overhead, auto-restart, systemd + OpenRC | Linux only, manual updates |
-| **Windows Service** | Windows desktop/server | Native, auto-rebuild on start, no visible window | Windows only, requires Go toolchain |
+| **Windows Service** | Windows desktop/server | Native, auto-restart, no visible window | Windows only, requires Go toolchain to install |
 | **Docker Compose** | Self-hosted, VPS | Full control, customizable | Requires infrastructure management |
 | **Fly.io** | Quick cloud deploy | Managed platform, auto-scaling | Costs for high usage |
 
@@ -97,10 +97,16 @@ The wizard will ask for config directory, port, and log level. [NSSM](https://ns
 
 ### How It Works
 
-The installer uses NSSM to wrap the application as a native Windows service. On every start (including automatic restarts after a crash), the service:
+The installer uses NSSM to wrap the application as a native Windows service. It builds the binary once during installation and writes `_service-start.bat`, which runs that binary directly:
 
-1. Rebuilds the binary from source (`go build`)
-2. Launches the freshly built binary
+1. Install builds `twitch-miner-go.exe` and points the wrapper at it
+2. Every start (including the automatic restart after a crash or an applied auto-update) launches the existing binary without rebuilding it
+
+Parameters set in the NSSM GUI are appended to the binary's command line, so `-auto-update` can be enabled there without editing the wrapper.
+
+The reason for this split is auto-update: a wrapper that rebuilt on every start would replace a freshly downloaded release with a build of the older local source. Use `install-service.bat restart` to stop the service, rebuild from source, and start it again.
+
+Services installed by an older version of the script still call `_run.bat` and rebuild on every start. Re-run the installer once to switch them to the direct wrapper.
 
 ### Config Editor & Tray in Service Mode
 
@@ -115,14 +121,14 @@ displayed there. This is a Windows platform limitation, not a bug — the miner
 runs normally without it. Running with the `-no-tray` flag (as the service
 installer does) is therefore the typical setup for service deployments.
 
-This ensures config changes and code updates are always picked up without manual rebuilds.
+Config changes hot-reload in file mode; code changes are picked up by `install-service.bat restart`, which rebuilds the binary before starting it.
 
 ### Managing the Service
 
 ```bat
-tools\install-service.bat start       REM starts (triggers a rebuild first)
+tools\install-service.bat start       REM starts the service
 tools\install-service.bat stop
-tools\install-service.bat restart     REM restart with a fresh rebuild
+tools\install-service.bat restart     REM rebuild from source, then restart
 tools\install-service.bat status
 ```
 
@@ -146,7 +152,7 @@ This stops and removes the Windows service. The binary, configs, and logs are pr
 
 ### Prerequisites
 
-- **Go toolchain** in the system PATH (not just user PATH — the service runs under the SYSTEM account)
+- **Go toolchain** in the system PATH for install and for `restart`, which rebuilds the binary (not needed for plain service starts)
 - **Git** in the system PATH (for version embedding during builds)
 - **Administrator privileges** to install/manage Windows services
 
