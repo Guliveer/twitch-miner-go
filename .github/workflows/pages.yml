@@ -1,0 +1,64 @@
+name: GitHub Pages
+
+# The site in docs/ is fully static, so there is no build step: the checkout is
+# the artifact. Every file the page loads (HTML, CSS, JS, images, video) lives
+# there, which is why the trigger watches the whole directory instead of only
+# the HTML entry point.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+  # deploy-pages reads the artifact uploaded by the build job.
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Check the site files
+        run: |
+          test -s docs/index.html
+          test -s docs/style.css
+          test -s docs/app.js
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+      - name: Verify the published site
+        run: |
+          for file in "" style.css app.js; do
+            curl --fail --silent --show-error \
+              --retry 10 --retry-delay 3 --retry-all-errors \
+              "${{ steps.deployment.outputs.page_url }}${file}" > /dev/null
+          done
