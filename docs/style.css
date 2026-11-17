@@ -41,10 +41,7 @@
   --dp-motion-ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
   --dp-motion-ease-spring:   cubic-bezier(0.34, 1.4, 0.64, 1);
 
-  --shell-padding-inline: max(
-    var(--dp-spacing-gutter),
-    calc((100% - var(--dp-spacing-max)) / 2 + var(--dp-spacing-gutter))
-  );
+  --shell-padding-inline: var(--dp-spacing-gutter);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
