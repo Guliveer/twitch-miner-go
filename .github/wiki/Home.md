@@ -43,6 +43,6 @@ The rest of this page and the linked pages progress from the simplest concepts t
 - [README](https://github.com/Guliveer/twitch-miner-go#readme) — installation, Docker, Fly.io, service setup
 - [Telemetry dashboard](https://github.com/Guliveer/twitch-miner-go-telemetry) — anonymous usage data server (open source)
 - [configs/example.yaml.example](https://github.com/Guliveer/twitch-miner-go/blob/main/configs/example.yaml.example) — fully annotated config template
-- [CONTRIBUTING.md](https://github.com/Guliveer/twitch-miner-go/blob/main/CONTRIBUTING.md) — commit convention, git hooks, automated versioning
+- [CONTRIBUTING.md](https://github.com/Guliveer/twitch-miner-go/blob/main/.github/CONTRIBUTING.md) — commit convention, git hooks, automated versioning
 - [Releases](https://github.com/Guliveer/twitch-miner-go/releases) — changelog and downloads
 - [Discussions](https://github.com/Guliveer/twitch-miner-go/discussions) — questions and ideas

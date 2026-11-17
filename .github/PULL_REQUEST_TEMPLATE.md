@@ -4,10 +4,10 @@
 
 ## Checklist
 
-- [ ] PR title follows [Conventional Commits](../blob/main/CONTRIBUTING.md) format (`feat:`, `fix:`, `refactor:`, …)
+- [ ] PR title follows [Conventional Commits](https://github.com/Guliveer/twitch-miner-go/blob/main/.github/CONTRIBUTING.md) format (`feat:`, `fix:`, `refactor:`, …)
 - [ ] `go test ./...` passes locally
 - [ ] `go vet ./...` passes locally
-- [ ] Relevant [wiki pages](../.github/wiki/) updated (see the table in CONTRIBUTING.md)
+- [ ] Relevant [wiki pages](https://github.com/Guliveer/twitch-miner-go/tree/main/.github/wiki) updated (see the table in CONTRIBUTING.md)
 
 ## Notes for reviewer
 

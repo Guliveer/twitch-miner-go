@@ -57,7 +57,7 @@ This configures three git hooks:
 - **`commit-msg`** — validates that every commit message follows the Conventional Commits format before it is recorded.
 - **`pre-push`** — re-validates all outgoing commits before they are pushed to the remote.
 
-> **Tip:** The hooks are stored in [`tools/githooks/`](tools/githooks/) and the installer ([`tools/install-hooks.sh`](tools/install-hooks.sh)) simply points `core.hooksPath` at that directory — no files are copied into `.git/`.
+> **Tip:** The hooks are stored in [`tools/githooks/`](../tools/githooks/) and the installer ([`tools/install-hooks.sh`](../tools/install-hooks.sh)) simply points `core.hooksPath` at that directory — no files are copied into `.git/`.
 
 ## Pull Requests
 
@@ -67,7 +67,7 @@ This configures three git hooks:
 
 ## Automated Versioning
 
-Releases are fully automated through the [CI workflow](.github/workflows/ci.yml):
+Releases are fully automated through the [CI workflow](workflows/ci.yml):
 
 1. Developers write commits using the Conventional Commits format described above.
 2. Git hooks enforce the format locally (see [Setting Up Git Hooks](#setting-up-git-hooks)).
@@ -77,25 +77,25 @@ Releases are fully automated through the [CI workflow](.github/workflows/ci.yml)
    - **version** — analyzes first-parent commit messages since the last tag, bumps `VERSION`, creates a git tag and GitHub Release
    - **deploy** — deploys to Fly.io (when `FLY_API_TOKEN` is configured)
 
-Docker images are published separately via the [Docker workflow](.github/workflows/docker-publish.yml). No manual tags are needed — just write well-formatted commits and the pipeline handles the rest.
+Docker images are published separately via the [Docker workflow](workflows/docker-publish.yml). No manual tags are needed — just write well-formatted commits and the pipeline handles the rest.
 
 ## Documentation and Wiki
 
 The project has two layers of documentation:
 
 - **README.md** — installation, deployment, quick-start. Update when adding flags, env vars, or deployment methods.
-- **[Wiki](.github/wiki/)** — in-depth reference pages (configuration, auth, strategies, notifications, troubleshooting, architecture). Wiki source files live in `.github/wiki/` and are automatically synced to the GitHub Wiki on every push.
+- **[Wiki](wiki/)** — in-depth reference pages (configuration, auth, strategies, notifications, troubleshooting, architecture). Wiki source files live in `.github/wiki/` and are automatically synced to the GitHub Wiki on every push.
 
 After any non-trivial change, check whether the relevant wiki page needs updating:
 
 | Changed area | Wiki page to review |
 |---|---|
-| Config options / YAML schema | [Configuration-Reference](.github/wiki/Configuration-Reference.md) |
-| Auth flow or token handling | [Authentication](.github/wiki/Authentication.md) |
-| Prediction strategies or bet logic | [Prediction-Strategies](.github/wiki/Prediction-Strategies.md) |
-| Notification providers or events | [Notifications](.github/wiki/Notifications.md) |
-| Known errors or edge cases | [Troubleshooting](.github/wiki/Troubleshooting.md) |
-| Internal packages or data flow | [Architecture](.github/wiki/Architecture.md) |
+| Config options / YAML schema | [Configuration-Reference](wiki/Configuration-Reference.md) |
+| Auth flow or token handling | [Authentication](wiki/Authentication.md) |
+| Prediction strategies or bet logic | [Prediction-Strategies](wiki/Prediction-Strategies.md) |
+| Notification providers or events | [Notifications](wiki/Notifications.md) |
+| Known errors or edge cases | [Troubleshooting](wiki/Troubleshooting.md) |
+| Internal packages or data flow | [Architecture](wiki/Architecture.md) |
 
 ## Commit Types Cheatsheet
 
