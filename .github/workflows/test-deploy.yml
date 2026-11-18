@@ -1,6 +1,6 @@
 name: "PR Test Deploy"
 
-# Deploys a PR branch to the production Fly app as a "test" version when the `test-deploy` label is added. Version is not computed here: the existing Release workflow (dry run) derives the bump from the PR title's conventional commit type on top of the latest tag, and this workflow appends "-pr<PR number>" — prod 1.26.4 + "fix" PR title -> 1.26.5-pr42 (displayed as v1.26.5-pr42). The deploy itself reuses the existing Fly.io Deploy reusable workflow, so no flyctl logic lives here.
+# Deploys a PR branch to the production Fly app as a "test" version when the `test-deploy` label is added, and again on every push while the label stays on the PR. Version is not computed here: the existing Release workflow (dry run) derives the bump from the PR title's conventional commit type on top of the latest tag, and this workflow appends "-pr<PR number>" — prod 1.26.4 + "fix" PR title -> 1.26.5-pr42 (displayed as v1.26.5-pr42). The deploy itself reuses the existing Fly.io Deploy reusable workflow, so no flyctl logic lives here.
 #
 # All outcomes (rejections, skips, cancellations, success/failure) are written to the run's Summary page in the Actions tab; nothing is posted as a PR comment.
 #
@@ -8,20 +8,22 @@ name: "PR Test Deploy"
 #
 # Label lifecycle semantics (the bot re-add / strip below are itself a no-op action, purely visual):
 # - authorized add             -> label take-over from other PRs, then the version is computed and the deploy starts.
+# - authorized push            -> while the label is on the PR, each new commit is deployed again (the newest run supersedes an in-flight one).
 # - bot (restored) add         -> no-op: purely a visual restoration, no deploy.
 # - unauthorized add           -> the bot strips the label immediately; the run rejects; nothing else happens.
+# - unauthorized push          -> the run rejects; the label and the running test build are left untouched.
 # - unauthorized human removal -> the bot restores the label immediately (visual indicator only); any in-flight deploy keeps running.
 # - authorized removal         -> all in-flight runs for this commit are cancelled at once; when this was the last PR carrying the label, prod is also restored by redeploying `main` with the version from its `VERSION` file.
 # - bot removal                -> auto-removal by this workflow (label take-over): in-flight runs for that PR are cancelled (superseded).
 # - deploy failed             -> the label is stripped from the PR automatically, so a re-try is a clean add.
 # - label on several PRs       -> only the newest authorized request keeps the label; older PRs lose it and their deploys are superseded (via bot take-over and the shared fly-deploy concurrency group). A real release always supersedes a test deploy.
 #
-# Re-run: remove the label and add it again (only "labeled" fires a deploy).
+# Re-run: remove the label and add it again, or push a new commit while the label is present.
 # Note: a test deploy overwrites the running prod release until the next real release, because it targets the same fly app.
 
 on:
   pull_request:
-    types: [labeled, unlabeled]
+    types: [labeled, unlabeled, synchronize]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -35,13 +37,18 @@ permissions:
 
 jobs:
   guard:
-    if: github.event.label.name == 'test-deploy' && github.event.action == 'labeled'
+    # `labeled` starts a deploy; `synchronize` keeps an already labeled PR
+    # deployed, so new commits reach the test app without re-adding the label.
+    if: >-
+      (github.event.action == 'labeled' && github.event.label.name == 'test-deploy') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'test-deploy'))
     runs-on: ubuntu-latest
     outputs:
       allowed: ${{ steps.auth.outputs.allowed }}
     steps:
       - name: Detect bot-restored label
         id: restoration
+        if: github.event.action == 'labeled'
         run: |
           # The bot re-adds the label after unauthorized removals as a pure
           # visual indicator. That must never trigger a fresh deploy.
@@ -73,16 +80,22 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          # Remove the label right away: an unauthorized add is purely
-          # visual noise and carries no intent.
-          gh pr edit ${{ github.event.pull_request.number }} --remove-label test-deploy > /dev/null || true
+          # A rejected add is visual noise and carries no intent, so the label
+          # goes away. A rejected push must not disarm the PR: the label and
+          # the build it produced stay as they are.
+          if [ "${{ github.event.action }}" = "labeled" ]; then
+            gh pr edit ${{ github.event.pull_request.number }} --remove-label test-deploy > /dev/null || true
+            OUTCOME="The label has been removed and nothing else was executed."
+          else
+            OUTCOME="The push is ignored: the label stays on the PR and the running test build keeps serving."
+          fi
           echo "## PR Test Deploy — rejected" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Sender \`${{ github.event.sender.login }}\` is not on \`AUTHORIZED_TRIGGERERS\`. The label has been removed and nothing else was executed." >> "$GITHUB_STEP_SUMMARY"
+          echo "Sender \`${{ github.event.sender.login }}\` is not on \`AUTHORIZED_TRIGGERERS\`. ${OUTCOME}" >> "$GITHUB_STEP_SUMMARY"
           exit 1
 
       - name: Take over the test-deploy label from other PRs
-        if: steps.auth.outputs.allowed == 'true'
+        if: steps.auth.outputs.allowed == 'true' && github.event.action == 'labeled'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
