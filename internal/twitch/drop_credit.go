@@ -15,15 +15,16 @@ import (
 // comes from inventory and only moves when watch time is actually counted,
 // which makes it the reliable signal.
 //
-// Progress is account-wide, not per channel, so two streamers sharing a
-// campaign would make an advancing drop look like credit for both. Only
-// campaigns matched to a single streamer are used, where a missed advance can
-// be attributed to that streamer.
+// Progress is account-wide, not per channel, so two watched streamers sharing
+// a campaign would make an advancing drop look like credit for both. Only
+// campaigns matched to a single watched streamer are used, where a missed
+// advance can be attributed to that streamer. Streamers that are not being
+// watched right now cannot earn credit, so they do not count as sharing.
 func (c *Client) detectStalledDropCredit(streamers []*model.Streamer, now time.Time) {
 	matched := make(map[string]int, len(streamers))
 	for _, streamer := range streamers {
 		streamer.Mu.RLock()
-		if streamer.Settings != nil && streamer.Settings.ClaimDrops {
+		if streamer.Settings != nil && streamer.Settings.ClaimDrops && beingWatched(streamer.Stream, now) {
 			for i := range streamer.Stream.Campaigns {
 				matched[streamer.Stream.Campaigns[i].ID]++
 			}
@@ -57,15 +58,9 @@ func (c *Client) detectStalledDropCredit(streamers []*model.Streamer, now time.T
 // stalledDropCredit returns the drop whose progress has not moved for longer
 // than DropCreditStallThreshold while the streamer was still being watched.
 func stalledDropCredit(streamer *model.Streamer, matched map[string]int, now time.Time) (*model.Drop, time.Duration) {
-	lastAttempt := streamer.Stream.LastMinuteAttemptedAt
-	lastAccepted := streamer.Stream.LastMinuteCreditedAt
-	if lastAttempt.IsZero() || lastAccepted.IsZero() {
-		return nil, 0
-	}
 	// Without a recent attempt the channel was not being watched, so a frozen
 	// drop says nothing about its credit.
-	if now.Sub(lastAttempt) > constants.DropCreditStallThreshold ||
-		now.Sub(lastAccepted) > constants.DropCreditStallThreshold {
+	if !beingWatched(streamer.Stream, now) {
 		return nil, 0
 	}
 	if now.Before(streamer.Stream.StalledCooldownUntil) {
@@ -87,4 +82,15 @@ func stalledDropCredit(streamer *model.Streamer, matched map[string]int, now tim
 		}
 	}
 	return nil, 0
+}
+
+// beingWatched reports whether minute-watched events are flowing for the
+// streamer right now, which is what makes a frozen drop evidence of missing
+// credit rather than of a channel that was simply left alone.
+func beingWatched(stream *model.Stream, now time.Time) bool {
+	if stream.LastMinuteAttemptedAt.IsZero() || stream.LastMinuteCreditedAt.IsZero() {
+		return false
+	}
+	return now.Sub(stream.LastMinuteAttemptedAt) <= constants.DropCreditStallThreshold &&
+		now.Sub(stream.LastMinuteCreditedAt) <= constants.DropCreditStallThreshold
 }

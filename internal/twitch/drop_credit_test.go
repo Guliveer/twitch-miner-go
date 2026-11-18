@@ -128,6 +128,32 @@ func TestSharedCampaignIsNotAttributed(t *testing.T) {
 	}
 }
 
+// A streamer that has the campaign attached but is not being watched earns no
+// credit, so it cannot hide a frozen drop on the one channel that is watched.
+func TestCampaignSharedWithIdleStreamerIsAttributed(t *testing.T) {
+	t.Parallel()
+
+	client := newDropCreditClient(t)
+	watched := dropCreditStreamer("watched", "shared", "d1", 10)
+	idle := dropCreditStreamer("idle", "shared", "d2", 10)
+	streamers := []*model.Streamer{watched, idle}
+
+	base := time.Now()
+	watching(watched, base)
+	client.detectStalledDropCredit(streamers, base)
+
+	later := base.Add(25 * time.Minute)
+	watching(watched, later)
+	client.detectStalledDropCredit(streamers, later)
+
+	if watched.Stream.StalledCooldownUntil.IsZero() {
+		t.Fatal("a frozen drop on the only watched channel must cool it down")
+	}
+	if !idle.Stream.StalledCooldownUntil.IsZero() {
+		t.Fatal("a channel that is not being watched must not be cooled down")
+	}
+}
+
 func TestUnwatchedStreamerIsNotCooledDown(t *testing.T) {
 	t.Parallel()
 
