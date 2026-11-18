@@ -1,6 +1,6 @@
 name: "PR Test Deploy"
 
-# Deploys a PR branch to the production Fly app as a "test" version when the `test-deploy` label is added. Version is not computed here: the existing Release workflow (dry run) derives the bump from the PR title's conventional commit type on top of the latest tag, and this workflow appends "-test" — prod 1.26.4 + "fix" PR title -> 1.26.5-test. The deploy itself reuses the existing Fly.io Deploy reusable workflow, so no flyctl logic lives here.
+# Deploys a PR branch to the production Fly app as a "test" version when the `test-deploy` label is added. Version is not computed here: the existing Release workflow (dry run) derives the bump from the PR title's conventional commit type on top of the latest tag, and this workflow appends "-pr<PR number>" — prod 1.26.4 + "fix" PR title -> 1.26.5-pr42 (displayed as v1.26.5-pr42). The deploy itself reuses the existing Fly.io Deploy reusable workflow, so no flyctl logic lives here.
 #
 # All outcomes (rejections, skips, cancellations, success/failure) are written to the run's Summary page in the Actions tab; nothing is posted as a PR comment.
 #
@@ -127,7 +127,7 @@ jobs:
       cancel-in-progress: true
     uses: ./.github/workflows/fly-deploy.yml
     with:
-      version: ${{ needs.version.outputs.new_version }}-test
+      version: ${{ needs.version.outputs.new_version }}-pr${{ github.event.pull_request.number }}
     secrets: inherit
 
   # Real cleanup only: after a failed attempt the label must not linger, so a
