@@ -102,6 +102,16 @@ streamer that has not received a successful minute-watched credit within
 until it recovers — this prevents the miner from burning events on an account
 that is not actually counting.
 
+Twitch can also acknowledge a minute-watched event (spade `204`/`200`) without
+counting it, so acceptance alone is not proof of credit
+([#54](https://github.com/Guliveer/twitch-miner-go/issues/54)). A second check
+therefore runs on every campaign sync: when a campaign's drop progress stays
+unchanged for `DropCreditStallThreshold` (15 minutes) while the streamer is
+still being watched, the streamer is put into `StalledCooldownDuration`
+(30 minutes). It only considers campaigns matched to a single streamer, because
+drop progress is account-wide and a shared drop cannot be attributed to one
+channel. Both checks leave a channel that is simply not being watched alone.
+
 </details>
 
 <details>
