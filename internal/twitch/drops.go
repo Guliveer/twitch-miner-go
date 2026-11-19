@@ -68,6 +68,10 @@ func (c *Client) SyncCampaigns(ctx context.Context, streamers []*model.Streamer)
 		streamer.Mu.Unlock()
 	}
 
+	// Spade acceptance does not prove credit, so drop progress is checked on
+	// every sync to catch streamers whose watch time is not being counted.
+	c.detectStalledDropCredit(streamers, time.Now())
+
 	if !c.startupDropsLogged {
 		c.startupDropsLogged = true
 		c.logDropStatuses(ctx)

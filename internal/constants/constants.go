@@ -136,6 +136,11 @@ const (
 	// StalledCooldownDuration is how long a frozen streamer stays in cooldown
 	// before becoming eligible for selection again.
 	StalledCooldownDuration = 30 * time.Minute
+	// DropCreditStallThreshold is how long a drop's progress may stand still
+	// while the streamer is still being watched before the streamer is treated
+	// as not credited. It sits above the campaign sync cadence so a single
+	// quiet poll is not enough to trigger it.
+	DropCreditStallThreshold = 15 * time.Minute
 	// SynthSkipPolls is the number of consecutive polls in which a drop must
 	// appear in campaign details but not in inventory before it is considered
 	// synthetic (never actually available). At ~20s per poll, 6 polls ≈ 2min.

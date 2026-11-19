@@ -25,12 +25,23 @@ type Stream struct {
 	IsWatchStreakMissing bool    `json:"watch_streak_missing"`
 	MinuteWatched        float64 `json:"minute_watched"`
 
+	// LastMinuteCreditedAt is when Twitch last accepted a minute-watched event
+	// (spade 200/204). Acceptance is not credit: Twitch can acknowledge an
+	// event it does not count, so drop progress is the authoritative signal.
 	LastMinuteCreditedAt  time.Time `json:"last_minute_credited_at,omitempty"`
 	LastMinuteAttemptedAt time.Time `json:"last_minute_attempted_at,omitempty"`
 	StalledCooldownUntil  time.Time `json:"stalled_cooldown_until,omitempty"`
 
 	lastUpdate             time.Time
 	minuteWatchedTimestamp time.Time
+	dropCredit             map[string]dropCreditSample
+}
+
+// dropCreditSample records the last seen progress of a drop so that stall
+// detection can tell a frozen watch credit from a drop that is complete.
+type dropCreditSample struct {
+	minutes int
+	at      time.Time
 }
 
 // GameInfo holds game/category metadata from the Twitch API.
@@ -162,7 +173,28 @@ const MaxWatchSegmentGap = 2 * time.Minute
 // stream, whether or not Twitch credited it. Stall detection needs to tell
 // "we are watching and Twitch stopped counting" from "we stopped watching".
 func (s *Stream) MarkMinuteWatchAttempt() {
-	s.LastMinuteAttemptedAt = time.Now()
+	now := time.Now()
+	// A new watch segment starts from scratch: progress that stood still while
+	// the channel was not being watched says nothing about its credit.
+	if !s.LastMinuteAttemptedAt.IsZero() && now.Sub(s.LastMinuteAttemptedAt) > MaxWatchSegmentGap {
+		s.dropCredit = nil
+	}
+	s.LastMinuteAttemptedAt = now
+}
+
+// ObserveDropCredit records the current progress of a drop and reports how long
+// that progress has been standing still. The first observation only establishes
+// a baseline, and any change starts a new stretch.
+func (s *Stream) ObserveDropCredit(dropID string, minutes int, now time.Time) time.Duration {
+	if s.dropCredit == nil {
+		s.dropCredit = make(map[string]dropCreditSample)
+	}
+	sample, seen := s.dropCredit[dropID]
+	if !seen || sample.minutes != minutes {
+		s.dropCredit[dropID] = dropCreditSample{minutes: minutes, at: now}
+		return 0
+	}
+	return now.Sub(sample.at)
 }
 
 // UpdateMinuteWatched increments the minute-watched counter based on elapsed time.
