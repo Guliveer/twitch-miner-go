@@ -91,28 +91,29 @@ jobs:
           # The computed version wins over whatever the merged branch carried.
           if [ -n "${{ inputs.version }}" ]; then
             NEW_VERSION="${{ inputs.version }}"
+            TAGGED=true
           elif [ "$BUMP" = "skip" ]; then
             NEW_VERSION="$BASE"
+            TAGGED=false
           else
             NEW_VERSION="$EXPECTED"
+            TAGGED=true
           fi
 
           echo "New version: ${NEW_VERSION}"
           echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
 
-          # Only a real bump produces a tag; a skip merge may still restore VERSION.
-          if [ "$BUMP" = "skip" ]; then
-            echo "tagged=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "tagged=true" >> "$GITHUB_OUTPUT"
-          fi
+          # An explicit version is always a release, even when the commits since
+          # the last tag would not warrant a bump. A skip merge without one only
+          # restores VERSION.
+          echo "tagged=${TAGGED}" >> "$GITHUB_OUTPUT"
 
       - name: Commit and tag
         if: ${{ !inputs.dry_run }}
         env:
           NEW_VERSION: ${{ steps.bump.outputs.new_version }}
           FILE_VERSION: ${{ needs.resolve-version.outputs.actual }}
-          BUMP: ${{ needs.resolve-version.outputs.bump }}
+          TAGGED: ${{ steps.bump.outputs.tagged }}
         run: |
           set -euo pipefail
 
@@ -131,7 +132,7 @@ jobs:
 
           # A merge that does not warrant a bump only restores VERSION; there is
           # no new version to tag.
-          if [ "$BUMP" = "skip" ]; then
+          if [ "$TAGGED" != "true" ]; then
             echo "No version bump in this merge; VERSION is ${NEW_VERSION} and no tag is created."
             exit 0
           fi
@@ -149,7 +150,7 @@ jobs:
           echo "- \`VERSION\` in the merge: \`${{ needs.resolve-version.outputs.actual }}\`" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             echo "- Mode: **DRY RUN** — no commit or tag created" >> "$GITHUB_STEP_SUMMARY"
-          elif [ "${{ needs.resolve-version.outputs.bump }}" = "skip" ]; then
+          elif [ "${{ steps.bump.outputs.tagged }}" != "true" ]; then
             echo "- No version bump in this merge — no tag created" >> "$GITHUB_STEP_SUMMARY"
             if [ "${{ needs.resolve-version.outputs.actual }}" != "${{ steps.bump.outputs.new_version }}" ]; then
               echo "- Commit: \`VERSION\` restored to \`${{ steps.bump.outputs.new_version }}\`" >> "$GITHUB_STEP_SUMMARY"
