@@ -53,7 +53,7 @@ Run the hook installer to enable local commit validation:
 
 This configures three git hooks:
 
-- **`pre-commit`** — blocks commits if the local branch is behind its remote tracking branch (e.g. after a CI version bump). Pull first with `git pull --rebase`, or bypass with `git commit --no-verify`.
+- **`pre-commit`** — blocks commits if the local branch is behind its remote tracking branch (e.g. after CI pushed a `VERSION` fix to your PR branch). Pull first with `git pull --rebase`, or bypass with `git commit --no-verify`.
 - **`commit-msg`** — validates that every commit message follows the Conventional Commits format before it is recorded.
 - **`pre-push`** — re-validates all outgoing commits before they are pushed to the remote.
 
@@ -62,6 +62,9 @@ This configures three git hooks:
 ## Pull Requests
 
 - **PR titles must follow Conventional Commits format** — CI validates this automatically.
+- **`VERSION` is maintained by the pipeline, not by hand.** The CI `Version Bump` job computes the version the PR title implies, counted from the latest release tag: a `fix:`/`perf:`/`refactor:`/`build:` PR raises the patch number (`1.28.1` → `1.28.2`), a `feat:` PR the minor number (`1.28.1` → `1.29.0`), and a `!`/`BREAKING CHANGE:` PR the major number (`1.28.1` → `2.0.0`). When the file in your branch differs from that version — not bumped, too high, malformed, or bumped by a PR that does not affect the released binary (`docs`, `style`, `test`, `ci`, `chore`) — the job commits the correct value to your branch as `chore: bump version to X [skip ci]`. You do not have to touch `VERSION`; the merge always carries the released version. Edit the PR title if the number is wrong, not the file.
+- Pull requests from forks cannot be written to, so for those the job only reports the mismatch and `main` applies the bump after the merge.
+- **`main`'s `VERSION` is authoritative.** The released version is always computed from `main`'s latest release tag plus the change type, never from the number a pull request carries. When you merge or rebase `main` into your branch, resolve a `VERSION` conflict by taking `main`'s value; the pipeline applies the bump again when the PR needs one. A stale, too high or malformed value therefore cannot change a release: `main` overwrites `VERSION` with the computed version, and restores it even when the merge warrants no bump.
 - **Use squash-merge** when merging PRs. This ensures the PR title (which CI validates) becomes the single commit on `main`, keeping history clean and version bumps predictable.
 - The version pipeline only analyzes first-parent commits on `main`, so internal branch history from forks does not influence version bumps.
 
@@ -71,11 +74,13 @@ Releases are fully automated through the [CI workflow](workflows/ci.yml):
 
 1. Developers write commits using the Conventional Commits format described above.
 2. Git hooks enforce the format locally (see [Setting Up Git Hooks](#setting-up-git-hooks)).
-3. CI validates both the **PR title** and individual **commit messages** on pull requests.
+3. CI validates both the **PR title** and individual **commit messages** on pull requests. It also computes the `VERSION` implied by the PR title with the same rules as a real release and commits it to the PR branch when the file disagrees.
 4. On merge to `main`, the CI pipeline runs in order: **build** → **version** → **deploy**:
    - **build** — compiles, runs tests, vet, and lint
-   - **version** — analyzes first-parent commit messages since the last tag, bumps `VERSION`, creates a git tag and GitHub Release
+   - **version** — computes the next version from `main`'s latest release tag and the first-parent commit types since that tag. If the merged `VERSION` already equals it (the PR bumped it), the tag is created without a second bump commit; if it is missing, stale or wrong, it is corrected on `main` first. A merge that warrants no bump only restores `VERSION` and stops there; otherwise a git tag and GitHub Release are created.
    - **deploy** — deploys to Fly.io (when `FLY_API_TOKEN` is configured)
+
+> The bump rules themselves live in the reusable [`version.yml`](workflows/version.yml) workflow, which both the pull-request check and the release pipeline call, so a PR and its release always agree on the version.
 
 Docker images are published separately via the [Docker workflow](workflows/docker-publish.yml). No manual tags are needed — just write well-formatted commits and the pipeline handles the rest.
 

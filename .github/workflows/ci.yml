@@ -19,6 +19,9 @@ on:
       - '.github/**'
   pull_request:
     branches: [main]
+    # The version bump is derived from the PR title, so a title edit must
+    # re-validate the VERSION file.
+    types: [opened, synchronize, reopened, edited]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -82,6 +85,19 @@ jobs:
             echo "Format: \`<type>[optional scope][!]: <description>\`" >> "$GITHUB_STEP_SUMMARY"
             echo "Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build" >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  version-bump:
+    if: github.event_name == 'pull_request'
+    # The bump rules live in the reusable Version workflow, which the release
+    # pipeline calls too, so the check and the release cannot disagree. It also
+    # commits the computed version to the PR branch when the file is wrong, so
+    # the merge carries the released version instead of a stale one.
+    uses: ./.github/workflows/version.yml
+    with:
+      mode: check
+      pr_title: ${{ github.event.pull_request.title }}
+      pr_branch: ${{ github.event.pull_request.head.ref }}
+      pr_fork: ${{ github.event.pull_request.head.repo.fork }}
 
   vet:
     runs-on: ubuntu-latest

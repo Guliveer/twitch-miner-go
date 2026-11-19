@@ -362,7 +362,8 @@ The repository includes modular GitHub Actions workflows:
 
 | Workflow | Trigger | Purpose | Auto-runs |
 |----------|---------|---------|-----------|
-| **CI** ([ci.yml](.github/workflows/ci.yml)) | Push, PR | Test, lint, version bump | Always |
+| **CI** ([ci.yml](.github/workflows/ci.yml)) | Push, PR | Test, lint, PR version-bump check and fix, main version bump | Always |
+| **Version** ([version.yml](.github/workflows/version.yml)) | Called by CI and Release | Computes the next version from the last release tag and the change type, writes it to the PR branch when it differs; shared by the PR check and the release | Always |
 | **Docker Publish** ([docker-publish.yml](.github/workflows/docker-publish.yml)) | Push to main, tags | Build and push to GHCR | When enabled |
 | **Fly.io Deploy** ([fly-deploy.yml](.github/workflows/fly-deploy.yml)) | Push to main, tags | Deploy to Fly.io | When `FLY_API_TOKEN` exists |
 

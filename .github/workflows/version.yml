@@ -1,0 +1,306 @@
+name: Version
+
+# Single source of truth for the version rules. Both the pull-request check
+# (ci.yml, mode: check) and the release pipeline (release.yml, mode: compute)
+# call this workflow, so a PR and its release always agree on the version.
+#
+# The released version is never read from the VERSION file of a branch: the base
+# is always main's latest release tag and the bump comes from the change type.
+# The file is only a preview of that computation. A stale, too high or malformed
+# value is therefore never rejected or trusted: a pull request has it rewritten
+# on its own branch before the merge, and main overwrites it again at release.
+on:
+  workflow_call:
+    inputs:
+      mode:
+        description: "check corrects the VERSION file of a pull request branch and warns about forks; compute only reports the values. Neither mode fails the run on a wrong version: main overwrites the file at release."
+        required: false
+        type: string
+        default: compute
+      pr_title:
+        description: "Pull request title; when set it replaces the commit log as the bump input"
+        required: false
+        type: string
+        default: ""
+      pr_branch:
+        description: "Pull request head branch; when set, mode check commits the computed version to it"
+        required: false
+        type: string
+        default: ""
+      pr_fork:
+        description: "'true' when the pull request head is a fork, whose branch the workflow token cannot push to"
+        required: false
+        type: string
+        default: ""
+    outputs:
+      base:
+        description: "Released version the bump starts from"
+        value: ${{ jobs.resolve.outputs.base }}
+      bump:
+        description: "Bump type (major/minor/patch/skip)"
+        value: ${{ jobs.resolve.outputs.bump }}
+      expected:
+        description: "Version the bump produces"
+        value: ${{ jobs.resolve.outputs.expected }}
+      actual:
+        description: "Content of the VERSION file in the checked out ref"
+        value: ${{ jobs.resolve.outputs.actual }}
+      state:
+        description: "bumped, missing, not-required or invalid"
+        value: ${{ jobs.resolve.outputs.state }}
+      fixable:
+        description: "true when the check can push the computed version to the pull request branch"
+        value: ${{ jobs.resolve.outputs.fixable }}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      base: ${{ steps.resolve.outputs.base }}
+      bump: ${{ steps.resolve.outputs.bump }}
+      expected: ${{ steps.resolve.outputs.expected }}
+      actual: ${{ steps.resolve.outputs.actual }}
+      state: ${{ steps.resolve.outputs.state }}
+      fixable: ${{ steps.resolve.outputs.fixable }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: resolve
+        env:
+          MODE: ${{ inputs.mode }}
+          PR_TITLE: ${{ inputs.pr_title }}
+          PR_BRANCH: ${{ inputs.pr_branch }}
+          PR_FORK: ${{ inputs.pr_fork }}
+        run: |
+          set -euo pipefail
+
+          # Tags pushed on a feature branch must not move main's base, so only
+          # tags reachable from main are considered.
+          MAIN_REF="HEAD"
+          if git rev-parse --verify --quiet origin/main > /dev/null; then
+            MAIN_REF="origin/main"
+          fi
+
+          LAST_TAG=$(git tag -l 'v*.*.*' --sort=-v:refname --merged "$MAIN_REF" | head -n1)
+          ACTUAL=$(tr -d '[:space:]' < VERSION)
+
+          if [ -n "$LAST_TAG" ]; then
+            BASE="${LAST_TAG#v}"
+            SOURCE="tag ${LAST_TAG}"
+          else
+            BASE="$ACTUAL"
+            SOURCE="VERSION file (no release tag on main)"
+          fi
+
+          if ! [[ "$BASE" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Cannot derive the base version: '${BASE}' from ${SOURCE} is not MAJOR.MINOR.PATCH."
+            exit 1
+          fi
+
+          if [ -n "$PR_TITLE" ]; then
+            COMMITS="$PR_TITLE"
+            ORIGIN="pull request title"
+          else
+            if [ -n "$LAST_TAG" ]; then
+              RANGE="${LAST_TAG}..${MAIN_REF}"
+            else
+              RANGE="$MAIN_REF"
+            fi
+            COMMITS=$(git log --first-parent --format='%s' "$RANGE")
+            ORIGIN="first-parent commits in ${RANGE}"
+          fi
+
+          # Conventional Commits ranking: a breaking change wins over feat,
+          # feat over everything that only warrants a patch.
+          rank() {
+            case "$1" in
+              major) echo 3 ;;
+              minor) echo 2 ;;
+              patch) echo 1 ;;
+              *) echo 0 ;;
+            esac
+          }
+
+          BUMP=skip
+          while IFS= read -r msg; do
+            [ -z "$msg" ] && continue
+
+            if [[ "$msg" =~ ^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\([a-zA-Z0-9_-]+\))?!:[[:space:]] ]] \
+              || [[ "$msg" == *"BREAKING CHANGE:"* ]]; then
+              CANDIDATE=major
+            elif [[ "$msg" =~ ^feat(\([a-zA-Z0-9_-]+\))?:[[:space:]] ]]; then
+              CANDIDATE=minor
+            elif [[ "$msg" =~ ^(fix|perf|refactor|build)(\([a-zA-Z0-9_-]+\))?:[[:space:]] ]]; then
+              CANDIDATE=patch
+            else
+              continue
+            fi
+
+            if [ "$(rank "$CANDIDATE")" -gt "$(rank "$BUMP")" ]; then
+              BUMP="$CANDIDATE"
+            fi
+          done <<< "$COMMITS"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+          case "$BUMP" in
+            major) EXPECTED="$((MAJOR + 1)).0.0" ;;
+            minor) EXPECTED="${MAJOR}.$((MINOR + 1)).0" ;;
+            patch) EXPECTED="${MAJOR}.${MINOR}.$((PATCH + 1))" ;;
+            skip) EXPECTED="$BASE" ;;
+          esac
+
+          if [ "$BUMP" = "skip" ]; then
+            if [ "$ACTUAL" = "$BASE" ]; then
+              STATE="not-required"
+            else
+              STATE="invalid"
+            fi
+          elif [ "$ACTUAL" = "$EXPECTED" ]; then
+            STATE="bumped"
+          elif [ "$ACTUAL" = "$BASE" ]; then
+            STATE="missing"
+          else
+            STATE="invalid"
+          fi
+
+          {
+            echo "base=${BASE}"
+            echo "bump=${BUMP}"
+            echo "expected=${EXPECTED}"
+            echo "actual=${ACTUAL}"
+            echo "state=${STATE}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Base version: ${BASE} (source: ${SOURCE})"
+          echo "Bump source: ${ORIGIN}"
+          echo "Bump type: ${BUMP} -> ${EXPECTED}"
+          echo "VERSION file: ${ACTUAL}"
+
+          if [ "$MODE" != "check" ]; then
+            exit 0
+          fi
+
+          # Fork branches are read-only for the workflow token, so their authors
+          # can only be told what the version should be.
+          CAN_FIX=false
+          if [ -n "$PR_BRANCH" ] && [ "$PR_FORK" != "true" ]; then
+            CAN_FIX=true
+          fi
+          echo "fixable=${CAN_FIX}" >> "$GITHUB_OUTPUT"
+
+          if [ "$STATE" = "missing" ]; then
+            if [ "$CAN_FIX" = "true" ]; then
+              echo "::notice::VERSION was not bumped in this pull request; it is set to ${EXPECTED} on ${PR_BRANCH}."
+            else
+              echo "::notice::VERSION was not bumped in this pull request; main sets it to ${EXPECTED} after the merge."
+            fi
+          elif [ "$STATE" = "invalid" ]; then
+            if [ "$CAN_FIX" = "true" ] && [ "$BUMP" = "skip" ]; then
+              echo "::warning::VERSION is ${ACTUAL}, but this change does not bump the version; it is restored to ${BASE} on ${PR_BRANCH}."
+            elif [ "$CAN_FIX" = "true" ]; then
+              echo "::warning::VERSION is ${ACTUAL}, but a ${BUMP} change from ${BASE} yields ${EXPECTED}; it is corrected on ${PR_BRANCH}."
+            elif [ "$BUMP" = "skip" ]; then
+              echo "::warning::VERSION is ${ACTUAL}, but this change does not bump the version; main restores ${BASE} after the merge."
+            else
+              echo "::warning::VERSION is ${ACTUAL}, but a ${BUMP} bump from ${BASE} yields ${EXPECTED}; main overwrites it with ${EXPECTED} after the merge."
+            fi
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Version Bump" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Base version: \`${{ steps.resolve.outputs.base }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Bump implies: **${{ steps.resolve.outputs.bump }}** → \`${{ steps.resolve.outputs.expected }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- \`VERSION\` in this ref: \`${{ steps.resolve.outputs.actual }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          case "${{ steps.resolve.outputs.state }}" in
+            bumped)
+              echo "✅ \`VERSION\` is already bumped — \`main\` only tags the release." >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            missing)
+              echo "ℹ️ \`VERSION\` is unchanged — the computed version is \`${{ steps.resolve.outputs.expected }}\`." >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            not-required)
+              echo "✅ This change does not need a version bump." >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            invalid)
+              echo "⚠️ \`VERSION\` is \`${{ steps.resolve.outputs.actual }}\`, but the computed version is \`${{ steps.resolve.outputs.expected }}\`." >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            *)
+              echo "❌ \`VERSION\` could not be resolved — check the log above." >> "$GITHUB_STEP_SUMMARY"
+              ;;
+          esac
+
+  fix:
+    needs: [resolve]
+    # The pull request carries the version, so a wrong VERSION is corrected
+    # there instead of only being reported. The merge ref of a pull request is
+    # not writable and fork branches are read-only for the workflow token, so
+    # only branches in this repository are fixed.
+    if: >-
+      inputs.mode == 'check' &&
+      needs.resolve.outputs.fixable == 'true' &&
+      needs.resolve.outputs.actual != needs.resolve.outputs.expected
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout pull request branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.pr_branch }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Correct VERSION
+        id: correct
+        env:
+          PR_BRANCH: ${{ inputs.pr_branch }}
+          OLD_VERSION: ${{ needs.resolve.outputs.actual }}
+          NEW_VERSION: ${{ needs.resolve.outputs.expected }}
+        run: |
+          set -euo pipefail
+
+          printf "%s" "$NEW_VERSION" > VERSION
+
+          # A concurrent run may have corrected the branch already, so an
+          # unchanged file produces no commit.
+          if git diff --quiet -- VERSION; then
+            echo "VERSION already contains ${NEW_VERSION}; nothing to push."
+            exit 0
+          fi
+
+          git add VERSION
+          git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
+          git push origin "HEAD:refs/heads/${PR_BRANCH}"
+          echo "VERSION corrected from ${OLD_VERSION} to ${NEW_VERSION} on ${PR_BRANCH}."
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Version in Pull Request" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: \`${{ inputs.pr_branch }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- \`VERSION\`: \`${{ needs.resolve.outputs.actual }}\` → \`${{ needs.resolve.outputs.expected }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.correct.outcome }}" = "success" ]; then
+            echo "✅ Pushed the computed version to the pull request branch." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ \`VERSION\` could not be corrected — check the log above." >> "$GITHUB_STEP_SUMMARY"
+          fi

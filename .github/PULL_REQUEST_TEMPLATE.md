@@ -5,6 +5,7 @@
 ## Checklist
 
 - [ ] PR title follows [Conventional Commits](https://github.com/Guliveer/twitch-miner-go/blob/main/.github/CONTRIBUTING.md) format (`feat:`, `fix:`, `refactor:`, …)
+- [ ] `VERSION` left to the pipeline — CI computes it from the PR title and pushes it onto this branch (see [Pull Requests](https://github.com/Guliveer/twitch-miner-go/blob/main/.github/CONTRIBUTING.md#pull-requests)); after merging `main` into this branch, keep `main`'s value in any `VERSION` conflict
 - [ ] `go test ./...` passes locally
 - [ ] `go vet ./...` passes locally
 - [ ] Relevant [wiki pages](https://github.com/Guliveer/twitch-miner-go/tree/main/.github/wiki) updated (see the table in CONTRIBUTING.md)
