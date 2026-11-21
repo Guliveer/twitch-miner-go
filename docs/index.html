@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Twitch channel points miner in Go — twitch-miner-go</title>
+        <title>twitch-miner-go — Go to bed. It's mining.</title>
         <meta name="description" content="Mine Twitch channel points, drops, bonuses, predictions and raids while you sleep. One static Go binary, multi-account, a built-in dashboard and ~80 MB of RAM.">
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
         <link rel="canonical" href="https://guliveer.github.io/twitch-miner-go/">
@@ -63,7 +63,7 @@
                     {
                         "@type": "VideoObject",
                         "name": "twitch-miner-go launch film",
-                        "description": "The whole product, in twenty seconds.",
+                        "description": "The 20-second launch film: the built-in dashboard, channel discovery without a streamer list, and drops and channel points claimed unattended while one binary runs many accounts.",
                         "thumbnailUrl": "https://guliveer.github.io/twitch-miner-go/brag.jpg",
                         "contentUrl": "https://guliveer.github.io/twitch-miner-go/brag.mp4",
                         "uploadDate": "2026-11-16T23:20:30Z",
@@ -371,7 +371,7 @@
             <section class="section" id="claims">
                 <div class="shell">
                     <div class="section-head" data-reveal>
-                        <h2>Collected while you were away.</h2>
+                        <h2>Channel points, drops and bonuses, collected while you were away.</h2>
                         <p>Every routine claim has its own toggle and schedule, per account.</p>
                     </div>
 
@@ -483,6 +483,105 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="rules">
+                <div class="shell">
+                    <div class="section-grid">
+                        <div class="section-intro" data-reveal>
+                            <h2>Is a Twitch channel points miner allowed?</h2>
+                            <p>
+                                Twitch's
+                                <a href="https://www.twitch.tv/p/legal/community-guidelines">Community Guidelines</a>
+                                prohibit cheating the rewards system — the Drops and channel points
+                                systems are named explicitly — and enforcing that is Twitch's call.
+                                This page cannot change it, so here is what the miner does and what
+                                you accept by running it.
+                            </p>
+                        </div>
+
+                        <div class="rows" data-reveal>
+                            <div class="row">
+                                <h3 class="row-label">What it does</h3>
+                                <p>
+                                    It signs in as you and sends the minute-watched events a browser
+                                    sends, for the channels you configured. No video or audio is
+                                    downloaded.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">What it does not do</h3>
+                                <p>
+                                    No extra accounts, no bought or shared logins, no chat messages.
+                                    It acts only for the logins you add, one session each.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">What that leaves you with</h3>
+                                <p>
+                                    Automating watch time is what the rule above describes, so use an
+                                    account you could lose. One with subscriptions, purchases or a
+                                    community behind it is the wrong account to point at a miner,
+                                    and an appeal is not a guarantee of getting it back.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="alternatives">
+                <div class="shell">
+                    <div class="section-grid">
+                        <div class="section-intro" data-reveal>
+                            <h2>twitch-miner-go vs the Python channel points miners</h2>
+                            <p>
+                                The established tools are
+                                <a href="https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2">Twitch Channel Points Miner v2</a>
+                                and <a href="https://github.com/DevilXD/TwitchDropsMiner">TwitchDropsMiner</a>.
+                                What changes is how you run a miner, not what Twitch pays out.
+                            </p>
+                        </div>
+
+                        <div class="rows" data-reveal>
+                            <div class="row">
+                                <h3 class="row-label">What you install</h3>
+                                <p>
+                                    v2 needs Python 3.6 or newer, pip and a <code>run.py</code> you
+                                    edit by hand; TwitchDropsMiner ships a desktop GUI application.
+                                    This is one archive, one binary and one YAML file.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">Where the dashboard comes from</h3>
+                                <p>
+                                    v2 starts an optional analytics web server from your script and
+                                    needs analytics enabled to feed it; TwitchDropsMiner is a window
+                                    you leave open. Here the dashboard and the config editor are
+                                    served by the same process, on <code>:8080</code> and
+                                    <code>:8070</code>.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">Accounts and hosting</h3>
+                                <p>
+                                    v2 runs one account per process or container. TwitchDropsMiner
+                                    is desktop-only and single-account by design, with no headless
+                                    or remote mode. This miner keeps every account in one process and
+                                    runs headless under systemd, Docker, Fly.io or a Windows service.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">Scope</h3>
+                                <p>
+                                    TwitchDropsMiner mines drops only, deliberately. v2 and this
+                                    project also claim channel points, bonus chests, predictions,
+                                    raids, moments and community goals.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -813,6 +912,8 @@ cd twitch-miner-go
                         <a href="#performance">Performance</a>
                         <a href="#install">Install</a>
                         <a href="#quick-start">Quick start</a>
+                        <a href="#rules">Rules</a>
+                        <a href="#alternatives">Compare</a>
                     </nav>
 
                     <nav class="footer-links" aria-label="Project">
