@@ -5,19 +5,153 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>twitch-miner-go — Go to bed. It's mining.</title>
-        <meta name="description" content="One static Go binary that mines Twitch channel points, claims drops, bonuses, predictions, raids, moments and community goals. Multi-account, a built-in dashboard and ~80 MB of RAM.">
+        <meta name="description" content="Mine Twitch channel points, drops, bonuses, predictions and raids while you sleep. One static Go binary, multi-account, a built-in dashboard and ~80 MB of RAM.">
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+        <link rel="canonical" href="https://guliveer.github.io/twitch-miner-go/">
         <meta property="og:type" content="website">
+        <meta property="og:site_name" content="twitch-miner-go">
+        <meta property="og:url" content="https://guliveer.github.io/twitch-miner-go/">
         <meta property="og:title" content="twitch-miner-go — Go to bed. It's mining.">
         <meta property="og:description" content="Mines channel points, claims drops, places predictions, joins raids and claims moments — several accounts in one small static binary.">
-        <meta property="og:image" content="https://raw.githubusercontent.com/Guliveer/twitch-miner-go/main/docs/brag.jpg">
+        <meta property="og:image" content="https://guliveer.github.io/twitch-miner-go/og-image.png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="twitch-miner-go header card: the line “Mine Twitch in your sleep.” above the facts single static binary, multi-account, built-in dashboard and ~80 MB RAM">
         <meta name="twitter:card" content="summary_large_image">
         <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230e0e0e'/%3E%3Cg fill='none' stroke='%233fd6c6' stroke-width='2.2'%3E%3Cpath d='M8 12V8h4'/%3E%3Cpath d='M24 12V8h-4'/%3E%3Cpath d='M8 20v4h4'/%3E%3Cpath d='M24 20v4h-4'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='2.2' fill='%233fd6c6'/%3E%3C/svg%3E">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
         <link rel="stylesheet" href="style.css">
         <script>document.documentElement.classList.add('js');</script>
         <noscript><style>.bar-fill { width: var(--bar-width, 0); }</style></noscript>
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@graph": [
+                    {
+                        "@type": "SoftwareApplication",
+                        "name": "twitch-miner-go",
+                        "alternateName": "Twitch Miner Go",
+                        "applicationCategory": "UtilitiesApplication",
+                        "applicationSubCategory": "Twitch channel points miner",
+                        "operatingSystem": "Windows, macOS, Linux",
+                        "description": "Mines Twitch channel points, claims drops, bonuses, predictions, raids, moments and community goals from several accounts in one static Go binary with a built-in dashboard.",
+                        "url": "https://guliveer.github.io/twitch-miner-go/",
+                        "downloadUrl": "https://github.com/Guliveer/twitch-miner-go/releases/latest",
+                        "codeRepository": "https://github.com/Guliveer/twitch-miner-go",
+                        "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+                        "featureList": [
+                            "Channel points and bonus claims",
+                            "Twitch drops",
+                            "Predictions",
+                            "Raids",
+                            "Moments and community goals",
+                            "Multi-account",
+                            "Built-in dashboard"
+                        ],
+                        "offers": {
+                            "@type": "Offer",
+                            "price": "0",
+                            "priceCurrency": "USD",
+                            "availability": "https://schema.org/InStock"
+                        },
+                        "author": {
+                            "@type": "Person",
+                            "name": "Guliveer",
+                            "url": "https://github.com/Guliveer"
+                        }
+                    },
+                    {
+                        "@type": "VideoObject",
+                        "name": "twitch-miner-go launch film",
+                        "description": "The 20-second launch film: the built-in dashboard, channel discovery without a streamer list, and drops and channel points claimed unattended while one binary runs many accounts.",
+                        "thumbnailUrl": "https://guliveer.github.io/twitch-miner-go/brag.jpg",
+                        "contentUrl": "https://guliveer.github.io/twitch-miner-go/brag.mp4",
+                        "uploadDate": "2026-11-16T23:20:30Z",
+                        "duration": "PT20S"
+                    }
+                ]
+            }
+        </script>
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Do I need Go installed?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "No. The release binary is self-contained. Go is only needed to build from source or to run the standalone config editor from its script."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "What happens on the first run?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "The miner walks through authentication until one method succeeds. In an interactive terminal that means a device code: it prints a code, you approve it at twitch.tv/activate, and the token is saved for the next start. Headless hosts can supply TWITCH_AUTH_TOKEN_<USERNAME> instead."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "How do I add a second account?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Drop a YAML file into configs/ named after the Twitch username — the filename is the username, there is no field inside. The file watcher starts the new account without a restart."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Do config edits need a restart?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "No. YAML changes hot-reload by default. An invalid config is skipped and a disabled account is stopped with a line in the log; set enabled: false to pause an account without deleting it."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Does it actually watch the stream?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "No video or audio is played. The miner sends minute-watched events every 20 seconds for the streamers it picked, which is what Twitch counts for points, streaks and drops."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Does it collect any data?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Anonymous telemetry is on by default: instance ID, version, OS, architecture and the number of running accounts. No usernames, channel names, IPs or tokens. Turn it off with TELEMETRY_AGREE=false."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Why does Docker lose the account after a restart?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Cookies, state and the instance ID live in /data, configs in /configs. Mount both as persistent volumes — without -v miner_data:/data they vanish with the container."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Can it update itself?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "With -auto-update it downloads the release for your OS and architecture, replaces the binary and exits so the service manager starts the new version. On Windows the running executable is moved aside first, because Windows will not overwrite it in place."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Is it open source?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Yes — GNU GPL v3.0. The source, the issue tracker and the release history are all on GitHub."
+                        }
+                    }
+                ]
+            }
+        </script>
     </head>
 
     <body>
@@ -237,7 +371,7 @@
             <section class="section" id="claims">
                 <div class="shell">
                     <div class="section-head" data-reveal>
-                        <h2>Collected while you were away.</h2>
+                        <h2>Channel points, drops and bonuses, collected while you were away.</h2>
                         <p>Every routine claim has its own toggle and schedule, per account.</p>
                     </div>
 
@@ -349,6 +483,104 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="rules">
+                <div class="shell">
+                    <div class="section-grid">
+                        <div class="section-intro" data-reveal>
+                            <h2>Is a Twitch miner allowed?</h2>
+                            <p>
+                                Twitch's
+                                <a href="https://www.twitch.tv/p/legal/community-guidelines">Community Guidelines</a>
+                                prohibit cheating the rewards system — the Drops and channel points
+                                systems are named explicitly — and enforcing that is Twitch's call.
+                                This page cannot change it, so here is what the miner does and what
+                                you accept by running it.
+                            </p>
+                        </div>
+
+                        <div class="rows" data-reveal>
+                            <div class="row">
+                                <h3 class="row-label">What it does</h3>
+                                <p>
+                                    It signs in as you and sends the minute-watched events a browser
+                                    sends, for the channels you configured. No video or audio is
+                                    downloaded.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">What it does not do</h3>
+                                <p>
+                                    No extra accounts, no bought or shared logins, no chat messages.
+                                    It acts only for the logins you add, one session each.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">What that leaves you with</h3>
+                                <p>
+                                    Automating watch time is what the rule above describes, so use an
+                                    account you could lose. One with subscriptions, purchases or a
+                                    community behind it is the wrong account to point at a miner,
+                                    and an appeal is not a guarantee of getting it back.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="alternatives">
+                <div class="shell">
+                    <div class="section-grid">
+                        <div class="section-intro" data-reveal>
+                            <h2>twitch-miner-go vs the Python miners</h2>
+                            <p>
+                                Miners written in Python are the long-standing alternative: an
+                                interpreter, a set of dependencies and a config file you maintain
+                                yourself. What changes here is how a miner is deployed and kept
+                                running, not what Twitch pays out.
+                            </p>
+                        </div>
+
+                        <div class="rows" data-reveal>
+                            <div class="row">
+                                <h3 class="row-label">What you install</h3>
+                                <p>
+                                    A Python miner starts with an interpreter, its dependencies and
+                                    a config file or script you edit. This is one archive, one binary
+                                    and one YAML file.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">Where the dashboard comes from</h3>
+                                <p>
+                                    There the monitor is usually a separate window or an add-on web
+                                    server started next to the miner. Here the dashboard and the
+                                    config editor are served by the same process, on
+                                    <code>:8080</code> and <code>:8070</code>.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">Accounts and hosting</h3>
+                                <p>
+                                    Many Python miners take one account per process, and the ones
+                                    with a GUI stay on the desktop. This miner keeps every account
+                                    in one process and runs headless under systemd, Docker, Fly.io or
+                                    a Windows service.
+                                </p>
+                            </div>
+                            <div class="row">
+                                <h3 class="row-label">Scope</h3>
+                                <p>
+                                    Some miners chase Drops and nothing else. This one also claims
+                                    channel points, bonus chests, predictions, raids, moments and
+                                    community goals.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -679,6 +911,8 @@ cd twitch-miner-go
                         <a href="#performance">Performance</a>
                         <a href="#install">Install</a>
                         <a href="#quick-start">Quick start</a>
+                        <a href="#rules">Rules</a>
+                        <a href="#alternatives">Compare</a>
                     </nav>
 
                     <nav class="footer-links" aria-label="Project">
