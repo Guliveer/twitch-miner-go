@@ -143,32 +143,58 @@ jobs:
         if: ${{ !inputs.dry_run }}
         env:
           NEW_VERSION: ${{ steps.bump.outputs.new_version }}
-          FILE_VERSION: ${{ needs.resolve-version.outputs.actual }}
           TAGGED: ${{ steps.bump.outputs.tagged }}
         run: |
           set -euo pipefail
 
-          # The tag push fails after VERSION was already committed, so an
-          # existing tag would leave main carrying a version nobody released.
-          # Checking first keeps main untouched on that failure. A merge that
-          # only restores VERSION reuses the released version by design, so the
-          # check applies to runs that create a tag.
-          if [ "$TAGGED" = "true" ] && git ls-remote --exit-code --tags origin "refs/tags/v${NEW_VERSION}" > /dev/null 2>&1; then
-            echo "::error::Tag v${NEW_VERSION} already exists; release a version that has not been released yet."
-            exit 1
-          fi
+          # main can move while this run works: a merge pushed between the
+          # checkout and the push rejects it as non-fast-forward. Every attempt
+          # picks main up as it is now and rebuilds the VERSION commit on its
+          # tip, so that release still lands instead of being lost.
+          ATTEMPTS=3
+          ATTEMPT=0
+          SYNCED=false
+          while [ "$ATTEMPT" -lt "$ATTEMPTS" ]; do
+            ATTEMPT=$((ATTEMPT + 1))
+            git fetch --quiet origin "+main:refs/remotes/origin/main"
+            git reset --quiet --hard origin/main
 
-          # VERSION on main always has to equal the released version. A pull
-          # request normally sets it, but its value is never trusted: when it is
-          # missing, stale or deliberately wrong it is corrected here, so a tag
-          # can never point at a different version than the file says.
-          if [ "$FILE_VERSION" = "$NEW_VERSION" ]; then
-            echo "VERSION already contains ${NEW_VERSION}; nothing to commit."
-          else
+            # The tag push fails after VERSION was already committed, so an
+            # existing tag would leave main carrying a version nobody released.
+            # A merge that only restores VERSION reuses the released version by
+            # design, so the check applies to runs that create a tag. It is
+            # repeated on every attempt because a release can appear while this
+            # run waits, and tagging it again would duplicate it.
+            if [ "$TAGGED" = "true" ] && git ls-remote --exit-code --tags origin "refs/tags/v${NEW_VERSION}" > /dev/null 2>&1; then
+              echo "::error::Tag v${NEW_VERSION} already exists; release a version that has not been released yet."
+              exit 1
+            fi
+
+            # VERSION on main always has to equal the released version. A pull
+            # request normally sets it, but its value is never trusted: when it
+            # is missing, stale or deliberately wrong it is corrected here, so a
+            # tag can never point at a different version than the file says.
+            if [ "$(cat VERSION)" = "$NEW_VERSION" ]; then
+              echo "VERSION already contains ${NEW_VERSION}; nothing to commit."
+              SYNCED=true
+              break
+            fi
+
             printf "%s" "$NEW_VERSION" > VERSION
             git add VERSION
             git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
-            git push origin main
+
+            if git push origin "HEAD:refs/heads/main"; then
+              SYNCED=true
+              break
+            fi
+
+            echo "main moved while this run was working; retrying on the new tip (attempt ${ATTEMPT}/${ATTEMPTS})."
+          done
+
+          if [ "$SYNCED" != "true" ]; then
+            echo "::error::Could not commit ${NEW_VERSION} to main after ${ATTEMPTS} attempts: another push kept landing first."
+            exit 1
           fi
 
           # A merge that does not warrant a bump only restores VERSION; there is
