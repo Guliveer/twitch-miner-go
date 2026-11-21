@@ -9,19 +9,19 @@ on:
         type: boolean
         default: false
       version:
-        description: "Version to release (leave empty to auto-detect from commits)"
+        description: "Version to release as MAJOR.MINOR.PATCH, higher than the latest tag (leave empty to auto-detect from commits)"
         required: false
         type: string
     outputs:
-      bumped:
-        description: "Bump type (major/minor/patch/skip)"
-        value: ${{ jobs.resolve-version.outputs.bump }}
       new_version:
         description: "New version string"
         value: ${{ jobs.bump-version.outputs.new_version }}
       current_version:
         description: "Released version the bump starts from"
         value: ${{ jobs.resolve-version.outputs.base }}
+      tagged:
+        description: "'true' when this run created a tag and a GitHub Release"
+        value: ${{ jobs.bump-version.outputs.tagged }}
   workflow_dispatch:
     inputs:
       dry_run:
@@ -30,7 +30,7 @@ on:
         type: boolean
         default: false
       version:
-        description: "Version to release (leave empty to auto-detect from commits)"
+        description: "Version to release as MAJOR.MINOR.PATCH, higher than the latest tag (leave empty to auto-detect from commits)"
         required: false
         type: string
 
@@ -88,16 +88,36 @@ jobs:
         run: |
           set -euo pipefail
 
+          EXPLICIT=false
           # The computed version wins over whatever the merged branch carried.
           if [ -n "${{ inputs.version }}" ]; then
             NEW_VERSION="${{ inputs.version }}"
             TAGGED=true
+            EXPLICIT=true
           elif [ "$BUMP" = "skip" ]; then
             NEW_VERSION="$BASE"
             TAGGED=false
           else
             NEW_VERSION="$EXPECTED"
             TAGGED=true
+          fi
+
+          # A hand-written version becomes the tag name, the VERSION file and
+          # the base every later release is computed from, so it is validated
+          # before anything is written. A malformed value would break the next
+          # base, and a value that does not advance would tag over a released
+          # version.
+          if [ "$EXPLICIT" = "true" ]; then
+            if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::version '${NEW_VERSION}' is not MAJOR.MINOR.PATCH."
+              exit 1
+            fi
+
+            HIGHEST=$(printf '%s\n%s\n' "$BASE" "$NEW_VERSION" | sort -V | tail -n1)
+            if [ "$NEW_VERSION" = "$BASE" ] || [ "$HIGHEST" != "$NEW_VERSION" ]; then
+              echo "::error::version '${NEW_VERSION}' must be higher than the current release ${BASE}."
+              exit 1
+            fi
           fi
 
           echo "New version: ${NEW_VERSION}"
@@ -109,6 +129,7 @@ jobs:
           echo "tagged=${TAGGED}" >> "$GITHUB_OUTPUT"
 
       - name: Commit and tag
+        id: commit
         if: ${{ !inputs.dry_run }}
         env:
           NEW_VERSION: ${{ steps.bump.outputs.new_version }}
@@ -116,6 +137,16 @@ jobs:
           TAGGED: ${{ steps.bump.outputs.tagged }}
         run: |
           set -euo pipefail
+
+          # The tag push fails after VERSION was already committed, so an
+          # existing tag would leave main carrying a version nobody released.
+          # Checking first keeps main untouched on that failure. A merge that
+          # only restores VERSION reuses the released version by design, so the
+          # check applies to runs that create a tag.
+          if [ "$TAGGED" = "true" ] && git ls-remote --exit-code --tags origin "refs/tags/v${NEW_VERSION}" > /dev/null 2>&1; then
+            echo "::error::Tag v${NEW_VERSION} already exists; release a version that has not been released yet."
+            exit 1
+          fi
 
           # VERSION on main always has to equal the released version. A pull
           # request normally sets it, but its value is never trusted: when it is
@@ -150,6 +181,8 @@ jobs:
           echo "- \`VERSION\` in the merge: \`${{ needs.resolve-version.outputs.actual }}\`" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             echo "- Mode: **DRY RUN** — no commit or tag created" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ steps.commit.outcome }}" != "success" ]; then
+            echo "- ❌ The commit/tag step failed — nothing was tagged and \`main\` was left unchanged" >> "$GITHUB_STEP_SUMMARY"
           elif [ "${{ steps.bump.outputs.tagged }}" != "true" ]; then
             echo "- No version bump in this merge — no tag created" >> "$GITHUB_STEP_SUMMARY"
             if [ "${{ needs.resolve-version.outputs.actual }}" != "${{ steps.bump.outputs.new_version }}" ]; then

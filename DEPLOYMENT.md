@@ -409,6 +409,8 @@ gh workflow run docker-publish.yml
 gh workflow run fly-deploy.yml
 ```
 
+The [Release workflow](.github/workflows/release.yml) can also be dispatched by hand. It always creates a tag and a GitHub Release, even when the commits since the last tag would not warrant a bump, so an explicit `version` input must be `MAJOR.MINOR.PATCH` and higher than the latest tag; any other value fails the run before `VERSION`, the tag or the release is touched. `dry_run` builds only.
+
 ### Disabling Workflows
 
 **To disable a workflow without deleting it:**

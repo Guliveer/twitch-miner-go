@@ -286,8 +286,12 @@ jobs:
             exit 0
           fi
 
+          # No skip instruction: the corrected head needs its own workflow run,
+          # otherwise it has no checks at all and a pull request with required
+          # checks stays blocked. The next run finds the file correct and
+          # pushes nothing, so this cannot loop.
           git add VERSION
-          git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
+          git commit -m "chore: bump version to ${NEW_VERSION}"
           git push origin "HEAD:refs/heads/${PR_BRANCH}"
           echo "VERSION corrected from ${OLD_VERSION} to ${NEW_VERSION} on ${PR_BRANCH}."
 

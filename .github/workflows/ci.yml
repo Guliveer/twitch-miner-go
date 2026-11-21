@@ -20,7 +20,8 @@ on:
   pull_request:
     branches: [main]
     # The version bump is derived from the PR title, so a title edit must
-    # re-validate the VERSION file.
+    # re-validate the VERSION file. An edit keeps the head commit unchanged,
+    # so only the title-driven jobs run and the code checks are skipped below.
     types: [opened, synchronize, reopened, edited]
 
 env:
@@ -100,6 +101,7 @@ jobs:
       pr_fork: ${{ github.event.pull_request.head.repo.fork }}
 
   vet:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -129,6 +131,7 @@ jobs:
           fi
 
   lint:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -160,6 +163,7 @@ jobs:
           fi
 
   test:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -190,6 +194,7 @@ jobs:
 
   build:
     needs: [vet, lint, test]
+    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -232,8 +237,7 @@ jobs:
     needs: [release]
     if: >-
       github.event_name == 'push' &&
-      needs.release.outputs.bumped != 'skip' &&
-      needs.release.outputs.bumped != ''
+      needs.release.outputs.tagged == 'true'
     permissions:
       contents: read
       packages: write
@@ -249,8 +253,7 @@ jobs:
     needs: [release]
     if: >-
       github.event_name == 'push' &&
-      needs.release.outputs.bumped != 'skip' &&
-      needs.release.outputs.bumped != ''
+      needs.release.outputs.tagged == 'true'
     uses: ./.github/workflows/fly-deploy.yml
     with:
       version: ${{ needs.release.outputs.new_version }}
