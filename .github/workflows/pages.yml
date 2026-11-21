@@ -57,7 +57,7 @@ jobs:
 
       - name: Verify the published site
         run: |
-          for file in "" style.css app.js; do
+          for file in "" style.css app.js og-image.png sitemap.xml; do
             curl --fail --silent --show-error \
               --retry 10 --retry-delay 3 --retry-all-errors \
               "${{ steps.deployment.outputs.page_url }}${file}" > /dev/null
