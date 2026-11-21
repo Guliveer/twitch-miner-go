@@ -491,7 +491,7 @@
                 <div class="shell">
                     <div class="section-grid">
                         <div class="section-intro" data-reveal>
-                            <h2>Is a Twitch channel points miner allowed?</h2>
+                            <h2>Is a Twitch miner allowed?</h2>
                             <p>
                                 Twitch's
                                 <a href="https://www.twitch.tv/p/legal/community-guidelines">Community Guidelines</a>
@@ -536,12 +536,12 @@
                 <div class="shell">
                     <div class="section-grid">
                         <div class="section-intro" data-reveal>
-                            <h2>twitch-miner-go vs the Python channel points miners</h2>
+                            <h2>twitch-miner-go vs the Python miners</h2>
                             <p>
-                                The established tools are
-                                <a href="https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2">Twitch Channel Points Miner v2</a>
-                                and <a href="https://github.com/DevilXD/TwitchDropsMiner">TwitchDropsMiner</a>.
-                                What changes is how you run a miner, not what Twitch pays out.
+                                Miners written in Python are the long-standing alternative: an
+                                interpreter, a set of dependencies and a config file you maintain
+                                yourself. What changes here is how a miner is deployed and kept
+                                running, not what Twitch pays out.
                             </p>
                         </div>
 
@@ -549,36 +549,35 @@
                             <div class="row">
                                 <h3 class="row-label">What you install</h3>
                                 <p>
-                                    v2 needs Python 3.6 or newer, pip and a <code>run.py</code> you
-                                    edit by hand; TwitchDropsMiner ships a desktop GUI application.
-                                    This is one archive, one binary and one YAML file.
+                                    A Python miner starts with an interpreter, its dependencies and
+                                    a config file or script you edit. This is one archive, one binary
+                                    and one YAML file.
                                 </p>
                             </div>
                             <div class="row">
                                 <h3 class="row-label">Where the dashboard comes from</h3>
                                 <p>
-                                    v2 starts an optional analytics web server from your script and
-                                    needs analytics enabled to feed it; TwitchDropsMiner is a window
-                                    you leave open. Here the dashboard and the config editor are
-                                    served by the same process, on <code>:8080</code> and
-                                    <code>:8070</code>.
+                                    There the monitor is usually a separate window or an add-on web
+                                    server started next to the miner. Here the dashboard and the
+                                    config editor are served by the same process, on
+                                    <code>:8080</code> and <code>:8070</code>.
                                 </p>
                             </div>
                             <div class="row">
                                 <h3 class="row-label">Accounts and hosting</h3>
                                 <p>
-                                    v2 runs one account per process or container. TwitchDropsMiner
-                                    is desktop-only and single-account by design, with no headless
-                                    or remote mode. This miner keeps every account in one process and
-                                    runs headless under systemd, Docker, Fly.io or a Windows service.
+                                    Many Python miners take one account per process, and the ones
+                                    with a GUI stay on the desktop. This miner keeps every account
+                                    in one process and runs headless under systemd, Docker, Fly.io or
+                                    a Windows service.
                                 </p>
                             </div>
                             <div class="row">
                                 <h3 class="row-label">Scope</h3>
                                 <p>
-                                    TwitchDropsMiner mines drops only, deliberately. v2 and this
-                                    project also claim channel points, bonus chests, predictions,
-                                    raids, moments and community goals.
+                                    Some miners chase Drops and nothing else. This one also claims
+                                    channel points, bonus chests, predictions, raids, moments and
+                                    community goals.
                                 </p>
                             </div>
                         </div>
