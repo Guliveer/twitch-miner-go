@@ -52,6 +52,10 @@ jobs:
     # pull-request check calls too, so the check and the release always agree.
     uses: ./.github/workflows/version.yml
     with:
+      # Resolve from main as it is once this run actually starts. A queued run
+      # that resolved from the commit which triggered it would count a release
+      # another merge already produced as still missing.
+      ref: ${{ !inputs.dry_run && 'main' || '' }}
       pr_title: ${{ github.event.pull_request.title }}
 
   bump-version:
@@ -71,6 +75,12 @@ jobs:
         if: ${{ !inputs.dry_run }}
         uses: actions/checkout@v4
         with:
+          # Work on main as it is now, not on the commit that triggered the
+          # run: when two merges land together, the run that starts second
+          # would otherwise build its VERSION commit on a base main has already
+          # moved past, and its push and tag would be rejected as
+          # non-fast-forward. Runs are serialized by the concurrency group.
+          ref: main
           ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
 
       - name: Configure git
