@@ -362,7 +362,8 @@ The repository includes modular GitHub Actions workflows:
 
 | Workflow | Trigger | Purpose | Auto-runs |
 |----------|---------|---------|-----------|
-| **CI** ([ci.yml](.github/workflows/ci.yml)) | Push, PR | Test, lint, version bump | Always |
+| **CI** ([ci.yml](.github/workflows/ci.yml)) | Push, PR | Test, lint, PR version-bump check and fix, main version bump | Always |
+| **Version** ([version.yml](.github/workflows/version.yml)) | Called by CI and Release | Computes the next version from the last release tag and the change type, writes it to the PR branch when it differs; shared by the PR check and the release | Always |
 | **Docker Publish** ([docker-publish.yml](.github/workflows/docker-publish.yml)) | Push to main, tags | Build and push to GHCR | When enabled |
 | **Fly.io Deploy** ([fly-deploy.yml](.github/workflows/fly-deploy.yml)) | Push to main, tags | Deploy to Fly.io | When `FLY_API_TOKEN` exists |
 
@@ -407,6 +408,8 @@ Both workflows support manual dispatch:
 gh workflow run docker-publish.yml
 gh workflow run fly-deploy.yml
 ```
+
+The [Release workflow](.github/workflows/release.yml) can also be dispatched by hand. It always creates a tag and a GitHub Release, even when the commits since the last tag would not warrant a bump, so an explicit `version` input must be `MAJOR.MINOR.PATCH` and higher than the latest tag; any other value fails the run before `VERSION`, the tag or the release is touched. `dry_run` builds only.
 
 ### Disabling Workflows
 

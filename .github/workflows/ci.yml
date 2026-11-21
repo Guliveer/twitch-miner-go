@@ -19,6 +19,10 @@ on:
       - '.github/**'
   pull_request:
     branches: [main]
+    # The version bump is derived from the PR title, so a title edit must
+    # re-validate the VERSION file. An edit keeps the head commit unchanged,
+    # so only the title-driven jobs run and the code checks are skipped below.
+    types: [opened, synchronize, reopened, edited]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -83,7 +87,21 @@ jobs:
             echo "Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build" >> "$GITHUB_STEP_SUMMARY"
           fi
 
+  version-bump:
+    if: github.event_name == 'pull_request'
+    # The bump rules live in the reusable Version workflow, which the release
+    # pipeline calls too, so the check and the release cannot disagree. It also
+    # commits the computed version to the PR branch when the file is wrong, so
+    # the merge carries the released version instead of a stale one.
+    uses: ./.github/workflows/version.yml
+    with:
+      mode: check
+      pr_title: ${{ github.event.pull_request.title }}
+      pr_branch: ${{ github.event.pull_request.head.ref }}
+      pr_fork: ${{ github.event.pull_request.head.repo.fork }}
+
   vet:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -113,6 +131,7 @@ jobs:
           fi
 
   lint:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -144,6 +163,7 @@ jobs:
           fi
 
   test:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -174,6 +194,7 @@ jobs:
 
   build:
     needs: [vet, lint, test]
+    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -216,8 +237,7 @@ jobs:
     needs: [release]
     if: >-
       github.event_name == 'push' &&
-      needs.release.outputs.bumped != 'skip' &&
-      needs.release.outputs.bumped != ''
+      needs.release.outputs.tagged == 'true'
     permissions:
       contents: read
       packages: write
@@ -233,8 +253,7 @@ jobs:
     needs: [release]
     if: >-
       github.event_name == 'push' &&
-      needs.release.outputs.bumped != 'skip' &&
-      needs.release.outputs.bumped != ''
+      needs.release.outputs.tagged == 'true'
     uses: ./.github/workflows/fly-deploy.yml
     with:
       version: ${{ needs.release.outputs.new_version }}
