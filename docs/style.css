@@ -710,6 +710,18 @@ h3 {
   color: var(--dp-color-read);
 }
 
+.section-grid-follow { margin-top: 104px; }
+
+.section-grid-follow .section-intro { position: static; }
+
+.subhead {
+  margin-bottom: 16px;
+  font-size: var(--dp-type-heading);
+  font-weight: 500;
+  letter-spacing: var(--dp-tracking-heading);
+  color: var(--dp-color-bright);
+}
+
 .steps {
   list-style: none;
   margin: 0;
@@ -1478,6 +1490,8 @@ h3 {
   .install-grid { grid-template-columns: 1fr; }
 
   .install-panel { padding: 20px 18px 22px; }
+
+  .section-grid-follow { margin-top: 64px; }
 
   .code pre { font-size: 11px; }
 
